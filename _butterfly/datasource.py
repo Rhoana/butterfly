@@ -18,9 +18,9 @@ class Datasource(object):
     '''
     pass
 
-  def load(self, x, y, z):
+  def load(self, cur_path):
     '''
     Loads this file from the data path.
     '''
-    pass
+    return cv2.imread(cur_path, 0)
 
