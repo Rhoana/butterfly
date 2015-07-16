@@ -1,0 +1,6 @@
+--filename y=%(y)08d,x=%(x)08d.tif
+--folderpaths z=%(z)08d
+--x_ind 0 1
+--y_ind 0 1
+--z_ind 1 2 3 4 5 6 7 8 9 10
+--blocksize 512 512
