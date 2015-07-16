@@ -22,5 +22,6 @@ class Datasource(object):
     '''
     Loads this file from the data path.
     '''
+    #Need to be able to throw errors!
     return cv2.imread(cur_path, 0)
 

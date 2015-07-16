@@ -1,0 +1,6 @@
+--filename %(z)04d_Tile_r1-c1_W02_sec%(z)03d_tr%(y)d-tc%(x)d_.png
+--folderpaths %(z)04d_Tile_r1-c1_W02_sec%(z)03d
+--x_ind 1 2 3
+--y_ind 1 2 3 4
+--z_ind 1 2 3
+--blocksize 16384 16384
