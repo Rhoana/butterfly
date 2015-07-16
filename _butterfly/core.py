@@ -30,7 +30,7 @@ class Core(object):
     #
 
     vol_type = 'uint32' #Supports segmentations as well, can be changed for images
-    vol = np.zeros(vol_size, dtype=vol_type) 
+    vol = np.zeros((vol_size[1], vol_size[0], vol_size[2]), dtype=vol_type) 
     blocksize = [x/(2**w) for x in datasource.blocksize]
 
     #Might need some non-zero check - how would we throw the error?
@@ -64,7 +64,11 @@ class Core(object):
           print 'y offset:   ' + str(y_offset) + '\n'
 
           #Add offsets in current y direction
-          vol[self.vol_xy_start[1]:self.vol_xy_start[1] + y_offset, self.vol_xy_start[0]:self.vol_xy_start[0] + x_offset, z] = cur_img[self.tile_xy_start[1]:self.tile_xy_start[1] + y_offset, self.tile_xy_start[0]:self.tile_xy_start[0] + x_offset]
+          target_boundaries = (self.vol_xy_start[1], self.vol_xy_start[1] + y_offset, self.vol_xy_start[0], self.vol_xy_start[0] + x_offset, z)
+          source_boundaries = (self.tile_xy_start[1], self.tile_xy_start[1] + y_offset, self.tile_xy_start[0],self.tile_xy_start[0] + x_offset)
+
+          data = cur_img[source_boundaries[0]:source_boundaries[1], source_boundaries[2]:source_boundaries[3]]
+          vol[target_boundaries[0]:target_boundaries[1], target_boundaries[2]:target_boundaries[3], target_boundaries[4]] = data
           self.tile_xy_start[1] = (self.tile_xy_start[1] + y_offset) % blocksize[1]
           self.vol_xy_start[1] += y_offset
 
