@@ -3,6 +3,7 @@
 import _butterfly
 import cv2
 import argparse
+import re
 
 # Custom parsing of the args file
 def convert_arg_line_to_args(arg_line):
@@ -10,6 +11,14 @@ def convert_arg_line_to_args(arg_line):
         if not arg.strip():
             continue
         yield arg
+
+def parseNumRange(num_arg):
+	match = re.match(r'(\d+)(?:-(\d+))?$', num_arg)
+	if not match:
+		raise argparse.ArgumentTypeError("'" + num_arg + "' must be a number or range (ex. '5' or '0-10').")
+	start = match.group(1)
+	end = match.group(2) or match.group(1)
+	return list(range(int(start), int(end) + 1))
 
 core = _butterfly.Core()
 
@@ -33,9 +42,9 @@ v_inf.add_argument('--zoom', nargs='?', type=int, default=0, metavar='level', he
 d_inf = parser.add_argument_group()
 d_inf.add_argument('--filename', help=argparse.SUPPRESS, required=True) #EM stack filenames in sprintf format
 d_inf.add_argument('--folderpaths', help=argparse.SUPPRESS, required=True) #Folder names for each vertical slice in sprintf format
-d_inf.add_argument('--x_ind', nargs='+', type=int, help=argparse.SUPPRESS, required=True) #Row indices of the filenames
-d_inf.add_argument('--y_ind', nargs='+', type=int, help=argparse.SUPPRESS, required=True) #Column indices of the filenames
-d_inf.add_argument('--z_ind', nargs='+', type=int, help=argparse.SUPPRESS, required=True) #Slice indices of the filenames
+d_inf.add_argument('--x_ind', nargs='+', type=parseNumRange, help=argparse.SUPPRESS, required=True) #Row indices of the filenames
+d_inf.add_argument('--y_ind', nargs='+', type=parseNumRange, help=argparse.SUPPRESS, required=True) #Column indices of the filenames
+d_inf.add_argument('--z_ind', nargs='+', type=parseNumRange, help=argparse.SUPPRESS, required=True) #Slice indices of the filenames
 d_inf.add_argument('--blocksize', nargs=2, type=int, help=argparse.SUPPRESS, required=True) #Tile size of each image (X, Y)
 
 args = parser.parse_args()
@@ -47,10 +56,10 @@ datapath = args.datapath
 filename = args.filename
 folderpaths = args.folderpaths
 
-#Tile and slice index ranges
-z_ind = args.z_ind
-y_ind = args.y_ind
-x_ind = args.x_ind
+#Tile and slice index ranges - the list comprehensions can be understood as nested for loops to flatten list
+z_ind = [number for sublist in args.z_ind for number in sublist]
+y_ind = [number for sublist in args.y_ind for number in sublist]
+x_ind = [number for sublist in args.x_ind for number in sublist]
 indices = (x_ind, y_ind, z_ind)
 
 #Requested volume (coordinates are for the entire current image set)
