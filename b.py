@@ -18,7 +18,10 @@ def parseNumRange(num_arg):
 		raise argparse.ArgumentTypeError("'" + num_arg + "' must be a number or range (ex. '5' or '0-10').")
 	start = match.group(1)
 	end = match.group(2) or match.group(1)
-	return list(range(int(start), int(end) + 1))
+	step = 1
+	if end < start:
+		step = -1
+	return list(range(int(start), int(end) + step, step))
 
 core = _butterfly.Core()
 
