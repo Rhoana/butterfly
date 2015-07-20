@@ -7,10 +7,10 @@ import re
 
 # Custom parsing of the args file
 def convert_arg_line_to_args(arg_line):
-    for arg in arg_line.split():
+    for arg in re.split(''' (?=(?:[^'"]|'[^']*'|"[^"]*")*$)''', arg_line):
         if not arg.strip():
             continue
-        yield arg
+        yield arg.strip('\'\"')
 
 def parseNumRange(num_arg):
 	match = re.match(r'(\d+)(?:-(\d+))?$', num_arg)
