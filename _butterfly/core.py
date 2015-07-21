@@ -2,6 +2,7 @@ import os
 import numpy as np
 
 from regularimagestack import RegularImageStack
+from mojo import Mojo
 
 class Core(object):
 
@@ -85,9 +86,11 @@ class Core(object):
     '''
 
     # detect data source type
-
-    # create specific datasource object
-    ds = RegularImageStack(datapath)
+    last_folder = datapath.rstrip(os.sep).split(os.sep)[-1]
+    if last_folder.lower() == 'mojo':
+      ds = Mojo(datapath)
+    else:
+      ds = RegularImageStack(datapath)
 
     # call index 
     ds.index()

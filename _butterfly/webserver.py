@@ -8,7 +8,7 @@ import tornado.web
 import tornado.websocket
 import urllib
 import urlparse
-
+import numpy as np
 
 class WebServerHandler(tornado.web.RequestHandler):
 
@@ -59,7 +59,6 @@ class WebServer:
     content = None
 
     splitted_request = handler.request.uri.split('/')
-
     query = '/'.join(splitted_request[2:])[1:]
 
     if splitted_request[1] == 'metainfo':
@@ -71,16 +70,24 @@ class WebServer:
     elif splitted_request[1] == 'data':
 
       parsed_query = urlparse.parse_qs(query)
-      datapath = parsed_query['datapath'][0]
-      x = parsed_query['x'][0]
-      y = parsed_query['y'][0]
-      z = parsed_query['z'][0]
-      w = parsed_query['w'][0]
-
-      self._core.get(datapath, (x, y, z), (256,256,1), w)
-
-
-
+      print parsed_query
+      try:
+        datapath = parsed_query['datapath'][0]
+        x = int(parsed_query['x'][0])
+        y = int(parsed_query['y'][0])
+        z = int(parsed_query['z'][0])
+        w = int(parsed_query['w'][0])
+        volsize = tuple(int(a) for a in parsed_query['size'][0].split(','))
+        volume = self._core.get(datapath, (x, y, z), volsize, w)
+        print volume.shape
+        print np.unique(volume)
+        content = 'data'
+        content_type = 'text/html'#'image/jpeg'
+      except KeyError:
+        print 'Missing query'
+        content = 'Error 400: Bad request'
+        content_type = 'text/html'
+      
       # this is for actual image data
       # path = '/'.join(splitted_request[2:-1])
 
@@ -92,14 +99,11 @@ class WebServer:
       # w = int(tile[0])
 
       # content = self._core.get_image(path, x, y, z, w)
-      content = 'data'
-      content_type = 'text/html'#'image/jpeg'
-
-
+      
 
     # invalid request
     if not content:
-      content = 'Error 404'
+      content = 'Error 404: Not found'
       content_type = 'text/html'
 
     # handler.set_header('Cache-Control','no-cache, no-store, must-revalidate')

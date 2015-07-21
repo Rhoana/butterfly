@@ -2,12 +2,14 @@ import argparse
 from datasource import Datasource
 import os
 import cv2
+import re
+import glob
 
 def convert_arg_line_to_args(arg_line):
     for arg in re.split(''' (?=(?:[^'"]|'[^']*'|"[^"]*")*$)''', arg_line):
         if not arg.strip():
             continue
-        yield arg.strip('\'\"')
+        yield arg.strip('\'\"\n')
 
 def parseNumRange(num_arg):
     match = re.match(r'(\d+)(?:-(\d+))?$', num_arg)
@@ -34,31 +36,28 @@ class RegularImageStack(Datasource):
     '''
     @override
     '''
-    #self.blocksize = self.get_blocksize()
+
     super(RegularImageStack, self).index()
 
     d_inf = argparse.ArgumentParser(fromfile_prefix_chars='@')
-    d_inf.convert_arg_line_to_args = convert_arg_line_to_args
-
 
     d_inf.add_argument('--filename', help=argparse.SUPPRESS, required=True) #EM stack filenames in sprintf format
     d_inf.add_argument('--folderpaths', help=argparse.SUPPRESS, required=True) #Folder names for each vertical slice in sprintf format
     d_inf.add_argument('--x_ind', nargs='+', type=parseNumRange, help=argparse.SUPPRESS, required=True) #Row indices of the filenames
     d_inf.add_argument('--y_ind', nargs='+', type=parseNumRange, help=argparse.SUPPRESS, required=True) #Column indices of the filenames
     d_inf.add_argument('--z_ind', nargs='+', type=parseNumRange, help=argparse.SUPPRESS, required=True) #Slice indices of the filenames
-    d_inf.add_argument('--blocksize', nargs=2, type=int, help=argparse.SUPPRESS, required=True) #Tile size of each image (X, Y)
+    #d_inf.add_argument('--blocksize', nargs=2, type=int, help=argparse.SUPPRESS) #Tile size of each image (X, Y)
 
-    args_file = os.path.join(self._datapath,'ac3.args')
-    args = d_inf.parse_args('--filename %(z)04d_Tile_r1-c1_W02_sec%(z)03d_tr%(y)d-tc%(x)d_.png')#'@'+args_file)
+    args_file = os.path.join(self._datapath,'*.args')
+    args_file = glob.glob(args_file)[0]
 
-    print args
+    with open(args_file, 'r') as f:
+        args_list = [arg for line in f for arg in convert_arg_line_to_args(line)]
 
-    datapath = args.datapath
-    # datapath = '/Volumes/DATA1/P3/'
-    # datapath = '/home/e/Documents/Data/P3/'
-
+    args = d_inf.parse_args(args_list)
     filename = args.filename
     folderpaths = args.folderpaths
+    #blocksize = args.blocksize
 
     #Tile and slice index ranges - the list comprehensions can be understood as nested for loops to flatten list
     z_ind = [number for sublist in args.z_ind for number in sublist]
@@ -66,30 +65,20 @@ class RegularImageStack(Datasource):
     x_ind = [number for sublist in args.x_ind for number in sublist]
     indices = (x_ind, y_ind, z_ind)
 
-    #Requested volume (coordinates are for the entire current image set)
-    start_coord = args.start
-    vol_size = args.size
-    zoom_level = args.zoom
+    #Load info from args file
+    self.load_info(folderpaths, filename, indices)
 
-    #In the case of regular image stacks we manually input paths
-    # core.create_datasource(datapath)
-    ris = self#core._datasources[datapath]
-    ris.load_paths(folderpaths, filename, indices)
+    #Grab blocksize from first image
+    self.blocksize = self.get_blocksize()
 
-    #Temporary input of blocksize, should be able to grab from index in the future
-    ris.blocksize = args.blocksize    
-
-
-  def load_paths(self, folderpaths, filename, indices):
+  def load_info(self, folderpaths, filename, indices):
     self._folderpaths = folderpaths
     self._filename = filename
     self._indices = indices
 
-  def get_blocksize():
-    '''
-    Placeholder function for now
-    '''
-    pass
+  def get_blocksize(self):
+    tmp_img = self.load(0, 0, 0, 0)
+    return tmp_img.shape
 
   def load(self, x, y, z, w):
     '''
