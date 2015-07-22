@@ -87,7 +87,10 @@ class WebServer:
         print 'Missing query'
         content = 'Error 400: Bad request'
         content_type = 'text/html'
-      
+      except TypeError:
+        print 'Out of bounds'
+        content = 'Error 400: Bad request'
+        content_type = 'text/html'
       # this is for actual image data
       # path = '/'.join(splitted_request[2:-1])
 

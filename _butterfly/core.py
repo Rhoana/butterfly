@@ -30,9 +30,14 @@ class Core(object):
     # else wise return the data
     #
 
+    #If the datasource has zoom levels already, we assume their tiles are the same size across zooms
+    f = w
+    if w <= datasource.max_zoom:
+      f = 0
+
     vol_type = 'uint32' #Supports segmentations as well, can be changed for images
     vol = np.zeros((vol_size[1], vol_size[0], vol_size[2]), dtype=vol_type) 
-    blocksize = [x/(2**w) for x in datasource.blocksize]
+    blocksize = [x/(2**f) for x in datasource.blocksize]
 
     #Might need some non-zero check - how would we throw the error?
 
