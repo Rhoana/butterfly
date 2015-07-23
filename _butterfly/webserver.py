@@ -10,6 +10,10 @@ import urllib
 import urlparse
 import numpy as np
 
+#For file output testing
+from tempfile import TemporaryFile
+import cv2
+
 class WebServerHandler(tornado.web.RequestHandler):
 
   def initialize(self, webserver):
@@ -84,27 +88,31 @@ class WebServer:
         print 'Shape:', volume.shape
         print 'Unique values in volume:' 
         print np.unique(volume)
-        content = 'data'
-        content_type = 'text/html'#'image/jpeg'
+        # content = 'data'
+        # content_type = 'text/html'
+
+        #Temporary image output
+        cv2.imwrite('test.png', volume[:,:,0].astype('uint8'))
+        with open('test.png', 'rb') as f:
+          content = f.read()
+          content_type = 'image/png'
+        
+        # Some testing with sending binary data, seems to work vaguely
+        # outfile = TemporaryFile()
+        # np.save(outfile, volume)
+        # outfile.seek(0)
+        # content = outfile.read()
+        # outfile.close()
+        # content_type = 'application/octet-stream'#'image/jpeg'
+
       except KeyError:
         print 'Missing query'
-        content = 'Error 400: Bad request'
+        content = 'Error 400: Bad request<br>Missing query'
         content_type = 'text/html'
-      except TypeError:
+      except (TypeError, ValueError):
         print 'Out of bounds'
-        content = 'Error 400: Bad request'
+        content = 'Error 400: Bad request<br>Out of bounds'
         content_type = 'text/html'
-      # this is for actual image data
-      # path = '/'.join(splitted_request[2:-1])
-
-      # tile = splitted_request[-1].split('-')
-
-      # x = int(tile[1])
-      # y = int(tile[2])
-      # z = int(tile[3])
-      # w = int(tile[0])
-
-      # content = self._core.get_image(path, x, y, z, w)
       
 
     # invalid request
@@ -117,4 +125,6 @@ class WebServer:
     # handler.set_header('Expires','0')
     handler.set_header('Access-Control-Allow-Origin', '*')
     handler.set_header('Content-Type', content_type)
+    
+    #Temporary check for img output
     handler.write(content)

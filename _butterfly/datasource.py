@@ -10,7 +10,7 @@ class Datasource(object):
     self._size_y = -1
     self._size_z = -1
     #Maximum supported zoom in file system, affects calculations
-    self.maxzoom = -1
+    self.max_zoom = -1
     
   def index(self):
     '''
