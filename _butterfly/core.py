@@ -30,6 +30,8 @@ class Core(object):
     # else wise return the data
     #
 
+    print 'Loading tiles:'
+
     #If the datasource has zoom levels already, we assume their tiles are the same size across zooms
     f = w
     if w <= datasource.max_zoom:

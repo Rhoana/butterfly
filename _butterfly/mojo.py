@@ -27,29 +27,27 @@ class Mojo(Datasource):
     zoom_folders = os.path.join(base_path, 'w=*')
     self.max_zoom = len(glob.glob(zoom_folders)) - 1 #Max zoom level
 
-    print 'Max zoom:'
-    print base_path
-    print self.max_zoom
-
     #Try first image to get extension
     tmp_file = os.path.join(base_path, 'w=00000000', 'z=00000000', 'y=00000000,x=00000000.*')
     img_ext = os.path.splitext(glob.glob(tmp_file)[0])[1]
     filename = 'y=%(y)08d,x=%(x)08d' + img_ext
 
     #Tile and slice index ranges
-    slice_folders = os.path.join(base_path, 'w=00000000', 'z=*')
-    num_slices = len(glob.glob(slice_folders)) 
+    slice_folders = glob.glob(os.path.join(base_path, 'w=00000000', 'z=*'))
+    y_tiles = os.path.join(slice_folders[0], 'y=*,x=00000000' + img_ext)
+    x_tiles = os.path.join(slice_folders[0], 'y=00000000,x=*' + img_ext)
+    num_slices = len(slice_folders)
     z_ind = range(num_slices)
-    y_ind = [0, 1]
-    x_ind = [0, 1]
+    y_ind = range(len(glob.glob(y_tiles)))
+    x_ind = range(len(glob.glob(x_tiles)))
     indices = (x_ind, y_ind, z_ind)
-
 
     #Load info
     self.load_info(folderpaths, filename, indices)
 
     #Grab blocksize from first image
     tmp_img = self.load(0, 0, 0, 0)
+    print 'Indexing complete.\n'
     self.blocksize = tmp_img.shape
 
   def load_info(self, folderpaths, filename, indices):

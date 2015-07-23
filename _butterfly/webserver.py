@@ -70,7 +70,7 @@ class WebServer:
     elif splitted_request[1] == 'data':
 
       parsed_query = urlparse.parse_qs(query)
-      print parsed_query
+      print 'Parsed query:', parsed_query
       try:
         datapath = parsed_query['datapath'][0]
         x = int(parsed_query['x'][0])
@@ -79,7 +79,10 @@ class WebServer:
         w = int(parsed_query['w'][0])
         volsize = tuple(int(a) for a in parsed_query['size'][0].split(','))
         volume = self._core.get(datapath, (x, y, z), volsize, w)
-        print volume.shape
+
+        #Show some basic statistics
+        print 'Shape:', volume.shape
+        print 'Unique values in volume:' 
         print np.unique(volume)
         content = 'data'
         content_type = 'text/html'#'image/jpeg'
