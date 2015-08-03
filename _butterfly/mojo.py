@@ -66,6 +66,8 @@ class Mojo(Datasource):
         cur_path = os.path.join(self._datapath, 'images', 'tiles', 'w=%08d' % w, self._folderpaths % self._indices[2][z], cur_filename)
         return super(Mojo, self).load(cur_path)
 
+    print 'RESIZE'
+
     cur_path = os.path.join(self._datapath, 'images', 'tiles', 'w=00000000', self._folderpaths % self._indices[2][z], cur_filename)
     factor = 0.5**w
     return cv2.resize(super(Mojo, self).load(cur_path),(0,0), fx=factor, fy=factor, interpolation=cv2.INTER_LINEAR)

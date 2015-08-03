@@ -86,16 +86,24 @@ class WebServer:
 
         #Show some basic statistics
         print 'Shape:', volume.shape
-        print 'Unique values in volume:' 
-        print np.unique(volume)
+        # print 'Unique values in volume:' 
+        # print np.unique(volume)
         # content = 'data'
         # content_type = 'text/html'
 
         #Temporary image output
-        cv2.imwrite('test.png', volume[:,:,0].astype('uint8'))
-        with open('test.png', 'rb') as f:
-          content = f.read()
-          content_type = 'image/png'
+        content = cv2.imencode('.png', volume[:,:,0].astype('uint8'))[1].tostring()
+        content_type = 'image/png'
+        
+
+        # c_image_data = zlib.compress(image_data)
+
+        # output = StringIO.StringIO()
+        # output.write(c_image_data)
+
+        # content = output.getvalue()
+        # content_type = 'application/octstream'
+
         
         # Some testing with sending binary data, seems to work vaguely
         # outfile = TemporaryFile()
