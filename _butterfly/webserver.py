@@ -9,10 +9,9 @@ import tornado.websocket
 import urllib
 import urlparse
 import numpy as np
-
-#For file output testing
-from tempfile import TemporaryFile
 import cv2
+import StringIO
+import zlib
 
 class WebServerHandler(tornado.web.RequestHandler):
 
@@ -46,6 +45,7 @@ class WebServer:
       
       (r'/metainfo/(.*)', WebServerHandler, dict(webserver=self)),
       (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
+      (r'/zip/(.*)', WebServerHandler, dict(webserver=self)),
       # (r'/(.*)', tornado.web.StaticFileHandler, dict(path=os.path.join(os.path.dirname(__file__),'../web'), default_filename='index.html'))
   
     ])
@@ -71,18 +71,21 @@ class WebServer:
       content = 'metainfo'
       content_type = 'text/html'
 
+    #image data request
     elif splitted_request[1] == 'data':
 
       parsed_query = urlparse.parse_qs(query)
       print 'Parsed query:', parsed_query
       try:
         datapath = parsed_query['datapath'][0]
-        x = int(parsed_query['x'][0])
-        y = int(parsed_query['y'][0])
-        z = int(parsed_query['z'][0])
-        w = int(parsed_query['w'][0])
+        start = tuple(int(a) for a in parsed_query['start'][0].split(','))
+        # x = int(parsed_query['x'][0])
+        # y = int(parsed_query['y'][0])
+        # z = int(parsed_query['z'][0])
+        # w = int(parsed_query['w'][0])
+        w = int(parsed_query['mip'][0])
         volsize = tuple(int(a) for a in parsed_query['size'][0].split(','))
-        volume = self._core.get(datapath, (x, y, z), volsize, w)
+        volume = self._core.get(datapath, start, volsize, w)
 
         #Show some basic statistics
         print 'Shape:', volume.shape
@@ -94,24 +97,6 @@ class WebServer:
         #Temporary image output
         content = cv2.imencode('.png', volume[:,:,0].astype('uint8'))[1].tostring()
         content_type = 'image/png'
-        
-
-        # c_image_data = zlib.compress(image_data)
-
-        # output = StringIO.StringIO()
-        # output.write(c_image_data)
-
-        # content = output.getvalue()
-        # content_type = 'application/octstream'
-
-        
-        # Some testing with sending binary data, seems to work vaguely
-        # outfile = TemporaryFile()
-        # np.save(outfile, volume)
-        # outfile.seek(0)
-        # content = outfile.read()
-        # outfile.close()
-        # content_type = 'application/octet-stream'#'image/jpeg'
 
       except KeyError:
         print 'Missing query'
@@ -121,7 +106,35 @@ class WebServer:
         print 'Out of bounds'
         content = 'Error 400: Bad request<br>Out of bounds'
         content_type = 'text/html'
-      
+    
+    #Binary zipped data request (images)
+    elif splitted_request[1] == 'zip':
+      parsed_query = urlparse.parse_qs(query)
+      print 'Parsed query:', parsed_query
+      try:
+        datapath = parsed_query['datapath'][0]
+        start = tuple(int(a) for a in parsed_query['start'][0].split(','))
+        w = int(parsed_query['mip'][0])
+        volsize = tuple(int(a) for a in parsed_query['size'][0].split(','))
+        volume = self._core.get(datapath, start, volsize, w)
+
+        #Show some basic statistics
+        print 'Shape:', volume.shape
+
+        zipped_data = zlib.compress(volume.tostring())
+
+        output = StringIO.StringIO()
+        output.write(zipped_data)
+        content = output.getvalue()
+        content_type = 'application/octet-stream'
+      except KeyError:
+        print 'Missing query'
+        content = 'Error 400: Bad request<br>Missing query'
+        content_type = 'text/html'
+      except (TypeError, ValueError):
+        print 'Out of bounds'
+        content = 'Error 400: Bad request<br>Out of bounds'
+        content_type = 'text/html'
 
     # invalid request
     if not content:
