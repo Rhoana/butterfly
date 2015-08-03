@@ -121,7 +121,9 @@ class WebServer:
         #Show some basic statistics
         print 'Shape:', volume.shape
 
-        zipped_data = zlib.compress(volume.tostring())
+        #Arbitrary rotation for output to VAST
+        volume = volume.transpose(2, 0, 1)
+        zipped_data = zlib.compress(volume.astype('uint8').tostring())
 
         output = StringIO.StringIO()
         output.write(zipped_data)
