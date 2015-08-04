@@ -77,7 +77,7 @@ class RegularImageStack(Datasource):
     self._indices = indices
 
   def get_blocksize(self):
-    tmp_img = self.load(0, 0, 0, 0)
+    tmp_img = self.load(x_ind[0], y_ind[0], z_ind[0], 0)
     return tmp_img.shape
 
   def load(self, x, y, z, w):

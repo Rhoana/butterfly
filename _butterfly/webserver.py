@@ -45,7 +45,6 @@ class WebServer:
       
       (r'/metainfo/(.*)', WebServerHandler, dict(webserver=self)),
       (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
-      (r'/zip/(.*)', WebServerHandler, dict(webserver=self)),
       # (r'/(.*)', tornado.web.StaticFileHandler, dict(path=os.path.join(os.path.dirname(__file__),'../web'), default_filename='index.html'))
   
     ])
@@ -85,56 +84,49 @@ class WebServer:
         # w = int(parsed_query['w'][0])
         w = int(parsed_query['mip'][0])
         volsize = tuple(int(a) for a in parsed_query['size'][0].split(','))
-        volume = self._core.get(datapath, start, volsize, w)
+
+        #Default values
+        output_format = '.png'
+        segmentation = False
+
+        #Grab optional queries
+        try:
+          output_format = parsed_query['output'][0]
+          segmentation = parsed_query['segmentation'][0]
+        except KeyError:
+          #No optional queries
+          pass
+
+        #Call the cutout method
+        volume = self._core.get(datapath, start, volsize, segmentation, w)        
+
+        #Accepted image output formats
+        image_formats = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp')
+        output_format = output_format.lstrip('.').lower()
+
+        #Process output
+        if output_format == 'zip':
+          #Rotate out of numpy array
+          volume = volume.transpose(1, 0, 2)
+          zipped_data = zlib.compress(volume.astype('uint8').tostring('F'))
+
+          output = StringIO.StringIO()
+          output.write(zipped_data)
+          content = output.getvalue()
+          content_type = 'application/octet-stream'
+        elif output_format in image_formats:
+          content = cv2.imencode('.' + output_format, volume[:,:,0].astype('uint8'))[1].tostring()
+          content_type = 'image/' + output_format
 
         #Show some basic statistics
         print 'Shape:', volume.shape
-        # print 'Unique values in volume:' 
-        # print np.unique(volume)
-        # content = 'data'
-        # content_type = 'text/html'
-
-        #Temporary image output
-        content = cv2.imencode('.png', volume[:,:,0].astype('uint8'))[1].tostring()
-        content_type = 'image/png'
 
       except KeyError:
         print 'Missing query'
         content = 'Error 400: Bad request<br>Missing query'
         content_type = 'text/html'
-      except (TypeError, ValueError):
-        print 'Out of bounds'
-        content = 'Error 400: Bad request<br>Out of bounds'
-        content_type = 'text/html'
-    
-    #Binary zipped data request (images)
-    elif splitted_request[1] == 'zip':
-      parsed_query = urlparse.parse_qs(query)
-      print 'Parsed query:', parsed_query
-      try:
-        datapath = parsed_query['datapath'][0]
-        start = tuple(int(a) for a in parsed_query['start'][0].split(','))
-        w = int(parsed_query['mip'][0])
-        volsize = tuple(int(a) for a in parsed_query['size'][0].split(','))
-        volume = self._core.get(datapath, start, volsize, w)
-
-        #Show some basic statistics
-        print 'Shape:', volume.shape
-
-        #Arbitrary rotation for output to VAST
-        volume = volume.transpose(2, 0, 1)
-        zipped_data = zlib.compress(volume.astype('uint8').tostring())
-
-        output = StringIO.StringIO()
-        output.write(zipped_data)
-        content = output.getvalue()
-        content_type = 'application/octet-stream'
-      except KeyError:
-        print 'Missing query'
-        content = 'Error 400: Bad request<br>Missing query'
-        content_type = 'text/html'
-      except (TypeError, ValueError):
-        print 'Out of bounds'
+      except (TypeError, ValueError) as e:
+        print 'Out of bounds', e
         content = 'Error 400: Bad request<br>Out of bounds'
         content_type = 'text/html'
 

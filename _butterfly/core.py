@@ -10,12 +10,10 @@ class Core(object):
     '''
     '''
     self._datasources = {}
-
-    #Is there a way not to initialize these temporary variables?
     self.vol_xy_start = [0, 0]
     self.tile_xy_start = [0, 0]
 
-  def get(self, datapath, start_coord, vol_size, w=0):
+  def get(self, datapath, start_coord, vol_size, segmentation=False, w=0):
     '''
     Request a subvolume of the datapath at a given zoomlevel.
     '''
