@@ -2,6 +2,7 @@ import os
 import numpy as np
 
 from regularimagestack import RegularImageStack
+from collections import OrderedDict
 from mojo import Mojo
 
 class Core(object):
@@ -12,6 +13,9 @@ class Core(object):
     self._datasources = {}
     self.vol_xy_start = [0, 0]
     self.tile_xy_start = [0, 0]
+    self._cache = OrderedDict()
+    self._max_cache_size = 1*1024*1024*1024 #1GB max cache
+    self._current_cache_size = 0
 
   def get(self, datapath, start_coord, vol_size, segmentation=False, w=0):
     '''
@@ -93,9 +97,9 @@ class Core(object):
     # detect data source type
     last_folder = datapath.rstrip(os.sep).split(os.sep)[-1]
     if last_folder.lower() == 'mojo':
-      ds = Mojo(datapath)
+      ds = Mojo(self, datapath)
     else:
-      ds = RegularImageStack(datapath)
+      ds = RegularImageStack(self, datapath)
 
     # call index 
     ds.index()

@@ -6,12 +6,12 @@ import glob
 
 class Mojo(Datasource):
   
-  def __init__(self, datapath):
+  def __init__(self, core, datapath):
     '''
     @override
     '''
 
-    super(Mojo, self).__init__(datapath)
+    super(Mojo, self).__init__(core, datapath)
 
   def index(self):
     '''

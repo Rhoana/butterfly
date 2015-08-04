@@ -121,12 +121,12 @@ class WebServer:
         #Show some basic statistics
         print 'Shape:', volume.shape
 
-      except KeyError:
-        print 'Missing query'
-        content = 'Error 400: Bad request<br>Missing query'
-        content_type = 'text/html'
-      except (TypeError, ValueError) as e:
-        print 'Out of bounds', e
+      # except KeyError:
+      #   print 'Missing query'
+      #   content = 'Error 400: Bad request<br>Missing query'
+      #   content_type = 'text/html'
+      except IndexError:
+        print 'Out of bounds'
         content = 'Error 400: Bad request<br>Out of bounds'
         content_type = 'text/html'
 

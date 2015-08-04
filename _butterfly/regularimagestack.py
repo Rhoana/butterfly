@@ -25,12 +25,12 @@ def parseNumRange(num_arg):
 
 class RegularImageStack(Datasource):
   
-  def __init__(self, datapath):
+  def __init__(self, core, datapath):
     '''
     @override
     '''
 
-    super(RegularImageStack, self).__init__(datapath)
+    super(RegularImageStack, self).__init__(core, datapath)
 
   def index(self):
     '''
@@ -77,7 +77,7 @@ class RegularImageStack(Datasource):
     self._indices = indices
 
   def get_blocksize(self):
-    tmp_img = self.load(self._indices[0][0], self._indices[1][0], self._indices[2][0], 0)
+    tmp_img = self.load(self._indices[0][0], self._indices[1][0], 0, 0)
     return tmp_img.shape
 
   def load(self, x, y, z, w):
