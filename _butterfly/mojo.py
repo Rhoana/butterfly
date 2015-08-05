@@ -54,6 +54,9 @@ class Mojo(Datasource):
         print 'Indexing complete.\n'
         self.blocksize = tmp_img.shape
 
+        #Grab color map
+        color_map = glob.glob(os.path.join(self._datapath, 'ids', 'color*.hdf5'))[0]
+
     def load_info(self, folderpaths, filename, ids_filename, indices):
         self._folderpaths = folderpaths
         self._filename = filename
@@ -76,16 +79,22 @@ class Mojo(Datasource):
         print cur_filename
         if w <= self.max_zoom:
             cur_path = os.path.join(self._datapath, image_or_id, 'tiles', 'w=%08d' % w, self._folderpaths % self._indices[2][z], cur_filename)
-            return super(Mojo, self).load(cur_path)
+            #We pass zero mip level to use the files on disk, as we don't need .load() to resize
+            return super(Mojo, self).load(cur_path, 0)
 
         #Resize if we don't have the zoom levels
         print 'RESIZE'
 
         cur_path = os.path.join(self._datapath, image_or_id, 'tiles', 'w=00000000', self._folderpaths % self._indices[2][z], cur_filename)
-        if segmentation:
-            #Subsample to preserve accuracy
-            return super(Mojo, self).load(cur_path)[::2**w, ::2**w]
+        # if segmentation:
+        #     #Subsample to preserve accuracy
+        #     return super(Mojo, self).load(cur_path)[::2**w, ::2**w]
+        #
+        # factor = 0.5**w
+        # return cv2.resize(super(Mojo, self).load(cur_path),(0,0), fx=factor, fy=factor, interpolation=cv2.INTER_LINEAR)
+        return super(Mojo, self).load(cur_path, w, segmentation)
 
-        factor = 0.5**w
-        return cv2.resize(super(Mojo, self).load(cur_path),(0,0), fx=factor, fy=factor, interpolation=cv2.INTER_LINEAR)
+    def seg_to_color(self, slice):
+        super(Mojo, self).seg_to_color()
+        return slice
 

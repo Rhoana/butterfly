@@ -121,6 +121,9 @@ class WebServer:
         elif output_format in image_formats:
           content = cv2.imencode('.' + output_format, volume[:,:,0].astype('uint8'))[1].tostring()
           content_type = 'image/' + output_format
+        else:
+          content = 'Error 400: Bad request<br>Output file format not supported'
+          content_type = 'text/html'
 
         #Show some basic statistics
         print 'Shape:', volume.shape
