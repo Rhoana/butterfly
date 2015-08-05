@@ -80,7 +80,7 @@ class RegularImageStack(Datasource):
     tmp_img = self.load(self._indices[0][0], self._indices[1][0], 0, 0)
     return tmp_img.shape
 
-  def load(self, x, y, z, w):
+  def load(self, x, y, z, w, segmentation):
     '''
     @override
     '''

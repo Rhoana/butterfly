@@ -1,4 +1,5 @@
 import cv2
+import h5py
 
 class Datasource(object):
 
@@ -31,7 +32,12 @@ class Datasource(object):
         return self._core._cache[cur_path]
 
     #Load image from given path
-    tmp_image = cv2.imread(cur_path, 0)
+    if cur_path.rpartition('.')[2] == 'hdf5':
+        with h5py.File(cur_path, 'r') as f:
+            tmp_image = f['IdMap'][()]
+    else:
+        tmp_image = cv2.imread(cur_path, 0)
+
     self._core._current_cache_size += tmp_image.size
 
     #If we don't care to exceed the max cache size temporarily:

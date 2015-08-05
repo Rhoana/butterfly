@@ -63,7 +63,7 @@ class Core(object):
 
         for y in y_tiles:
           y_offset = min((blocksize[1] - self.tile_xy_start[1]),(vol_size[1] - self.vol_xy_start[1]))
-          cur_img = datasource.load(x, y, z + start_coord[2], w)
+          cur_img = datasource.load(x, y, z + start_coord[2], w, segmentation)
 
           #Temporary code to show which cutouts we are grabbing and from where
           print 'tile:       ' + '(' + str(x) + ', ' + str(y) + ')' 
@@ -76,6 +76,9 @@ class Core(object):
           #Add offsets in current y direction
           target_boundaries = (self.vol_xy_start[1], self.vol_xy_start[1] + y_offset, self.vol_xy_start[0], self.vol_xy_start[0] + x_offset, z)
           source_boundaries = (self.tile_xy_start[1], self.tile_xy_start[1] + y_offset, self.tile_xy_start[0],self.tile_xy_start[0] + x_offset)
+
+          print cur_img
+          print cur_img.shape
 
           data = cur_img[source_boundaries[0]:source_boundaries[1], source_boundaries[2]:source_boundaries[3]]
           vol[target_boundaries[0]:target_boundaries[1], target_boundaries[2]:target_boundaries[3], target_boundaries[4]] = data

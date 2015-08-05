@@ -92,9 +92,13 @@ class WebServer:
         #Grab optional queries
         try:
           output_format = parsed_query['output'][0]
-          segmentation = parsed_query['segmentation'][0]
         except KeyError:
-          #No optional queries
+          pass
+        try:
+          tmp_string = parsed_query['segmentation'][0]
+          if tmp_string.lower() in ('yes', 'y', 'true'):
+            segmentation = True
+        except KeyError:
           pass
 
         #Call the cutout method
@@ -121,10 +125,10 @@ class WebServer:
         #Show some basic statistics
         print 'Shape:', volume.shape
 
-      # except KeyError:
-      #   print 'Missing query'
-      #   content = 'Error 400: Bad request<br>Missing query'
-      #   content_type = 'text/html'
+      except KeyError:
+        print 'Missing query'
+        content = 'Error 400: Bad request<br>Missing query'
+        content_type = 'text/html'
       except IndexError:
         print 'Out of bounds'
         content = 'Error 400: Bad request<br>Out of bounds'
