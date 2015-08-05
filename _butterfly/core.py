@@ -67,18 +67,19 @@ class Core(object):
 
           #Temporary code to show which cutouts we are grabbing and from where
           print 'tile:       ' + '(' + str(x) + ', ' + str(y) + ')' 
-          print 'z slice:    ' + str(z + start_coord[2])
-          print 'vol start:  ' + str(self.vol_xy_start)
-          print 'tile start: ' + str(self.tile_xy_start)
-          print 'x offset:   ' + str(x_offset)
-          print 'y offset:   ' + str(y_offset) + '\n'
+          # print 'z slice:    ' + str(z + start_coord[2])
+          # print 'vol start:  ' + str(self.vol_xy_start)
+          # print 'tile start: ' + str(self.tile_xy_start)
+          # print 'x offset:   ' + str(x_offset)
+          # print 'y offset:   ' + str(y_offset) + '\n'
 
           #Add offsets in current y direction
           target_boundaries = (self.vol_xy_start[1], self.vol_xy_start[1] + y_offset, self.vol_xy_start[0], self.vol_xy_start[0] + x_offset, z)
           source_boundaries = (self.tile_xy_start[1], self.tile_xy_start[1] + y_offset, self.tile_xy_start[0],self.tile_xy_start[0] + x_offset)
 
-          print cur_img
+          # print cur_img
           print cur_img.shape
+          print 'Current cache size', self._current_cache_size
 
           data = cur_img[source_boundaries[0]:source_boundaries[1], source_boundaries[2]:source_boundaries[3]]
           vol[target_boundaries[0]:target_boundaries[1], target_boundaries[2]:target_boundaries[3], target_boundaries[4]] = data

@@ -33,6 +33,7 @@ class Datasource(object):
         if cache_index in self._core._cache:
             #Move most recently accesed items to the top
             self._core._cache[cache_index] = self._core._cache.pop(cache_index)
+            print 'Loading from cache!'
             return self._core._cache[cache_index]
 
         #Load image from given path, check extension

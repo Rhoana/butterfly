@@ -86,6 +86,7 @@ class RegularImageStack(Datasource):
     '''
 
     cur_filename = self._filename % {'x': self._indices[0][x], 'y': self._indices[1][y], 'z': self._indices[2][z]}
+    print '\n'
     print cur_filename
     cur_path = os.path.join(self._datapath, self._folderpaths % {'z': self._indices[2][z]}, cur_filename)
     return super(RegularImageStack, self).load(cur_path, w, segmentation)

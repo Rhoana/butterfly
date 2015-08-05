@@ -76,22 +76,14 @@ class Mojo(Datasource):
             cur_filename = self._filename % {'x': self._indices[0][x], 'y': self._indices[1][y]}
             image_or_id = 'images'
 
+        print '\n'
         print cur_filename
         if w <= self.max_zoom:
             cur_path = os.path.join(self._datapath, image_or_id, 'tiles', 'w=%08d' % w, self._folderpaths % self._indices[2][z], cur_filename)
             #We pass zero mip level to use the files on disk, as we don't need .load() to resize
             return super(Mojo, self).load(cur_path, 0)
 
-        #Resize if we don't have the zoom levels
-        print 'RESIZE'
-
         cur_path = os.path.join(self._datapath, image_or_id, 'tiles', 'w=00000000', self._folderpaths % self._indices[2][z], cur_filename)
-        # if segmentation:
-        #     #Subsample to preserve accuracy
-        #     return super(Mojo, self).load(cur_path)[::2**w, ::2**w]
-        #
-        # factor = 0.5**w
-        # return cv2.resize(super(Mojo, self).load(cur_path),(0,0), fx=factor, fy=factor, interpolation=cv2.INTER_LINEAR)
         return super(Mojo, self).load(cur_path, w, segmentation)
 
     def seg_to_color(self, slice):
