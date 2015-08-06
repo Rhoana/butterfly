@@ -36,7 +36,7 @@ class RequestParser(object):
             try:
                 print 'OCP request:', request[ind:]
                 print 'Datapath:', datapath
-                w = int(float(request[ind+2]))
+                w = int(float(request[ind+2])) - 1
                 x_range = [int(i) for i in request[ind+3].split(',')]
                 y_range = [int(i) for i in request[ind+4].split(',')]
                 z_range = [int(i) for i in request[ind+5].split(',')]

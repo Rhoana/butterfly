@@ -127,7 +127,8 @@ class Core(object):
 
     # detect data source type
     last_folder = datapath.rstrip(os.sep).split(os.sep)[-1]
-    if last_folder.lower() == 'mojo':
+    last_folder = last_folder.lower()
+    if last_folder == 'mojo':
       ds = Mojo(self, datapath)
     else:
       ds = RegularImageStack(self, datapath)
