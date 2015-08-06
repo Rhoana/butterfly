@@ -39,11 +39,12 @@ class Core(object):
     if w <= datasource.max_zoom:
       f = 0
 
-    blocksize = [x/(2**f) for x in datasource.blocksize]
+    blocksize = [x//(2**f) for x in datasource.blocksize]
 
     #If we need to fit the volume to existing data, calculate volume size now
     if fit:
       boundaries = datasource.get_boundaries()
+      boundaries = [x//(2**f) for x in boundaries]
       for i in range(3):
         if start_coord[i] + vol_size[i] > boundaries[i]:
           vol_size[i] = boundaries[i] - start_coord[i]
@@ -77,7 +78,11 @@ class Core(object):
 
         for y in y_tiles:
           y_offset = min((blocksize[1] - self.tile_xy_start[1]),(vol_size[1] - self.vol_xy_start[1]))
-          cur_img = datasource.load(x, y, z + start_coord[2], w, segmentation)
+          try:
+            cur_img = datasource.load(x, y, z + start_coord[2], w, segmentation)
+          except (IndexError, IOError):
+            cur_img = np.zeros(blocksize, dtype=np.uint8)
+
           if color:
             cur_img = datasource.seg_to_color(cur_img)
 

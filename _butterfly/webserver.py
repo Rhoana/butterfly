@@ -77,13 +77,13 @@ class WebServer:
       print 'Parsed query:', parsed_query
       try:
         datapath = parsed_query['datapath'][0]
-        start = tuple(int(a) for a in parsed_query['start'][0].split(','))
+        start = [int(a) for a in parsed_query['start'][0].split(',')]
         # x = int(parsed_query['x'][0])
         # y = int(parsed_query['y'][0])
         # z = int(parsed_query['z'][0])
         # w = int(parsed_query['w'][0])
         w = int(parsed_query['mip'][0])
-        volsize = tuple(int(a) for a in parsed_query['size'][0].split(','))
+        volsize = [int(a) for a in parsed_query['size'][0].split(',')]
 
         #Default values
         output_format = '.png'
@@ -105,6 +105,10 @@ class WebServer:
 
         #Call the cutout method
         volume = self._core.get(datapath, start, volsize, optional_queries['segmentation'], optional_queries['segcolor'], optional_queries['fit'], w)
+
+        #Check if we got nothing in the case of a request outside the data with fit=True
+        if volume.size == 0:
+          raise IndexError('Tile index out of bounds')
 
         #Accepted image output formats
         image_formats = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp')
