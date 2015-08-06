@@ -12,6 +12,8 @@ import numpy as np
 import cv2
 import StringIO
 import zlib
+import sys, traceback
+from requestparser import RequestParser
 
 class WebServerHandler(tornado.web.RequestHandler):
 
@@ -73,56 +75,26 @@ class WebServer:
     #image data request
     elif splitted_request[1] == 'data':
 
-      parsed_query = urlparse.parse_qs(query)
-      print 'Parsed query:', parsed_query
       try:
-        datapath = parsed_query['datapath'][0]
-        start = [int(a) for a in parsed_query['start'][0].split(',')]
-        # x = int(parsed_query['x'][0])
-        # y = int(parsed_query['y'][0])
-        # z = int(parsed_query['z'][0])
-        # w = int(parsed_query['w'][0])
-        w = int(float(parsed_query['mip'][0]))
-        volsize = [int(a) for a in parsed_query['size'][0].split(',')]
-
-        #Default values
-        output_format = '.png'
-        segmentation = False
-        segcolor = False
-
-        #Grab optional yes/no queries
-        optional_query_list = ('segmentation', 'segcolor', 'fit')
-        assent_list = ('yes', 'y', 'true')
-        optional_queries = {}
-        for query in optional_query_list:
-          optional_queries[query] = False
-          try:
-            tmp = parsed_query[query][0]
-            if tmp.lower() in assent_list:
-              optional_queries[query] = True
-          except KeyError:
-            pass
+        parser = RequestParser()
+        args = parser.parse(splitted_request[2:])
 
         #Call the cutout method
-        volume = self._core.get(datapath, start, volsize, optional_queries['segmentation'], optional_queries['segcolor'], optional_queries['fit'], w)
+        volume = self._core.get(*args)
 
         #Check if we got nothing in the case of a request outside the data with fit=True
         if volume.size == 0:
           raise IndexError('Tile index out of bounds')
 
+        #Color mode is equivalent to segmentation color request right now
+        color = parser.optional_queries['segcolor'] and parser.optional_queries['segmentation']
+
         #Accepted image output formats
         image_formats = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp')
-        output_format = output_format.lstrip('.').lower()
-
-        #Color mode is equivalent to segmentation color request right now
-        color = optional_queries['segcolor'] and optional_queries['segmentation']
 
         #Process output
         out_dtype = np.uint8
-        try:
-          output_format = parsed_query['output'][0]
-        except KeyError:
-          pass
+        output_format = parser.output_format
 
         if output_format == 'zip' and not color:
           #Rotate out of numpy array
@@ -152,9 +124,12 @@ class WebServer:
         content = 'Error 400: Bad request<br>Missing query'
         content_type = 'text/html'
       except IndexError:
+        # traceback.print_exc(file=sys.stdout)
         print 'Out of bounds'
         content = 'Error 400: Bad request<br>Out of bounds'
         content_type = 'text/html'
+      # except Exception:
+      #   traceback.print_exc(file=sys.stdout)
 
     # invalid request
     if not content:

@@ -81,7 +81,7 @@ class Core(object):
           y_offset = min((blocksize[1] - self.tile_xy_start[1]),(vol_size[1] - self.vol_xy_start[1]))
           try:
             cur_img = datasource.load(x, y, z + start_coord[2], w, segmentation)
-          except (IndexError, IOError):
+          except (IndexError, IOError, AttributeError):
             cur_img = np.zeros(blocksize, dtype=np.uint8)
 
           if color:
