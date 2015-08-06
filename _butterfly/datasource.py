@@ -50,12 +50,13 @@ class Datasource(object):
         #Resize if necessary, then also store to cache
         print 'RESIZE'
         if w > 0:
-            if segmentation:
+            #We will use subsampling for all requests right now for speed
+            if True: #segmentation:
                 #Subsample to preserve accuracy for segmentations
                 tmp_image = tmp_image[::2**w, ::2**w]
             else:
                 factor = 0.5**w
-                tmp_image = cv2.resize(tmp_image,(0,0), fx=factor, fy=factor, interpolation=cv2.INTER_LINEAR)
+                tmp_image = cv2.resize(tmp_image,(0,0), fx=factor, fy=factor, interpolation=cv2.INTER_NEAREST)
 
         self._core._current_cache_size += tmp_image.size
 
