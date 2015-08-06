@@ -82,7 +82,7 @@ class WebServer:
         # y = int(parsed_query['y'][0])
         # z = int(parsed_query['z'][0])
         # w = int(parsed_query['w'][0])
-        w = int(parsed_query['mip'][0])
+        w = int(float(parsed_query['mip'][0]))
         volsize = [int(a) for a in parsed_query['size'][0].split(',')]
 
         #Default values
