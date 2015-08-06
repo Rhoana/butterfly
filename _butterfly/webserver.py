@@ -135,6 +135,7 @@ class WebServer:
           content_type = 'application/octet-stream'
         elif output_format in image_formats:
           if color:
+            volume = volume[:,:,:,[2,1,0]]
             content = cv2.imencode('.' + output_format, volume[:,:,0,:].astype(out_dtype))[1].tostring()
           else:
             content = cv2.imencode('.' + output_format, volume[:,:,0].astype(out_dtype))[1].tostring()

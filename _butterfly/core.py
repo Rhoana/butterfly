@@ -44,7 +44,8 @@ class Core(object):
     #If we need to fit the volume to existing data, calculate volume size now
     if fit:
       boundaries = datasource.get_boundaries()
-      boundaries = [x//(2**w) for x in boundaries]
+      #No mip zoom for slices right now
+      boundaries = [boundaries[0]//(2**w), boundaries[1]//(2**w), boundaries[2]]
       for i in range(3):
         if start_coord[i] + vol_size[i] > boundaries[i]:
           vol_size[i] = boundaries[i] - start_coord[i]
