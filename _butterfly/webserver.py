@@ -88,38 +88,52 @@ class WebServer:
         #Default values
         output_format = '.png'
         segmentation = False
+        segcolor = False
 
-        #Grab optional queries
-        try:
-          output_format = parsed_query['output'][0]
-        except KeyError:
-          pass
-        try:
-          tmp_string = parsed_query['segmentation'][0]
-          if tmp_string.lower() in ('yes', 'y', 'true'):
-            segmentation = True
-        except KeyError:
-          pass
+        #Grab optional yes/no queries
+        optional_query_list = ('segmentation', 'segcolor', 'fit')
+        assent_list = ('yes', 'y', 'true')
+        optional_queries = {}
+        for query in optional_query_list:
+          optional_queries[query] = False
+          try:
+            tmp = parsed_query[query][0]
+            if tmp.lower() in assent_list:
+              optional_queries[query] = True
+          except KeyError:
+            pass
 
         #Call the cutout method
-        volume = self._core.get(datapath, start, volsize, segmentation, w)        
+        volume = self._core.get(datapath, start, volsize, optional_queries['segmentation'], optional_queries['segcolor'], optional_queries['fit'], w)
 
         #Accepted image output formats
         image_formats = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp')
         output_format = output_format.lstrip('.').lower()
 
+        #Color mode is equivalent to segmentation color request right now
+        color = optional_queries['segcolor'] and optional_queries['segmentation']
+
         #Process output
-        if output_format == 'zip':
+        out_dtype = np.uint8
+        try:
+          output_format = parsed_query['output'][0]
+        except KeyError:
+          pass
+
+        if output_format == 'zip' and not color:
           #Rotate out of numpy array
           volume = volume.transpose(1, 0, 2)
-          zipped_data = zlib.compress(volume.astype('uint8').tostring('F'))
+          zipped_data = zlib.compress(volume.astype(out_dtype).tostring('F'))
 
           output = StringIO.StringIO()
           output.write(zipped_data)
           content = output.getvalue()
           content_type = 'application/octet-stream'
         elif output_format in image_formats:
-          content = cv2.imencode('.' + output_format, volume[:,:,0].astype('uint8'))[1].tostring()
+          if color:
+            content = cv2.imencode('.' + output_format, volume[:,:,0,:].astype(out_dtype))[1].tostring()
+          else:
+            content = cv2.imencode('.' + output_format, volume[:,:,0].astype(out_dtype))[1].tostring()
           content_type = 'image/' + output_format
         else:
           content = 'Error 400: Bad request<br>Output file format not supported'
@@ -128,7 +142,7 @@ class WebServer:
         #Show some basic statistics
         print 'Shape:', volume.shape
 
-      except KeyError:
+      except (KeyError, ValueError):
         print 'Missing query'
         content = 'Error 400: Bad request<br>Missing query'
         content_type = 'text/html'

@@ -13,6 +13,7 @@ class Datasource(object):
         self._size_z = -1
         #Maximum supported zoom in file system, affects calculations
         self.max_zoom = -1
+        self.blocksize = (0,0)
         self._color_map = None
 
     def index(self):
@@ -77,3 +78,8 @@ class Datasource(object):
         Get segmentation color from color map
         '''
         pass
+
+    def get_boundaries(self):
+        '''
+        Get maximum data size
+        '''

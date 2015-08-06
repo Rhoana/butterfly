@@ -1,8 +1,9 @@
 from datasource import Datasource
 import os
 import cv2
-import re
 import glob
+import h5py
+import numpy as np
 
 class Mojo(Datasource):
   
@@ -55,7 +56,11 @@ class Mojo(Datasource):
         self.blocksize = tmp_img.shape
 
         #Grab color map
-        color_map = glob.glob(os.path.join(self._datapath, 'ids', 'color*.hdf5'))[0]
+        color_map_path = glob.glob(os.path.join(self._datapath, 'ids', 'color*.hdf5'))[0]
+        with h5py.File(color_map_path, 'r') as f:
+            datasets = []
+            f.visit(datasets.append)
+            self._color_map = f[datasets[0]][()]
 
     def load_info(self, folderpaths, filename, ids_filename, indices):
         self._folderpaths = folderpaths
@@ -87,6 +92,12 @@ class Mojo(Datasource):
         return super(Mojo, self).load(cur_path, w, segmentation)
 
     def seg_to_color(self, slice):
-        super(Mojo, self).seg_to_color()
-        return slice
+        # super(Mojo, self).seg_to_color()
 
+        #Modulo by length of color map, then advanced indexing to return rgb image
+        return self._color_map[np.fmod(slice, len(self._color_map))]
+
+    def get_boundaries(self):
+        # super(Mojo, self).get_boundaries()
+
+        return (len(self._indices[0])*self.blocksize[0], len(self._indices[1])*self.blocksize[1], len(self._indices[2]))

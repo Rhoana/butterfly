@@ -17,7 +17,7 @@ class Core(object):
     self._max_cache_size = 1*1024*1024*1024 #1GB max cache
     self._current_cache_size = 0
 
-  def get(self, datapath, start_coord, vol_size, segmentation=False, w=0):
+  def get(self, datapath, start_coord, vol_size, segmentation=False, segcolor=False, fit=False, w=0):
     '''
     Request a subvolume of the datapath at a given zoomlevel.
     '''
@@ -39,9 +39,23 @@ class Core(object):
     if w <= datasource.max_zoom:
       f = 0
 
-    vol_type = 'uint32' #Supports segmentations as well, can be changed for images
-    vol = np.zeros((vol_size[1], vol_size[0], vol_size[2]), dtype=vol_type) 
     blocksize = [x/(2**f) for x in datasource.blocksize]
+
+    #If we need to fit the volume to existing data, calculate volume size now
+    if fit:
+      boundaries = datasource.get_boundaries()
+      for i in range(3):
+        if start_coord[i] + vol_size[i] > boundaries[i]:
+          vol_size[i] = boundaries[i] - start_coord[i]
+
+    #Use 4D volume for rgb data, currently segmentation color is the only use for color
+    color = segcolor and segmentation
+    if color:
+      vol = np.zeros((vol_size[1], vol_size[0], vol_size[2], 3), dtype=np.uint16)
+    else:
+      vol = np.zeros((vol_size[1], vol_size[0], vol_size[2]), dtype=np.uint8)
+
+
 
     #Might need some non-zero check - how would we throw the error?
 
@@ -64,6 +78,8 @@ class Core(object):
         for y in y_tiles:
           y_offset = min((blocksize[1] - self.tile_xy_start[1]),(vol_size[1] - self.vol_xy_start[1]))
           cur_img = datasource.load(x, y, z + start_coord[2], w, segmentation)
+          if color:
+            cur_img = datasource.seg_to_color(cur_img)
 
           #Temporary code to show which cutouts we are grabbing and from where
           print 'tile:       ' + '(' + str(x) + ', ' + str(y) + ')' 
@@ -81,8 +97,13 @@ class Core(object):
           print cur_img.shape
           print 'Current cache size', self._current_cache_size
 
-          data = cur_img[source_boundaries[0]:source_boundaries[1], source_boundaries[2]:source_boundaries[3]]
-          vol[target_boundaries[0]:target_boundaries[1], target_boundaries[2]:target_boundaries[3], target_boundaries[4]] = data
+          if color:
+            data = cur_img[source_boundaries[0]:source_boundaries[1], source_boundaries[2]:source_boundaries[3], :]
+            vol[target_boundaries[0]:target_boundaries[1], target_boundaries[2]:target_boundaries[3], target_boundaries[4], :] = data
+          else:
+            data = cur_img[source_boundaries[0]:source_boundaries[1], source_boundaries[2]:source_boundaries[3]]
+            vol[target_boundaries[0]:target_boundaries[1], target_boundaries[2]:target_boundaries[3], target_boundaries[4]] = data
+
           self.tile_xy_start[1] = (self.tile_xy_start[1] + y_offset) % blocksize[1]
           self.vol_xy_start[1] += y_offset
 
