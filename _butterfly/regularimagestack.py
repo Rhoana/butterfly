@@ -1,5 +1,5 @@
 import argparse
-from datasource import Datasource
+from datasource import DataSource
 import os
 import cv2
 import re
@@ -24,7 +24,7 @@ def parseNumRange(num_arg):
     return list(range(int(start), int(end) + step, step))
 
 
-class RegularImageStack(Datasource):
+class RegularImageStack(DataSource):
   
     def __init__(self, core, datapath):
         '''

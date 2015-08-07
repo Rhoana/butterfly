@@ -66,8 +66,13 @@ class RequestParser(object):
             #Parse essential parameters
             datapath = parsed_query['datapath'][0]
             start = [int(a) for a in parsed_query['start'][0].split(',')]
-            w = int(float(parsed_query['mip'][0]))
             volsize = [int(a) for a in parsed_query['size'][0].split(',')]
+
+            #Consider default zoom to be zero
+            try:
+                w = int(float(parsed_query['mip'][0]))
+            except KeyError:
+                w = 0
 
             #Try to get optional parameters
             try:

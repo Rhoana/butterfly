@@ -2,7 +2,7 @@ import cv2
 import h5py
 import settings
 
-class Datasource(object):
+class DataSource(object):
     def __init__(self, core, datapath):
         '''
         '''
