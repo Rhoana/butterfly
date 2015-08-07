@@ -1,6 +1,7 @@
 import os
 import numpy as np
 
+import settings
 from regularimagestack import RegularImageStack
 from collections import OrderedDict
 from mojo import Mojo
@@ -14,7 +15,7 @@ class Core(object):
     self.vol_xy_start = [0, 0]
     self.tile_xy_start = [0, 0]
     self._cache = OrderedDict()
-    self._max_cache_size = 1*1024*1024*1024 #1GB max cache
+    self._max_cache_size = settings.MAX_CACHE_SIZE
     self._current_cache_size = 0
 
   def get(self, datapath, start_coord, vol_size, segmentation=False, segcolor=False, fit=False, w=0):
@@ -22,15 +23,11 @@ class Core(object):
     Request a subvolume of the datapath at a given zoomlevel.
     '''
 
-    #
     # if datapath is not indexed (knowing the meta information like width, height),do it now
     if not datapath in self._datasources:
       self.create_datasource(datapath)
 
     datasource = self._datasources[datapath]
-
-    # else wise return the data
-    #
 
     print 'Loading tiles:'
 
@@ -58,9 +55,6 @@ class Core(object):
       vol = np.zeros((vol_size[1], vol_size[0], vol_size[2]), dtype=np.uint8)
 
 
-
-    #Might need some non-zero check - how would we throw the error?
-
     #Loop through all z-slices requested, using x,y offsets to calculate distance until next block or volume end
     for z in range(vol_size[2]):
       #Calculate list of tiles that we need
@@ -87,8 +81,8 @@ class Core(object):
           if color:
             cur_img = datasource.seg_to_color(cur_img)
 
-          #Temporary code to show which cutouts we are grabbing and from where
-          print 'tile:       ' + '(' + str(x) + ', ' + str(y) + ')' 
+          #Debug code to show which cutouts we are grabbing and from where
+          print 'tile:       ' + '(' + str(x) + ', ' + str(y) + ')'
           # print 'z slice:    ' + str(z + start_coord[2])
           # print 'vol start:  ' + str(self.vol_xy_start)
           # print 'tile start: ' + str(self.tile_xy_start)

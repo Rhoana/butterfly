@@ -4,6 +4,7 @@ import cv2
 import glob
 import h5py
 import numpy as np
+import settings
 
 class Mojo(Datasource):
   
@@ -52,7 +53,7 @@ class Mojo(Datasource):
 
         #Grab blocksize from first image
         tmp_img = self.load(0, 0, 0, 0)
-        print 'Indexing complete.\n'
+        # print 'Indexing complete.\n'
         self.blocksize = tmp_img.shape
 
         #Grab color map
@@ -83,6 +84,7 @@ class Mojo(Datasource):
 
         print '\n'
         print cur_filename
+
         if w <= self.max_zoom:
             cur_path = os.path.join(self._datapath, image_or_id, 'tiles', 'w=%08d' % w, self._folderpaths % self._indices[2][z], cur_filename)
             #We pass zero mip level to use the files on disk, as we don't need .load() to resize

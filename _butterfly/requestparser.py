@@ -2,16 +2,17 @@ import urlparse
 import os
 import re
 import urllib
+import settings
 
 class RequestParser(object):
 
     def __init__(self):
-        self.output_format = '.png'
+        self.output_format = settings.DEFAULT_OUTPUT
 
         #Optional queries
         self.optional_queries = {}
         self.optional_query_list = ('segmentation', 'segcolor', 'fit')
-        self.assent_list = ('yes', 'y', 'true')
+        self.assent_list = settings.ASSENT_LIST
 
         #Set these to false in case we use OCP format or some other format that doesn't support optional parameters
         for query in self.optional_query_list:
@@ -34,12 +35,14 @@ class RequestParser(object):
             datapath = urllib.unquote(datapath)
 
             try:
+                #Debug output in console for OCP request
                 print 'OCP request:', request[ind:]
                 print 'Datapath:', datapath
-                w = int(float(request[ind+2])) - 1
-                x_range = [int(i) for i in request[ind+3].split(',')]
-                y_range = [int(i) for i in request[ind+4].split(',')]
-                z_range = [int(i) for i in request[ind+5].split(',')]
+
+                w = int(float(request[ind+2]))
+                x_range = [int(i) - 1 for i in request[ind+3].split(',')]
+                y_range = [int(i) - 1 for i in request[ind+4].split(',')]
+                z_range = [int(i) - 1 for i in request[ind+5].split(',')]
                 start = [x_range[0], y_range[0], z_range[0]]
                 volsize = [x_range[1]-x_range[0], y_range[1]-y_range[0], z_range[1]-z_range[0]]
 
@@ -56,6 +59,8 @@ class RequestParser(object):
             #Parse standard queries using urlparse
             query = '/'.join(request)[1:]
             parsed_query = urlparse.parse_qs(query)
+
+            #Console output for parsed query
             print 'Parsed query:', parsed_query
 
             #Parse essential parameters

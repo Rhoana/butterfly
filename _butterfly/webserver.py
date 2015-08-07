@@ -1,18 +1,16 @@
 import json
 import os
 import socket
-import time
 import tornado
 import tornado.gen
 import tornado.web
 import tornado.websocket
-import urllib
-import urlparse
 import numpy as np
 import cv2
 import StringIO
 import zlib
 import sys, traceback
+import settings
 from requestparser import RequestParser
 
 class WebServerHandler(tornado.web.RequestHandler):
@@ -55,6 +53,10 @@ class WebServer:
 
     print 'Starting webserver at \033[93mhttp://' + ip + ':' + str(port) + '\033[0m'
 
+    #Suppress console output by redirecting print statements to /dev/null
+    if settings.SUPPRESS_CONSOLE_OUTPUT:
+      sys.stdout = open(os.devnull, 'w')
+
     tornado.ioloop.IOLoop.instance().start()
 
   @tornado.gen.coroutine
@@ -90,7 +92,7 @@ class WebServer:
         color = parser.optional_queries['segcolor'] and parser.optional_queries['segmentation']
 
         #Accepted image output formats
-        image_formats = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp')
+        image_formats = settings.SUPPORTED_IMAGE_FORMATS
 
         #Process output
         out_dtype = np.uint8
@@ -117,7 +119,7 @@ class WebServer:
           content_type = 'text/html'
 
         #Show some basic statistics
-        print 'Shape:', volume.shape
+        print 'Total volume shape:', volume.shape
 
       except (KeyError, ValueError):
         print 'Missing query'
@@ -125,8 +127,8 @@ class WebServer:
         content_type = 'text/html'
       except IndexError:
         # traceback.print_exc(file=sys.stdout)
-        print 'Out of bounds'
-        content = 'Error 400: Bad request<br>Out of bounds'
+        print 'Could not load image'
+        content = 'Error 400: Bad request<br>Could not load image'
         content_type = 'text/html'
       # except Exception:
       #   traceback.print_exc(file=sys.stdout)

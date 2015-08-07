@@ -4,6 +4,7 @@ import os
 import cv2
 import re
 import glob
+import settings
 
 def convert_arg_line_to_args(arg_line):
     for arg in re.split(''' (?=(?:[^'"]|'[^']*'|"[^"]*")*$)''', arg_line):
