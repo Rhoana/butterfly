@@ -57,11 +57,12 @@ class Mojo(DataSource):
         self.blocksize = tmp_img.shape
 
         #Grab color map
-        color_map_path = glob.glob(os.path.join(self._datapath, 'ids', 'color*.hdf5'))[0]
-        with h5py.File(color_map_path, 'r') as f:
-            datasets = []
-            f.visit(datasets.append)
-            self._color_map = f[datasets[0]][()]
+        color_map_path = glob.glob(os.path.join(self._datapath, 'ids', 'color*.hdf5'))
+        if color_map_path:
+            with h5py.File(color_map_path[0], 'r') as f:
+                datasets = []
+                f.visit(datasets.append)
+                self._color_map = f[datasets[0]][()]
 
     def load_info(self, folderpaths, filename, ids_filename, indices):
         self._folderpaths = folderpaths

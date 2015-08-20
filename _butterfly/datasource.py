@@ -45,11 +45,10 @@ class DataSource(object):
                 f.visit(datasets.append)
                 tmp_image = f[datasets[0]][()]
         else:
+            print 'Current path', cur_path
             tmp_image = cv2.imread(cur_path, 0)
 
         # Resize if necessary, then also store to cache
-        print 'RESIZE'
-
         if w > 0:
             # We will use subsampling for all requests right now for speed
             if settings.ALWAYS_SUBSAMPLE or segmentation:

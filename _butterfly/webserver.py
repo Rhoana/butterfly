@@ -126,7 +126,7 @@ class WebServer:
         content = 'Error 400: Bad request<br>Missing query'
         content_type = 'text/html'
       except IndexError:
-        # traceback.print_exc(file=sys.stdout)
+        traceback.print_exc(file=sys.stdout)
         print 'Could not load image'
         content = 'Error 400: Bad request<br>Could not load image'
         content_type = 'text/html'
