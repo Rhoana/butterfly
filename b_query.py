@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import _butterfly
+import butterfly
 import cv2
 import argparse
 import re
@@ -27,7 +27,7 @@ def parseNumRange(num_arg):
         step = -1
     return list(range(int(start), int(end) + step, step))
 
-core = _butterfly.Core()
+core = butterfly.Core()
 
 # Parser for command-line arguments - to be incorporated separately in a
 # client-side tool

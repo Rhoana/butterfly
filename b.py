@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import sys
-import _butterfly
+import butterfly
 
 '''
 Butterfly
@@ -11,11 +11,11 @@ Lichtman Lab, 2015
 
 if __name__ == "__main__":
 
-    port = _butterfly.settings.PORT
+    port = butterfly.settings.PORT
     if len(sys.argv) == 2:
         port = sys.argv[1]
 
-    core = _butterfly.Core()
+    core = butterfly.Core()
 
-    webserver = _butterfly.WebServer(core, port)
+    webserver = butterfly.WebServer(core, port)
     webserver.start()
