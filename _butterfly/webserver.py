@@ -9,140 +9,157 @@ import numpy as np
 import cv2
 import StringIO
 import zlib
-import sys, traceback
+import sys
+import traceback
 import settings
 from requestparser import RequestParser
 
+
 class WebServerHandler(tornado.web.RequestHandler):
 
-  def initialize(self, webserver):
-    self._webserver = webserver
+    def initialize(self, webserver):
+        self._webserver = webserver
 
-  @tornado.web.asynchronous
-  @tornado.gen.coroutine
-  def get(self, uri):
-    '''
-    '''
-    self._webserver.handle(self)
+    @tornado.web.asynchronous
+    @tornado.gen.coroutine
+    def get(self, uri):
+        '''
+        '''
+        self._webserver.handle(self)
 
 
 class WebServer:
 
-  def __init__( self, core, port=2001 ):
-    '''
-    '''
-    self._core = core
-    self._port = port
+    def __init__(self, core, port=2001):
+        '''
+        '''
+        self._core = core
+        self._port = port
 
-  def start( self ):
-    '''
-    '''
+    def start(self):
+        '''
+        '''
 
-    ip = socket.gethostbyname('')
-    port = self._port
+        ip = socket.gethostbyname('')
+        port = self._port
 
-    webapp = tornado.web.Application([
-      
-      (r'/metainfo/(.*)', WebServerHandler, dict(webserver=self)),
-      (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
-      # (r'/(.*)', tornado.web.StaticFileHandler, dict(path=os.path.join(os.path.dirname(__file__),'../web'), default_filename='index.html'))
-  
-    ])
+        webapp = tornado.web.Application([
 
-    webapp.listen(port, max_buffer_size=1024*1024*150000)
+            (r'/metainfo/(.*)', WebServerHandler, dict(webserver=self)),
+            (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
+            # (r'/(.*)', tornado.web.StaticFileHandler, dict(path=os.path.join(os.path.dirname(__file__),'../web'), default_filename='index.html'))
 
-    print 'Starting webserver at \033[93mhttp://' + ip + ':' + str(port) + '\033[0m'
+        ])
 
-    #Suppress console output by redirecting print statements to /dev/null
-    if settings.SUPPRESS_CONSOLE_OUTPUT:
-      sys.stdout = open(os.devnull, 'w')
+        webapp.listen(port, max_buffer_size=1024 * 1024 * 150000)
 
-    tornado.ioloop.IOLoop.instance().start()
+        print 'Starting webserver at \033[93mhttp://' + ip + ':' + str(port) + '\033[0m'
 
-  @tornado.gen.coroutine
-  def handle( self, handler ):
-    '''
-    '''
-    content = None
+        # Suppress console output by redirecting print statements to /dev/null
+        if settings.SUPPRESS_CONSOLE_OUTPUT:
+            sys.stdout = open(os.devnull, 'w')
 
-    splitted_request = handler.request.uri.split('/')
-    query = '/'.join(splitted_request[2:])[1:]
+        tornado.ioloop.IOLoop.instance().start()
 
-    if splitted_request[1] == 'metainfo':
+    @tornado.gen.coroutine
+    def handle(self, handler):
+        '''
+        '''
+        content = None
 
-      # content = self._core.get_meta_info(path)
-      content = 'metainfo'
-      content_type = 'text/html'
+        splitted_request = handler.request.uri.split('/')
+        query = '/'.join(splitted_request[2:])[1:]
 
-    #image data request
-    elif splitted_request[1] == 'data':
+        if splitted_request[1] == 'metainfo':
 
-      try:
-        parser = RequestParser()
-        args = parser.parse(splitted_request[2:])
+            # content = self._core.get_meta_info(path)
+            content = 'metainfo'
+            content_type = 'text/html'
 
-        #Call the cutout method
-        volume = self._core.get(*args)
+        # image data request
+        elif splitted_request[1] == 'data':
 
-        #Check if we got nothing in the case of a request outside the data with fit=True
-        if volume.size == 0:
-          raise IndexError('Tile index out of bounds')
+            try:
+                parser = RequestParser()
+                args = parser.parse(splitted_request[2:])
 
-        #Color mode is equivalent to segmentation color request right now
-        color = parser.optional_queries['segcolor'] and parser.optional_queries['segmentation']
+                # Call the cutout method
+                volume = self._core.get(*args)
 
-        #Accepted image output formats
-        image_formats = settings.SUPPORTED_IMAGE_FORMATS
+                # Check if we got nothing in the case of a request outside the
+                # data with fit=True
+                if volume.size == 0:
+                    raise IndexError('Tile index out of bounds')
 
-        #Process output
-        out_dtype = np.uint8
-        output_format = parser.output_format
+                # Color mode is equivalent to segmentation color request right
+                # now
+                color = parser.optional_queries[
+                    'segcolor'] and parser.optional_queries['segmentation']
 
-        if output_format == 'zip' and not color:
-          #Rotate out of numpy array
-          volume = volume.transpose(1, 0, 2)
-          zipped_data = zlib.compress(volume.astype(out_dtype).tostring('F'))
+                # Accepted image output formats
+                image_formats = settings.SUPPORTED_IMAGE_FORMATS
 
-          output = StringIO.StringIO()
-          output.write(zipped_data)
-          content = output.getvalue()
-          content_type = 'application/octet-stream'
-        elif output_format in image_formats:
-          if color:
-            volume = volume[:,:,:,[2,1,0]]
-            content = cv2.imencode('.' + output_format, volume[:,:,0,:].astype(out_dtype))[1].tostring()
-          else:
-            content = cv2.imencode('.' + output_format, volume[:,:,0].astype(out_dtype))[1].tostring()
-          content_type = 'image/' + output_format
-        else:
-          content = 'Error 400: Bad request<br>Output file format not supported'
-          content_type = 'text/html'
+                # Process output
+                out_dtype = np.uint8
+                output_format = parser.output_format
 
-        #Show some basic statistics
-        print 'Total volume shape:', volume.shape
+                if output_format == 'zip' and not color:
+                    # Rotate out of numpy array
+                    volume = volume.transpose(1, 0, 2)
+                    zipped_data = zlib.compress(
+                        volume.astype(out_dtype).tostring('F'))
 
-      except (KeyError, ValueError):
-        print 'Missing query'
-        content = 'Error 400: Bad request<br>Missing query'
-        content_type = 'text/html'
-      except IndexError:
-        traceback.print_exc(file=sys.stdout)
-        print 'Could not load image'
-        content = 'Error 400: Bad request<br>Could not load image'
-        content_type = 'text/html'
-      # except Exception:
-      #   traceback.print_exc(file=sys.stdout)
+                    output = StringIO.StringIO()
+                    output.write(zipped_data)
+                    content = output.getvalue()
+                    content_type = 'application/octet-stream'
+                elif output_format in image_formats:
+                    if color:
+                        volume = volume[:, :, :, [2, 1, 0]]
+                        content = cv2.imencode(
+                            '.' + output_format,
+                            volume[
+                                :,
+                                :,
+                                0,
+                                :].astype(out_dtype))[1].tostring()
+                    else:
+                        content = cv2.imencode(
+                            '.' + output_format,
+                            volume[
+                                :,
+                                :,
+                                0].astype(out_dtype))[1].tostring()
+                    content_type = 'image/' + output_format
+                else:
+                    content = 'Error 400: Bad request<br>Output file format not supported'
+                    content_type = 'text/html'
 
-    # invalid request
-    if not content:
-      content = 'Error 404: Not found'
-      content_type = 'text/html'
+                # Show some basic statistics
+                print 'Total volume shape:', volume.shape
 
-    # handler.set_header('Cache-Control','no-cache, no-store, must-revalidate')
-    # handler.set_header('Pragma','no-cache')
-    # handler.set_header('Expires','0')
-    handler.set_header('Access-Control-Allow-Origin', '*')
-    handler.set_header('Content-Type', content_type)
-    
-    #Temporary check for img output
-    handler.write(content)
+            except (KeyError, ValueError):
+                print 'Missing query'
+                content = 'Error 400: Bad request<br>Missing query'
+                content_type = 'text/html'
+            except IndexError:
+                traceback.print_exc(file=sys.stdout)
+                print 'Could not load image'
+                content = 'Error 400: Bad request<br>Could not load image'
+                content_type = 'text/html'
+            # except Exception:
+            #   traceback.print_exc(file=sys.stdout)
+
+        # invalid request
+        if not content:
+            content = 'Error 404: Not found'
+            content_type = 'text/html'
+
+        # handler.set_header('Cache-Control','no-cache, no-store, must-revalidate')
+        # handler.set_header('Pragma','no-cache')
+        # handler.set_header('Expires','0')
+        handler.set_header('Access-Control-Allow-Origin', '*')
+        handler.set_header('Content-Type', content_type)
+
+        # Temporary check for img output
+        handler.write(content)

@@ -6,6 +6,7 @@ import h5py
 import numpy as np
 import settings
 
+
 class MultiBeam(DataSource):
 
     def __init__(self, core, datapath):

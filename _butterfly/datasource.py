@@ -2,7 +2,9 @@ import cv2
 import h5py
 import settings
 
+
 class DataSource(object):
+
     def __init__(self, core, datapath):
         '''
         '''
@@ -56,7 +58,13 @@ class DataSource(object):
                 tmp_image = tmp_image[::2 ** w, ::2 ** w]
             else:
                 factor = 0.5 ** w
-                tmp_image = cv2.resize(tmp_image, (0, 0), fx=factor, fy=factor, interpolation=settings.IMAGE_RESIZE_METHOD)
+                tmp_image = cv2.resize(
+                    tmp_image,
+                    (0,
+                     0),
+                    fx=factor,
+                    fy=factor,
+                    interpolation=settings.IMAGE_RESIZE_METHOD)
 
         self._core._current_cache_size += tmp_image.size
 
@@ -67,7 +75,8 @@ class DataSource(object):
         # Remove items in cache until everything fits
         while self._core._current_cache_size > self._core._max_cache_size:
             oldest_item = self._core._cache.keys()[0]
-            self._core._current_cache_size -= self._core._cache[oldest_item].size
+            self._core._current_cache_size -= self._core._cache[
+                oldest_item].size
             del self._core._cache[oldest_item]
 
         self._core._cache[cache_index] = tmp_image
