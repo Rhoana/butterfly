@@ -13,7 +13,7 @@ $ pip install -e .
 ## Usage
 NOTE: Default port is currently 2001
 ```bash
-$ butterfly [<port>]
+$ bfly [<port>]
 ```
 
 ## P3 Args
