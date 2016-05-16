@@ -1,10 +1,8 @@
 from datasource import DataSource
 import os
-import cv2
 import glob
 import h5py
 import numpy as np
-import settings
 
 
 class Mojo(DataSource):
@@ -27,7 +25,6 @@ class Mojo(DataSource):
 
         # Max zoom level
         base_path = os.path.join(self._datapath, 'images', 'tiles')
-        base_ids_path = os.path.join(self._datapath, 'ids', 'tiles')
         zoom_folders = os.path.join(base_path, 'w=*')
         self.max_zoom = len(glob.glob(zoom_folders)) - 1  # Max zoom level
 

@@ -1,4 +1,3 @@
-import json
 import os
 import socket
 import tornado
@@ -47,13 +46,17 @@ class WebServer:
 
             (r'/metainfo/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
-            # (r'/(.*)', tornado.web.StaticFileHandler, dict(path=os.path.join(os.path.dirname(__file__),'../web'), default_filename='index.html'))
+            # (r'/(.*)', tornado.web.StaticFileHandler,
+            #  dict(path=os.path.join(os.path.dirname(__file__),'../web'),
+            #       default_filename='index.html'))
 
         ])
 
         webapp.listen(port, max_buffer_size=1024 * 1024 * 150000)
+        startup_msg = ('Starting webserver at \033[93mhttp://' + ip + ':' +
+                       str(port) + '\033[0m')
 
-        print 'Starting webserver at \033[93mhttp://' + ip + ':' + str(port) + '\033[0m'
+        print startup_msg
 
         # Suppress console output by redirecting print statements to /dev/null
         if settings.SUPPRESS_CONSOLE_OUTPUT:
@@ -68,7 +71,6 @@ class WebServer:
         content = None
 
         splitted_request = handler.request.uri.split('/')
-        query = '/'.join(splitted_request[2:])[1:]
 
         if splitted_request[1] == 'metainfo':
 
@@ -132,7 +134,8 @@ class WebServer:
                                 0].astype(out_dtype))[1].tostring()
                     content_type = 'image/' + output_format
                 else:
-                    content = 'Error 400: Bad request<br>Output file format not supported'
+                    content = ('Error 400: Bad request<br>Output file format '
+                               'not supported')
                     content_type = 'text/html'
 
                 # Show some basic statistics
@@ -155,7 +158,8 @@ class WebServer:
             content = 'Error 404: Not found'
             content_type = 'text/html'
 
-        # handler.set_header('Cache-Control','no-cache, no-store, must-revalidate')
+        # handler.set_header('Cache-Control',
+        #                    'no-cache, no-store, must-revalidate')
         # handler.set_header('Pragma','no-cache')
         # handler.set_header('Expires','0')
         handler.set_header('Access-Control-Allow-Origin', '*')

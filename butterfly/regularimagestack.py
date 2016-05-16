@@ -1,10 +1,8 @@
 import argparse
 from datasource import DataSource
 import os
-import cv2
 import re
 import glob
-import settings
 
 
 def convert_arg_line_to_args(arg_line):
@@ -83,7 +81,7 @@ class RegularImageStack(DataSource):
         args = d_inf.parse_args(args_list)
         filename = args.filename
         folderpaths = args.folderpaths
-        #blocksize = args.blocksize
+        # blocksize = args.blocksize
 
         # Tile and slice index ranges - the list comprehensions can be
         # understood as nested for loops to flatten list

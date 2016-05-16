@@ -143,16 +143,19 @@ class Core(object):
                     print 'Current cache size', self._current_cache_size
 
                     if color:
-                        data = cur_img[source_boundaries[0]:source_boundaries[
-                            1], source_boundaries[2]:source_boundaries[3], :]
-                        vol[target_boundaries[0]:target_boundaries[1], target_boundaries[
-                            2]:target_boundaries[3], target_boundaries[4], :] = data
+                        data = cur_img[
+                            source_boundaries[0]:source_boundaries[1],
+                            source_boundaries[2]:source_boundaries[3], :]
+                        vol[target_boundaries[0]:target_boundaries[1],
+                            target_boundaries[2]:target_boundaries[3],
+                            target_boundaries[4], :] = data
                     else:
                         data = cur_img[
                             source_boundaries[0]:source_boundaries[1],
                             source_boundaries[2]:source_boundaries[3]]
-                        vol[target_boundaries[0]:target_boundaries[1], target_boundaries[
-                            2]:target_boundaries[3], target_boundaries[4]] = data
+                        vol[target_boundaries[0]:target_boundaries[1],
+                            target_boundaries[2]:target_boundaries[3],
+                            target_boundaries[4]] = data
 
                     self.tile_xy_start[1] = (
                         self.tile_xy_start[1] + y_offset) % blocksize[1]

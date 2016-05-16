@@ -4,7 +4,9 @@ import argparse
 
 import cv2
 
-import butterfly
+from butterfly import core
+from butterfly import settings
+from butterfly import webserver
 
 
 def main():
@@ -14,14 +16,14 @@ def main():
     Eagon Meng and Daniel Haehn
     Lichtman Lab, 2015
     '''
-    port = butterfly.settings.PORT
+    port = settings.PORT
     if len(sys.argv) == 2:
         port = sys.argv[1]
 
-    core = butterfly.Core()
+    c = core.Core()
 
-    webserver = butterfly.WebServer(core, port)
-    webserver.start()
+    ws = webserver.WebServer(c, port)
+    ws.start()
 
 
 # Custom parsing of the args file
@@ -48,7 +50,7 @@ def parseNumRange(num_arg):
 
 
 def query():
-    core = butterfly.Core()
+    c = core.Core()
 
     # Parser for command-line arguments - to be incorporated separately in a
     # client-side tool
@@ -65,7 +67,8 @@ def query():
     paths.add_argument(
         '--output',
         metavar='filename',
-        help='Output file name (with extension), use sprintf format for multiple slices',
+        help='Output file name (with extension), '
+             'use sprintf format for multiple slices',
         required=True)
 
     # Argument group for information about requested volume
@@ -152,8 +155,8 @@ def query():
     zoom_level = args.zoom
 
     # In the case of regular image stacks we manually input paths
-    core.create_datasource(datapath)
-    ris = core._datasources[datapath]
+    c.create_datasource(datapath)
+    ris = c._datasources[datapath]
     ris.load_paths(folderpaths, filename, indices)
 
     # Temporary input of blocksize, should be able to grab from index in the
@@ -161,19 +164,19 @@ def query():
     ris.blocksize = args.blocksize
 
     # Grab the sample volume
-    volume = core.get(datapath, start_coord, vol_size, zoom_level)
+    volume = c.get(datapath, start_coord, vol_size, zoom_level)
 
     if vol_size[2] == 1:
         # Is there a better way to catch errors?
         try:
             cv2.imwrite(args.output, volume[:, :, 0].astype('uint8'))
-        except cv2.error as e:
+        except cv2.error:
             print 'Could not write image'
     else:
         for i in range(vol_size[2]):
             try:
                 cv2.imwrite(args.output % i, volume[:, :, i].astype('uint8'))
-            except cv2.error as e:
+            except cv2.error:
                 print 'Could not write image'
 
     print volume.shape
