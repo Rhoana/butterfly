@@ -3,6 +3,7 @@ import numpy as np
 
 import settings
 from regularimagestack import RegularImageStack
+from multibeam import MultiBeam
 from collections import OrderedDict
 from mojo import Mojo
 
@@ -124,6 +125,8 @@ class Core(object):
     last_folder = last_folder.lower()
     if last_folder == 'mojo':
       ds = Mojo(self, datapath)
+    elif datapath.startswith("tilespec:"):
+      ds = MultiBeam(self, datapath)
     else:
       ds = RegularImageStack(self, datapath)
 
