@@ -16,6 +16,42 @@ NOTE: Default port is currently 2001
 $ bfly [<port>]
 ```
 
+### bfly configuration
+
+bfly uses rh_config which gets its configuration by default from
+~/.rh-config.yaml. You can change this by setting the environment variable,
+RH_CONFIG_FILENAME, to the name of the config file you want to use. bfly
+uses two configuration sections, "bfly" and "rh_logger" (rh_logger is
+documented here: https://github.com/rhoana/rh_logger). The bfly section
+has the following structure:
+
+    bfly:
+        # data sources to try in order of their appearance
+        #
+        datasource:
+            - comprimato
+            - multibeam
+            - mojo
+            - regularimagestack
+        # HTTP port to listen on
+        port: 2001
+        # size of the image cache to maintain in MB
+        max-cache-size: 1000
+        assent-list:
+            - yes
+            - y
+            - true
+        always-subsample: True
+        #
+        # Interpolation method - one of linear, area, nearest or cubic
+        #
+        image-resize-method: linear
+        # Paths to the section files must start with one of the following:
+        allowed-paths:
+            - /data
+        # Suppress tornado logging (was SUPPRESS_CONSOLE_OUTPUT)
+        suppress-tornado-logging: True
+
 ## P3 Args
 TODO: document P3 args (maybe?):
 ```
@@ -37,3 +73,4 @@ TODO: document ac3 args (maybe?):
 --z_ind 0-74
 --blocksize 512 512
 ```
+

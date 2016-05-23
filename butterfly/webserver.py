@@ -1,3 +1,4 @@
+import logging
 import os
 import socket
 import tornado
@@ -10,8 +11,10 @@ import StringIO
 import zlib
 import sys
 import traceback
+import rh_logger
 import settings
 from requestparser import RequestParser
+from urllib2 import HTTPError
 
 
 class WebServerHandler(tornado.web.RequestHandler):
@@ -56,11 +59,7 @@ class WebServer:
         startup_msg = ('Starting webserver at \033[93mhttp://' + ip + ':' +
                        str(port) + '\033[0m')
 
-        print startup_msg
-
-        # Suppress console output by redirecting print statements to /dev/null
-        if settings.SUPPRESS_CONSOLE_OUTPUT:
-            sys.stdout = open(os.devnull, 'w')
+        rh_logger.logger.report_event(startup_msg)
 
         tornado.ioloop.IOLoop.instance().start()
 
@@ -76,7 +75,7 @@ class WebServer:
 
             # content = self._core.get_meta_info(path)
             content = 'metainfo'
-            content_type = 'text/html'
+            handler.set_header("Content-type", 'text/html')
 
         # image data request
         elif splitted_request[1] == 'data':
@@ -134,36 +133,47 @@ class WebServer:
                                 0].astype(out_dtype))[1].tostring()
                     content_type = 'image/' + output_format
                 else:
-                    content = ('Error 400: Bad request<br>Output file format '
-                               'not supported')
-                    content_type = 'text/html'
+                    raise HTTPError(handler.request.uri,
+                                    400,
+                                    'Output file format not supported',
+                                    [], None)
 
                 # Show some basic statistics
-                print 'Total volume shape:', volume.shape
+                
+                rh_logger.logger.report_event(
+                    'Total volume shape: %s' % str(volume.shape))
+                handler.set_header('Content-Type', content_type)
 
             except (KeyError, ValueError):
-                print 'Missing query'
+                rh_logger.logger.report_error('Missing query',
+                                              log_level=logging.WARNING)
                 content = 'Error 400: Bad request<br>Missing query'
                 content_type = 'text/html'
+                handler.set_status(400)
             except IndexError:
-                traceback.print_exc(file=sys.stdout)
-                print 'Could not load image'
+                rh_logger.logger.report_exception(msg='Could not load image')
                 content = 'Error 400: Bad request<br>Could not load image'
                 content_type = 'text/html'
+                handler.set_status(400)
+            except HTTPError, http_error:
+                content = http_error.msg
+                if len(http_error.hdrs) == 0:
+                    handler.set_header('Content-Type', "text/html")
+                handler.set_status(http_error.code)
             # except Exception:
             #   traceback.print_exc(file=sys.stdout)
 
         # invalid request
         if not content:
+            handler.set_status(404)
             content = 'Error 404: Not found'
-            content_type = 'text/html'
+            handler.set_header("Content-Type", 'text/html')
 
         # handler.set_header('Cache-Control',
         #                    'no-cache, no-store, must-revalidate')
         # handler.set_header('Pragma','no-cache')
         # handler.set_header('Expires','0')
         handler.set_header('Access-Control-Allow-Origin', '*')
-        handler.set_header('Content-Type', content_type)
 
         # Temporary check for img output
         handler.write(content)

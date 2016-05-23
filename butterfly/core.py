@@ -1,11 +1,12 @@
+import logging
 import os
 import numpy as np
+import urllib2
 
 import settings
-from regularimagestack import RegularImageStack
 from collections import OrderedDict
-from mojo import Mojo
-
+import rh_config
+import rh_logger
 
 class Core(object):
 
@@ -39,7 +40,7 @@ class Core(object):
 
         datasource = self._datasources[datapath]
 
-        print 'Loading tiles:'
+        rh_logger.logger.report_event('Loading tiles:')
 
         # If the datasource has zoom levels already, we assume their tiles are
         # the same size across zooms
@@ -116,12 +117,23 @@ class Core(object):
 
                     # Debug code to show which cutouts we are grabbing and from
                     # where
-                    print 'tile:       ' + '(' + str(x) + ', ' + str(y) + ')'
-                    # print 'z slice:    ' + str(z + start_coord[2])
-                    # print 'vol start:  ' + str(self.vol_xy_start)
-                    # print 'tile start: ' + str(self.tile_xy_start)
-                    # print 'x offset:   ' + str(x_offset)
-                    # print 'y offset:   ' + str(y_offset) + '\n'
+                    rh_logger.logger.report_event(
+                        'tile:       ' + '(' + str(x) + ', ' + str(y) + ')')
+                    rh_logger.logger.report_event(
+                        'z slice:    ' + str(z + start_coord[2]),
+                        log_level=logging.DEBUG)
+                    rh_logger.logger.report_event(
+                        'vol start:  ' + str(self.vol_xy_start),
+                        log_level=logging.DEBUG)
+                    rh_logger.logger.report_event(
+                        'tile start: ' + str(self.tile_xy_start),
+                        log_level=logging.DEBUG)
+                    rh_logger.logger.report_event(
+                        'x offset:   ' + str(x_offset),
+                        log_level=logging.DEBUG)
+                    rh_logger.logger.report_event(
+                        'y offset:   ' + str(y_offset) + "\n",
+                        log_level=logging.DEBUG)
 
                     # Add offsets in current y direction
                     target_boundaries = (
@@ -139,8 +151,11 @@ class Core(object):
                         self.tile_xy_start[0] + x_offset)
 
                     # print cur_img
-                    print cur_img.shape
-                    print 'Current cache size', self._current_cache_size
+                    rh_logger.logger.report_event(
+                        "Adding image of size %d, %d to cache" %
+                        (cur_img.shape[0], cur_img.shape[1]))
+                    rh_logger.logger.report_event(
+                        'Current cache size', self._current_cache_size)
 
                     if color:
                         data = cur_img[
@@ -172,14 +187,33 @@ class Core(object):
         '''
         '''
 
-        # detect data source type
-        last_folder = datapath.rstrip(os.sep).split(os.sep)[-1]
-        last_folder = last_folder.lower()
-        if last_folder == 'mojo':
-            ds = Mojo(self, datapath)
+        for allowed_path in settings.ALLOWED_PATHS:
+            if datapath.startswith(allowed_path):
+                break
         else:
-            ds = RegularImageStack(self, datapath)
-
+            raise urllib2.HTTPError(
+                None, 403, datapath + " is not an allowed datapath. " +
+                "Contact the butterfly admin to configure a new datapath",
+                [], None)
+        for datasource in settings.DATASOURCES:
+            try:
+                if datasource == 'mojo':
+                    from mojo import Mojo
+                    ds = Mojo(self, datapath)
+                    break
+                elif datasource == 'regularimagestack':
+                    from regularimagestack import RegularImageStack
+                    ds = RegularImageStack(self, datapath)
+                    break
+            except:
+                continue
+        else:
+            rh_logger.logger.report_event(
+                 "Failed to find datasource for %s" % datapath,
+                 log_level = logging.WARNING)
+            raise urllib2.HTTPError(
+                None, 404, "Can't find a loader for datapath=%s" % datapath,
+                [], None)
         # call index
         ds.index()
 

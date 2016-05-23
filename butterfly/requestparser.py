@@ -1,6 +1,7 @@
 import urlparse
 import os
 import re
+from rh_logger import logger
 import urllib
 import settings
 
@@ -39,8 +40,8 @@ class RequestParser(object):
 
             try:
                 # Debug output in console for OCP request
-                print 'OCP request:', request[ind:]
-                print 'Datapath:', datapath
+                logger.report_event('OCP request: ' + str(request[ind:]))
+                logger.report_event('Datapath: ' + datapath)
 
                 w = int(float(request[ind + 2]))
                 x_range = [int(i) - 1 for i in request[ind + 3].split(',')]
@@ -69,7 +70,7 @@ class RequestParser(object):
             parsed_query = urlparse.parse_qs(query)
 
             # Console output for parsed query
-            print 'Parsed query:', parsed_query
+            logger.report_event('Parsed query: ' + repr(parsed_query))
 
             # Parse essential parameters
             datapath = parsed_query['datapath'][0]

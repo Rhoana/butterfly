@@ -1,3 +1,4 @@
+import rh_logger
 import re
 import sys
 import argparse
@@ -17,6 +18,8 @@ def main():
     Lichtman Lab, 2015
     '''
     port = settings.PORT
+    logger = rh_logger.get_logger("bfly", [port])
+    logger.start_process("Starting butterfly server on port %d" % port)
     if len(sys.argv) == 2:
         port = sys.argv[1]
 
@@ -50,6 +53,8 @@ def parseNumRange(num_arg):
 
 
 def query():
+    logger = rh_logger.get_logger("bquery", [])
+    logger.setart_process("Starting butterfly query")
     c = core.Core()
 
     # Parser for command-line arguments - to be incorporated separately in a
@@ -171,12 +176,19 @@ def query():
         try:
             cv2.imwrite(args.output, volume[:, :, 0].astype('uint8'))
         except cv2.error:
-            print 'Could not write image'
+            logger.report_exception()
+            logger.end_process('Could not write image', 
+                               rh_logger.ExitCode.io_error)
+            exit(-1)
     else:
         for i in range(vol_size[2]):
             try:
                 cv2.imwrite(args.output % i, volume[:, :, i].astype('uint8'))
             except cv2.error:
-                print 'Could not write image'
+                logger.report_exception()
+                logger.end_process('Could not write image', 
+                                   rh_logger.ExitCode.io_error)
+                exit(-1)
 
-    print volume.shape
+    logger.end_process("Wrote cutout with volume = %s" % str(volume.shape),
+                       rh_logger.ExitCode.success)

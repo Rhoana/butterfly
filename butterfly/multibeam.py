@@ -1,4 +1,7 @@
 from datasource import DataSource
+import dataspec
+import rh_config
+import rh_logger
 
 
 class MultiBeam(DataSource):

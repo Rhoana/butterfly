@@ -3,7 +3,7 @@ import os
 import glob
 import h5py
 import numpy as np
-
+from rh_logger import logger
 
 class Mojo(DataSource):
 
@@ -11,7 +11,9 @@ class Mojo(DataSource):
         '''
         @override
         '''
-
+        
+        if os.path.split(datapath)[-1] != "mojo":
+            raise IndexError("Datapath %s is not a Mojo data path" % datapath)
         super(Mojo, self).__init__(core, datapath)
 
     def index(self):
@@ -92,8 +94,7 @@ class Mojo(DataSource):
                 'y': self._indices[1][y]}
             image_or_id = 'images'
 
-        print '\n'
-        print cur_filename
+        logger.report_event("Mojo loading " + cur_filename)
 
         if w <= self.max_zoom:
             cur_path = os.path.join(
