@@ -177,7 +177,7 @@ def query():
             cv2.imwrite(args.output, volume[:, :, 0].astype('uint8'))
         except cv2.error:
             logger.report_exception()
-            logger.end_process('Could not write image', 
+            logger.end_process('Could not write image',
                                rh_logger.ExitCode.io_error)
             exit(-1)
     else:
@@ -186,7 +186,7 @@ def query():
                 cv2.imwrite(args.output % i, volume[:, :, i].astype('uint8'))
             except cv2.error:
                 logger.report_exception()
-                logger.end_process('Could not write image', 
+                logger.end_process('Could not write image',
                                    rh_logger.ExitCode.io_error)
                 exit(-1)
 

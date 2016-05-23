@@ -8,6 +8,7 @@ from collections import OrderedDict
 import rh_config
 import rh_logger
 
+
 class Core(object):
 
     def __init__(self):
@@ -209,8 +210,8 @@ class Core(object):
                 continue
         else:
             rh_logger.logger.report_event(
-                 "Failed to find datasource for %s" % datapath,
-                 log_level = logging.WARNING)
+                "Failed to find datasource for %s" % datapath,
+                log_level=logging.WARNING)
             raise urllib2.HTTPError(
                 None, 404, "Can't find a loader for datapath=%s" % datapath,
                 [], None)

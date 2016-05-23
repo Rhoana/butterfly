@@ -139,7 +139,7 @@ class WebServer:
                                     [], None)
 
                 # Show some basic statistics
-                
+
                 rh_logger.logger.report_event(
                     'Total volume shape: %s' % str(volume.shape))
                 handler.set_header('Content-Type', content_type)

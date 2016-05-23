@@ -5,13 +5,14 @@ import h5py
 import numpy as np
 from rh_logger import logger
 
+
 class Mojo(DataSource):
 
     def __init__(self, core, datapath):
         '''
         @override
         '''
-        
+
         if os.path.split(datapath)[-1] != "mojo":
             raise IndexError("Datapath %s is not a Mojo data path" % datapath)
         super(Mojo, self).__init__(core, datapath)
