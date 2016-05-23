@@ -2,7 +2,7 @@ argparse==1.4.0
 numpy==1.9.3
 tornado==4.3
 h5py==2.6.0
-rh_config=1.0.0
-rh_logger=1.0.1
+rh_config==1.0.0
+rh_logger==1.0.1
 
 
