@@ -22,6 +22,7 @@ setup(
         "argparse>=1.4.0",
         "numpy>=1.9.3",
         "h5py>=2.6.0",
+        "scipy>=0.16.0",
         "tornado>=4.3",
     ],
     entry_points=dict(console_scripts=[

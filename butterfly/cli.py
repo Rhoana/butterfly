@@ -1,4 +1,4 @@
-import rh_logger
+from rh_logger import logger
 import re
 import sys
 import argparse
@@ -18,8 +18,9 @@ def main():
     Lichtman Lab, 2015
     '''
     port = settings.PORT
-    logger = rh_logger.get_logger("bfly", [port])
-    logger.start_process("Starting butterfly server on port %d" % port)
+    logger.start_process(
+        "bfly", "Starting butterfly server on port %d" % port, [port])
+
     if len(sys.argv) == 2:
         port = sys.argv[1]
 
@@ -53,8 +54,7 @@ def parseNumRange(num_arg):
 
 
 def query():
-    logger = rh_logger.get_logger("bquery", [])
-    logger.setart_process("Starting butterfly query")
+    logger.start_process("bquery", "Starting butterfly query")
     c = core.Core()
 
     # Parser for command-line arguments - to be incorporated separately in a

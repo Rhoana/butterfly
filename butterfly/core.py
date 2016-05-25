@@ -206,6 +206,10 @@ class Core(object):
                     from regularimagestack import RegularImageStack
                     ds = RegularImageStack(self, datapath)
                     break
+                elif datasource in ("comprimato", "multibeam"):
+                    from multibeam import MultiBeam
+                    ds = MultiBeam(self, datapath)
+                    break
             except:
                 continue
         else:
