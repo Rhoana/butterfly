@@ -1,4 +1,4 @@
-from rh_logger import logger
+from rh_logger import logger, ExitCode
 import re
 import sys
 import argparse
@@ -178,7 +178,7 @@ def query():
         except cv2.error:
             logger.report_exception()
             logger.end_process('Could not write image',
-                               rh_logger.ExitCode.io_error)
+                               ExitCode.io_error)
             exit(-1)
     else:
         for i in range(vol_size[2]):
@@ -187,8 +187,8 @@ def query():
             except cv2.error:
                 logger.report_exception()
                 logger.end_process('Could not write image',
-                                   rh_logger.ExitCode.io_error)
+                                   ExitCode.io_error)
                 exit(-1)
 
     logger.end_process("Wrote cutout with volume = %s" % str(volume.shape),
-                       rh_logger.ExitCode.success)
+                       ExitCode.success)

@@ -1,11 +1,9 @@
 import logging
-import os
 import numpy as np
 import urllib2
 
 import settings
 from collections import OrderedDict
-import rh_config
 import rh_logger
 
 

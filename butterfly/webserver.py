@@ -49,6 +49,7 @@ class WebServer:
 
             (r'/metainfo/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
+            (r'/stop/(.*)', WebServerHandler, dict(webserver=self)),
             # (r'/(.*)', tornado.web.StaticFileHandler,
             #  dict(path=os.path.join(os.path.dirname(__file__),'../web'),
             #       default_filename='index.html'))
@@ -76,6 +77,13 @@ class WebServer:
             # content = self._core.get_meta_info(path)
             content = 'metainfo'
             handler.set_header("Content-type", 'text/html')
+        elif splitted_request[1] == 'stop':
+            import tornado
+            tornado.ioloop.IOLoop.instance().stop()
+            handler.set_status(200)
+            handler.set_header("Content-type", "text/plain")
+            handler.write("stop")
+            return
 
         # image data request
         elif splitted_request[1] == 'data':
@@ -145,7 +153,7 @@ class WebServer:
                 handler.set_header('Content-Type', content_type)
 
             except (KeyError, ValueError):
-                rh_logger.logger.report_error('Missing query',
+                rh_logger.logger.report_event('Missing query',
                                               log_level=logging.WARNING)
                 content = 'Error 400: Bad request<br>Missing query'
                 content_type = 'text/html'

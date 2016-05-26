@@ -107,7 +107,7 @@ class MultiBeam(DataSource):
         single_renderers = []
         for idx in idxs:
             ts = self.ts[z][idx]
-            renderer = TilespecSingleTileRenderer(ts)
+            renderer = TilespecSingleTileRenderer(ts, compute_distances=False)
             single_renderers.append(renderer)
             for ts_transform in ts.get_transforms():
                 model = Transforms.from_tilespec(ts_transform)
