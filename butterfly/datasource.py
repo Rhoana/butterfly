@@ -25,6 +25,22 @@ class DataSource(object):
         '''
         pass
 
+    def load_cutout(self, x0, x1, y0, y1, z, w):
+        '''Load a cutout from a plane
+
+        :param x0: leftmost coordinate of the cutout
+        :param x1: rightmost coordinate of the cutout (not inclusive)
+        :param y0: top coordinate of the cutout
+        :param y1: bottom coordinate of the cutout (not inclusive)
+        :param z: plane # of the cutout
+        :param w: the mipmap level
+
+        :returns: the downsampled (if necessary) image of the cutout
+        :raises: NotImplementedError if the datasource doesn't implement this
+        (which is OK)
+        '''
+        raise NotImplementedError()
+
     def load(self, cur_path, w, segmentation=False):
         '''
         Loads this file from the data path.

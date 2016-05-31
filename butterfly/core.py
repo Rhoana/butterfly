@@ -40,6 +40,19 @@ class Core(object):
         datasource = self._datasources[datapath]
 
         rh_logger.logger.report_event('Loading tiles:')
+        if not segmentation:
+            try:
+                planes = []
+                x0 = start_coord[0] * 2 ** w
+                x1 = (start_coord[0] + vol_size[0]) * 2 ** w
+                y0 = start_coord[1] * 2 ** w
+                y1 = (start_coord[1] + vol_size[1]) * 2 ** w
+                for z in range(start_coord[2], start_coord[2] + vol_size[2]):
+                    plane = datasource.load_cutout(x0, x1, y0, y1, z, w)
+                    planes.append(plane)
+                return np.dstack(planes)
+            except:
+                pass
 
         # If the datasource has zoom levels already, we assume their tiles are
         # the same size across zooms
@@ -152,9 +165,8 @@ class Core(object):
                     # print cur_img
                     rh_logger.logger.report_event(
                         "Adding image of size %d, %d to cache" %
-                        (cur_img.shape[0], cur_img.shape[1]))
-                    rh_logger.logger.report_event(
-                        'Current cache size', self._current_cache_size)
+                        (cur_img.shape[0], cur_img.shape[1]),
+                        log_level=logging.DEBUG)
 
                     if color:
                         data = cur_img[

@@ -1,7 +1,6 @@
 from datasource import DataSource
 import dataspec
 import numpy as np
-import rh_config
 from rh_logger import logger
 from rh_renderer.models import AffineModel, Transforms
 from rh_renderer.single_tile_renderer import SingleTileRendererBase
@@ -71,6 +70,13 @@ class MultiBeam(DataSource):
              self.max_y - self.min_y + 1,
              self.max_z - self.min_z + 1))
 
+    def load_cutout(self, x0, x1, y0, y1, z, w):
+        if z not in self.ts or len(self.ts[z]) == 0 or\
+           not hasattr(self.ts[z][0], "section"):
+            super(MultiBeam, self).load_cutout(x0, x1, y0, y1, z, w)
+        section = self.ts[z][0].section
+        return section.imread(x0, y0, x1, y1, w)
+
     def load(self, x, y, z, w, segmentation=False):
         '''
         @override
@@ -81,7 +87,8 @@ class MultiBeam(DataSource):
         elif z > self.max_z:
             z = self.max_z
         if segmentation:
-            return np.zeros((self.blocksize[0], self.blocksize[1], 3))
+            return np.zeros((self.blocksize[0] / 2**w,
+                             self.blocksize[1] / 2**w, 3))
         if z not in self.kdtrees:
             return np.zeros(self.blocksize)
 
@@ -107,8 +114,13 @@ class MultiBeam(DataSource):
         single_renderers = []
         for idx in idxs:
             ts = self.ts[z][idx]
-            renderer = TilespecSingleTileRenderer(ts, compute_distances=False)
+            renderer = TilespecSingleTileRenderer(
+                ts, compute_distances=False,
+                mipmap_level=w)
             single_renderers.append(renderer)
+            if w > 0:
+                model = AffineModel(m=np.eye(3) * 2.0 ** w)
+                renderer.add_transformation(model)
             for ts_transform in ts.get_transforms():
                 model = Transforms.from_tilespec(ts_transform)
                 renderer.add_transformation(model)
@@ -139,12 +151,14 @@ class TilespecSingleTileRenderer(SingleTileRendererBase):
 
     def __init__(self, ts,
                  compute_mask=False,
-                 compute_distances=True):
-        width = ts.width
-        height = ts.height
+                 compute_distances=True,
+                 mipmap_level=0):
+        width = ts.width / 2 ** mipmap_level
+        height = ts.height / 2 ** mipmap_level
         super(TilespecSingleTileRenderer, self).__init__(
             width, height, compute_mask, compute_distances)
         self.ts = ts
+        self.mipmap_level = mipmap_level
 
     def load(self):
-        return self.ts.imread()
+        return self.ts.imread(mipmap_level=self.mipmap_level)
