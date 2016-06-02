@@ -134,6 +134,9 @@
     var args = parse_args();
 
     server_name = args['server'];
+    if (! server_name) {
+        server_name = location.hostname+":"+location.port
+    }
     data_path = args['data_path'];
     g_width = parseInt(args['width'],10);
     g_height = g_width;

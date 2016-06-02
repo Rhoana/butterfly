@@ -42,6 +42,8 @@ class WebServerHandler(tornado.web.RequestHandler):
 class PkgResourcesHandler(tornado.web.RequestHandler):
 
     def get(self, path):
+        if path == "/":
+            self.redirect("index.html?"+self.request.query)
         path = posixpath.normpath(path)
         if os.path.isabs(path) or path.startswith(".."):
             return self.send_error(404)
@@ -75,7 +77,8 @@ class WebServer:
             (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/stop/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/(index\.html)', PkgResourcesHandler, {}),
-            (r'/(.*\.js)', PkgResourcesHandler, {})
+            (r'/(.*\.js)', PkgResourcesHandler, {}),
+            (r'(/)', PkgResourcesHandler, {})
 
         ])
 
