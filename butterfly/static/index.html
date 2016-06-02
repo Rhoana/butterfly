@@ -1,0 +1,295 @@
+<html>
+<head>
+  <script type='text/javascript' src='openseadragon.min.js'></script>
+  <script type='text/javascript' src='jquery.min.js'></script>
+
+
+  <script type='text/javascript'>
+
+  var Z = 0;
+
+  var server_name = '';
+  var data_path = '';
+  var g_width = 0;
+  var g_height = 0;
+  var g_z = 0;
+
+  var ready_for_next_slice = false;
+
+  function parse_args() {
+
+    // from http://stackoverflow.com/a/7826782/1183453
+    var args = document.location.search.substring(1).split('&');
+    argsParsed = {};
+    for (var i=0; i < args.length; i++)
+    {
+        arg = unescape(args[i]);
+
+        if (arg.length == 0) {
+          continue;
+        }
+
+        if (arg.indexOf('=') == -1)
+        {
+            argsParsed[arg.replace(new RegExp('/$'),'').trim()] = true;
+        }
+        else
+        {
+            kvp = arg.split('=');
+            argsParsed[kvp[0].trim()] = kvp[1].replace(new RegExp('/$'),'').trim();
+        }
+    }
+
+    return argsParsed;
+
+  };
+
+
+  function create_viewer(page, visible) {
+
+
+      // create dom element
+      var container_id = 'viewer_'+page;
+      var container_id_seg = 'seg_viewer_'+page;
+      if (!visible) {
+        var style = 'background-color:black;position:absolute;top:0px;left:0px;width:100%;height:100%;z-index:0'//display:none';
+        var seg_style = 'background-color:black;position:absolute;top:0px;left:0px;width:100%;height:100%;z-index:0;opacity:0.5'
+      } else {
+        var style = 'background-color:black;position:absolute;top:0px;left:0px;width:100%;height:100%;z-index:1';
+        var seg_style = 'background-color:black;position:absolute;top:0px;left:0px;width:100%;height:100%;z-index:2;opacity:0.5;'
+      }
+
+      $('#viewers').append('<div id="'+container_id+'" class="viewers" style="'+style+'"></div>');
+      $('#viewers').append('<div id="'+container_id_seg+'" class="viewers" style="'+seg_style+'"></div>');
+
+      var ts = images[page];
+      var ts2 = segmentations[page];
+
+
+      var viewer = OpenSeadragon({
+          id:            container_id,
+          prefixUrl:     "images/",
+          navigatorSizeRatio: 0.25,
+          minZoomImageRatio: 0.5,
+          maxZoomPixelRatio: 10,
+          showNavigationControl: false,
+          animationTime: 0,
+          // imageLoaderLimit: 3,
+          tileSources:   ts,
+          timeout: 120000
+        });
+
+        var seg_viewer = OpenSeadragon({
+          id:            container_id_seg,
+          prefixUrl:     "images/",
+          navigatorSizeRatio: 0.25,
+          minZoomImageRatio: 0.5,
+          maxZoomPixelRatio: 10,
+          showNavigationControl: false,
+          animationTime: 0,
+          // imageLoaderLimit: 3,
+          tileSources:   ts2,
+          timeout: 120000
+        });
+
+      viewer.innerTracker.keyHandler = null;
+      viewer.innerTracker.keyDownHandler = null;
+
+      // viewer.addHandler('animation-finish', this.store_viewpoint.bind(this));
+      // viewer.addHandler('tile-drawn', this.propagate_viewpoint.bind(this));
+      // viewer.addHandler('zoom', this.propagate_viewport.bind(this));
+
+
+      // keyboard (needs to be rebound to overwrite OSD)
+      window.onkeydown = this.onkey;
+
+
+        seg_viewer.addHandler('pan', propagate_viewport);
+        seg_viewer.addHandler('zoom', propagate_viewport);
+
+        if (!visible) {
+            seg_viewer.addHandler('tile-drawn', function() {
+                ready_for_next_slice = true;
+            });
+        }
+
+      return [viewer, seg_viewer];  
+
+  };
+
+  function propagate_viewport() {
+
+    viewer.viewport.panTo(seg_viewer.viewport.getCenter(), true);
+    // center = null;
+
+    // zoom = parseFloat(zoom);
+    viewer.viewport.zoomTo(seg_viewer.viewport.getZoom(), null, true);    
+
+  };
+
+
+  window.onload = function() {
+
+
+    var args = parse_args();
+
+    server_name = args['server'];
+    data_path = args['data_path'];
+    g_width = parseInt(args['width'],10);
+    g_height = g_width;
+    g_z = parseInt(args['z'],10);
+
+    console.log(args)
+
+    images = [];
+    segmentations = [];
+    for(var i=0; i<25; i++) {
+
+        var ts = {
+            height: g_height,//#512*256,
+            width:  g_width,//512*256,
+            tileSize: 512,
+            minLevel: 0,
+            maxLevel: Math.min(5, Math.ceil(Math.log2(g_width/512))),
+
+            getTileUrl: function( level, x, y ){
+
+                level = this.maxLevel - level;
+
+                // return "http://s3.amazonaws.com/com.modestmaps.bluemarble/" +
+                        // (level-8) + "-r" + y + "-c" + x + ".jpg";
+
+                x = x*this.tileSize;
+                y = y*this.tileSize;
+                
+                return "http://"+server_name+"/data/?datapath="+data_path+"&start="+x+","+y+","+g_z+"&mip="+level+"&size="+this.tileSize+","+this.tileSize+",1"
+            }
+        };
+
+        images.push(ts);
+
+        var ts_seg = {
+            height: g_height,//#512*256,
+            width:  g_width,//512*256,
+            tileSize: 512,
+            minLevel: 0,
+            maxLevel: Math.min(5, Math.ceil(Math.log2(g_width/512))),
+
+            getTileUrl: function( level, x, y ){
+
+                level = this.maxLevel - level;
+
+                // return "http://s3.amazonaws.com/com.modestmaps.bluemarble/" +
+                        // (level-8) + "-r" + y + "-c" + x + ".jpg";
+
+                x = x*this.tileSize;
+                y = y*this.tileSize;
+                
+                return "http://"+server_name+"/data/?datapath="+data_path+"&start="+x+","+y+","+g_z+"&mip="+level+"&size="+this.tileSize+","+this.tileSize+",1&segmentation=y&segcolor=y"
+            }
+        };
+
+        segmentations.push(ts_seg);
+
+
+    }
+
+
+    var viewers = create_viewer(g_z, true);
+    viewer = viewers[0];
+    seg_viewer = viewers[1];
+    next_viewers = create_viewer(g_z+1, false);
+
+
+  }
+
+  // function propagate_viewport() {
+
+  //   // var center = viewer2.
+  //   // return;
+  //   // console.log('propppp')
+    
+  //   // center = new OpenSeadragon.Point(parseFloat(center[0]), parseFloat(center[1]));
+  //   viewer.viewport.panTo(viewer2.viewport.getCenter(), true);
+  //   // center = null;
+
+  //   // zoom = parseFloat(zoom);
+  //   viewer.viewport.zoomTo(viewer2.viewport.getZoom(), null, true);
+  //   // this._zoom = null;
+
+
+
+
+  // }
+
+  // function propagate_viewport2() {
+
+  //   // var center = viewer2.
+  //   // return;
+  //   // console.log('propppp')
+    
+  //   // center = new OpenSeadragon.Point(parseFloat(center[0]), parseFloat(center[1]));
+  //   viewer3.viewport.panTo(viewer4.viewport.getCenter(), true);
+  //   // center = null;
+
+  //   // zoom = parseFloat(zoom);
+  //   viewer3.viewport.zoomTo(viewer4.viewport.getZoom(), null, true);
+  //   // this._zoom = null;
+
+
+
+
+  // }
+
+  function onkey() {
+
+    if (!ready_for_next_slice) return;
+
+    // setTimeout(function() {
+
+
+    //   Z+=1;
+    //   viewer.goToPage(Z);
+
+
+    // }, 100);
+    ready_for_next_slice = false;
+
+    next_viewers[1].removeAllHandlers('tile-drawn');
+
+    var container_id = 'viewer_'+g_z;
+    var container_id_seg = 'seg_viewer_'+g_z;
+
+    var new_container_id = 'viewer_'+(g_z+1);
+    var new_container_id_seg = 'seg_viewer_'+(g_z+1);
+
+    next_viewers[0].viewport.panTo(viewer.viewport.getCenter());
+    next_viewers[0].viewport.zoomTo(viewer.viewport.getZoom());
+    next_viewers[1].viewport.panTo(seg_viewer.viewport.getCenter());
+    next_viewers[1].viewport.zoomTo(viewer.viewport.getZoom());
+
+    $('#'+new_container_id).css('z-index','1');
+    $('#'+new_container_id_seg).css('z-index','2');
+
+    // delete old viewers
+    $('#'+container_id).css('z-index','0');
+    $('#'+container_id_seg).css('z-index','0');
+    viewer.destroy();
+    seg_viewer.destroy();
+
+    g_z += 1;
+
+    viewer = next_viewers[0];
+    seg_viewer = next_viewers[1];
+    next_viewers = create_viewer(g_z+1, false);
+
+  }
+
+
+  </script>
+</head>
+
+<body>
+<div id='viewers' style='position:absolute;top:0px;left:0px;width:100%;height:100%'></div>
+</body>
+</html>

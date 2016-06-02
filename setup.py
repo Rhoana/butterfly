@@ -9,6 +9,11 @@ execfile(version)
 
 README = open('README.md').read()
 
+butterfly_package_data = [
+    os.path.join("static", filename)
+    for filename in os.listdir("butterfly/static")
+    if any([filename.endswith(ext) for ext in ".html", ".js"])]
+
 setup(
     name='butterfly',
     version=VERSION,
@@ -19,7 +24,6 @@ setup(
     description="butterfly",
     long_description=README,
     install_requires=[
-        "argparse>=1.4.0",
         "numpy>=1.9.3",
         "h5py>=2.6.0",
         "scipy>=0.16.0",
@@ -29,5 +33,6 @@ setup(
         'bfly = butterfly.cli:main',
         'bfly_query = butterfly.cli:query',
     ]),
+    package_data=dict(butterfly=butterfly_package_data),
     zip_safe=False
 )

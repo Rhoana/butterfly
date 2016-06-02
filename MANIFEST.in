@@ -1,0 +1,2 @@
+include butterfly/static/index.html
+include butterfly/static/*.js

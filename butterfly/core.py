@@ -221,6 +221,9 @@ class Core(object):
                     ds = MultiBeam(self, datapath)
                     break
             except:
+                rh_logger.logger.report_event(
+                    "Can't load %s with %s" % (datapath, datasource),
+                    log_level=logging.DEBUG)
                 continue
         else:
             rh_logger.logger.report_event(

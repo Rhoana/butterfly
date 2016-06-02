@@ -1,5 +1,6 @@
 import logging
 import os
+import pkg_resources
 import socket
 import tornado
 import tornado.gen
@@ -7,10 +8,10 @@ import tornado.web
 import tornado.websocket
 import numpy as np
 import cv2
+import mimetypes
+import posixpath
 import StringIO
 import zlib
-import sys
-import traceback
 import rh_logger
 import settings
 from requestparser import RequestParser
@@ -28,6 +29,29 @@ class WebServerHandler(tornado.web.RequestHandler):
         '''
         '''
         self._webserver.handle(self)
+
+
+#
+# Thank you Luigi:
+# https://github.com/spotify/luigi/blob/
+#    f7219c38121098d464011a094156d99b5b320362/luigi/server.py#L212
+#
+# Had vague idea that resources should be served via pkg_handler and
+# Luigi did it, so I am cribbing from their implementation.
+#
+class PkgResourcesHandler(tornado.web.RequestHandler):
+
+    def get(self, path):
+        path = posixpath.normpath(path)
+        if os.path.isabs(path) or path.startswith(".."):
+            return self.send_error(404)
+
+        extension = os.path.splitext(path)[1]
+        if extension in mimetypes.types_map:
+            self.set_header("Content-Type", mimetypes.types_map[extension])
+        data = pkg_resources.resource_string(
+            __name__, os.path.join("static", path))
+        self.write(data)
 
 
 class WebServer:
@@ -50,9 +74,8 @@ class WebServer:
             (r'/metainfo/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/stop/(.*)', WebServerHandler, dict(webserver=self)),
-            # (r'/(.*)', tornado.web.StaticFileHandler,
-            #  dict(path=os.path.join(os.path.dirname(__file__),'../web'),
-            #       default_filename='index.html'))
+            (r'/(index\.html)', PkgResourcesHandler, {}),
+            (r'/(.*\.js)', PkgResourcesHandler, {})
 
         ])
 

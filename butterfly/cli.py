@@ -1,4 +1,5 @@
 from rh_logger import logger, ExitCode
+import logging
 import re
 import sys
 import argparse
@@ -21,6 +22,10 @@ def main():
     logger.start_process(
         "bfly", "Starting butterfly server on port %d" % port, [port])
 
+    logger.report_event("Datasources: " + ", ".join(settings.DATASOURCES),
+                        log_level=logging.DEBUG)
+    logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),
+                        log_level=logging.DEBUG)
     if len(sys.argv) == 2:
         port = sys.argv[1]
 
