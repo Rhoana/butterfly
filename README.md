@@ -16,6 +16,23 @@ NOTE: Default port is currently 2001
 $ bfly [<port>]
 ```
 
+The butterfly client is the default document (in the default configuration,
+at http://localhost:2001). The following query parameters must be supplied:
+
+* **data_path:**  the path on the server filesystem of the data source.
+* **width** the width for the display in pixels
+* **depth** the number of sections/layers in the data source z-stack
+* **z** the z index (zero-based) of the first section to load
+
+An example URL: http://localhost:2001/index.html?data_path=/home/leek/temp/poll_for_sections&width=200000&height=150000&depth=3&z=1
+
+### Navigation
+
+You can go up and down through the z-stack using the "s" and "w" keys. The
+mouse wheel zooms in and out and you can pan by pressing the left mouse
+button down and dragging. The navigation controls in the upper left of
+the display include a home button that resets zoom and pan.
+
 ### bfly configuration
 
 bfly uses rh_config which gets its configuration by default from
@@ -73,4 +90,3 @@ TODO: document ac3 args (maybe?):
 --z_ind 0-74
 --blocksize 512 512
 ```
-

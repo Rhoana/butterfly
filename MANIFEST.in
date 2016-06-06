@@ -1,2 +1,4 @@
 include butterfly/static/index.html
 include butterfly/static/*.js
+include butterfly/static/images/*.png
+include README.md

@@ -11,8 +11,11 @@ README = open('README.md').read()
 
 butterfly_package_data = [
     os.path.join("static", filename)
-    for filename in os.listdir("butterfly/static")
-    if any([filename.endswith(ext) for ext in ".html", ".js"])]
+    for filename in os.listdir(os.path.join("butterfly", "static"))
+    if any([filename.endswith(ext) for ext in ".html", ".js"])] + [
+    os.path.join("static", "images", filename)
+    for filename in os.listdir(os.path.join("butterfly", "static", "images"))
+    if filename.endswith(".png")]
 
 setup(
     name='butterfly',
