@@ -71,11 +71,45 @@ class MultiBeam(DataSource):
              self.max_z - self.min_z + 1))
 
     def load_cutout(self, x0, x1, y0, y1, z, w):
-        if z not in self.ts or len(self.ts[z]) == 0 or\
-           not hasattr(self.ts[z][0], "section"):
+        if z not in self.ts or len(self.ts[z]) == 0:
             super(MultiBeam, self).load_cutout(x0, x1, y0, y1, z, w)
-        section = self.ts[z][0].section
-        return section.imread(x0, y0, x1, y1, w)
+        if hasattr(self.ts[z][0], "section"):
+            section = self.ts[z][0].section
+            return section.imread(x0, y0, x1, y1, w)
+        return self.load_tilespec_cutout(x0, x1, y0, y1, z, w)
+    
+    def load_tilespec_cutout(self, x0, x1, y0, y1, z, w):
+        '''Load a cutout from tilespecs'''
+        kdtree = self.kdtrees[z]
+        assert isinstance(kdtree, KDTree)
+        x0a = x0 - self.tile_width / 2
+        x1a = x1 + self.tile_width / 2
+        y0a = y0 - self.tile_height / 2
+        y1a = y1 + self.tile_height / 2
+        nx = 2 * (x1a - x0a) / self.tile_width + 1
+        ny = 2 * (y1a - y0a) / self.tile_height + 1
+        xr = np.vstack([np.linspace(x0a, x1a, nx)] * ny)
+        yr = np.column_stack([np.linspace(y0a, y1a, ny)] * nx)
+        coords = np.column_stack([xr.flatten(), yr.flatten()])
+        d, idxs = kdtree.query(coords)
+        idxs = np.unique(idxs)
+        single_renderers = []
+        for idx in idxs:
+            ts = self.ts[z][idx]
+            renderer = TilespecSingleTileRenderer(
+                ts, compute_distances=False)
+            single_renderers.append(renderer)
+            for ts_transform in ts.get_transforms():
+                model = Transforms.from_tilespec(ts_transform)
+                renderer.add_transformation(model)
+            if w > 0:
+                model = AffineModel(m=np.eye(3) / 2.0 ** w)
+                renderer.add_transformation(model)
+        renderer = MultipleTilesRenderer(
+            single_renderers, blend_type='AVERAGING')
+        return renderer.crop(
+            int(x0 / 2**w), int(y0 / 2**w), int(x1 / 2**w), int(y1 / 2**w))[0]
+        
 
     def load(self, x, y, z, w, segmentation=False):
         '''
