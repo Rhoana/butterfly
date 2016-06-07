@@ -19,6 +19,9 @@ def main():
     Lichtman Lab, 2015
     '''
     port = settings.PORT
+    if len(sys.argv) == 2:
+        port = sys.argv[1]
+
     logger.start_process(
         "bfly", "Starting butterfly server on port %d" % port, [port])
 
@@ -26,9 +29,6 @@ def main():
                         log_level=logging.DEBUG)
     logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),
                         log_level=logging.DEBUG)
-    if len(sys.argv) == 2:
-        port = sys.argv[1]
-
     c = core.Core()
 
     ws = webserver.WebServer(c, port)

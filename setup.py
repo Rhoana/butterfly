@@ -30,7 +30,8 @@ setup(
         "numpy>=1.9.3",
         "h5py>=2.6.0",
         "scipy>=0.16.0",
-        "tornado>=4.3",
+        "tornado>=4.3"],
+    dependency_links=[
     ],
     entry_points=dict(console_scripts=[
         'bfly = butterfly.cli:main',
