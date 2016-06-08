@@ -23,7 +23,7 @@ def main():
         port = sys.argv[1]
 
     logger.start_process(
-        "bfly", "Starting butterfly server on port %d" % port, [port])
+        "bfly", "Starting butterfly server on port {}".format(port), [port])
 
     logger.report_event("Datasources: " + ", ".join(settings.DATASOURCES),
                         log_level=logging.DEBUG)
