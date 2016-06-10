@@ -3,7 +3,7 @@ import os
 
 from setuptools import setup, find_packages
 
-VERSION = 0.1
+VERSION = 0.2
 version = os.path.join('butterfly', '__init__.py')
 execfile(version)
 
