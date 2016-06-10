@@ -72,7 +72,8 @@ class MultiBeam(DataSource):
 
     def load_cutout(self, x0, x1, y0, y1, z, w):
         if z not in self.ts or len(self.ts[z]) == 0:
-            super(MultiBeam, self).load_cutout(x0, x1, y0, y1, z, w)
+            return np.zeros((int((x1 - x0) / 2**w),
+                             int((y1 - y0) / 2**w)), np.uint8)
         if hasattr(self.ts[z][0], "section"):
             section = self.ts[z][0].section
             return section.imread(x0, y0, x1, y1, w)
