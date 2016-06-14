@@ -68,6 +68,33 @@ has the following structure:
             - /data
         # Suppress tornado logging (was SUPPRESS_CONSOLE_OUTPUT)
         suppress-tornado-logging: True
+        #
+        # For the near-term, the experiment / dataset / channel mapping
+        # to a filesystem path is done here:
+        #
+        experiments:
+            - name: microns
+              samples:
+                - name: mouse
+                    datasets:
+                        - name: sem
+                          channels:
+                              - name: raw
+                                path: /data/microns/sem/raw
+                                short-description: raw
+                                data-type: uint8
+                                dimensions:
+                                  x: 512
+                                  y: 512
+                                  z: 3
+                              - name: membrane-probability
+                                path: /data/microns/sem/mp
+                                short-description: probability-map
+                                data-type: uint8
+                                dimensions:
+                                  x: 512
+                                  y: 512
+                                  z: 3
 
 ## P3 Args
 TODO: document P3 args (maybe?):

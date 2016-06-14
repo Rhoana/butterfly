@@ -16,6 +16,7 @@ import rh_logger
 import settings
 from requestparser import RequestParser
 from urllib2 import HTTPError
+from restapi import RestAPIHandler
 
 
 class WebServerHandler(tornado.web.RequestHandler):
@@ -72,7 +73,7 @@ class WebServer:
         port = self._port
 
         webapp = tornado.web.Application([
-
+            (r'/api/(.*)', RestAPIHandler, dict(core=self._core)),
             (r'/metainfo/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/stop/(.*)', WebServerHandler, dict(webserver=self)),
