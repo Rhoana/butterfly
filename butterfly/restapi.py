@@ -72,6 +72,10 @@ class RestAPIHandler(RequestHandler):
             elif command == "mask":
                 self.get_mask()
                 return
+            else:
+                raise HTTPError(self.request.uri, 400,
+                                "Unsupported command: " + command,
+                                [], None)
             data = json.dumps(result)
             self.set_header("Content-Type", "application/json")
             self.write(data)
@@ -218,7 +222,8 @@ class RestAPIHandler(RequestHandler):
                             [x, y, z], [width, height, 1],
                             w=resolution)
         dtype = getattr(np, channel[self.DATA_TYPE])
-        data = cv2.imencode("." + fmt, vol[:, :, 0].astype(dtype))[1]
+        data = cv2.imencode(
+            "." + fmt, vol[:width, :height, 0].astype(dtype))[1]
         data = data.tostring()
         self.set_header("Content-Type", "image/"+fmt)
         self.write(data)

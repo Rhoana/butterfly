@@ -41,36 +41,6 @@ class RegularImageStack(DataSource):
 
         super(RegularImageStack, self).index()
 
-        d_inf = argparse.ArgumentParser(fromfile_prefix_chars='@')
-
-        # EM stack filenames in sprintf format
-        d_inf.add_argument('--filename', help=argparse.SUPPRESS, required=True)
-        # Folder names for each vertical slice in sprintf format
-        d_inf.add_argument(
-            '--folderpaths',
-            help=argparse.SUPPRESS,
-            required=True)
-        d_inf.add_argument(
-            '--x_ind',
-            nargs='+',
-            type=parseNumRange,
-            help=argparse.SUPPRESS,
-            required=True)  # Row indices of the filenames
-        d_inf.add_argument(
-            '--y_ind',
-            nargs='+',
-            type=parseNumRange,
-            help=argparse.SUPPRESS,
-            required=True)  # Column indices of the filenames
-        d_inf.add_argument(
-            '--z_ind',
-            nargs='+',
-            type=parseNumRange,
-            help=argparse.SUPPRESS,
-            required=True)  # Slice indices of the filenames
-        # d_inf.add_argument('--blocksize', nargs=2, type=int,
-        # help=argparse.SUPPRESS) #Tile size of each image (X, Y)
-
         args_file = os.path.join(self._datapath, '*.args')
         args_file = glob.glob(args_file)[0]
 

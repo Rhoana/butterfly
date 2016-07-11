@@ -97,12 +97,14 @@ class MultiBeam(DataSource):
         single_renderers = []
         for idx in idxs:
             ts = self.ts[z][idx]
-            renderer = TilespecSingleTileRenderer(
-                ts, compute_distances=False)
-            single_renderers.append(renderer)
+            transformation_models = []
             for ts_transform in ts.get_transforms():
                 model = Transforms.from_tilespec(ts_transform)
-                renderer.add_transformation(model)
+                transformation_models.append(model)
+            renderer = TilespecSingleTileRenderer(
+                ts, transformation_models=transformation_models,
+                compute_distances=False)
+            single_renderers.append(renderer)
             if w > 0:
                 model = AffineModel(m=np.eye(3) / 2.0 ** w)
                 renderer.add_transformation(model)
@@ -187,11 +189,14 @@ class TilespecSingleTileRenderer(SingleTileRendererBase):
     def __init__(self, ts,
                  compute_mask=False,
                  compute_distances=True,
+                 transformation_models=[],
                  mipmap_level=0):
         width = ts.width / 2 ** mipmap_level
         height = ts.height / 2 ** mipmap_level
         super(TilespecSingleTileRenderer, self).__init__(
-            width, height, compute_mask, compute_distances)
+            width, height, compute_mask=compute_mask, 
+            transformation_models=transformation_models,
+            compute_distances=compute_distances)
         self.ts = ts
         self.mipmap_level = mipmap_level
 
