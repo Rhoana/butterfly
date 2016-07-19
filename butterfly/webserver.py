@@ -8,6 +8,7 @@ import tornado.web
 import tornado.websocket
 import numpy as np
 import cv2
+import io
 import mimetypes
 import posixpath
 import StringIO
@@ -56,6 +57,23 @@ class PkgResourcesHandler(tornado.web.RequestHandler):
             __name__, os.path.join("static", path))
         self.write(data)
 
+class PkgResourcesHandler2(tornado.web.RequestHandler):
+
+    def get(self, path):
+        if path == "/":
+            self.redirect("index.html?"+self.request.query)
+        path = posixpath.normpath(path)
+        if os.path.isabs(path) or path.startswith(".."):
+            return self.send_error(404)
+
+        extension = os.path.splitext(path)[1]
+        if extension in mimetypes.types_map:
+            self.set_header("Content-Type", mimetypes.types_map[extension])
+        data = pkg_resources.resource_string(
+            __name__, os.path.join("neuroglancer", path))
+        self.write(data)
+
+
 
 class WebServer:
 
@@ -74,6 +92,9 @@ class WebServer:
 
         webapp = tornado.web.Application([
             (r'/api/(.*)', RestAPIHandler, dict(core=self._core)),
+            (r'/neuroglancer/info/(.*)', WebServerHandler, dict(webserver=self)),
+            (r'/neuroglancer/npz/(.*)', WebServerHandler, dict(webserver=self)),            
+            (r'/neuroglancer/(.*)', PkgResourcesHandler2, {}),
             (r'/metainfo/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/stop/(.*)', WebServerHandler, dict(webserver=self)),
@@ -100,11 +121,27 @@ class WebServer:
 
         splitted_request = handler.request.uri.split('/')
 
+        data_request = False
+
         if splitted_request[1] == 'metainfo':
 
             # content = self._core.get_meta_info(path)
             content = 'metainfo'
             handler.set_header("Content-type", 'text/html')
+
+        elif splitted_request[1] == 'neuroglancer':
+
+            if splitted_request[2] == 'info':
+
+                # todo for dynamic data set
+                content = '{"dataType": "uint32", "threeDimensionalScales": [{"voxelSize": [1, 1, 1], "sizeInVoxels": [75, 1024, 1024], "key": "/home/d/data/ac3x75/mojo/1,1,1", "offset": [0, 0, 0]}, {"voxelSize": [2, 2, 2], "sizeInVoxels": [75, 512, 512], "key": "/home/d/data/ac3x75/mojo/2,2,2", "offset": [0, 0, 0]}], "numChannels": 1, "volumeType": "image", "encoding": "npz"}'
+                handler.set_header("Content-type", 'text/html')
+
+            elif splitted_request[2] == 'npz':
+
+                data_request = True         
+
+
         elif splitted_request[1] == 'stop':
             import tornado
             tornado.ioloop.IOLoop.instance().stop()
@@ -115,6 +152,11 @@ class WebServer:
 
         # image data request
         elif splitted_request[1] == 'data':
+
+            data_request = True
+
+
+        if data_request:
 
             try:
                 parser = RequestParser()
@@ -150,6 +192,22 @@ class WebServer:
                     output.write(zipped_data)
                     content = output.getvalue()
                     content_type = 'application/octet-stream'
+
+                elif output_format == 'npz':
+
+                    fileobj = io.BytesIO()
+                    if len(volume.shape) == 3:
+                        volume = np.expand_dims(volume, 0)
+                    np.save(fileobj, volume.astype(np.uint32))
+                    zipped_data = zlib.compress(fileobj.getvalue())
+
+                    # output = StringIO.StringIO()
+                    # output.write(zipped_data)
+                    # content = output.getvalue()
+                    content = zipped_data
+                    content_type = 'application/octet-stream'
+                                     
+
                 elif output_format in image_formats:
                     if color:
                         volume = volume[:, :, :, [2, 1, 0]]

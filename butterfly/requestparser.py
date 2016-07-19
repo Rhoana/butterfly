@@ -22,6 +22,8 @@ class RequestParser(object):
             self.optional_queries[query] = False
 
     def parse(self, request):
+        print request
+
         # Open connectome project format
         if 'ocp' in request:
             # Parse OCP request by the '/' splitted request, ind finds the
@@ -62,6 +64,51 @@ class RequestParser(object):
                 # Convert index errors in OCP format to key errors of the
                 # standard query
                 raise KeyError('Missing query')
+
+        elif 'npz' in request:
+
+            # Parse OCP request by the '/' splitted request, ind finds the
+            # position of '/ocp/'
+            #ind = request.index('ocp')
+            #datapath = '/'.join(filter(None, request[1:ind]))
+            ind = 1
+            datapath = '/home/d/data/ac3x75/mojo'
+
+            # Check for windows systems and undo separator changes in request
+            if re.match('[a-zA-Z]:', datapath):
+                datapath = os.sep.join(datapath.split('/'))
+            else:
+                datapath = os.sep + datapath
+
+            # Get rid of %20 and other url escapes
+            datapath = urllib.unquote(datapath)
+
+            try:
+                # Debug output in console for OCP request
+                logger.report_event('Neuroglancer request: ' + str(request[ind:]))
+                logger.report_event('Datapath: ' + datapath)
+
+                w = int(float(request[-4].split(',')[0])) -1
+                x_range = [int(i) for i in request[-1].split(',')]
+                y_range = [int(i) for i in request[-2].split(',')]
+                z_range = [int(i) for i in request[-3].split(',')]
+                print w, x_range, y_range, z_range
+                start = [x_range[0], y_range[0], z_range[0]]
+                volsize = [
+                    x_range[1] - x_range[0],
+                    y_range[1] - y_range[0],
+                    z_range[1] - z_range[0]]
+
+                self.output_format = request[0]
+                # if self.output_format == 'npz':
+                #     # Match OCP's image cutout service, use default image
+                #     # format
+                #     self.output_format = '.npz'
+            except IndexError:
+                # Convert index errors in OCP format to key errors of the
+                # standard query
+                raise KeyError('Missing query')
+
 
         # Standard butterfly query scheme
         else:
