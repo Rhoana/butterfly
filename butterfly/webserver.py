@@ -108,7 +108,6 @@ class WebServer:
         webapp.listen(port, max_buffer_size=1024 * 1024 * 150000)
         startup_msg = ('Starting webserver at \033[93mhttp://' + ip + ':' +
                        str(port) + '\033[0m')
-
         rh_logger.logger.report_event(startup_msg)
 
         tornado.ioloop.IOLoop.instance().start()
@@ -134,7 +133,7 @@ class WebServer:
             if splitted_request[2] == 'info':
 
                 # todo for dynamic data set
-                content = '{"dataType": "uint32", "threeDimensionalScales": [{"voxelSize": [1, 1, 1], "sizeInVoxels": [75, 1024, 1024], "key": "/home/d/data/ac3x75/mojo/1,1,1", "offset": [0, 0, 0]}, {"voxelSize": [2, 2, 2], "sizeInVoxels": [75, 512, 512], "key": "/home/d/data/ac3x75/mojo/2,2,2", "offset": [0, 0, 0]}], "numChannels": 1, "volumeType": "image", "encoding": "npz"}'
+                content = '{"dataType": "uint8", "threeDimensionalScales": [{"voxelSize": [1, 1, 1], "sizeInVoxels": [75, 1024, 1024], "key": "/home/d/data/ac3x75/mojo/1,1,1", "offset": [0, 0, 0]}, {"voxelSize": [2, 2, 2], "sizeInVoxels": [75, 512, 512], "key": "/home/d/data/ac3x75/mojo/2,2,2", "offset": [0, 0, 0]}], "numChannels": 1, "volumeType": "image", "encoding": "npz"}'
                 handler.set_header("Content-type", 'text/html')
 
             elif splitted_request[2] == 'npz':
@@ -198,13 +197,13 @@ class WebServer:
                     fileobj = io.BytesIO()
                     if len(volume.shape) == 3:
                         volume = np.expand_dims(volume, 0)
-                    np.save(fileobj, volume.astype(np.uint32))
+                    np.save(fileobj, volume.astype(np.uint8))
                     zipped_data = zlib.compress(fileobj.getvalue())
 
-                    # output = StringIO.StringIO()
-                    # output.write(zipped_data)
-                    # content = output.getvalue()
-                    content = zipped_data
+                    output = StringIO.StringIO()
+                    output.write(zipped_data)
+                    content = output.getvalue()
+                    # content = zipped_data
                     content_type = 'application/octet-stream'
                                      
 
