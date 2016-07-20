@@ -218,10 +218,10 @@ class RestAPIHandler(RequestHandler):
                 self.request.uri, 400,
                 "The %s query parameter must be an integer, but was %s" %
                 (self.Q_RESOLUTION, resolution), [], None)
+        dtype = getattr(np, channel[self.DATA_TYPE])
         vol = self.core.get(channel[self.PATH],
                             [x, y, z], [width, height, 1],
-                            w=resolution)
-        dtype = getattr(np, channel[self.DATA_TYPE])
+                            w=resolution, dtype=dtype)
         data = cv2.imencode(
             "." + fmt, vol[:width, :height, 0].astype(dtype))[1]
         data = data.tostring()

@@ -11,7 +11,7 @@ from urllib2 import HTTPError
 
 class MultiBeam(DataSource):
 
-    def __init__(self, core, datapath):
+    def __init__(self, core, datapath, dtype = np.uint8):
         '''
         @override
         '''
@@ -21,6 +21,7 @@ class MultiBeam(DataSource):
                 None, 404,
                 "Failed to load %s as multibeam data source" % datapath,
                 [], None)
+        self.dtype = dtype
         super(MultiBeam, self).__init__(core, datapath)
 
     def index(self):
@@ -109,7 +110,7 @@ class MultiBeam(DataSource):
                 model = AffineModel(m=np.eye(3) / 2.0 ** w)
                 renderer.add_transformation(model)
         renderer = MultipleTilesRenderer(
-            single_renderers, blend_type='AVERAGING')
+            single_renderers, blend_type='AVERAGING', dtype=self.dtype)
         return renderer.crop(
             int(x0 / 2**w), int(y0 / 2**w), int(x1 / 2**w), int(y1 / 2**w))[0]
         

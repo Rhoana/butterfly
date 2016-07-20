@@ -27,7 +27,8 @@ class Core(object):
             segmentation=False,
             segcolor=False,
             fit=False,
-            w=0):
+            w=0,
+            dtype=np.uint8):
         '''
         Request a subvolume of the datapath at a given zoomlevel.
         '''
@@ -35,7 +36,7 @@ class Core(object):
         # if datapath is not indexed (knowing the meta information like width,
         # height),do it now
         if datapath not in self._datasources:
-            self.create_datasource(datapath)
+            self.create_datasource(datapath, dtype=dtype)
 
         datasource = self._datasources[datapath]
 
@@ -194,7 +195,7 @@ class Core(object):
 
         return vol
 
-    def create_datasource(self, datapath):
+    def create_datasource(self, datapath, dtype=np.uint8):
         '''
         '''
 
@@ -222,7 +223,7 @@ class Core(object):
                     break
                 elif datasource in ("comprimato", "multibeam"):
                     from multibeam import MultiBeam
-                    ds = MultiBeam(self, datapath)
+                    ds = MultiBeam(self, datapath, dtype=dtype)
                     break
             except:
                 rh_logger.logger.report_event(
