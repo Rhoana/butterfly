@@ -53,7 +53,7 @@ class Core(object):
                     planes.append(plane)
                 return np.dstack(planes)
             except:
-                pass
+                rh_logger.logger.report_exception()
 
         # If the datasource has zoom levels already, we assume their tiles are
         # the same size across zooms
@@ -219,7 +219,7 @@ class Core(object):
                     break
                 elif datasource in ("tilespecs"):
                     from tilespecs import Tilespecs
-                    ds = Tilespecs(self, datapath)
+                    ds = Tilespecs(self, datapath, dtype=dtype)
                     break
                 elif datasource in ("comprimato", "multibeam"):
                     from multibeam import MultiBeam

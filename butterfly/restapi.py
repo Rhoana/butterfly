@@ -211,7 +211,7 @@ class RestAPIHandler(RequestHandler):
         try:
             resolution = int(resolution)
         except ValueError:
-            rh_logger.report_event(
+            rh_logger.logger.report_event(
                 "Received REST API call with non-integer %s: %s" %
                 (self.Q_RESOLUTION, resolution))
             raise HTTPError(
@@ -219,6 +219,8 @@ class RestAPIHandler(RequestHandler):
                 "The %s query parameter must be an integer, but was %s" %
                 (self.Q_RESOLUTION, resolution), [], None)
         dtype = getattr(np, channel[self.DATA_TYPE])
+        rh_logger.logger.report_event(
+            "Encoding image as dtype %s" % repr(dtype))
         vol = self.core.get(channel[self.PATH],
                             [x, y, z], [width, height, 1],
                             w=resolution, dtype=dtype)

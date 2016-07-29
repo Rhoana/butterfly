@@ -9,11 +9,11 @@ import glob
 import os
 import json
 import logging
-
+import numpy as np
 
 class Tilespecs(DataSource):
 
-    def __init__(self, core, datapath):
+    def __init__(self, core, datapath, dtype=np.uint8):
         '''
         @override
         '''
@@ -23,6 +23,7 @@ class Tilespecs(DataSource):
                 None, 404,
                 "Failed to load %s as multibeam data source" % datapath,
                 [], None)
+        self.dtype=dtype
         super(Tilespecs, self).__init__(core, datapath)
 
     def index(self):
@@ -60,7 +61,7 @@ class Tilespecs(DataSource):
                 self.min_y = min(self.min_y, y_min)
                 self.max_y = max(self.max_y, y_max)
 
-            self.layer_renderer[layer] = TilespecRenderer(tilespecs)
+            self.layer_renderer[layer] = TilespecRenderer(tilespecs, self.dtype)
 
         self.tile_width = ts["width"]
         self.tile_height = ts["height"]
