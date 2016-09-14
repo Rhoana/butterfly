@@ -225,6 +225,10 @@ class Core(object):
                     from multibeam import MultiBeam
                     ds = MultiBeam(self, datapath, dtype=dtype)
                     break
+                elif datasource == 'hdf5':
+                    from .hdf5 import HDF5DataSource
+                    ds = HDF5DataSource(self, datapath, dtype=dtype)
+                    break
             except:
                 rh_logger.logger.report_event(
                     "Can't load %s with %s" % (datapath, datasource),

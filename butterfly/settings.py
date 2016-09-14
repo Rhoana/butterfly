@@ -31,7 +31,8 @@ SUPPORTED_IMAGE_FORMATS = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp')
 
 '''List of datasources to try, in order, given a path'''
 DATASOURCES = bfly_config.get(
-    "datasource", ["comprimato", "multibeam", "mojo", "regularimagestack"])
+    "datasource", 
+    ["comprimato", "multibeam", "mojo", "regularimagestack", "hdf5"])
 
 '''Paths must start with one of the following allowed paths'''
 ALLOWED_PATHS = bfly_config.get("allowed-paths", [os.sep])
