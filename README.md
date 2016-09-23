@@ -7,7 +7,7 @@
 ## Installation
 ```bash
 $ git clone https://github.com/Rhoana/butterfly.git
-$ pip install -e .
+$ pip install --process-dependency-links  -e .
 ```
 
 ## Usage
