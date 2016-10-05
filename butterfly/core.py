@@ -90,7 +90,7 @@ class Core(object):
                 (vol_size[1],
                  vol_size[0],
                     vol_size[2]),
-                dtype=np.uint8)
+                dtype=np.uint32)
 
         # Loop through all z-slices requested, using x,y offsets to calculate
         # distance until next block or volume end
