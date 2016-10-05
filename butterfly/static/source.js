@@ -5,7 +5,6 @@
 //-----------------------------------
 
 DOJO.Source = function(src_terms){
-    this.glflag = Number(src_terms.gl) || 0;
     // Change the default source terms
     this.tileSource = this.share(src_terms, this.tileSource);
 }
@@ -18,7 +17,7 @@ DOJO.Source.prototype = {
         source.maxLevel = Math.ceil(Math.log2(maxLevel));
         // Get the segmentation string for butterfly
         if (source.segmentation) {
-            source.seg = '&segmentation=y&'+this.segmentFormats[this.glflag];
+            source.seg = '&segmentation=y&'+this.segmentFormats[source.glflag];
         }
         return {tileSource: source};
     },
