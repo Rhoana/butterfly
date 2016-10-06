@@ -33,6 +33,8 @@ class HDF5DataSource(DataSource):
         super(HDF5DataSource, self).__init__(core, datapath)
     
     def index(self):
+        with h5py.File(self.hdf5_file, "r") as fd:
+            self.blocksize = fd[self.data_path].shape[1:]
         return
     
     def load_cutout(self, x0, x1, y0, y1, z, w):
@@ -40,6 +42,15 @@ class HDF5DataSource(DataSource):
             ds = fd[self.data_path]
             stride = 2 ** w
             return ds[z, y0:y1:stride, x0:x1:stride]
+
+    def load(self, x, y, z, w, segmentation):
+        (bx,by) = self.blocksize
+        return self.load_cutout(x, x+bx, y, y+by, z, w)
+
+    def seg_to_color(self, slice):
+        # Simply expand all 32 bit ids into four 8 bit ints
+        colors = slice.view(np.uint8).reshape(slice.shape + (4,))
+        return colors[:,:,:3]
     
     def get_boundaries(self):
         with h5py.File(self.hdf5_file, "r") as fd:
