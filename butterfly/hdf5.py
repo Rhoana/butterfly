@@ -1,7 +1,10 @@
 '''An HDF5 data source'''
 
+import os
 import h5py
 import json
+import logging
+from rh_logger import logger
 import numpy as np
 import settings
 
@@ -12,6 +15,9 @@ K_FILENAME = 'filename'
 
 '''The JSON dictionary key of the path to the dataset inside the HDF5 file'''
 K_DATASET_PATH = 'dataset-path'
+
+'''The default filenames for image and segmentation data if no JSON file'''
+K_PRESET_FILENAMES = ['image.h5','segmentation.h5']
 
 class HDF5DataSource(DataSource):
     '''An HDF5 data source
@@ -27,14 +33,34 @@ class HDF5DataSource(DataSource):
     '''
     
     def __init__(self, core, datapath, dtype=np.uint8):
-        layers = json.load(open(datapath, "r"))
-        if type(layers) is not list:
-            layers = [layers]
+        layers = self.defaultLayers(datapath)
+        if not layers:
+            warn = "HDF5 path %s must point to valid h5" % datapath
+            logger.report_event(warn, log_level=logging.WARNING)
+            raise IndexError(warn)
         self.layers = len(layers)
         self.hdf5_file = [d[K_FILENAME] for d in layers]
         self.data_path = [d[K_DATASET_PATH] for d in layers]
         super(HDF5DataSource, self).__init__(core, datapath)
-    
+
+    def defaultLayers(self,path):
+        layers = []
+        if path.endswith('.json'):
+            layers = json.load(open(path, "r"))
+            if type(layers) is not list:
+                layers = [layers]
+        elif os.path.isdir(path):
+            h5files = [i for i in os.listdir(path) if i.endswith('.h5')]
+            for name in K_PRESET_FILENAMES:
+                if name in h5files:
+                    fullName = os.path.join(path,name)
+                    with h5py.File(fullName, "r") as fd:
+                        layer = dict([(K_FILENAME, fullName)])
+                        layer[K_DATASET_PATH] = fd.keys()[0]
+                        layers.append(layer)
+        return layers
+
+
     def index(self):
         with h5py.File(self.hdf5_file[0], "r") as fd:
             self.blocksize = fd[self.data_path[0]].shape[1:]
