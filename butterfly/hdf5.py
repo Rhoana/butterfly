@@ -55,10 +55,11 @@ class HDF5DataSource(DataSource):
             return ds[z, y:y+by:stride, x:x+bx:stride]
 
     def seg_to_color(self, slice):
-        # Simply expand all 32 bit ids into four 8 bit ints
-        slice = slice.astype(np.uint32)
-        colors = slice.view(np.uint8).reshape(slice.shape + (4,))
-        return colors[:,:,:3]
+        colors = np.zeros(slice.shape+(3,),dtype=np.uint8)
+        colors[:,:,0] = np.mod(107*slice[:,:],700).astype(np.uint8)
+        colors[:,:,1] = np.mod(509*slice[:,:],900).astype(np.uint8)
+        colors[:,:,2] = np.mod(200*slice[:,:],777).astype(np.uint8)
+        return colors
     
     def get_boundaries(self):
         with h5py.File(self.hdf5_file[0], "r") as fd:
