@@ -15,6 +15,7 @@ DOJO.Stack = function(src_terms){
 
     this.seg = Number(src_terms.id || 0);
     this.glflag = Number(src_terms.gl || 0);
+    this.seg = src_terms.overlay? 1: this.seg;
     this.nLayers = 1+Number(src_terms.overlay || 0);
     this.layers[1].set.opacity = [.5,1][this.glflag];
     this.preset = this.range(this.nLayers).map(this.layerer, this);
