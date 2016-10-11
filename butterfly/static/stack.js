@@ -12,28 +12,30 @@ DOJO.Stack = function(src_terms){
     // Setup
     var zBuff = this.zBuff;
     var first = this.now-zBuff;
-    var glflag = Number(src_terms.gl || 0);
-    var which = Number(src_terms.image || 2);
-    this.preset[1].set.opacity = [.5,1][glflag];
 
-    this.preset.splice(which,1);
-    var nLayers = this.preset.length;
+    this.seg = Number(src_terms.id || 0);
+    this.glflag = Number(src_terms.gl || 0);
+    this.nLayers = 1+Number(src_terms.overlay || 0);
+    this.layers[1].set.opacity = [.5,1][this.glflag];
+    this.preset = this.range(this.nLayers).map(this.layerer, this);
+
     var keys = this.range(2*zBuff+1);
     var addFirst = this.add.bind(first);
-    var join = this.join.bind(this,nLayers);
+    var join = this.join.bind(this,this.nLayers);
 
     // Prepare the sources
     keys.push(keys.splice(zBuff, 1)[0]);
     this.protoSource = new DOJO.Source(src_terms);
     this.source = keys.map(addFirst).reduce(join,[]);
-    this.index = this.indexer(zBuff,nLayers);
-    this.total = nLayers*keys.length;
+    this.index = this.indexer(zBuff,this.nLayers);
+    this.total = this.nLayers*keys.length;
 }
 
 DOJO.Stack.prototype = {
     now: 0,
     zBuff: 1,
-    preset: [
+    preset: [],
+    layers: [
         {
             set: {},
             src: {}
@@ -67,7 +69,7 @@ DOJO.Stack.prototype = {
     },
     share: DOJO.Source.prototype.share.bind(null),
     sourcer: function(zLevel, indices, layer, i){
-        var src = {z:zLevel,minLevel:this.level};
+        var src = {z:zLevel,minLevel:this.level,glflag:this.glflag};
         var source = this.protoSource.init(this.share(layer.src, src));
         return this.share(this.share(layer.set, {index:indices[i]}), source);
     },
@@ -100,6 +102,10 @@ DOJO.Stack.prototype = {
     },
     times: function(that) {
         return this * that;
+    },
+    layerer:  function(ind){
+        var kind = Number(ind == this.nLayers-this.seg);
+        return this.share(this.layers[kind],{});
     },
     refresher: function(e){
         e.item.addHandler('fully-loaded-change',function(e){
