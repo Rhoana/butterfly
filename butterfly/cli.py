@@ -1,14 +1,8 @@
-from rh_logger import logger, ExitCode
 import logging
 import re
-import sys
-import argparse
-
+import os
 import cv2
-
-from butterfly import core
-from butterfly import settings
-from butterfly import webserver
+import argparse
 
 
 def main():
@@ -18,9 +12,23 @@ def main():
     Eagon Meng and Daniel Haehn
     Lichtman Lab, 2015
     '''
-    port = settings.PORT
-    if len(sys.argv) == 2:
-        port = sys.argv[1]
+
+    help = {
+        'bfly': 'Host a butterfly server!',
+        'path': '/parent/path/of/all/sources',
+        'port': 'port >1024 for hosting this server'
+    }
+
+    parser = argparse.ArgumentParser(description=help['bfly'])
+    parser.add_argument('path', default=os.getcwd(), nargs='?', help=help['path'])
+    parser.add_argument('-p','--port', metavar='int',type=int, help=help['port'])
+    args = parser.parse_args()
+    base = os.path.join(args.path,'rh_config.yaml')
+    os.environ['RH_CONFIG_FILENAME'] = base
+
+    from butterfly import settings,core,webserver
+    from rh_logger import logger
+    port = args.port if args.port else settings.PORT
 
     logger.start_process(
         "bfly", "Starting butterfly server on port {}".format(port), [port])
@@ -59,6 +67,8 @@ def parseNumRange(num_arg):
 
 
 def query():
+    from butterfly import core
+    from rh_logger import logger, ExitCode
     logger.start_process("bquery", "Starting butterfly query")
     c = core.Core()
 
