@@ -19,7 +19,7 @@ window.onload = function(e){{}
     SCOPE.openSD = OpenSeadragon({
         tileSources: SCOPE.stack.source,
         crossOriginPolicy: 'Anonymous',
-        prefixUrl: 'images/icons/',
+        prefixUrl: '../images/icons/',
         minZoomImageRatio: .2,
         maxZoomPixelRatio: 8,
         showZoomControl: 0,
