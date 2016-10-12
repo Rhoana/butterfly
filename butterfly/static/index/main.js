@@ -9,6 +9,5 @@ var DOJO = {};
 //-----------------------------------
 
 window.onload = function(e){
-
-
+    API.setup = new DOJO.Config();
 }
