@@ -5,29 +5,34 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"] + label {
-	background-color: #FDC;
+	background-color: #FD9;
+	margin-bottom: 0.25em;
+	padding-left: 1.5em;
+	font-size: 1.5em;
 	cursor: pointer;
   display: block;
 }
 
 input[type="checkbox"] + label + section {
-	transition: .3s all;
+	transition: .25s all;
+	padding-left: 1.25em;
+	font-size: 1.25em;
 	overflow: hidden;
   height: 0;
 }
 
 input[type="checkbox"]:focus + label {
-	background-color: #B80;
+	background-color: #EB1;
   color: #FED;
 }
 
 input[type="checkbox"]:checked:not(:focus) + label {
-	background-color: #EB1;
+	background-color: #FDC;
   color: black;
 }
 
 input[type="checkbox"]:checked + label + section {
-	height: 100px;
+	height: 4em;
 }
 
 .api {
