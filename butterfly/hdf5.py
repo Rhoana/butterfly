@@ -63,7 +63,7 @@ class HDF5DataSource(DataSource):
 
     def index(self):
         with h5py.File(self.hdf5_file[0], "r") as fd:
-            self.blocksize = fd[self.data_path[0]].shape[1:]
+            self.blocksize = fd[self.data_path[0]].shape[-1:0:-1]
         return
     
     def load_cutout(self, x0, x1, y0, y1, z, w):
