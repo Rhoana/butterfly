@@ -16,7 +16,12 @@ input[type="checkbox"] + label + section {
   height: 0;
 }
 
-input[type="checkbox"]:checked + label {
+input[type="checkbox"]:focus + label {
+	background-color: #B80;
+  color: #FED;
+}
+
+input[type="checkbox"]:checked:not(:focus) + label {
 	background-color: #EB1;
   color: black;
 }
