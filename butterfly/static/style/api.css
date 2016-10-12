@@ -1,0 +1,35 @@
+input[type="checkbox"] {
+	position: absolute;
+	cursor: pointer;
+	opacity: 0;
+}
+
+input[type="checkbox"] + label {
+	background-color: #FDC;
+	cursor: pointer;
+  display: block;
+}
+
+input[type="checkbox"] + label + section {
+	transition: .3s all;
+	overflow: hidden;
+  height: 0;
+}
+
+input[type="checkbox"]:checked + label {
+	background-color: #EB1;
+  color: black;
+}
+
+input[type="checkbox"]:checked + label + section {
+	height: 100px;
+}
+
+.api {
+  background-color:#FED;
+  position:absolute;
+  height:100%;
+  width:100%;
+  left:0px;
+  top:0px;
+}
