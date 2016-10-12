@@ -2,14 +2,14 @@ var SCOPE = {};
 var DOJO = {};
 //-----------------------------------
 //
-// http://<host>:<port>/index.html?server=<...>&datapath=<...>
+// http://<host>:<port>/viz.html?server=<...>&datapath=<...>
 // New DOJO.Stack
 //     DOJO.Stack.init
 // New OpenSeadragon
 // New DOJO.Input
 // -- Called first
 //-----------------------------------
-window.onload = function(e){{}
+window.onload = function(e){
 
     OpenSeadragon.ImageLoader = ZipLoader;
 
