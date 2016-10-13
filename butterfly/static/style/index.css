@@ -35,7 +35,7 @@ input[type="checkbox"]:checked + label + section {
 	height: 4em;
 }
 
-#api {
+.api {
   background-color:#FED;
   position:absolute;
   height:100%;

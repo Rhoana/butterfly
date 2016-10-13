@@ -27,7 +27,7 @@ DOJO.Write.prototype = {
       },
       section: {
         innerHTML: 'Content for Experiment '+id,
-        tags: []
+        tags: [['id',id+'-'+'samples']]
       }
     };
   },
@@ -40,7 +40,7 @@ DOJO.Write.prototype = {
     document.getElementById(parent).appendChild(el);
   },
   experiment: function(id){
-    var build = this.build.bind(this,'api',id);
+    var build = this.build.bind(this,'0-experiments',id);
     this.keys.map(build);
   }
 }
