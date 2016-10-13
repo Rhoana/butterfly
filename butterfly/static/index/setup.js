@@ -7,23 +7,22 @@ log = console.log.bind(window.console);
 
 DOJO.Setup = function(api){
   this.parse = api.parse;
-  var go = Promise.resolve([{}]);
-  var loader = this.loader.bind(this);
-  var loaded = this.ask.reduce(loader,[go]);
   this.write = new DOJO.Write(this);
-  Promise.all(loaded).then(function(sources){
+  this.loaded = this.ask.reduce(this.loader.bind(this),this.start(''));
+  Promise.all(this.loaded).then(function(sources){
     log(sources)
   });
 }
 
 DOJO.Setup.prototype = {
   ask: [
-    'experiment',
-    'sample',
-    'dataset',
-    'channel',
+    'experiment','sample',
+    'dataset','channel',
     'channel_metadata'
   ],
+  start: function(old){
+    return [Promise.resolve([{old:old}])];
+  },
   // Copy an object
   share: function(from, to) {
     for (var key in from) {
@@ -56,50 +55,49 @@ DOJO.Setup.prototype = {
   },
   argue: function(hash){
     argument = '?';
-    if ('old' in hash){
-        argument += hash.old + '&';
-        delete hash.old;
-    }
+    argument += hash.old + '&';
+    delete hash.old;
     for (var key in hash) {
       argument += key + '=';
       argument += hash[key] + '&'
     }
     return argument.slice(0,-1);
   },
-  // Map a bound method
-  map: function(kind,fn,arr){
-    return arr.map(this[fn].bind(this,kind));
-  },
   find: function(kind,hash){
     var where = this.plural(kind)+this.argue(hash);
     return this.get('/api/' + where);
   },
-  mapfind: function(kind,arr){
-    return Promise.all(this.map(kind,'find',arr));
-  },
   draw: function(kind,result) {
     var hashes = [];
     var [out,old] = [result.out,result.old];
-    var hash = 0!= old.indexOf('/api')? {old: old}:{};
+    var hash = (kind !== this.ask[0])? {old: old}: {old:''};
+    var write = this.write.dom.bind(this.write,kind);
     if (out instanceof Array){
       for (folder of out){
         var temp = this.share(hash,{});
         temp[kind] = folder;
         hashes.push(temp);
-//        log(temp)
+        write(temp);
+//        log(temp);
       }
       return hashes;
     }
     out.source = this.parse(old);
+//    log(out);
     return [out];
   },
-  mapdraw: function(kind,arr){
-    var cat = [].concat.apply.bind([].concat);
-    return this.map(kind,'draw',arr).reduce(cat,[]);
+  map: function(arr,kind,fn){
+    return arr.map(this[fn].bind(this,kind));
   },
   loader: function(pending,kind){
-    var find = this.mapfind.bind(this,kind);
-    var draw = this.mapdraw.bind(this,kind);
+    map = this.map.bind(this);
+    var find = function(arr){
+      return Promise.all(map(arr,kind,'find'));
+    };
+    var draw = function(arr){
+      var cat = [].concat.apply.bind([].concat);
+      return map(arr,kind,'draw').reduce(cat,[]);
+    };
     return pending.map(function(prom){
       return prom.then(find).then(draw);
     });

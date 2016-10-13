@@ -5,42 +5,54 @@
 //-----------------------------------
 
 DOJO.Write = function(setup){
-  this.setup = setup;
-  [0,1,2,3,4,5,6,7,8,9,10,11,12].map(this.experiment,this);
+  this.argue = setup.argue;
+  this.ask = setup.ask;
+//  [0,1,2,3,4,5,6,7,8,9,10,11,12].map(this.experiment,this);
 }
 DOJO.Write.prototype = {
-  keys: ['input','label','section'],
-  basic: function(id){
+  basic: function(kind,folder){
+    var name = folder[kind];
+    var id = kind+'='+name;
+    var label = kind+' '+name;
     return {
       input: {
         innerHTML: '',
         tags:[
-          ['id','experiment'+id],
+          ['id',name],
           ['type','checkbox']
         ]
       },
       label: {
-        innerHTML: 'Experiment '+id,
+        innerHTML: label,
         tags: [
-          ['for','experiment'+id]
+          ['for',name]
         ]
       },
       section: {
-        innerHTML: 'Content for Experiment '+id,
-        tags: [['id',id+'-'+'samples']]
+        innerHTML: 'Content for '+label,
+        tags: [['id',id]]
       }
     };
   },
-  build: function(parent,id,kind){
+  keys: ['input','label','section'],
+  build: function(parent,basic,kind){
     var el = document.createElement(kind);
-    var preset = this.basic(id)[kind];
+    var preset = basic[kind];
     var set = el.setAttribute;
     el.innerHTML = preset.innerHTML;
     preset.tags.map(set.apply.bind(set,el));
     document.getElementById(parent).appendChild(el);
   },
-  experiment: function(id){
-    var build = this.build.bind(this,'0-experiments',id);
-    this.keys.map(build);
+  dom: function(kind,folder){
+    if (folder.old !== ''){
+//        log(folder.old)
+    }
+    else{
+//      log('hi')
+      var basic = this.basic(kind,folder);
+      var build = this.build.bind(this,'experiments',basic);
+      this.keys.map(build);
+    }
+//    var build = this.build.bind(this,'experiments',id);
   }
 }
