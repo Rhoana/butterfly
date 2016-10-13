@@ -6,30 +6,40 @@ log = console.log.bind(window.console);
 // -- Init by main.js
 //-----------------------------------
 
-DOJO.Config = function(src_terms){
-  var api = this.api.bind(this);
+DOJO.Config = function(api){
+  this.parse = api.parse;
   var go = Promise.resolve([{}]);
-  a = [0,1,2,3,4].reduce(api,[go]);
+  var loader = this.loader.bind(this);
+  var loaded = [0,1,2,3,4].reduce(loader,[go]);
+  Promise.all(loaded).then(function(sources){
+    log(sources)
+  });
 }
 
 DOJO.Config.prototype = {
+  // Copy an object
+  share: function(from, to) {
+    for (var key in from) {
+      to[key] = from[key];
+    }
+    return to;
+  },
   // Get a file as a promise
   get: function(where) {
-      log(where)
-      var win = function(bid){
-          if (bid.status == 200) {
-              var json = JSON.parse(bid.response);
-              var target = where.split('?').pop();
-              return this({out:json,old:target});
-          }
-          console.log('error loading')
-      };
-      return new Promise(function(done){
-          var bid = new XMLHttpRequest();
-          bid.onload = win.bind(done,bid);
-          bid.open('GET', where, true);
-          bid.send();
-      });
+    var win = function(bid){
+      if (bid.status == 200) {
+        var json = JSON.parse(bid.response);
+        var target = where.split('?').pop();
+        return this({out:json,old:target});
+      }
+      console.log('error loading')
+    };
+    return new Promise(function(done){
+      var bid = new XMLHttpRequest();
+      bid.onload = win.bind(done,bid);
+      bid.open('GET', where, true);
+      bid.send();
+    });
   },
   ask: [
     'experiment',
@@ -56,42 +66,43 @@ DOJO.Config.prototype = {
     }
     return argument.slice(0,-1);
   },
-  find: function(kind,hash){
-    return this.get('/api/'+this.plural(kind)+this.argue(hash));
+  // Map a bound method
+  map: function(kind,fn,arr){
+    return arr.map(this[fn].bind(this,kind));
   },
-  finds: function(kind,hashes){
-        log('')
-    log(hashes)
-    return Promise.all(hashes.map(this.find.bind(this,kind)));
+  find: function(kind,hash){
+    var where = this.plural(kind)+this.argue(hash);
+    return this.get('/api/' + where);
+  },
+  mapfind: function(kind,arr){
+    return Promise.all(this.map(kind,'find',arr));
   },
   draw: function(kind,result) {
-    if (result.out instanceof Array){
-      var hashes = []
-      for (folder of result.out){
-        var hash = {};
-        hash[kind] = folder;
-        if(result.old.indexOf('/')){
-          hash.old = result.old;
-        }
-        hashes.push(hash);
+    var hashes = [];
+    var [out,old] = [result.out,result.old];
+    var hash = 0!= old.indexOf('/api')? {old: old}:{};
+    if (out instanceof Array){
+      for (folder of out){
+        var temp = this.share(hash,{});
+        temp[kind] = folder;
+        hashes.push(temp);
+//        log(temp)
       }
       return hashes;
     }
-    return result.out;
+    out.source = this.parse(old);
+    return [out];
   },
-  draws: function(kind,result) {
-    hashes = result.map(this.draw.bind(this,kind)).reduce(function(all,one){
-      return all.concat(one);
-    },[]);
-    log(hashes)
-    return hashes;
+  mapdraw: function(kind,arr){
+    var cat = [].concat.apply.bind([].concat);
+    return this.map(kind,'draw',arr).reduce(cat,[]);
   },
-  api: function(pending,now){
-    return pending.map(function(prom,id){
-      var kind = this.ask[now]
-      var finds = this.finds.bind(this,kind);
-      var draws = this.draws.bind(this,kind);
-      return prom.then(finds).then(draws);
+  loader: function(pending,now){
+    var kind = this.ask[now];
+    var find = this.mapfind.bind(this,kind);
+    var draw = this.mapdraw.bind(this,kind);
+    return pending.map(function(prom){
+      return prom.then(find).then(draw);
     },this);
   }
 }
