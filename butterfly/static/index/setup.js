@@ -10,7 +10,7 @@ DOJO.Setup = function(api){
   this.write = new DOJO.Write(this);
   this.loaded = this.ask.reduce(this.loader.bind(this),this.start(''));
   Promise.all(this.loaded).then(function(sources){
-    log(sources)
+    log(sources.pop());
   });
 }
 
@@ -70,20 +70,19 @@ DOJO.Setup.prototype = {
     var hashes = [];
     var [out,old] = [result.out,result.old];
     var hash = (kind !== this.ask[0])? {old: old}: {};
-    var write = this.write.dom.bind(this.write,kind);
+    var list = this.write.list.bind(this.write,kind);
+    var link = this.write.link.bind(this.write,kind);
     if (out instanceof Array){
       for (folder of out){
         var temp = this.share(hash,{});
         temp[kind] = folder;
-        hashes.push(temp);
-        write(temp);
-//        log(temp);
+        hashes.push(list(temp));
       }
       return hashes;
     }
-    out.source = this.parse(old);
-//    log(out);
-    return [out];
+    out = this.share(out,this.parse(old));
+    out.old = old;
+    return [link(out)];
   },
   map: function(arr,kind,fn){
     return arr.map(this[fn].bind(this,kind));
