@@ -3,13 +3,12 @@ var DOJO = {};
 //-----------------------------------
 //
 // http://<host>:<port>/index.html
-// New DOJO.Config
-//     DOJO.Config.init
+// New DOJO.Setup
 // -- Called first
 //-----------------------------------
 
 window.onload = function(e){
-    API.setup = new DOJO.Config(API);
+    API.setup = new DOJO.Setup(API);
 }
 
 // Change any preset terms set in input address

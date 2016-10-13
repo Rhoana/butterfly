@@ -1,22 +1,29 @@
 log = console.log.bind(window.console);
 //-----------------------------------
 //
-// DOJO.Config: request data from server
+// DOJO.Setup: request data from server
 // -- Made by main.js
-// -- Init by main.js
 //-----------------------------------
 
-DOJO.Config = function(api){
+DOJO.Setup = function(api){
   this.parse = api.parse;
   var go = Promise.resolve([{}]);
   var loader = this.loader.bind(this);
-  var loaded = [0,1,2,3,4].reduce(loader,[go]);
+  var loaded = this.ask.reduce(loader,[go]);
+  this.write = new DOJO.Write(this);
   Promise.all(loaded).then(function(sources){
     log(sources)
   });
 }
 
-DOJO.Config.prototype = {
+DOJO.Setup.prototype = {
+  ask: [
+    'experiment',
+    'sample',
+    'dataset',
+    'channel',
+    'channel_metadata'
+  ],
   // Copy an object
   share: function(from, to) {
     for (var key in from) {
@@ -41,13 +48,6 @@ DOJO.Config.prototype = {
       bid.send();
     });
   },
-  ask: [
-    'experiment',
-    'sample',
-    'dataset',
-    'channel',
-    'channel_metadata'
-  ],
   plural: function(str){
     if (str.substr(-4) != 'data'){
       str += 's';
@@ -97,12 +97,11 @@ DOJO.Config.prototype = {
     var cat = [].concat.apply.bind([].concat);
     return this.map(kind,'draw',arr).reduce(cat,[]);
   },
-  loader: function(pending,now){
-    var kind = this.ask[now];
+  loader: function(pending,kind){
     var find = this.mapfind.bind(this,kind);
     var draw = this.mapdraw.bind(this,kind);
     return pending.map(function(prom){
       return prom.then(find).then(draw);
-    },this);
+    });
   }
 }
