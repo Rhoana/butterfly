@@ -54,23 +54,22 @@ DOJO.Setup.prototype = {
     return str;
   },
   argue: function(hash){
-    argument = '?';
-    argument += hash.old + '&';
+    var argument = hash.old? hash.old+'&': '';
     delete hash.old;
     for (var key in hash) {
       argument += key + '=';
-      argument += hash[key] + '&'
+      argument += hash[key]+'&';
     }
     return argument.slice(0,-1);
   },
   find: function(kind,hash){
-    var where = this.plural(kind)+this.argue(hash);
+    var where = this.plural(kind)+'?'+this.argue(hash);
     return this.get('/api/' + where);
   },
   draw: function(kind,result) {
     var hashes = [];
     var [out,old] = [result.out,result.old];
-    var hash = (kind !== this.ask[0])? {old: old}: {old:''};
+    var hash = (kind !== this.ask[0])? {old: old}: {};
     var write = this.write.dom.bind(this.write,kind);
     if (out instanceof Array){
       for (folder of out){

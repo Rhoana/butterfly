@@ -16,7 +16,6 @@ input[type="checkbox"] + label {
 input[type="checkbox"] + label + section {
 	transition: .25s all;
 	padding-left: 1.25em;
-	font-size: 1.25em;
 	overflow: hidden;
   height: 0;
 }
@@ -32,7 +31,7 @@ input[type="checkbox"]:checked:not(:focus) + label {
 }
 
 input[type="checkbox"]:checked + label + section {
-	height: 4em;
+	height: 16em;
 }
 
 .api {
