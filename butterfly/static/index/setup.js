@@ -15,6 +15,7 @@ DOJO.Setup = function(api){
 }
 
 DOJO.Setup.prototype = {
+  now:{dataset:'',offset:0},
   ask: [
     'experiment','sample',
     'dataset','channel',
@@ -48,41 +49,43 @@ DOJO.Setup.prototype = {
     });
   },
   plural: function(str){
-    if (str.substr(-4) != 'data'){
-      str += 's';
-    }
-    return str;
+    return (str + 's').replace(/datas$/,'data');
   },
   argue: function(hash){
-    var argument = hash.old? hash.old+'&': '';
-    delete hash.old;
-    for (var key in hash) {
-      argument += key + '=';
-      argument += hash[key]+'&';
+    var now = hash.old+'&';
+    now = now.replace(/^&/,'');
+    if(hash.kind && hash.name){
+      now += hash.kind+'='+hash.name;
     }
-    return argument.slice(0,-1);
+    return now;
   },
   find: function(kind,hash){
     var where = this.plural(kind)+'?'+this.argue(hash);
     return this.get('/api/' + where);
   },
-  draw: function(kind,result) {
-    var hashes = [];
-    var [out,old] = [result.out,result.old];
-    var hash = (kind !== this.ask[0])? {old: old}: {};
-    var list = this.write.list.bind(this.write,kind);
-    var link = this.write.link.bind(this.write,kind);
-    if (out instanceof Array){
-      for (folder of out){
-        var temp = this.share(hash,{});
-        temp[kind] = folder;
-        hashes.push(list(temp));
+  build: function(hash,sources){
+    var terms = sources.reduce(this.share,hash);
+    if(terms.dataset){
+      if(terms.dataset != this.now.dataset){
+        this.now.dataset = terms.dataset;
+        this.now.offset = terms.order;
       }
-      return hashes;
+      terms.num = terms.order - this.now.offset;
     }
-    out = this.share(out,this.parse(old));
-    out.old = old;
-    return [link(out)];
+    return this.write.main(terms);
+  },
+  draw: function(kind,result,order,A) {
+    var [out,old] = [result.out,result.old];
+    var hash = {old: old, kind:kind};
+    if (out instanceof Array){
+      return out.map(function(name,num){
+        var sources = [{target:'head',name:name,num:num}];
+        sources.push({length:result.out.length});
+        return this.build(hash,sources);
+      },this);
+    }
+    var sources = [{order:order,target:'body'},this.parse(old),out];
+    return [this.build(hash,sources)];
   },
   map: function(arr,kind,fn){
     return arr.map(this[fn].bind(this,kind));

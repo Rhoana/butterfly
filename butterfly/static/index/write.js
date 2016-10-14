@@ -7,43 +7,58 @@
 DOJO.Write = function(setup){
   this.argue = setup.argue;
   this.share = setup.share;
+  this.html = new DOMParser();
+  this.max = setup.ask.length;
   this.ask = setup.ask;
 }
 DOJO.Write.prototype = {
-  written: {
-    false: true
-  },
   range: function(end){
     return Object.keys(new Uint8Array(end)).map(Number);
   },
   parent: function(el){
       return el.slice(0,el.lastIndexOf('&'));
   },
+  unstring: function(target){
+      return target.el.split('&').pop().split(target.char);
+  },
   meta: function(target){
     info = {}
     var query = target.query || 'size';
-    var size = JSON.stringify(target.folder.dimensions);
-    var name = target.name || target.folder['short-description'];
+    var size = JSON.stringify(target.dimensions);
+    var field = target['short-description'];
+    if(target.field){
+      field = target[target.field]
+    }
     info.size = size.replace(/[{"}]/g,' ').replace(/\s:/g,':');
-    info.format = ' '+target.folder['data-type'];
-    return [name,info[target.query]];
+    info.format = ' '+target['data-type'];
+    return [field,info[target.query]];
   },
-  k: {
-    lists: [{}],
-    links: [{
-        char: '+',
+  targets: {
+    head: [{
+        template:'lists'
+    },
+    {
+        maxdraw: 1,
+        template:'lengths',
+        char: '+'
+    }],
+    body: [{
+        template:'links',
+        char: '+'
       },
       {
+        maxdraw: 1,
+        template:'links',
         field: 'dataset',
         query: 'size',
         char: '+',
-        back: 1,
+        back: 1
     }]
   },
   lists: function(target){
-    var self = this.argue(target.folder);
-    var labid = self.replace('=','+');
-    var id = self.replace('=','-');
+    var self = this.argue(target);
+    var labid = self.replace(/=/g,'+');
+    var id = self.replace(/=/g,'-');
     return {
       input: {
         tags:[
@@ -52,7 +67,6 @@ DOJO.Write.prototype = {
         ]
       },
       label: {
-        innerHTML: 'h',
         tags: [
           ['for',id],
           ['id',labid]
@@ -66,60 +80,83 @@ DOJO.Write.prototype = {
   },
   links: function(target){
     var [link,info] = this.meta(target);
+    var path = 'viz.html?datapath='+target.path;
     return {
       a: {
         innerHTML: link+ ':',
-        tags:[['href','viz.html']]
+        tags:[['href',path]]
+      },
+      svg: {
+        innerHTML: '<path d="M 0,4 L 3,7 L 6,4"/>'
       },
       span: {
-        innerHTML: info,
-        tags:[]
+        innerHTML: info
       },
-      elems: ['a','span']
+      elems: ['svg','a','span']
     };
   },
-  sections: function(fold,target){
-    var ran = this.range(target.back||0);
-    var el = ran.reduce(this.parent,fold.old);
-    return {
-      query: target.query || 'format',
-      el: el.replace('=', target.char||'='),
-      name: target.field? fold[target.field] : false,
-      folder: fold,
-    };
-  },
-  names: [false,'dataset'],
-  queries: ['format','size'],
-  build: function(target,kind){
-    var parent = target.el || 'experiments';
-    var el = document.createElement(kind);
-    var preset = target.source[kind];
-    var set = el.setAttribute;
-    el.innerHTML = preset.innerHTML || '';
-    preset.tags.map(set.apply.bind(set,el));
-    document.getElementById(parent).appendChild(el);
-  },
-  write: function(target,format){
-    target.field
-    if (target.name in this.written){
-      target.source = this[format](target);
-      var build = this.build.bind(this,target);
-      target.source.elems.map(build);
+  lengths: function(target){
+    var index = this.ask.indexOf(target.kind);
+    var parentName = this.unstring(target).pop();
+    if(index==0 || this.max<index+3) {
+      return {elems:[]};
     }
-    this.written[target.name] = true;
+    return {
+      svg: {
+        innerHTML: '<path d="M 0,4 L 3,7 L 6,4"/>'
+      },
+      b: {
+        innerHTML: parentName +': '
+      },
+      span: {
+        innerHTML: ' ('+target.length +') '
+      },
+      elems: ['svg','b','span']
+    };
   },
-  list: function(kind,folder){
-    var fold = this.share(folder,{old: ''});
-    var heading = this.sections(fold,this.k.lists[0]);
-    this.write(heading,'lists');
-    return folder;
+  build: function(target,elem){
+    if (target.parent && target.source){
+      var el = document.createElement(elem);
+      if (elem == 'svg'){
+          el = document.getElementById('icon').cloneNode(1);
+      }
+      var preset = target.source[elem];
+      if(preset){
+        var set = el.setAttribute;
+        el.innerHTML = preset.innerHTML || '';
+        (preset.tags||[]).map(set.apply.bind(set,el));
+        target.parent.appendChild(el);
+      }
+    }
   },
-  link: function(kind,folder){
-    var fold = this.share(folder,{old: ''});
-    var channel = this.sections(fold,this.k.links[0]);
-    var dataset = this.sections(fold,this.k.links[1]);
-    this.write(channel,'links');
-    this.write(dataset,'links');
-    return folder;
+  template: function(target){
+    if(!target.maxdraw || target.maxdraw > target.num){
+        target.source = this[target.template](target);
+        var build = this.build.bind(this,target);
+        target.source.elems.map(build,this);
+    }
+  },
+  write: function(target){
+    var parent = target.el || this.ask[0];
+    target.parent = document.getElementById(parent);
+    this.template(target);
+  },
+  sections: function(source,target){
+    var ran = this.range(target.back||0);
+    var el = ran.reduce(this.parent,source.old);
+    return this.share(source,{
+      query: target.query || 'format',
+      el: el.replace(/=/g, target.char||'='),
+      field: target.field || false,
+      template: target.template,
+      maxdraw: target.maxdraw,
+      char: target.char || '='
+    });
+  },
+  main: function(terms){
+    var source = this.share(terms,{old: ''});
+    var section = this.sections.bind(this,source);
+    this.targets[terms.target].map(section).map(this.write,this);
+    return terms;
   }
 }
