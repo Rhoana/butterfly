@@ -7,11 +7,13 @@
 DOJO.Write = function(setup){
   this.argue = setup.argue;
   this.share = setup.share;
-  this.html = new DOMParser();
+  this.layers = [this.img,this.seg];
   this.max = setup.ask.length;
   this.ask = setup.ask;
 }
 DOJO.Write.prototype = {
+  img: new RegExp('^(img|ima|raw).*','i'),
+  seg: new RegExp('^(seg|id).*','i'),
   range: function(end){
     return Object.keys(new Uint8Array(end)).map(Number);
   },
@@ -57,13 +59,15 @@ DOJO.Write.prototype = {
   },
   lists: function(target){
     var self = this.argue(target);
-    var labid = self.replace(/=/g,'+');
     var id = self.replace(/=/g,'-');
+    var labid = self.replace(/=/g,'+');
+    var check = this.max-this.ask.indexOf(target.kind);
     return {
       input: {
         tags:[
           ['id',id],
-          ['type','checkbox']
+          ['type','checkbox'],
+          ['checked',check>3]
         ]
       },
       label: {
@@ -80,7 +84,21 @@ DOJO.Write.prototype = {
   },
   links: function(target){
     var [link,info] = this.meta(target);
-    var path = 'viz.html?datapath='+target.path;
+    var [w,h] = [target.dimensions.x,target.dimensions.y];
+    var labels = [target['short-description'],target.name];
+    var path = 'viz.html?datapath='+target.path+'&width='+w+'&height='+h;
+    this.layers.some(function(layer,layi){
+       if(labels.map(layer.test,layer).some(Boolean)){
+          var link = this.unstring(target).shift();
+          var keywords = {
+            dataset: ['&overlay'],
+            channel: ['','&id'],
+          };
+          var words = keywords[link];
+          path += words[layi%words.length];
+          return true;
+       }
+    },this)
     return {
       a: {
         innerHTML: link+ ':',
@@ -122,9 +140,13 @@ DOJO.Write.prototype = {
       }
       var preset = target.source[elem];
       if(preset){
-        var set = el.setAttribute;
         el.innerHTML = preset.innerHTML || '';
-        (preset.tags||[]).map(set.apply.bind(set,el));
+        (preset.tags||[]).map(function(tag){
+          if(tag.every(Boolean)){
+            return el.setAttribute.apply(el,tag);
+          }
+            el[tag[0] || 'b'] = false;
+        });
         target.parent.appendChild(el);
       }
     }

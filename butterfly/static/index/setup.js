@@ -10,7 +10,7 @@ DOJO.Setup = function(api){
   this.write = new DOJO.Write(this);
   this.loaded = this.ask.reduce(this.loader.bind(this),this.start(''));
   Promise.all(this.loaded).then(function(sources){
-    log(sources.pop());
+//    log(sources.pop());
   });
 }
 
@@ -59,7 +59,7 @@ DOJO.Setup.prototype = {
     }
     return now;
   },
-  find: function(kind,hash){
+  find: function(kind,hash,i){
     var where = this.plural(kind)+'?'+this.argue(hash);
     return this.get('/api/' + where);
   },
@@ -74,7 +74,7 @@ DOJO.Setup.prototype = {
     }
     return this.write.main(terms);
   },
-  draw: function(kind,result,order,A) {
+  draw: function(kind,result,order) {
     var [out,old] = [result.out,result.old];
     var hash = {old: old, kind:kind};
     if (out instanceof Array){
