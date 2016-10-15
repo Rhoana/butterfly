@@ -1,16 +1,15 @@
 input[type="checkbox"] {
 	position: absolute;
-	display:none;
 	opacity: 0;
 }
 
 input[type="checkbox"] + label {
-	background-color: #000;
-	margin-bottom: 0.25em;
-	padding-left: 1.5em;
-	font-size: 1em;
+  transition: max-height 0.5s;
+  background-color: #000;
+	overflow: hidden;
 	cursor: pointer;
   display: block;
+  font-size: 1em;
   color: #FFF;
 }
 
@@ -25,7 +24,7 @@ input[type="checkbox"] + label a {
 }
 
 input[type="checkbox"] + label svg {
-  transition: .1s all;
+  transition: .125s all;
 }
 
 input[type="checkbox"] + label path {
@@ -33,22 +32,23 @@ input[type="checkbox"] + label path {
 }
 
 input[type="checkbox"] + label + section {
-	transition: .25s all;
-	padding-left: 1.25em;
-	overflow: hidden;
-  height: 0;
+	padding-left: 1.5em;
 }
 
-input[type="checkbox"]+ label:focus path {
+input[type="checkbox"]:focus + label path {
   stroke:#FF0
 }
 
 input[type="checkbox"]:checked + label > svg {
-  transform: translate(0px) rotate(-90deg);
+  transform: rotate(-90deg);
 }
 
-input[type="checkbox"]:checked + label + section {
-	height: 16em;
+input[type="checkbox"]:checked + label + section > label {
+  max-height:100px;
+}
+
+input[type="checkbox"]:not(:checked) + label + section label{
+	max-height:0px;
 }
 
 .api {
