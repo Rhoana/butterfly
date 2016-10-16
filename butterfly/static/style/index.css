@@ -1,3 +1,7 @@
+#proto {
+  display:none;
+}
+
 input[type="checkbox"] {
 	position: absolute;
 	opacity: 0;
