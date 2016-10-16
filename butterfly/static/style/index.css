@@ -4,7 +4,7 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"] + label {
-  transition: max-height 0.5s;
+  transition: max-height 0.25s;
   background-color: #000;
 	overflow: hidden;
 	cursor: pointer;
@@ -43,12 +43,19 @@ input[type="checkbox"]:checked + label > svg {
   transform: rotate(-90deg);
 }
 
+input[type="checkbox"]:focus + label + section {
+  display:block !important;
+}
+
 input[type="checkbox"]:checked + label + section > label {
   max-height:100px;
 }
 
 input[type="checkbox"]:not(:checked) + label + section label{
 	max-height:0px;
+}
+input[type="checkbox"]:not(:checked) + label + section {
+  display:none;
 }
 
 .api {
