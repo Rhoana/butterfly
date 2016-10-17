@@ -42,18 +42,22 @@ label a:after {
 	content: ':'
 }
 
-label span span {
+input + label span span {
   padding-left: 0.75em;
-  font-size: x-small;
+  font-size: 0.7em;
 	color: #CCC;
 }
 
-label span span:before {
+input + label span span:before {
   content: '('
 }
 
-label span span:after {
+input + label span span:after {
   content: ')'
+}
+
+label:first-child > span {
+  font-size: 0.8em;
 }
 
 input[type="checkbox"] {
