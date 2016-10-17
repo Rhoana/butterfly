@@ -5,180 +5,64 @@
 //-----------------------------------
 
 DOJO.Write = function(setup){
+  this.ask = setup.ask;
   this.argue = setup.argue;
   this.share = setup.share;
-  this.layers = [this.img,this.seg];
-  this.max = setup.ask.length;
-  this.ask = setup.ask;
 }
 DOJO.Write.prototype = {
-  img: new RegExp('^(img|ima|raw).*','i'),
-  seg: new RegExp('^(seg|id).*','i'),
-  range: function(end){
-    return Object.keys(new Uint8Array(end)).map(Number);
+  totalIds: 0,
+  channels: {
+    'img':'',
+    'ids':'&id'
   },
-  parent: function(el){
-      return el.slice(0,el.lastIndexOf('&'));
+  copy: function(id){
+    return document.getElementById(id).cloneNode(1);
   },
-  unstring: function(target){
-      return target.el.split('&').pop().split(target.char);
+  grandkid: function(el){
+    return el.children[1].children[1];
   },
-  meta: function(target){
-    info = {}
-    var query = target.query || 'size';
-    var size = JSON.stringify(target.dimensions);
-    var field = target['short-description'];
-    if(target.field){
-      field = target[target.field]
-    }
-    info.size = size.replace(/[{"}]/g,' ').replace(/\s:/g,':');
-    info.format = ' '+target['data-type'];
-    return [field,info[target.query]];
-  },
-  targets: {
-    head: [{
-        template:'lists'
-    },
-    {
-        maxdraw: 1,
-        template:'lengths',
-        char: '+'
-    }],
-    body: [{
-        template:'links',
-        char: '+'
-      },
-      {
-        maxdraw: 1,
-        template:'links',
-        field: 'dataset',
-        query: 'size',
-        char: '+',
-        back: 1
-    }]
-  },
-  lists: function(target){
-    var self = this.argue(target);
-    var id = self.replace(/=/g,'-');
-    var labid = self.replace(/=/g,'+');
-    var check = this.max-this.ask.indexOf(target.kind);
-    return {
-      input: {
-        tags:[
-          ['id',id],
-          ['type','checkbox'],
-          ['checked',check>3]
-        ]
-      },
-      label: {
-        tags: [
-          ['for',id],
-          ['id',labid]
-        ]
-      },
-      section: {
-        tags: [['id',self]]
-      },
-      elems: ['input','label','section']
-    };
-  },
-  links: function(target){
-    var [link,info] = this.meta(target);
-    var [w,h] = [target.dimensions.x,target.dimensions.y];
-    var labels = [target['short-description'],target.name];
-    var path = 'viz.html?datapath='+target.path+'&width='+w+'&height='+h;
-    this.layers.some(function(layer,layi){
-       if(labels.map(layer.test,layer).some(Boolean)){
-          var link = this.unstring(target).shift();
-          var keywords = {
-            dataset: ['&overlay'],
-            channel: ['','&id'],
-          };
-          var words = keywords[link];
-          path += words[layi%words.length];
-          return true;
-       }
-    },this)
-    return {
-      a: {
-        innerHTML: link+ ':',
-        tags:[['href',path]]
-      },
-      svg: {
-        innerHTML: '<path d="M 0,4 L 3,7 L 6,4"/>'
-      },
-      span: {
-        innerHTML: info
-      },
-      elems: ['svg','a','span']
-    };
-  },
-  lengths: function(target){
-    var index = this.ask.indexOf(target.kind);
-    var parentName = this.unstring(target).pop();
-    if(index==0 || this.max<index+3) {
-      return {elems:[]};
-    }
-    return {
-      svg: {
-        innerHTML: '<path d="M 0,4 L 3,7 L 6,4"/>'
-      },
-      b: {
-        innerHTML: parentName +': '
-      },
-      span: {
-        innerHTML: ' ('+target.length +') '
-      },
-      elems: ['svg','b','span']
-    };
-  },
-  build: function(target,elem){
-    if (target.parent && target.source){
-      var el = document.createElement(elem);
-      if (elem == 'svg'){
-          el = document.getElementById('icon').cloneNode(1);
-      }
-      var preset = target.source[elem];
-      if(preset){
-        el.innerHTML = preset.innerHTML || '';
-        (preset.tags||[]).map(function(tag){
-          if(tag.every(Boolean)){
-            return el.setAttribute.apply(el,tag);
-          }
-            el[tag[0] || 'b'] = false;
+  head: function(source){
+      var self = this.copy('path');
+      var parent = document.getElementById(source.old);
+      var cousin = this.grandkid(parent.parentElement);
+      var offspring = this.grandkid(self);
+      self.removeAttribute('id');
+      var id = this.totalIds++;
+      var path = [
+        [['id', 'in'+id],['checked',true]],
+        [['for', 'in'+id]],
+        [['id', source.now]]
+      ];
+      path.forEach(function(tags,tagi){
+        tags.forEach(function(tag){
+          var temp = self.children[tagi];
+          temp.setAttribute.apply(temp,tag);
         });
-        target.parent.appendChild(el);
+      });
+      offspring.children[0].innerHTML = source.name+': ';
+      parent.appendChild(self);
+//      log(source)
+      if(cousin){
+        cousin.children[1].innerHTML = '('+source.length+')';
       }
-    }
   },
-  template: function(target){
-    if(!target.maxdraw || target.maxdraw > target.num){
-        target.source = this[target.template](target);
-        var build = this.build.bind(this,target);
-        target.source.elems.map(build,this);
-    }
-  },
-  write: function(target){
-    var parent = target.el || this.ask[0];
-    target.parent = document.getElementById(parent);
-    this.template(target);
-  },
-  sections: function(source,target){
-    var ran = this.range(target.back||0);
-    var el = ran.reduce(this.parent,source.old);
-    return this.share(source,{
-      query: target.query || 'format',
-      el: el.replace(/=/g, target.char||'='),
-      field: target.field || false,
-      template: target.template,
-      maxdraw: target.maxdraw,
-      char: target.char || '='
-    });
+  body: function(source){
+      var parent = document.getElementById(source.old);
+      var cousin = this.grandkid(parent.parentElement);
+      var ancestor = parent.parentElement.parentElement.parentElement;
+      var uncle = this.grandkid(parent.parentElement.parentElement.parentElement);
+      var [w,h,d] = [source.dimensions.x,source.dimensions.y,source.dimensions.z];
+      var path = 'viz.html?datapath='+source.path+'&width='+w+'&height='+h;
+      cousin.children[0].href = path+this.channels[source.name];
+      cousin.children[1].innerHTML = '('+source['data-type']+')';
+      uncle.children[1].innerHTML = '('+[w,h,d].join(', ')+')'
+      uncle.children[0].href = path+'&overlay';
+      ancestor.children[0].checked = false;
   },
   main: function(terms){
-    var source = this.share(terms,{old: ''});
-    var section = this.sections.bind(this,source);
-    this.targets[terms.target].map(section).map(this.write,this);
+    var source = this.share(terms,{now:this.argue(terms)});
+    source.old = source.old || this.ask[0];
+    this[source.target](source);
     return terms;
   }
 }

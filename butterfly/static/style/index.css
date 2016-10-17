@@ -2,67 +2,7 @@
   display:none;
 }
 
-input[type="checkbox"] {
-	position: absolute;
-	opacity: 0;
-}
-
-input[type="checkbox"] + label {
-  transition: max-height 0.25s;
-  background-color: #000;
-	overflow: hidden;
-	cursor: pointer;
-  display: block;
-  font-size: 1em;
-  color: #FFF;
-}
-
-input[type="checkbox"] + label span {
-  padding-left: 0.75em;
-  font-size: smaller;
-	color: #CCC;
-}
-
-input[type="checkbox"] + label a {
-	color: #FF0;
-}
-
-input[type="checkbox"] + label svg {
-  transition: .125s all;
-}
-
-input[type="checkbox"] + label path {
-  stroke:#FFF
-}
-
-input[type="checkbox"] + label + section {
-	padding-left: 1.5em;
-}
-
-input[type="checkbox"]:focus + label path {
-  stroke:#FF0
-}
-
-input[type="checkbox"]:checked + label > svg {
-  transform: rotate(-90deg);
-}
-
-input[type="checkbox"]:focus + label + section {
-  display:block !important;
-}
-
-input[type="checkbox"]:checked + label + section > label {
-  max-height:100px;
-}
-
-input[type="checkbox"]:not(:checked) + label + section label{
-	max-height:0px;
-}
-input[type="checkbox"]:not(:checked) + label + section {
-  display:none;
-}
-
-.api {
+#api {
   font-family: sans-serif;
   background-color:#000;
   position:absolute;
@@ -70,4 +10,66 @@ input[type="checkbox"]:not(:checked) + label + section {
   width:100%;
   left:0px;
   top:0px;
+}
+
+label {
+  transition: .25s all;
+	overflow: hidden;
+	cursor: pointer;
+  display: block;
+  font-size: 1em;
+  color: #FFF;
+}
+
+ul {
+	padding-left: 1.5em;
+}
+
+svg {
+  transition: .125s all;
+}
+
+path {
+  stroke:#FFF
+}
+
+label a[href] {
+	color: #FF0;
+}
+
+span span {
+  padding-left: 0.75em;
+  font-size: x-small;
+	color: #CCC;
+}
+
+input[type="checkbox"] {
+	position: absolute;
+	opacity: 0;
+}
+
+input[type="checkbox"]:checked + label svg {
+  transform: rotate(-90deg);
+}
+
+input[type="checkbox"]:checked + label + ul label{
+  max-height:2em;
+}
+
+input[type="checkbox"]:not(:checked) + label + ul label{
+	max-height:0em;
+}
+
+ /* Entirely for Keyboad Navigation Purposes */
+
+input[type="checkbox"]:focus + label svg path {
+  stroke:#FF0
+}
+
+input[type="checkbox"]:not(:checked) + label + ul input{
+	display:none;
+}
+
+input[type="checkbox"]:not(:checked) + label + ul a{
+	display:none;
 }
