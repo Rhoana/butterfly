@@ -6,7 +6,7 @@
 
 DOJO.Write = function(setup){
   this.ask = setup.ask;
-  this.argue = setup.argue;
+  this.hash = setup.hash;
   this.share = setup.share;
 }
 DOJO.Write.prototype = {
@@ -39,6 +39,7 @@ DOJO.Write.prototype = {
         var temp = self.children[tagi];
         temp.setAttribute.apply(temp,tag);
       });
+      self.children[0].checked = true;
       parent.appendChild(self);
       offspring.children[0].innerHTML = source.name;
       cousin.children[1].innerHTML = source.length;
@@ -69,7 +70,7 @@ DOJO.Write.prototype = {
       },this);
   },
   main: function(terms){
-    var source = this.share(terms,{now:this.argue(terms)});
+    var source = this.share(terms,{now:this.hash(terms)});
     var parent = document.getElementById(source.old || this.ask[0]);
     var cousin = this.grandkid(parent.parentElement,[1,1]);
     this[source.target](source,parent,cousin);

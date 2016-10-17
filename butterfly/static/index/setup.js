@@ -8,9 +8,10 @@ log = console.log.bind(window.console);
 DOJO.Setup = function(api){
   this.parse = api.parse;
   this.write = new DOJO.Write(this);
-  this.loaded = this.ask.reduce(this.loader.bind(this),this.start(''));
-  Promise.all(this.loaded).then(function(sources){
-//    log(sources.pop());
+  this.loaded = this.start('');
+
+  this.loaded.then(function(h){
+      log(h)
   });
 }
 
@@ -21,7 +22,8 @@ DOJO.Setup.prototype = {
     'channel_metadata'
   ],
   start: function(old){
-    return [Promise.resolve([{old:old}])];
+    var temp = Promise.resolve([{old:old,out:['']}]);
+    return this.ask.reduce(this.loader.bind(this),temp);
   },
   // Copy an object
   share: function(from, to) {
@@ -50,7 +52,7 @@ DOJO.Setup.prototype = {
   plural: function(str){
     return (str + 's').replace(/datas$/,'data');
   },
-  argue: function(hash){
+  hash: function(hash){
     var now = hash.old+'&';
     now = now.replace(/^&/,'');
     if(hash.kind && hash.name){
@@ -58,15 +60,11 @@ DOJO.Setup.prototype = {
     }
     return now;
   },
-  find: function(kind,hash,i){
-    var where = this.plural(kind)+'?'+this.argue(hash);
-    return this.get('/api/' + where);
-  },
   build: function(hash,sources){
     var terms = sources.reduce(this.share,hash);
     return this.write.main(terms);
   },
-  draw: function(kind,result) {
+  draw: function(kind,result,i) {
     var [out,old] = [result.out,result.old];
     var hash = {old: old, kind:kind};
     if (out instanceof Array){
@@ -77,12 +75,16 @@ DOJO.Setup.prototype = {
       },this);
     }
     var sources = [{target:'body'},this.parse(old),out];
-    return [this.build(hash,sources)];
+    return this.build(hash,sources);
+  },
+  find: function(kind,hash,i){
+    var where = this.plural(kind)+'?'+this.hash(hash);
+    return this.get('/api/' + where);
   },
   map: function(arr,kind,fn){
     return arr.map(this[fn].bind(this,kind));
   },
-  loader: function(pending,kind){
+  loader: function(pending,kind,depth){
     map = this.map.bind(this);
     var find = function(arr){
       return Promise.all(map(arr,kind,'find'));
@@ -91,8 +93,6 @@ DOJO.Setup.prototype = {
       var cat = [].concat.apply.bind([].concat);
       return map(arr,kind,'draw').reduce(cat,[]);
     };
-    return pending.map(function(prom){
-      return prom.then(find).then(draw);
-    });
+    return pending.then(find).then(draw);
   }
 }
