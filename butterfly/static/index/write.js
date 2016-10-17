@@ -11,13 +11,10 @@ DOJO.Write = function(setup){
 }
 DOJO.Write.prototype = {
   totalIds: 0,
-  channels: {
-    'img':'',
-    'ids':'&id'
-  },
   copy: function(id,i){
     return document.getElementById(id).children[i].cloneNode(1);
   },
+  chan: new RegExp('(seg|id).*', 'i'),
   grandparent: function(el){
     return el.parentElement.parentElement;
   },
@@ -50,8 +47,9 @@ DOJO.Write.prototype = {
       var uncle = this.grandkid(ancestor,[1,1]);
       var size = source.dimensions;
       var [w,h,d] = [size.x,size.y,size.z];
+      var matchID = Number(this.chan.test(source.name));
       var path = 'viz.html?datapath='+source.path+'&width='+w+'&height='+h;
-      cousin.children[0].href = path+this.channels[source.name];
+      cousin.children[0].href = path+ (['','&id'][matchID]);
       cousin.children[1].innerHTML = source['data-type'];
       uncle.children[1].innerHTML = [w,h,d].join(', ');
       uncle.children[0].href = path+'&overlay';

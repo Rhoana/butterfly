@@ -36,7 +36,6 @@ class HDF5DataSource(DataSource):
         layers = self.defaultLayers(datapath)
         if not layers:
             warn = "HDF5 path %s must point to valid h5" % datapath
-            logger.report_event(warn, log_level=logging.WARNING)
             raise IndexError(warn)
         self.layers = len(layers)
         self.hdf5_file = [d[K_FILENAME] for d in layers]

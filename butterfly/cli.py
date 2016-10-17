@@ -23,12 +23,13 @@ def main():
     parser.add_argument('path', default=os.getcwd(), nargs='?', help=help['path'])
     parser.add_argument('-p','--port', metavar='int',type=int, help=help['port'])
     args = parser.parse_args()
+
     base = os.path.join(args.path,'rh_config.yaml')
     os.environ['RH_CONFIG_FILENAME'] = base
-
-    from butterfly import settings,core,webserver
     from rh_logger import logger
+    from butterfly import settings,core,webserver,hdf5,mojo
     port = args.port if args.port else settings.PORT
+
 
     logger.start_process(
         "bfly", "Starting butterfly server on port {}".format(port), [port])
@@ -38,6 +39,22 @@ def main():
     logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),
                         log_level=logging.DEBUG)
     c = core.Core()
+
+    if not os.path.isfile(base):
+        home = args.path
+        root = os.path.basename(os.path.normpath(home))
+        folds = [os.path.join(home,f) for f in next(os.walk(home))[1] if not f.startswith('.')]
+        sample = {'name':root,'datasets':[]}
+        for fold in folds:
+            try:
+                c.create_datasource(fold)
+            except:
+                logger.report_event('No datasource at '+ fold,log_level=logging.WARN)
+                continue
+            source = c.get_datasource(fold)
+            dataset = source.get_dataset(fold)
+            sample['datasets'].append(dataset)
+        settings.bfly_config['experiments'] = [{'name':'BFLY','samples':[sample]}]
 
     ws = webserver.WebServer(c, port)
     ws.start()
