@@ -15,7 +15,6 @@ DOJO.Setup = function(api){
 }
 
 DOJO.Setup.prototype = {
-  now:{dataset:'',offset:0},
   ask: [
     'experiment','sample',
     'dataset','channel',
@@ -65,26 +64,19 @@ DOJO.Setup.prototype = {
   },
   build: function(hash,sources){
     var terms = sources.reduce(this.share,hash);
-    if(terms.dataset){
-      if(terms.dataset != this.now.dataset){
-        this.now.dataset = terms.dataset;
-        this.now.offset = terms.order;
-      }
-      terms.num = terms.order - this.now.offset;
-    }
     return this.write.main(terms);
   },
-  draw: function(kind,result,order) {
+  draw: function(kind,result) {
     var [out,old] = [result.out,result.old];
     var hash = {old: old, kind:kind};
     if (out instanceof Array){
-      return out.map(function(name,num){
-        var sources = [{target:'head',name:name,num:num}];
+      return out.map(function(name){
+        var sources = [{target:'head',name:name}];
         sources.push({length:result.out.length});
         return this.build(hash,sources);
       },this);
     }
-    var sources = [{order:order,target:'body'},this.parse(old),out];
+    var sources = [{target:'body'},this.parse(old),out];
     return [this.build(hash,sources)];
   },
   map: function(arr,kind,fn){

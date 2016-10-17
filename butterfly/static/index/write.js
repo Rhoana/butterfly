@@ -26,11 +26,7 @@ DOJO.Write.prototype = {
       return el.children[i];
     },el);
   },
-  head: function(source){
-      var parent = document.getElementById(source.old);
-      var grandparent = parent.parentElement;
-      var cousin = this.grandkid(grandparent,[1,1]);
-
+  head: function(source,parent,cousin){
       var self = this.copy('proto',0);
       var offspring = this.grandkid(self,[1,1]);
       var id = this.totalIds++;
@@ -47,14 +43,12 @@ DOJO.Write.prototype = {
       offspring.children[0].innerHTML = source.name;
       cousin.children[1].innerHTML = source.length;
   },
-  body: function(source){
-      var parent = document.getElementById(source.old);
-      var grandparent = parent.parentElement;
-      var cousin = this.grandkid(grandparent,[1,1]);
-
+  body: function(source,parent,cousin){
+      var grandparent = this.grandparent(cousin);
       var ancestor = this.grandparent(grandparent);
       var uncle = this.grandkid(ancestor,[1,1]);
-      var [w,h,d] = [source.dimensions.x,source.dimensions.y,source.dimensions.z];
+      var size = source.dimensions;
+      var [w,h,d] = [size.x,size.y,size.z];
       var path = 'viz.html?datapath='+source.path+'&width='+w+'&height='+h;
       cousin.children[0].href = path+this.channels[source.name];
       cousin.children[1].innerHTML = source['data-type'];
@@ -76,8 +70,9 @@ DOJO.Write.prototype = {
   },
   main: function(terms){
     var source = this.share(terms,{now:this.argue(terms)});
-    source.old = source.old || this.ask[0];
-    this[source.target](source);
+    var parent = document.getElementById(source.old || this.ask[0]);
+    var cousin = this.grandkid(parent.parentElement,[1,1]);
+    this[source.target](source,parent,cousin);
     return terms;
   }
 }
