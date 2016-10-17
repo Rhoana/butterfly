@@ -29,33 +29,28 @@ DOJO.Write.prototype = {
       self.removeAttribute('id');
       var id = this.totalIds++;
       var path = [
-        [['id', 'in'+id],['checked',true]],
-        [['for', 'in'+id]],
-        [['id', source.now]]
+        ['id', 'in'+id],
+        ['for', 'in'+id],
+        ['id', source.now]
       ];
-      path.forEach(function(tags,tagi){
-        tags.forEach(function(tag){
-          var temp = self.children[tagi];
-          temp.setAttribute.apply(temp,tag);
-        });
+      path.forEach(function(tag,tagi){
+        var temp = self.children[tagi];
+        temp.setAttribute.apply(temp,tag);
       });
-      offspring.children[0].innerHTML = source.name+': ';
       parent.appendChild(self);
-//      log(source)
-      if(cousin){
-        cousin.children[1].innerHTML = '('+source.length+')';
-      }
+      offspring.children[0].innerHTML = source.name;
+      cousin.children[1].innerHTML = source.length;
   },
   body: function(source){
       var parent = document.getElementById(source.old);
       var cousin = this.grandkid(parent.parentElement);
       var ancestor = parent.parentElement.parentElement.parentElement;
-      var uncle = this.grandkid(parent.parentElement.parentElement.parentElement);
+      var uncle = this.grandkid(ancestor);
       var [w,h,d] = [source.dimensions.x,source.dimensions.y,source.dimensions.z];
       var path = 'viz.html?datapath='+source.path+'&width='+w+'&height='+h;
       cousin.children[0].href = path+this.channels[source.name];
-      cousin.children[1].innerHTML = '('+source['data-type']+')';
-      uncle.children[1].innerHTML = '('+[w,h,d].join(', ')+')'
+      cousin.children[1].innerHTML = source['data-type'];
+      uncle.children[1].innerHTML = [w,h,d].join(', ');
       uncle.children[0].href = path+'&overlay';
       ancestor.children[0].checked = false;
   },
