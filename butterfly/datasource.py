@@ -115,8 +115,11 @@ class DataSource(object):
 
     def get_dataset(self,path):
         '''
-        Return dataset of the form {'name':'name','channels':[
-            {'data-type':'uint8', 'name': ids, 'path': '/root/path', 'dimensions':{'x':512,'y':512,'z':100}},
-        ]}
+        # Override for >1 channels with own 'data-type'
+        :param path: the root/path/to/this/data
+        :returns: dataset of meta info about self
         '''
-        raise NotImplementedError()
+        dimensions = dict(zip(('x','y','z'),self.get_boundaries()))
+        channel = {'path':path,'name':'img','dimensions':dimensions}
+        dataset = {'name':os.path.basename(path),'channels':[channel]}
+        return dataset
