@@ -27,10 +27,9 @@ def main():
     parser.add_argument('-n','--nth',type=int, metavar='nth', default = 2, help= help['depth'])
     [homefolder,port,nth] = [parser.parse_args().exp, parser.parse_args().port, parser.parse_args().nth]
     home = os.path.realpath(os.path.expanduser(homefolder if homefolder else '~'))
-    base = os.path.join(home,'rh_config.yaml')
     homename = os.path.basename(home)
 
-    if os.path.isfile(base):
+    if os.path.isfile(home):
         os.environ['RH_CONFIG_FILENAME'] = base
     from butterfly import settings,core,webserver
     from rh_logger import logger
