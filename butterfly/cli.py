@@ -53,7 +53,8 @@ def main():
         name = '/' if homename == rootname else rootname
         samp = {'name':name,'datasets':[]}
         for branch in folderer(root,depth):
-            try: samp['datasets'].append(sourcer(branch))
+            try:
+                samp['datasets'].append(sourcer(branch))
             except:
                 sampler(os.path.basename(branch),branch,depth-1,samples)
                 continue

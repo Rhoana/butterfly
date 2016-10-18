@@ -56,7 +56,7 @@ DOJO.Write.prototype = {
       grandparent.children[0].checked = false;
       ancestor.children[0].checked = false;
       var path = [
-        ['name', source['short-description']],
+        ['name', source['short-description'] || source['name']],
         ['path', source.path]
       ]
       path.forEach(function(items){

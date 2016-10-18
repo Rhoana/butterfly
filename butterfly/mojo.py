@@ -134,3 +134,13 @@ class Mojo(DataSource):
         return (len(self._indices[0]) *
                 self.blocksize[0], len(self._indices[1]) *
                 self.blocksize[1], len(self._indices[2]))
+
+    def get_dataset(self,path):
+        dataset = {'name':os.path.basename(path),'channels':[]}
+        dimensions = dict(zip(('x','y','z'),self.get_boundaries()))
+        for nindex,name in enumerate(['images','ids']):
+            # print os.path.join(path,file)
+            type = self.load(0,0,0,self.max_zoom,bool(nindex)).dtype.name
+            channel = {'path':path,'name':name,'dimensions':dimensions,'data-type': type}
+            dataset['channels'].append(channel)
+        return dataset

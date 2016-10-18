@@ -114,25 +114,9 @@ class DataSource(object):
         pass
 
     def get_dataset(self,path):
-        from mojo import Mojo
-        from hdf5 import HDF5DataSource
-        dataset = {'name':os.path.basename(path),'channels':[]}
-        dimensions = dict(zip(('x','y','z'),self.get_boundaries()))
-        if isinstance(self,HDF5DataSource):
-            for findex,file in enumerate(self.hdf5_file):
-                innerPath = self.data_path[findex]
-                base = os.path.splitext(os.path.basename(file))[0]
-                channel = {'path':path,'name':base,'dimensions':dimensions}
-                channel['short-description'] = base
-                with h5py.File(file, "r") as fd:
-                    channel['data-type'] = fd[innerPath].dtype.name
-                dataset['channels'].append(channel)
-        elif isinstance(self,Mojo):
-            for nindex,name in enumerate(['images','ids']):
-                # print os.path.join(path,file)
-                type = self.load(0,0,0,self.max_zoom,bool(nindex)).dtype.name
-                channel = {'path':path,'name':name,'dimensions':dimensions,'data-type': type}
-                channel['short-description'] = name
-                dataset['channels'].append(channel)
-            print 'mojo'
-        return dataset
+        '''
+        Return dataset of the form {'name':'name','channels':[
+            {'data-type':'uint8', 'name': ids, 'path': '/root/path', 'dimensions':{'x':512,'y':512,'z':100}},
+        ]}
+        '''
+        raise NotImplementedError()
