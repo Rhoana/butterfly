@@ -15,45 +15,40 @@ def main():
 
     help = {
         'bfly': 'Host a butterfly server!',
-        'path': '/parent/path/of/all/sources',
+        'home': '/parent/path/of/all/sources',
         'port': 'port >1024 for hosting this server'
     }
+    user = os.path.expanduser('~')
 
     parser = argparse.ArgumentParser(description=help['bfly'])
-    parser.add_argument('path', default=os.getcwd(), nargs='?', help=help['path'])
-    parser.add_argument('-p','--port', metavar='int',type=int, help=help['port'])
-    args = parser.parse_args()
+    parser.add_argument('port', type=int, default = 2001, nargs='?', help=help['port'])
+    parser.add_argument('-f','--folder', metavar='home', default= user, help= help['home'])
+    [home,port] = [parser.parse_args().folder, parser.parse_args().port]
+    base = os.path.join(home,'rh_config.yaml')
 
-    base = os.path.join(args.path,'rh_config.yaml')
-    os.environ['RH_CONFIG_FILENAME'] = base
+    if os.path.isfile(base):
+        os.environ['RH_CONFIG_FILENAME'] = base
     from rh_logger import logger
-    from butterfly import settings,core,webserver,hdf5,mojo
-    port = args.port if args.port else settings.PORT
+    from butterfly import settings,core,webserver
 
-
-    logger.start_process(
-        "bfly", "Starting butterfly server on port {}".format(port), [port])
-
-    logger.report_event("Datasources: " + ", ".join(settings.DATASOURCES),
-                        log_level=logging.DEBUG)
-    logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),
-                        log_level=logging.DEBUG)
+    logger.start_process("bfly", "Starting butterfly server on port {}".format(port), [port])
+    logger.report_event("Datasources: " + ", ".join(settings.DATASOURCES),log_level=logging.DEBUG)
+    logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),log_level=logging.DEBUG)
     c = core.Core()
 
-    if not os.path.isfile(base):
-        home = args.path
-        root = os.path.basename(os.path.normpath(home))
-        folds = [os.path.join(home,f) for f in next(os.walk(home))[1] if not f.startswith('.')]
-        sample = {'name':root,'datasets':[]}
+    if home is not user and not os.environ.get('RH_CONFIG_FILENAME'):
+        visible = [os.path.join(home,f) for f in os.listdir(home) if not f.startswith('.')]
+        folds = [v for v in visible if os.path.isdir(v) or v.endswith('.json')]
+        sample = {'name':os.path.basename(home),'datasets':[]}
         for fold in folds:
             try:
                 c.create_datasource(fold)
+                source = c.get_datasource(fold)
+                dataset = source.get_dataset(fold)
+                sample['datasets'].append(dataset)
             except:
                 logger.report_event('No datasource at '+ fold,log_level=logging.WARN)
                 continue
-            source = c.get_datasource(fold)
-            dataset = source.get_dataset(fold)
-            sample['datasets'].append(dataset)
         settings.bfly_config['experiments'] = [{'name':'BFLY','samples':[sample]}]
 
     ws = webserver.WebServer(c, port)
