@@ -225,7 +225,7 @@ class RestAPIHandler(RequestHandler):
                             [x, y, z], [width, height, 1],
                             w=resolution, dtype=dtype)
         data = cv2.imencode(
-            "." + fmt, vol[:width, :height, 0].astype(dtype))[1]
+            "." + fmt, vol[:height, :width, 0].astype(dtype))[1]
         data = data.tostring()
         self.set_header("Content-Type", "image/"+fmt)
         self.write(data)
