@@ -96,7 +96,7 @@ class HDF5DataSource(DataSource):
         dimensions = dict(zip(('x','y','z'),self.get_boundaries()))
         for findex,file in enumerate(self.hdf5_file):
             innerPath = self.data_path[findex]
-            base = os.path.splitext(os.path.basename(file))[0]
+            base = os.path.splitext(os.path.basename(file))[0]+innerPath
             channel = {'path':path,'name':base,'dimensions':dimensions}
             with h5py.File(file, "r") as fd:
                 channel['data-type'] = fd[innerPath].dtype.name
