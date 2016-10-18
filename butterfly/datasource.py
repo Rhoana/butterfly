@@ -1,3 +1,5 @@
+import os
+import re
 import cv2
 import h5py
 import settings
@@ -110,3 +112,27 @@ class DataSource(object):
         Get maximum data size
         '''
         pass
+
+    def get_dataset(self,path):
+        from mojo import Mojo
+        from hdf5 import HDF5DataSource
+        dataset = {'name':os.path.basename(path),'channels':[]}
+        dimensions = dict(zip(('x','y','z'),self.get_boundaries()))
+        if isinstance(self,HDF5DataSource):
+            for findex,file in enumerate(self.hdf5_file):
+                innerPath = self.data_path[findex]
+                base = os.path.splitext(os.path.basename(file))[0]
+                channel = {'path':path,'name':base,'dimensions':dimensions}
+                channel['short-description'] = base
+                with h5py.File(file, "r") as fd:
+                    channel['data-type'] = fd[innerPath].dtype.name
+                dataset['channels'].append(channel)
+        elif isinstance(self,Mojo):
+            for nindex,name in enumerate(['images','ids']):
+                # print os.path.join(path,file)
+                type = self.load(0,0,0,self.max_zoom,bool(nindex)).dtype.name
+                channel = {'path':path,'name':name,'dimensions':dimensions,'data-type': type}
+                channel['short-description'] = name
+                dataset['channels'].append(channel)
+            print 'mojo'
+        return dataset

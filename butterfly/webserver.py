@@ -77,7 +77,7 @@ class WebServer:
             (r'/metainfo/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/stop/(.*)', WebServerHandler, dict(webserver=self)),
-            (r'/(index\.html)', PkgResourcesHandler, {}),
+            (r'/(.*\.html)', PkgResourcesHandler, {}),
             (r'/(.*\.js)', PkgResourcesHandler, {}),
             (r'/(.*\.css)', PkgResourcesHandler, {}),
             (r'/(.*\.glsl)', PkgResourcesHandler, {}),

@@ -164,8 +164,8 @@ class RestAPIHandler(RequestHandler):
     def get_channel_metadata(self):
         '''Handle the /api/channel_metadata GET request'''
         channel = self._get_channel_config().copy()
-        if self.PATH in channel:
-            del channel[self.PATH]
+        # if self.PATH in channel:
+        #     del channel[self.PATH]
         return channel
 
     def _get_query_param(self, qparam):

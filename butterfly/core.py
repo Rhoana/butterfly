@@ -226,7 +226,7 @@ class Core(object):
                     ds = MultiBeam(self, datapath, dtype=dtype)
                     break
                 elif datasource == 'hdf5':
-                    from .hdf5 import HDF5DataSource
+                    from hdf5 import HDF5DataSource
                     ds = HDF5DataSource(self, datapath, dtype=dtype)
                     break
             except:
@@ -245,3 +245,6 @@ class Core(object):
         ds.index()
 
         self._datasources[datapath] = ds
+
+    def get_datasource(self,datapath):
+        return self._datasources[datapath]
