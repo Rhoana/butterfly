@@ -99,7 +99,7 @@ class HDF5DataSource(DataSource):
             base = os.path.splitext(os.path.basename(file))[0]
             base +os.path.basename(innerPath)
             channel = {'path':path,'dimensions':dimensions}
-            channel['name'] = base +os.path.basename(innerPath)
+            channel['name'] = base + ' ' +os.path.basename(innerPath)
             with h5py.File(file, "r") as fd:
                 channel['data-type'] = fd[innerPath].dtype.name
             dataset['channels'].append(channel)
