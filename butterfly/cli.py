@@ -30,7 +30,7 @@ def main():
     homename = os.path.basename(home)
 
     if os.path.isfile(home):
-        os.environ['RH_CONFIG_FILENAME'] = base
+        os.environ['RH_CONFIG_FILENAME'] = home
     from butterfly import settings,core,webserver
     from rh_logger import logger
 
@@ -62,7 +62,7 @@ def main():
             samples.append(samp)
         return samples
 
-    if homefolder and not os.path.isfile(base):
+    if homefolder and not os.path.isfile(home):
         exp = {'name': homename,'samples': sampler(homename,home,nth,[])}
         settings.bfly_config.setdefault('experiments',[]).append(exp)
     ws = webserver.WebServer(c, port)
