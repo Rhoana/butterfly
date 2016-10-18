@@ -15,42 +15,57 @@ def main():
 
     help = {
         'bfly': 'Host a butterfly server!',
-        'home': '/parent/path/of/all/sources',
-        'port': 'port >1024 for hosting this server'
+        'folder': 'relative, absolute, or user path/of/all/experiments',
+        'port': 'port >1024 for hosting this server',
+        'depth': 'search nth nested subfolders of exp path (default 2)'
     }
     user = os.path.expanduser('~')
 
     parser = argparse.ArgumentParser(description=help['bfly'])
+    parser.add_argument('-e','--exp', metavar='exp', help= help['folder'])
     parser.add_argument('port', type=int, default = 2001, nargs='?', help=help['port'])
-    parser.add_argument('-f','--folder', metavar='home', default= user, help= help['home'])
-    [home,port] = [parser.parse_args().folder, parser.parse_args().port]
+    parser.add_argument('-n','--nth',type=int, metavar='nth', default = 2, help= help['depth'])
+    [homefolder,port,nth] = [parser.parse_args().exp, parser.parse_args().port, parser.parse_args().nth]
+    home = os.path.realpath(os.path.expanduser(homefolder if homefolder else '~'))
     base = os.path.join(home,'rh_config.yaml')
+    homename = os.path.basename(home)
 
     if os.path.isfile(base):
         os.environ['RH_CONFIG_FILENAME'] = base
-    from rh_logger import logger
     from butterfly import settings,core,webserver
+    from rh_logger import logger
 
     logger.start_process("bfly", "Starting butterfly server on port {}".format(port), [port])
     logger.report_event("Datasources: " + ", ".join(settings.DATASOURCES),log_level=logging.DEBUG)
     logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),log_level=logging.DEBUG)
     c = core.Core()
 
-    if home is not user and not os.environ.get('RH_CONFIG_FILENAME'):
-        visible = [os.path.join(home,f) for f in os.listdir(home) if not f.startswith('.')]
-        folds = [v for v in visible if os.path.isdir(v) or v.endswith('.json')]
-        sample = {'name':os.path.basename(home),'datasets':[]}
-        for fold in folds:
-            try:
-                c.create_datasource(fold)
-                source = c.get_datasource(fold)
-                dataset = source.get_dataset(fold)
-                sample['datasets'].append(dataset)
-            except:
-                logger.report_event('No datasource at '+ fold,log_level=logging.WARN)
-                continue
-        settings.bfly_config['experiments'] = [{'name':'BFLY','samples':[sample]}]
+    def sourcer(fold):
+        c.create_datasource(fold)
+        source = c.get_datasource(fold)
+        return source.get_dataset(fold)
 
+    def folderer(root,depth):
+        if not os.path.isdir(root) or depth <= 0: return []
+        files = [os.path.realpath(os.path.join(root,f)) for f in os.listdir(root) if not f.startswith('.')]
+        return [v for v in files if os.path.isdir(v) or v.endswith('.json')]
+
+    def sampler(rootname,root,depth,samples):
+        name = '/' if homename == rootname else rootname
+        samp = {'name':name,'datasets':[]}
+        for branch in folderer(root,depth):
+            try: samp['datasets'].append(sourcer(branch))
+            except:
+                sampler(os.path.basename(branch),branch,depth-1,samples)
+                continue
+            logger.report_event('Datasource found at '+ branch)
+        if samp['datasets']:
+            samples.append(samp)
+        return samples
+
+    if homefolder and not os.path.isfile(base):
+        exp = {'name': homename,'samples': sampler(homename,home,nth,[])}
+        settings.bfly_config.setdefault('experiments',[]).append(exp)
     ws = webserver.WebServer(c, port)
     ws.start()
 
