@@ -28,7 +28,7 @@ DOJO.Source.prototype = {
         minLevel: 0,
         width: 8192,
         height: 8192,
-        tileSize: 520,
+        tileSize: 512,
         server: window.location.href.split('/')[2],
         datapath: '/Volumes/NeuroData/cylindojo/mojo',
         getTileUrl: function( level, x, y ) {
@@ -36,11 +36,10 @@ DOJO.Source.prototype = {
             var width = this.getTileWidth(level);
             var height = this.getTileHeight(level);
             var [sx,sy] = [x*width,y*height];
-            var offset = [this.width-sx,this.height-sy];
-            var size = [Math.min(offset[0],width), Math.min(offset[1],height), 1]
+            var size = [width, height, 1]
             return 'http://' + this.server + '/data/?datapath=' + this.datapath +
                 '&start=' + sx + ',' + sy + ',' + this.z + '&mip=' + (this.maxLevel - level) +
-                '&size=' +  size + this.seg;
+                '&size=' +  size + this.seg +'&fit=y';
         }
     },
     share: function(from, to) {
