@@ -111,6 +111,7 @@ ViaWebGL.prototype = {
     toBuffers: function(program) {
 
         // Allow for custom loading
+        this.program = program;
         this.gl.useProgram(program);
         this['gl-loaded'].call(this, program);
 
@@ -151,8 +152,22 @@ ViaWebGL.prototype = {
         gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ARRAY_BUFFER, buffer, gl.STATIC_DRAW);
     },
+    resize: function(){
+        // Get uniform term
+        var gl = this.gl;
+        gl.canvas.width = this.width;
+        gl.canvas.height = this.height;
+        var tile_size = gl.getUniformLocation(this.program, this.tile_size);
+        gl.uniform2f(tile_size, 1/gl.canvas.width, 1/gl.canvas.height);
+        this.gl.viewport(0, 0, this.width, this.height);
+    },
     // Turns image or canvas into a rendered canvas
-    toCanvas: function(tile) {
+    toCanvas: function(tile,size) {
+
+        if(size){
+          [this.width,this.height] = size;
+        }
+        this.resize();
         // Stop Rendering
         if (this.on%2 !== 0) {
             if(tile.nodeName == 'IMG') {

@@ -1,3 +1,4 @@
+log = console.log.bind(window.console)
 //-----------------------------------
 //
 // DOJO.Source: makes tileSources
@@ -14,7 +15,7 @@ DOJO.Source.prototype = {
         var sourcer = this.share(this.tileSource,{});
         var source = this.share(src_terms, sourcer);
         var maxLevel = source.width/source.tileSize;
-        source.maxLevel = Math.ceil(Math.log2(maxLevel));
+        source.maxLevel = Math.floor(Math.log2(maxLevel));
         // Get the segmentation string for butterfly
         if (source.segmentation) {
             source.seg = '&segmentation=y&'+this.segmentFormats[source.glflag];
@@ -34,10 +35,12 @@ DOJO.Source.prototype = {
         getTileUrl: function( level, x, y ) {
             var width = this.getTileWidth(level);
             var height = this.getTileHeight(level);
-            return 'http://' + this.server + '/data/?datapath=' +
-                this.datapath + '&start=' + x*width + ',' + y*height + ',' +
-                this.z + '&mip=' + (this.maxLevel - level) + '&size=' +
-                width + ',' + height + ',' + 1 + this.seg;
+            var [sx,sy] = [x*width,y*height];
+            var offset = [this.width-sx,this.height-sy];
+            var size = [Math.min(offset[0],width), Math.min(offset[1],height), 1]
+            return 'http://' + this.server + '/data/?datapath=' + this.datapath +
+                '&start=' + sx + ',' + sy + ',' + this.z + '&mip=' + (this.maxLevel - level) +
+                '&size=' +  size + this.seg;
         }
     },
     share: function(from, to) {
