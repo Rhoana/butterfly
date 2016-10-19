@@ -1,4 +1,3 @@
-log = console.log.bind(window.console)
 //-----------------------------------
 //
 // DOJO.Source: makes tileSources
@@ -29,10 +28,11 @@ DOJO.Source.prototype = {
         minLevel: 0,
         width: 8192,
         height: 8192,
-        tileSize: 512,
+        tileSize: 520,
         server: window.location.href.split('/')[2],
         datapath: '/Volumes/NeuroData/cylindojo/mojo',
         getTileUrl: function( level, x, y ) {
+            console.log(level)
             var width = this.getTileWidth(level);
             var height = this.getTileHeight(level);
             var [sx,sy] = [x*width,y*height];
