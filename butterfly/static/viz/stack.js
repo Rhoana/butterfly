@@ -12,19 +12,19 @@ DOJO.Stack = function(src_terms){
     // Setup
     var zBuff = this.zBuff;
     var channels = src_terms.channel || ['i'];
-    this.preset = this.layerer(channels);
+    var nLayers = channels.length;
+    this.layerer(channels);
 
     var keys = this.range(2*zBuff+1);
     var addFirst = this.add.bind(this.now-zBuff);
-    var join = this.join.bind(this,this.nLayers);
+    var join = this.join.bind(this,nLayers);
 
     // Prepare the sources
     keys.push(keys.splice(zBuff, 1)[0]);
     this.protoSource = new DOJO.Source(src_terms);
     this.source = keys.map(addFirst).reduce(join,[]);
-    this.index = this.indexer(zBuff,this.nLayers);
-    this.total = channels.length*keys.length;
-    console.log(this.total)
+    this.index = this.indexer(zBuff,nLayers);
+    this.total = nLayers*keys.length;
 }
 
 DOJO.Stack.prototype = {
@@ -47,7 +47,7 @@ DOJO.Stack.prototype = {
         }
     },
     layerer:  function(channels){
-        return channels.split('').map(function(char){
+        this.preset = channels.split('').map(function(char){
               return this.share(this.layers[char],{});
         },this);
     },
