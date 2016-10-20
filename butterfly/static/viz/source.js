@@ -32,14 +32,18 @@ DOJO.Source.prototype = {
         server: window.location.href.split('/')[2],
         datapath: '/Volumes/NeuroData/cylindojo/mojo',
         getTileUrl: function( level, x, y ) {
-            console.log(level)
+            var rats = this.getPixelRatio(level);
+            var bounds = this.getTileBounds(level, x, y).getSize();
+            var size = Object.keys(rats).map(function(xy){
+                return bounds[xy]/rats[xy];
+            });
+            size.push(1);
+            var blevel = this.maxLevel - level;
             var width = this.getTileWidth(level);
             var height = this.getTileHeight(level);
-            var [sx,sy] = [x*width,y*height];
-            var size = [width, height, 1]
-            return 'http://' + this.server + '/data/?datapath=' + this.datapath +
-                '&start=' + sx + ',' + sy + ',' + this.z + '&mip=' + (this.maxLevel - level) +
-                '&size=' +  size + this.seg +'&fit=y';
+            var start = [x*width, y*height, this.z];
+              return 'http://' + this.server + '/data/?datapath=' + this.datapath +
+                '&start=' + start + '&mip=' + blevel + '&size=' +  size + this.seg;
         }
     },
     share: function(from, to) {
