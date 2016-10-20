@@ -13,11 +13,11 @@ DOJO.Stack = function(src_terms){
     var zBuff = this.zBuff;
     var first = this.now-zBuff;
 
-    this.seg = Number(src_terms.id || 0);
+    this.idflag = Number(src_terms.id || 0);
     this.glflag = Number(src_terms.gl || 0);
-    this.seg = src_terms.overlay? 1: this.seg;
+    this.seg = src_terms.overlay? 1: this.idflag;
     this.nLayers = 1+Number(src_terms.overlay || 0);
-    this.layers[1].set.opacity = [.5,1][this.glflag];
+    this.layers[1].set.opacity = [.5,1][this.glflag || this.idflag];
     this.preset = this.range(this.nLayers).map(this.layerer, this);
 
     var keys = this.range(2*zBuff+1);
