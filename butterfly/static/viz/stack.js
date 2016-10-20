@@ -11,17 +11,11 @@ DOJO.Stack = function(src_terms){
 
     // Setup
     var zBuff = this.zBuff;
-    var first = this.now-zBuff;
-
-    this.idflag = Number(src_terms.id || 0);
-    this.glflag = Number(src_terms.gl || 0);
-    this.seg = src_terms.overlay? 1: this.idflag;
-    this.nLayers = 1+Number(src_terms.overlay || 0);
-    this.layers[1].set.opacity = [.5,1][this.glflag || this.idflag];
-    this.preset = this.range(this.nLayers).map(this.layerer, this);
+    var channels = src_terms.channel || ['i'];
+    this.preset = this.layerer(channels);
 
     var keys = this.range(2*zBuff+1);
-    var addFirst = this.add.bind(first);
+    var addFirst = this.add.bind(this.now-zBuff);
     var join = this.join.bind(this,this.nLayers);
 
     // Prepare the sources
@@ -29,23 +23,34 @@ DOJO.Stack = function(src_terms){
     this.protoSource = new DOJO.Source(src_terms);
     this.source = keys.map(addFirst).reduce(join,[]);
     this.index = this.indexer(zBuff,this.nLayers);
-    this.total = this.nLayers*keys.length;
+    this.total = channels.length*keys.length;
+    console.log(this.total)
 }
 
 DOJO.Stack.prototype = {
     now: 0,
+    level: 0,
     zBuff: 1,
     preset: [],
-    layers: [
-        {
+    layers: {
+        i: {
             set: {},
-            src: {}
+            src: {gl:0}
         },
-        {
+        s: {
+            set: {opacity: 0.5},
+            src: {gl:0,segmentation: true}
+        },
+        g: {
             set: {},
-            src: {segmentation: true}
+            src: {gl:1,segmentation: true}
         }
-    ],
+    },
+    layerer:  function(channels){
+        return channels.split('').map(function(char){
+              return this.share(this.layers[char],{});
+        },this);
+    },
     init: function(osd){
         var w = osd.world;
         this.event = function(event){
@@ -72,7 +77,7 @@ DOJO.Stack.prototype = {
     },
     share: DOJO.Source.prototype.share.bind(null),
     sourcer: function(zLevel, indices, layer, i){
-        var src = {z:zLevel,minLevel:this.level,glflag:this.glflag};
+        var src = {z:zLevel,minLevel:this.level};
         var source = this.protoSource.init(this.share(layer.src, src));
         return this.share(this.share(layer.set, {index:indices[i]}), source);
     },
@@ -106,10 +111,6 @@ DOJO.Stack.prototype = {
     times: function(that) {
         return this * that;
     },
-    layerer:  function(ind){
-        var kind = Number(ind == this.nLayers-this.seg);
-        return this.share(this.layers[kind],{});
-    },
     refresher: function(e){
         e.item.addHandler('fully-loaded-change',function(e){
             var event = e.eventSource;
@@ -121,13 +122,9 @@ DOJO.Stack.prototype = {
             }
         }.bind(this));
     },
-    porter: function(e){
-
-    },
     zoomer: function(e){
         var z = Math.max(e.zoom,1);
         var maxLevel = this.source[0].tileSource.maxLevel;
         this.level = Math.min(Math.ceil(Math.log(z)/Math.LN2), maxLevel);
-    },
-    level: 0
+    }
 };

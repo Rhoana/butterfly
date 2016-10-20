@@ -12,7 +12,6 @@ var DOJO = {};
 window.onload = function(e){
 
     OpenSeadragon.ImageLoader = ZipLoader;
-
     // preset tile source
     SCOPE.stack  = new DOJO.Stack(SCOPE.parse());
     // Open a seadragon with two layers
@@ -26,7 +25,6 @@ window.onload = function(e){
         id: 'viaWebGL'
     });
     SCOPE.openSD.world.addHandler('add-item', SCOPE.stack.refresher.bind(SCOPE.stack));
-    SCOPE.openSD.addHandler('update-level',SCOPE.stack.porter.bind(SCOPE.stack));
     SCOPE.openSD.addHandler('zoom',SCOPE.stack.zoomer.bind(SCOPE.stack));
     // Link everything to WebGL
     SCOPE.stack.init(SCOPE.openSD);

@@ -17,7 +17,7 @@ DOJO.Source.prototype = {
         source.maxLevel = Math.floor(Math.log2(maxLevel));
         // Get the segmentation string for butterfly
         if (source.segmentation) {
-            source.seg = '&segmentation=y&'+this.segmentFormats[source.glflag];
+            source.seg = '&segmentation=y&'+this.segmentFormats[source.gl];
         }
         return {tileSource: source};
     },
