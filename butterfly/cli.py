@@ -34,6 +34,7 @@ def main():
     from butterfly import settings,core,webserver
     from rh_logger import logger
 
+    port = settings.PORT if settings.PORT else port
     logger.start_process("bfly", "Starting butterfly server on port {}".format(port), [port])
     logger.report_event("Datasources: " + ", ".join(settings.DATASOURCES),log_level=logging.DEBUG)
     logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),log_level=logging.DEBUG)
