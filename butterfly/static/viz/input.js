@@ -65,10 +65,5 @@ DOJO.Input.prototype = {
         stack.show(stack.index.down);
         stack.lose(stack.index.end);
         stack.gain(-stack.zBuff, stack.index.start);
-    },
-    check: function(slice){
-        if (slice && slice.lastDrawn.length) {
-            return slice.lastDrawn[0].level >= level;
-        }
     }
 }
