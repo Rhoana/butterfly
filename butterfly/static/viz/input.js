@@ -20,9 +20,9 @@ DOJO.Input = function(scope) {
 DOJO.Input.prototype = {
 
     codes: {
-      188: 0,
+      190: 0,
       87: 0,
-      190: 1,
+      188: 1,
       83: 1,
     },
     init: function(){
