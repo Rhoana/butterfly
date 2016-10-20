@@ -49,10 +49,10 @@ DOJO.Write.prototype = {
       var [w,h,d] = [size.x,size.y,size.z];
       var matchID = Number(this.chan.test(source.name));
       var path = 'viz.html?datapath='+source.path+'&width='+w+'&height='+h;
-      cousin.children[0].href = path+ (['','&id'][matchID]);
+      cousin.children[0].href = path+ '&channel='+(['i','s'][matchID]);
       cousin.children[1].innerHTML = source['data-type'];
       uncle.children[1].innerHTML = [w,h,d].join(', ');
-      uncle.children[0].href = path+'&overlay';
+      uncle.children[0].href = path+'&channel=is';
       grandparent.children[0].checked = false;
       ancestor.children[0].checked = false;
       var path = [
