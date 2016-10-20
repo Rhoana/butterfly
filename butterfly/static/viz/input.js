@@ -19,38 +19,40 @@ DOJO.Input = function(scope) {
 
 DOJO.Input.prototype = {
 
+    codes: {
+      38: 0,
+      87: 0,
+      40: 1,
+      83: 1,
+    },
     init: function(){
         var seaGL = this.realT.seaGL;
         var toolbar = ['up','down'].map(this.button, this);
-        var keychain = this.key.bind(toolbar.reduce(this.chain,{}));
-        this.osd.addViewerInputHook({ keyDown: keychain });
+        this.osd.addViewerInputHook({ keyDown: this.keyDown.bind(this, toolbar) });
+        window.onkeydown = this.osd.innerTracker.keyDownHandler;
         toolbar.map(seaGL.button, seaGL);
     },
-    key: function(e){
-        e.shift = !e.shift;
-        var keychain = this;
-        if (e.shift && e.keyCode in keychain) {
-            e.preventDefaultAction = true;
-            keychain[e.keyCode]();
-        }
-    },
     event: function(event) {
-        var slices = this.stack.event(event);
-        if (slices.every(this.check.bind(this))) {
-            if (this.stack.total == this.stack.w.getItemCount()) {
-                return this[event](this.stack);
+        var level = this.stack.level;
+        var check = function(slice){
+            if (slice && slice.lastDrawn.length) {
+                return slice.lastDrawn[0].level >= level;
             }
         }
+        var slices = this.stack.event(event);
+        if (slices && slices.every(check)) {
+            return this[event](this.stack);
+        }
     },
-    button: function(name) {
-        var obj = {name:name};
-        obj.onClick = this.event.bind(this,name);
-        return obj;
+    button: function(event) {
+        return {name: event, onClick: this.event.bind(this,event)};
     },
-    chain: function(o,b,i){
-        var key = [38,40][i];
-        o[key] = b.onClick;
-        return o;
+    keyDown: function(toolbar,e){
+        if (e.keyCode in this.codes) {
+            var index = this.codes[e.keyCode];
+            toolbar[index].onClick();
+            e.stopHandlers = true;
+        }
     },
     up: function(stack){
         stack.now ++;
@@ -65,7 +67,6 @@ DOJO.Input.prototype = {
         stack.gain(-stack.zBuff, stack.index.start);
     },
     check: function(slice){
-        var level = this.stack.level;
         if (slice && slice.lastDrawn.length) {
             return slice.lastDrawn[0].level >= level;
         }

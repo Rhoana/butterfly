@@ -49,7 +49,9 @@ DOJO.Stack.prototype = {
     init: function(osd){
         var w = osd.world;
         this.event = function(event){
-            return this.index[event].map(w.getItemAt, w);
+            if (this.total == w.getItemCount()) {
+              return this.index[event].map(w.getItemAt, w);
+            }
         }
         this.lose = function(lost){
             lost.map(w.getItemAt,w).map(w.removeItem,w);

@@ -39,11 +39,6 @@
      *
      **/
     $.ViewerInputHook = function(options) {
-        options = options || {};
-
-        if (!options.viewer) {
-            throw new Error("A viewer must be specified.");
-        }
 
         var tracker = options.viewer.innerTracker;
 
