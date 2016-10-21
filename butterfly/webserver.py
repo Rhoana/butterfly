@@ -81,7 +81,8 @@ class WebServer:
             (r'/(.*\.js)', PkgResourcesHandler, {}),
             (r'/(.*\.css)', PkgResourcesHandler, {}),
             (r'/(.*\.glsl)', PkgResourcesHandler, {}),
-            (r'/(images/.*\.png)', PkgResourcesHandler, {}),
+            (r'/(.*\.png)', PkgResourcesHandler, {}),
+            (r'/(.*\.ico)', PkgResourcesHandler, {}),
             (r'(/)', PkgResourcesHandler, {})
 
         ])
