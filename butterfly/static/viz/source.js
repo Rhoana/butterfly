@@ -38,7 +38,6 @@ DOJO.Source.prototype = {
             var start = [x*width, y*height, this.z];
             var offset = [this.width-start[0],this.height-start[1]];
             var size = [Math.min(offset[0],width), Math.min(offset[1],height), 1]
-            var size = [width, height, 1]
               return 'http://' + this.server + '/data/?datapath=' + this.datapath +
                 '&start=' + start + '&mip=' + blevel + '&size=' +  size + this.seg;
         }
