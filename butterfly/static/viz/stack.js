@@ -18,15 +18,19 @@ DOJO.Stack = function(src_terms){
     // Prepare the sources
     this.protoSource = new DOJO.Source(src_terms);
     this.source = this.make(this.now, new Array(this.nLayers));
-    this.index = this.indexer(this.preset,0);
+    this.index = this.indexer(this.preset);
     this.total = this.source.length;
 }
 
 DOJO.Stack.prototype = {
     now: 0,
     level: 0,
-    zBuff: 0,
-    maxBuff: 9,
+    zBuff: {
+      start: 0,
+      end: 0
+    },
+    minBuff: 1,
+    maxBuff: 3,
     layers: {
         i: {
             set: {},
@@ -53,7 +57,7 @@ DOJO.Stack.prototype = {
         var source = this.protoSource.init(this.share(layer.src, src));
         return this.share(this.share(layer.set, {index:indices[i]}), source);
     },
-    indexer: function(preset,zBuff){
+    indexer: function(preset){
         var buffer = function(zb){
           return preset.map(function(p,i){
               return Math.max(zb,0)*preset.length+i;
@@ -61,16 +65,24 @@ DOJO.Stack.prototype = {
         }
         return {
           'start': buffer(0),
-          'up': buffer(zBuff),
-          'down': buffer(zBuff-1),
-          'end': buffer(2*zBuff-1)
+          'up': buffer(this.zBuff.start),
+          'down': buffer(this.zBuff.start-1),
+          'end': buffer(this.zBuff.start+this.zBuff.end-1)
         }
     },
     init: function(osd){
         var w = osd.world;
         this.event = function(event){
-            if (this.total == w.getItemCount()) {
+            var point = (event=='up')?'end':'start';
+            var needed = this.total - w.getItemCount();
+            if (needed == 0) {
               return this.index[event].map(w.getItemAt, w);
+            }
+            if (this.zBuff[point] > this.minBuff){
+              log(needed+' needed')
+//              this.zBuff[point] -= 1;
+//              this.total -= this.nLayers;
+//              this.index = this.indexer(this.preset);
             }
         }
         this.lose = function(lost){
@@ -87,16 +99,21 @@ DOJO.Stack.prototype = {
                 w.setItemIndex(lastItem, shown[i]);
             });
         }
+        this.log = function(){
+            for(var c = 0; c < w.getItemCount(); c++){
+               log(w.getItemAt(c).source.z);
+            }
+            log(' ');
+        }
         this.w = w;
         return this;
     },
-    updater: function(){
-        if (this.zBuff < this.maxBuff){
-            this.zBuff += 1;
-            this.total += 2*this.nLayers;
-            this.index = this.indexer(this.preset,this.zBuff);
-            this.gain(-this.zBuff, this.index.start);
-            this.gain(this.zBuff, this.index.end);
+    updater: function(point,sign){
+        if (this.zBuff[point] < this.maxBuff){
+            this.zBuff[point] += 1;
+            this.total += this.nLayers;
+            this.index = this.indexer(this.preset);
+            this.gain(sign*this.zBuff[point], this.index[point]);
         }
     },
     refresher: function(e){
@@ -105,7 +122,8 @@ DOJO.Stack.prototype = {
             var source = event.source;
             if(e.fullyLoaded){
                 if(!this.w.needsDraw()){
-                    this.updater();
+                    this.updater('start',-1);
+                    this.updater('end',1);
                 };
                 source.minLevel = 0;
                 event.draw();

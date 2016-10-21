@@ -58,12 +58,12 @@ DOJO.Input.prototype = {
         stack.now ++;
         stack.show(stack.index.up);
         stack.lose(stack.index.start);
-        stack.gain(stack.zBuff, stack.index.end);
+        stack.gain(stack.zBuff.end, stack.index.end);
     },
     down: function(stack){
         stack.now --;
         stack.show(stack.index.down);
         stack.lose(stack.index.end);
-        stack.gain(-stack.zBuff, stack.index.start);
+        stack.gain(-stack.zBuff.start, stack.index.start);
     }
 }
