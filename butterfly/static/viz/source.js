@@ -30,7 +30,7 @@ DOJO.Source.prototype = {
         height: 8192,
         tileSize: 512,
         server: window.location.href.split('/')[2],
-        datapath: '/Volumes/NeuroData/cylindojo/mojo',
+        datapath: '/data/',
         getTileUrl: function( level, x, y ) {
 
             var blevel = this.maxLevel - level;
