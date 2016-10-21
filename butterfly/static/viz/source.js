@@ -38,8 +38,8 @@ DOJO.Source.prototype = {
             var height = this.getTileHeight(level);
             var bounds = this.getTileBounds(level, x, y).getSize();
             var shape = bounds.times(this.getLevelScale(level)*this.width);
+            var size = [Math.round(shape.x), Math.round(shape.y), 1];
             var start = [x*width, y*height, this.z];
-            var size = [shape.x, shape.y, 1];
 
             return 'http://' + this.server + '/data/?datapath=' + this.datapath +
               '&start=' + start + '&mip=' + blevel + '&size=' +  size + this.seg;
