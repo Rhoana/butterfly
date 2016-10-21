@@ -32,6 +32,16 @@ DOJO.Input.prototype = {
         window.onkeydown = this.osd.innerTracker.keyDownHandler;
         toolbar.map(seaGL.button, seaGL);
     },
+    button: function(event) {
+        return {name: event, onClick: this.event.bind(this,event)};
+    },
+    keyDown: function(toolbar,e){
+        if (e.keyCode in this.codes) {
+            var index = this.codes[e.keyCode];
+            toolbar[index].onClick();
+            e.stopHandlers = true;
+        }
+    },
     event: function(event) {
         var level = this.stack.level;
         var check = function(slice){
@@ -42,16 +52,6 @@ DOJO.Input.prototype = {
         var slices = this.stack.event(event);
         if (slices && slices.every(check)) {
             return this[event](this.stack);
-        }
-    },
-    button: function(event) {
-        return {name: event, onClick: this.event.bind(this,event)};
-    },
-    keyDown: function(toolbar,e){
-        if (e.keyCode in this.codes) {
-            var index = this.codes[e.keyCode];
-            toolbar[index].onClick();
-            e.stopHandlers = true;
         }
     },
     up: function(stack){
