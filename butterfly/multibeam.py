@@ -79,7 +79,7 @@ class MultiBeam(DataSource):
             section = self.ts[z][0].section
             return section.imread(x0, y0, x1, y1, w)
         return self.load_tilespec_cutout(x0, x1, y0, y1, z, w)
-    
+
     def load_tilespec_cutout(self, x0, x1, y0, y1, z, w):
         '''Load a cutout from tilespecs'''
         kdtree = self.kdtrees[z]
@@ -113,7 +113,7 @@ class MultiBeam(DataSource):
             single_renderers, blend_type='AVERAGING', dtype=self.dtype)
         return renderer.crop(
             int(x0 / 2**w), int(y0 / 2**w), int(x1 / 2**w), int(y1 / 2**w))[0]
-        
+
 
     def load(self, x, y, z, w, segmentation=False):
         '''
