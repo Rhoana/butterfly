@@ -28,7 +28,8 @@ class Core(object):
             segcolor=False,
             fit=False,
             w=0,
-            dtype=np.uint8):
+            dtype=np.uint8,
+            synapse=False):
         '''
         Request a subvolume of the datapath at a given zoomlevel.
         '''

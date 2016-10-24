@@ -37,11 +37,15 @@ DOJO.Stack.prototype = {
         },
         s: {
             set: {opacity: 0.5},
-            src: {gl:0,segmentation: true}
+            src: {gl:0, segmentation: true}
+        },
+        y: {
+            set: {opacity: 0.5},
+            src: {gl:0, synapse: true}
         },
         g: {
             set: {},
-            src: {gl:1,segmentation: true}
+            src: {gl:1, segmentation: true}
         }
     },
     layerer: function(char){

@@ -19,11 +19,15 @@ DOJO.Source.prototype = {
         if (source.segmentation) {
             source.seg = '&segmentation=y&'+this.segmentFormats[source.gl];
         }
+        if (source.synapse) {
+            source.syn = '&synapse=y';
+        }
         return {tileSource: source};
     },
     segmentFormats: ['segcolor=y','output=zip'],
     tileSource: {
         z: 0,
+        syn: '',
         seg: '',
         minLevel: 0,
         width: 8192,
@@ -42,7 +46,7 @@ DOJO.Source.prototype = {
             var start = [x*width, y*height, this.z];
 
             return 'http://' + this.server + '/data/?datapath=' + this.datapath +
-              '&start=' + start + '&mip=' + blevel + '&size=' +  size + this.seg;
+              '&start=' + start + '&mip=' + blevel + '&size=' +  size + this.seg + this.syn;
         }
     },
     share: function(from, to) {
