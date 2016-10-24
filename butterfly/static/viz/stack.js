@@ -27,9 +27,8 @@ DOJO.Stack.prototype = {
     level: 0,
     zBuff: {
       start: 0,
-      end: 0
+      end: 0.
     },
-    minBuff: 1,
     maxBuff: 3,
     layers: {
         i: {
@@ -77,12 +76,6 @@ DOJO.Stack.prototype = {
             var needed = this.total - w.getItemCount();
             if (needed == 0) {
               return this.index[event].map(w.getItemAt, w);
-            }
-            if (this.zBuff[point] > this.minBuff){
-              log(needed+' needed')
-//              this.zBuff[point] -= 1;
-//              this.total -= this.nLayers;
-//              this.index = this.indexer(this.preset);
             }
         }
         this.lose = function(lost){
