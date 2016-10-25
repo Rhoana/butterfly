@@ -51,9 +51,13 @@ def main():
         return [v for v in files if os.path.isdir(v) or v.endswith('.json')]
 
     def sampler(rootname,root,depth,samples):
-        name = '/' if homename == rootname else rootname
+        name = rootname
+        folderList = folderer(root,depth)
+        if homename == rootname:
+            folderList+=[homename,]
+            name = '/'
         samp = {'name':name,'datasets':[]}
-        for branch in folderer(root,depth):
+        for branch in folderList:
             try:
                 samp['datasets'].append(sourcer(branch))
             except:
