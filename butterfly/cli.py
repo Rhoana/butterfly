@@ -212,7 +212,7 @@ def query():
     ris.blocksize = args.blocksize
 
     # Grab the sample volume
-    volume = c.get(datapath, start_coord, vol_size, zoom_level)
+    volume = c.get(datapath, start_coord, vol_size, w=zoom_level)
 
     if vol_size[2] == 1:
         # Is there a better way to catch errors?

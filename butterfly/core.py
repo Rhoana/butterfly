@@ -19,20 +19,28 @@ class Core(object):
         self._max_cache_size = settings.MAX_CACHE_SIZE
         self._current_cache_size = 0
 
-    def get(
-            self,
-            datapath,
-            start_coord,
-            vol_size,
-            segmentation=False,
-            segcolor=False,
-            fit=False,
-            w=0,
-            dtype=np.uint8,
-            synapse=False):
+    def get(self,datapath, start_coord, vol_size, **kwargs):
         '''
         Request a subvolume of the datapath at a given zoomlevel.
         '''
+        presets = {
+            'segmentation': False,
+            'segcolor': False,
+            'fit': False,
+            'w': 0,
+            'dtype': np.uint8,
+            'synapse': False
+        }
+        for k,v in presets.iteritems():
+            kwargs.setdefault(k,v)
+
+        segmentation= kwargs['segmentation']
+        segcolor= kwargs['segcolor']
+        synapse=kwargs['synapse']
+        dtype= kwargs['dtype']
+        fit= kwargs['fit']
+        w= kwargs['w']
+
 
         # if datapath is not indexed (knowing the meta information like width,
         # height),do it now

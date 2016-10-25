@@ -124,7 +124,12 @@ class WebServer:
                 args = parser.parse(splitted_request[2:])
 
                 # Call the cutout method
-                volume = self._core.get(*args)
+                volume = self._core.get(args[0],args[1],args[2],**{
+                    'segmentation': args[3],
+                    'segcolor': args[4],
+                    'fit': args[5],
+                    'w': args[6]
+                })
 
                 # Check if we got nothing in the case of a request outside the
                 # data with fit=True
