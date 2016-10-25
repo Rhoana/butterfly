@@ -131,10 +131,7 @@ class WebServer:
                 if volume.size == 0:
                     raise IndexError('Tile index out of bounds')
 
-                # Color mode is equivalent to segmentation color request right
-                # now
-                color = parser.optional_queries[
-                    'segcolor'] and parser.optional_queries['segmentation']
+                color = parser.optional_queries['segcolor']
 
                 # Accepted image output formats
                 image_formats = settings.SUPPORTED_IMAGE_FORMATS

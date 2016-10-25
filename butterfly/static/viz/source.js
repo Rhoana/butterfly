@@ -17,18 +17,17 @@ DOJO.Source.prototype = {
         source.maxLevel = Math.floor(Math.log2(maxLevel));
         // Get the segmentation string for butterfly
         if (source.segmentation) {
-            source.seg = '&segmentation=y&'+this.segmentFormats[source.gl];
+            source.mod = '&segmentation=y&'+this.segmentFormats[source.gl];
         }
         if (source.synapse) {
-            source.syn = '&synapse=y&segcolor=y';
+            source.mod = '&synapse=y&'+this.segmentFormats[source.gl];
         }
         return {tileSource: source};
     },
     segmentFormats: ['segcolor=y','output=zip'],
     tileSource: {
         z: 0,
-        syn: '',
-        seg: '',
+        mod: '',
         minLevel: 0,
         width: 8192,
         height: 8192,
@@ -36,7 +35,6 @@ DOJO.Source.prototype = {
         server: window.location.href.split('/')[2],
         datapath: '/data/',
         getTileUrl: function( level, x, y ) {
-
             var blevel = this.maxLevel - level;
             var width = this.getTileWidth(level);
             var height = this.getTileHeight(level);
@@ -46,7 +44,7 @@ DOJO.Source.prototype = {
             var start = [x*width, y*height, this.z];
 
             return 'http://' + this.server + '/data/?datapath=' + this.datapath +
-              '&start=' + start + '&mip=' + blevel + '&size=' +  size + this.seg + this.syn;
+              '&start=' + start + '&mip=' + blevel + '&size=' +  size + this.mod;
         }
     },
     share: function(from, to) {
