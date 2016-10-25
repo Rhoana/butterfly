@@ -20,14 +20,14 @@ DOJO.Input = function(scope) {
 DOJO.Input.prototype = {
 
     codes: {
-      190: 0,
-      87: 0,
-      188: 1,
-      83: 1,
+      190: 1,
+      87: 1,
+      188: 2,
+      83: 2,
     },
     init: function(){
         var seaGL = this.realT.seaGL;
-        var toolbar = ['up','down'].map(this.button, this);
+        var toolbar = ['home','up','down'].map(this.button, this);
         this.osd.addViewerInputHook({ keyDown: this.keyDown.bind(this, toolbar) });
         window.onkeydown = this.osd.innerTracker.keyDownHandler;
         toolbar.map(seaGL.button, seaGL);
@@ -43,6 +43,10 @@ DOJO.Input.prototype = {
         }
     },
     event: function(event) {
+        if (event == 'home'){
+            window.location = window.location.href.split('/viz.html')[0]+'/';
+            return;
+        }
         var level = this.stack.level;
         var check = function(slice){
             if (slice && slice.lastDrawn.length) {

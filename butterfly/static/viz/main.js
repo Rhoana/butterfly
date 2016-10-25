@@ -22,6 +22,7 @@ window.onload = function(e){
         minZoomImageRatio: .2,
         maxZoomPixelRatio: 8,
         showZoomControl: 0,
+        showHomeControl: 0,
         id: 'viaWebGL'
     });
     SCOPE.openSD.world.addHandler('add-item', SCOPE.stack.refresher.bind(SCOPE.stack));

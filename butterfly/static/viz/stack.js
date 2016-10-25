@@ -33,9 +33,9 @@ DOJO.Stack.prototype = {
     layerer: function(char,i){
         var layers = {
             i: {gl:0, mod:''},
-            y: {gl:0, mod:'&synapse=y&segcolor=y'},
             s: {gl:0, mod:'&segmentation=y&segcolor=y'},
-            g: {gl:1, mod:'&segmentation=y'}
+            g: {gl:1, mod:'&segmentation=y'},
+            y: {gl:1, mod:'&synapse=y'}
         };
         var src = layers[char] || layers.i;
         var set = {
