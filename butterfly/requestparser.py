@@ -100,11 +100,5 @@ class RequestParser(object):
 
         self.output_format = self.output_format.lstrip('.').lower()
 
-        return [
-            datapath,
-            start,
-            volsize,
-            self.optional_queries['segmentation'],
-            self.optional_queries['segcolor'],
-            self.optional_queries['fit'],
-            w]
+        self.optional_queries['w'] = w;
+        return [ datapath, start, volsize, self.optional_queries]
