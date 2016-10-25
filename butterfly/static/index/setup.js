@@ -8,11 +8,10 @@ log = console.log.bind(window.console);
 DOJO.Setup = function(api){
   this.parse = api.parse;
   this.write = new DOJO.Write(this);
-  this.loaded = this.start('');
-
-  this.loaded.then(function(h){
-//      log(h)
-  });
+  var allData = this.start('');
+  allData.then(function(all){
+//      log(all)
+  })
 }
 
 DOJO.Setup.prototype = {
@@ -21,9 +20,9 @@ DOJO.Setup.prototype = {
     'dataset','channel',
     'channel_metadata'
   ],
+  output: [],
   start: function(old){
-    var temp = Promise.resolve([{old:old,out:['']}]);
-    return this.ask.reduce(this.loader.bind(this),temp);
+    return this.loader(['root'],{old:old},0);
   },
   // Copy an object
   share: function(from, to) {
@@ -61,38 +60,32 @@ DOJO.Setup.prototype = {
     return now;
   },
   build: function(hash,sources){
+    hash.kind = this.ask[hash.depth];
     var terms = sources.reduce(this.share,hash);
     return this.write.main(terms);
   },
-  draw: function(kind,result,i) {
-    var [out,old] = [result.out,result.old];
-    var hash = {old: old, kind:kind};
-    if (out instanceof Array){
-      return out.map(function(name){
-        var sources = [{target:'head',name:name}];
-        sources.push({length:result.out.length});
-        return this.build(hash,sources);
-      },this);
+  draw: function(parent, depth, result) {
+    var loader = this.loader.bind(this);
+    var build = this.build.bind(this,{old: result.old, depth: depth});
+    var target = {self:parent.concat(0), parent:parent, target:'body'};
+    if (result.out instanceof Array){
+      var promises = result.out.map(function(name,i){
+        target.target = 'head';
+        target.self = parent.concat(i);
+        var sources = [target,{name:name,length:result.out.length}];
+        return loader(target.self,build(sources),depth+1);
+      });
+      return Promise.all(promises);
     }
-    var sources = [{target:'body'},this.parse(old),out];
-    return this.build(hash,sources);
+    var sources = [target,this.parse(result.old),result.out];
+    return build(sources);
   },
-  find: function(kind,hash,i){
-    var where = this.plural(kind)+'?'+this.hash(hash);
-    return this.get('/api/' + where);
+  find: function(hash,depth){
+    var where = this.plural(this.ask[depth])+'?';
+    return this.get('/api/' + where + this.hash(hash));
   },
-  map: function(arr,kind,fn){
-    return arr.map(this[fn].bind(this,kind));
-  },
-  loader: function(pending,kind,depth){
-    map = this.map.bind(this);
-    var find = function(arr){
-      return Promise.all(map(arr,kind,'find'));
-    };
-    var draw = function(arr){
-      var cat = [].concat.apply.bind([].concat);
-      return map(arr,kind,'draw').reduce(cat,[]);
-    };
-    return pending.then(find).then(draw);
+  loader: function(parent,folder,depth){
+      var draw = this.draw.bind(this, parent, depth);
+      return this.find(folder, depth).then(draw);
   }
 }

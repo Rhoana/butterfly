@@ -50,28 +50,34 @@ def main():
         files = [os.path.realpath(os.path.join(root,f)) for f in os.listdir(root) if not f.startswith('.')]
         return [v for v in files if os.path.isdir(v) or v.endswith('.json')]
 
-    def sampler(rootname,root,depth,samples):
-        samp = {'name':rootname,'datasets':[]}
-        for branch in folderer(root,depth):
-            try:
-                samp['datasets'].append(sourcer(branch))
-                logger.report_event('Datasource found at '+ branch)
-            except:
-                samples += sampler(os.path.basename(branch),branch,depth-1,samples)
-        return samples + [samp] if samp['datasets'] else []
-
-    def starter(depth,samples):
-        samp = {'name':'/','datasets':[]}
+    def trier(depth,datasets,path):
         try:
-            samp['datasets'].append(sourcer(home))
-            logger.report_event('Datasource found at '+ home)
+            source = sourcer(path)
+            dupes = sum(1 for d in datasets if d['name'] == source['name'])
+            logger.report_event('Datasource found at '+ path)
+            source['name'] += '_'+str(dupes) if dupes else ''
+            datasets.append(source)
         except:
-            samples += sampler(homename,home,depth,samples)
-        return samples + [samp] if samp['datasets'] else samples
+            datasets += sampler(path,depth-1)
+        return datasets
+
+    def sampler(root,depth):
+        datasets = []
+        for branch in folderer(root,depth):
+            datasets = trier(depth,datasets,branch)
+        return datasets
+
+    def starter(depth):
+        exp = {'name': homename,'samples': []}
+        sample = {'name':'/','datasets': []}
+        datasets = trier(depth+1,[],home)
+        if datasets:
+            sample['datasets'] += datasets
+            exp['samples'].append(sample)
+        return exp
 
     if homefolder and not os.path.isfile(home):
-        exp = {'name': homename,'samples': starter(nth,[])}
-        settings.bfly_config.setdefault('experiments',[]).append(exp)
+        settings.bfly_config.setdefault('experiments',[]).append(starter(nth))
     ws = webserver.WebServer(c, port)
     ws.start()
 
