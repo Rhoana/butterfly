@@ -51,25 +51,26 @@ def main():
         return [v for v in files if os.path.isdir(v) or v.endswith('.json')]
 
     def sampler(rootname,root,depth,samples):
-        name = rootname
-        folderList = folderer(root,depth)
-        if homename == rootname:
-            folderList+=[homename,]
-            name = '/'
-        samp = {'name':name,'datasets':[]}
-        for branch in folderList:
+        samp = {'name':rootname,'datasets':[]}
+        for branch in folderer(root,depth):
             try:
                 samp['datasets'].append(sourcer(branch))
+                logger.report_event('Datasource found at '+ branch)
             except:
-                sampler(os.path.basename(branch),branch,depth-1,samples)
-                continue
-            logger.report_event('Datasource found at '+ branch)
-        if samp['datasets']:
-            samples.append(samp)
-        return samples
+                samples += sampler(os.path.basename(branch),branch,depth-1,samples)
+        return samples + [samp] if samp['datasets'] else []
+
+    def starter(depth,samples):
+        samp = {'name':'/','datasets':[]}
+        try:
+            samp['datasets'].append(sourcer(home))
+            logger.report_event('Datasource found at '+ home)
+        except:
+            samples += sampler(homename,home,depth,samples)
+        return samples + [samp] if samp['datasets'] else samples
 
     if homefolder and not os.path.isfile(home):
-        exp = {'name': homename,'samples': sampler(homename,home,nth,[])}
+        exp = {'name': homename,'samples': starter(nth,[])}
         settings.bfly_config.setdefault('experiments',[]).append(exp)
     ws = webserver.WebServer(c, port)
     ws.start()
