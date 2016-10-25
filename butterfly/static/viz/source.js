@@ -15,16 +15,9 @@ DOJO.Source.prototype = {
         var source = this.share(src_terms, sourcer);
         var maxLevel = source.width/source.tileSize;
         source.maxLevel = Math.floor(Math.log2(maxLevel));
-        // Get the segmentation string for butterfly
-        if (source.segmentation) {
-            source.mod = '&segmentation=y&'+this.segmentFormats[source.gl];
-        }
-        if (source.synapse) {
-            source.mod = '&synapse=y&'+this.segmentFormats[source.gl];
-        }
+        source.mod += ['','&output=zip'][source.gl];
         return {tileSource: source};
     },
-    segmentFormats: ['segcolor=y','output=zip'],
     tileSource: {
         z: 0,
         mod: '',

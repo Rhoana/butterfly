@@ -12,9 +12,9 @@ DOJO.Stack = function(src_terms){
 
     // Setup
     var channels = src_terms.channel || ['i'];
-    this.preset = channels.split('').map(this.layerer,this);
+    this.preset = channels.split('').map(this.layerer);
     this.nLayers = this.preset.length;
-
+    log(this.preset)
     // Prepare the sources
     this.protoSource = new DOJO.Source(src_terms);
     this.source = this.make(this.now, new Array(this.nLayers));
@@ -27,29 +27,21 @@ DOJO.Stack.prototype = {
     level: 0,
     zBuff: {
       start: 0,
-      end: 0.
+      end: 0
     },
     maxBuff: 3,
-    layers: {
-        i: {
-            set: {},
-            src: {gl:0}
-        },
-        s: {
-            set: {opacity: 0.5},
-            src: {gl:0, segmentation: true}
-        },
-        y: {
-            set: {},
-            src: {gl:0, synapse: true}
-        },
-        g: {
-            set: {},
-            src: {gl:1, segmentation: true}
+    layerer: function(char,i){
+        var layers = {
+            i: {gl:0, mod:''},
+            y: {gl:0, mod:'&synapse=y&segcolor=y'},
+            s: {gl:0, mod:'&segmentation=y&segcolor=y'},
+            g: {gl:1, mod:'&segmentation=y'}
+        };
+        var src = layers[char] || layers.i;
+        var set = {
+            opacity: 1-(i>0)*(!src.gl)*(0.5)
         }
-    },
-    layerer: function(char){
-        return this.share(this.layers[char],{});
+        return {src:src, set:set}
     },
     make: function(zLevel, indices) {
         return this.preset.map(this.sourcer.bind(this,zLevel,indices));
