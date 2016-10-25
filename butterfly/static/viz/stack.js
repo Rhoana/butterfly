@@ -40,7 +40,7 @@ DOJO.Stack.prototype = {
             src: {gl:0, segmentation: true}
         },
         y: {
-            set: {opacity: 0.5},
+            set: {opacity: .5},
             src: {gl:0, synapse: true}
         },
         g: {

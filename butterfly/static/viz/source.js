@@ -20,7 +20,7 @@ DOJO.Source.prototype = {
             source.seg = '&segmentation=y&'+this.segmentFormats[source.gl];
         }
         if (source.synapse) {
-            source.syn = '&synapse=y';
+            source.syn = '&synapse=y&segcolor=y';
         }
         return {tileSource: source};
     },

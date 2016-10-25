@@ -50,7 +50,7 @@ class Core(object):
         datasource = self._datasources[datapath]
 
         rh_logger.logger.report_event('Loading tiles:')
-        if not segmentation:
+        if not segmentation and not synapse:
             try:
                 planes = []
                 x0 = start_coord[0] * 2 ** w
@@ -84,9 +84,11 @@ class Core(object):
                 if start_coord[i] + vol_size[i] > boundaries[i]:
                     vol_size[i] = boundaries[i] - start_coord[i]
 
-        # Use 4D volume for rgb data, currently segmentation color is the only
-        # use for color
-        color = segcolor and segmentation
+        # Use modified segmentation flag to support synapses
+        segmentation = 2 if synapse else segmentation
+
+        # Use 4D volume for rgb data
+        color = segcolor
         if color:
             vol = np.zeros(
                 (vol_size[1],

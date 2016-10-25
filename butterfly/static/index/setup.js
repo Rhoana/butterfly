@@ -11,7 +11,7 @@ DOJO.Setup = function(api){
   this.loaded = this.start('');
 
   this.loaded.then(function(h){
-      log(h)
+//      log(h)
   });
 }
 
