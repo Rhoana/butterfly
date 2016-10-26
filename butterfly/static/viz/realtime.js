@@ -65,13 +65,6 @@ DOJO.RealTime.prototype = {
         seaGL.addHandler('gl-drawing',GLdrawing);
         seaGL.addHandler('canvas-click',click);
 
-        // Add a custom button
-        seaGL.button({
-            tooltip: 'Toggle shaders',
-            prefix: this.iconPrefix,
-            name: 'shade'
-        });
-
         return seaGL.init();
     }
 }
