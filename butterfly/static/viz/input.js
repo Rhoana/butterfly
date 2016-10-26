@@ -13,7 +13,7 @@ DOJO.Input = function(scope) {
 
     this.osd = scope.openSD;
     this.stack = scope.stack;
-    this.realT = new DOJO.RealTime(this.osd);
+    this.realT = new DOJO.RealTime(scope);
     this.realT.init().then(this.init.bind(this));
 }
 
@@ -29,6 +29,7 @@ DOJO.Input.prototype = {
         var seaGL = this.realT.seaGL;
         var toolbar = ['home','up','down'].map(this.button, this);
         this.osd.addViewerInputHook({ keyDown: this.keyDown.bind(this, toolbar) });
+        this.osd.addViewerInputHook({ clickHandler: function(e){e.quick=false;} });
         window.onkeydown = this.osd.innerTracker.keyDownHandler;
         toolbar.map(seaGL.button, seaGL);
     },

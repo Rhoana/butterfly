@@ -14,7 +14,6 @@ DOJO.Stack = function(src_terms){
     var channels = src_terms.channel || ['i'];
     this.preset = channels.split('').map(this.layerer);
     this.nLayers = this.preset.length;
-    log(this.preset)
     // Prepare the sources
     this.protoSource = new DOJO.Source(src_terms);
     this.source = this.make(this.now, new Array(this.nLayers));
@@ -39,7 +38,7 @@ DOJO.Stack.prototype = {
         };
         var src = layers[char] || layers.i;
         var set = {
-            opacity: 1-(i>0)*(!src.gl)*(0.5)
+            opacity: 1-(i>0)*(1-src.gl)*(0.5)
         }
         return {src:src, set:set}
     },
@@ -62,16 +61,20 @@ DOJO.Stack.prototype = {
           'start': buffer(0),
           'up': buffer(this.zBuff.start),
           'down': buffer(this.zBuff.start-1),
-          'end': buffer(this.zBuff.start+this.zBuff.end-1)
+          'end': buffer(this.zBuff.start+this.zBuff.end-1),
+          'now': buffer(this.zBuff.start+this.zBuff.end)
         }
     },
     init: function(osd){
         var w = osd.world;
+        this.getItems = function(event){
+            return this.index[event].map(w.getItemAt, w);
+        }
         this.event = function(event){
             var point = (event=='up')?'end':'start';
             var needed = this.total - w.getItemCount();
             if (needed == 0) {
-              return this.index[event].map(w.getItemAt, w);
+              return this.getItems(event);
             }
         }
         this.lose = function(lost){
@@ -94,6 +97,7 @@ DOJO.Stack.prototype = {
             }
             log(' ');
         }
+        this.vp = osd.viewport;
         this.w = w;
         return this;
     },

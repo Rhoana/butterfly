@@ -16,6 +16,11 @@ openSeadragonGL = function(openSD) {
             // Render a webGL canvas to an input canvas
             var input = e.rendered.canvas;
             e.rendered.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
+        },
+        'canvas-click': function(e) {
+            // Render a webGL canvas to an input canvas
+            var input = e.rendered.canvas;
+            e.rendered.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
         }
     };
     this.defaults = {
@@ -27,7 +32,10 @@ openSeadragonGL = function(openSD) {
                 e.tile.drawn = 1;
                 callback(e);
             }
-        }
+        },
+        'canvas-click': function(callback, e) {
+            callback(e);
+        },
     };
     this.openSD = openSD;
     this.viaGL = new ViaWebGL();
