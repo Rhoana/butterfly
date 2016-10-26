@@ -28,6 +28,10 @@ DOJO.Source.prototype = {
         server: window.location.href.split('/')[2],
         datapath: '/data/',
         getTileUrl: function( level, x, y ) {
+
+            if (this.dojo) {
+              return '/images/pix.png?'+[level,x,y].join('-');
+            }
             var blevel = this.maxLevel - level;
             var width = this.getTileWidth(level);
             var height = this.getTileHeight(level);

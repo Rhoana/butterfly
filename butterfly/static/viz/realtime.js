@@ -24,6 +24,9 @@ DOJO.RealTime.prototype = {
         var canClick = fun.call.bind(function(){
           return this.source && this.source.gl;
         });
+        var isDojo = fun.call.bind(function(){
+          return this.source && this.source.dojo;
+        });
         var isTile = function(tile){
           var where = new OpenSeadragon.Point(tile.x,tile.y);
           return this.equals(where);
@@ -32,18 +35,24 @@ DOJO.RealTime.prototype = {
 
           var allItems = stack.getItems('now').reverse();
           var point = stack.vp.viewerElementToViewportCoordinates(e.position);
-
+          var dojo = allItems.filter(isDojo)[0];
+          if(!dojo){
+            return;
+          }
           for (var layer of allItems.filter(canClick)){
-            if (layer.lastDrawn.length){
-              var level = layer.lastDrawn[0].level;
-              var xy = layer.source.getTileAtPoint(level,point);
-              var here = layer.lastDrawn.filter(isTile.bind(xy)).pop();
-              if (here){
-                this.viaGL.tileShape = here.bounds.getSize();
-                this.viaGL.tileSpace = here.bounds.getBottomLeft();
+            var last = layer.lastDrawn[0];
+            if (last){
+              var xy = layer.source.getTileAtPoint(last.level,point);
+              var fromTile = layer.lastDrawn.filter(isTile.bind(xy))[0];
+              var toTile = dojo.lastDrawn.filter(isTile.bind(xy))[0];
+              if (fromTile && toTile){
+                this.viaGL.tileShape = fromTile.bounds.getSize();
+                this.viaGL.tileSpace = fromTile.bounds.getBottomLeft();
                 this.viaGL.tileSpace.y = 1 - this.viaGL.tileSpace.y;
-                e.rendered = here.cacheImageRecord._renderedContext;
+                e.rendered = fromTile.cacheImageRecord._renderedContext;
+                e.output = toTile.cacheImageRecord._renderedContext;
                 callback(e);
+                break;
               }
             }
           }

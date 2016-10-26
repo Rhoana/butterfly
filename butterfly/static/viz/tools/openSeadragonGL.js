@@ -20,7 +20,9 @@ openSeadragonGL = function(openSD) {
         'canvas-click': function(e) {
             // Render a webGL canvas to an input canvas
             var input = e.rendered.canvas;
-            e.rendered.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
+            e.output.canvas.width = input.width;
+            e.output.canvas.height = input.height;
+            e.output.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
         }
     };
     this.defaults = {

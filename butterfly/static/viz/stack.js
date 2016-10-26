@@ -12,7 +12,8 @@ DOJO.Stack = function(src_terms){
 
     // Setup
     var channels = src_terms.channel || ['i'];
-    this.preset = channels.split('').map(this.layerer);
+    channels = channels.split('').concat('dojo');
+    this.preset = channels.map(this.layerer);
     this.nLayers = this.preset.length;
     // Prepare the sources
     this.protoSource = new DOJO.Source(src_terms);
@@ -34,7 +35,8 @@ DOJO.Stack.prototype = {
             i: {gl:0, mod:''},
             s: {gl:0, mod:'&segmentation=y&segcolor=y'},
             g: {gl:1, mod:'&segmentation=y'},
-            y: {gl:1, mod:'&synapse=y'}
+            y: {gl:1, mod:'&synapse=y'},
+            dojo: {gl:0, dojo:true}
         };
         var src = layers[char] || layers.i;
         var set = {
