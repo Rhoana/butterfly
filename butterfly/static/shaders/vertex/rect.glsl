@@ -17,6 +17,6 @@ vec2 image2tile(vec2 imaged) {
 
 void main() {
   // Pass the overlay tiles
-  v_tile_pos = tile2image(a_tile_pos);
+  v_tile_pos = a_tile_pos;
   gl_Position = a_pos;
 }

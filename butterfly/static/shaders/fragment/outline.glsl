@@ -4,7 +4,7 @@ uniform vec2 u_tile_size;
 varying vec2 v_tile_pos;
 
 //
-// FLOAT COMPARE FUNCTIONS WITH DELTA
+// FLOAT COMPARE FUNCTIONS
 //
 bool equals4(vec4 id1, vec4 id2) {
   return all(equal(id1,id2));

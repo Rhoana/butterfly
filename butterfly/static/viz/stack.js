@@ -33,13 +33,15 @@ DOJO.Stack.prototype = {
     layerer: function(char,i){
         var layers = {
             i: {gl:0, mod:''},
-            s: {gl:1, mod:'&segmentation=y'},
+            s: {gl:0, mod:'&segmentation=y&segcolor=y'},
+            g: {gl:1, mod:'&segmentation=y'},
             y: {gl:1, mod:'&synapse=y'},
             dojo: {gl:0, dojo:true}
         };
         var src = layers[char] || layers.i;
+        var alpha = 1-(src.gl || src.dojo);
         var set = {
-            opacity: 1-(i>0)*(1-src.gl)*(0.5)
+            opacity: 1-(i>0)*alpha*(0.5)
         }
         return {src:src, set:set}
     },

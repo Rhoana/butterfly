@@ -27,9 +27,17 @@ DOJO.RealTime.prototype = {
         var isDojo = fun.call.bind(function(){
           return this.source && this.source.dojo;
         });
-        var isTile = function(tile){
+        var isTile = function(level,tile){
           var where = new OpenSeadragon.Point(tile.x,tile.y);
-          return this.equals(where);
+          return tile.level == level && this.equals(where);
+        }
+        // Image to Tile
+        var image2tile = function(point,space,shape) {
+            var d = point.minus(space);
+            log(d)
+            log(shape)
+            log(' ')
+            return [d.x/shape.x, d.y/shape.y];
         }
         var click = function(callback,e){
 
@@ -39,18 +47,22 @@ DOJO.RealTime.prototype = {
           if(!dojo){
             return;
           }
+          var last = dojo.lastDrawn[0];
           for (var layer of allItems.filter(canClick)){
-            var last = layer.lastDrawn[0];
             if (last){
-              var xy = layer.source.getTileAtPoint(last.level,point);
-              var fromTile = layer.lastDrawn.filter(isTile.bind(xy))[0];
-              var toTile = dojo.lastDrawn.filter(isTile.bind(xy))[0];
+              var level = last.level;
+              var xy = dojo.source.getTileAtPoint(level,point);
+              var toTile = dojo.lastDrawn.filter(isTile.bind(xy,level))[0];
+              var fromTile = layer.lastDrawn.filter(isTile.bind(xy,level))[0];
               if (fromTile && toTile){
-                this.viaGL.tileShape = fromTile.bounds.getSize();
-                this.viaGL.tileSpace = fromTile.bounds.getBottomLeft();
-                this.viaGL.tileSpace.y = 1 - this.viaGL.tileSpace.y;
+
                 e.rendered = fromTile.cacheImageRecord._renderedContext;
                 e.output = toTile.cacheImageRecord._renderedContext;
+
+                var tileShape = fromTile.bounds.getSize();
+                var tileSpace = fromTile.bounds.getTopLeft();
+                this.viaGL.clickSpot = image2tile(point,tileSpace,tileShape);
+                this.viaGL.clickSpot[1] = 1 - this.viaGL.clickSpot[1];
                 callback(e);
                 break;
               }
@@ -60,14 +72,12 @@ DOJO.RealTime.prototype = {
 
         // Load for glsl
         var GLloaded = function(program) {
-          this.wherer = this.gl.getUniformLocation(program, 'u_tile_where');
-          this.shaper = this.gl.getUniformLocation(program, 'u_tile_shape');
+          this.clicker = this.gl.getUniformLocation(program, 'u_click_pos');
         }
 
         // Draw for glsl
         var GLdrawing = function() {
-          this.gl.uniform2f(this.wherer, this.tileSpace.x, this.tileSpace.y);
-          this.gl.uniform2f(this.shaper, this.tileShape.x, this.tileShape.y);
+          this.gl.uniform2f(this.clicker, this.clickSpot[0], this.clickSpot[1]);
         }
 
         seaGL.addHandler('gl-loaded',GLloaded);
