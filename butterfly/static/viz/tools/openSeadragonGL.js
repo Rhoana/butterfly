@@ -18,7 +18,14 @@ openSeadragonGL = function(openSD) {
             e.rendered.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
         },
         'canvas-click': function(e) {
-            // Render a webGL canvas to an input canvas
+            // For clicking
+            var input = e.rendered.canvas;
+            e.output.canvas.width = input.width;
+            e.output.canvas.height = input.height;
+            e.output.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
+        },
+        'item-index-change': function(e) {
+            // For slicing
             var input = e.rendered.canvas;
             e.output.canvas.width = input.width;
             e.output.canvas.height = input.height;
@@ -37,7 +44,12 @@ openSeadragonGL = function(openSD) {
         },
         'canvas-click': function(callback, e) {
             callback(e);
-        },
+        }
+    };
+    this.worldDefaults = {
+        'item-index-change': function(callback, e) {
+            callback(e);
+        }
     };
     this.openSD = openSD;
     this.viaGL = new ViaWebGL();
@@ -59,6 +71,9 @@ openSeadragonGL.prototype = {
     addHandler: function(key,custom) {
         if (key in this.defaults){
             this[key] = this.defaults[key];
+        }
+        else if (key in this.worldDefaults){
+            this[key] = this.worldDefaults[key];
         }
         if (typeof custom == 'function') {
             this[key] = custom;
@@ -84,6 +99,14 @@ openSeadragonGL.prototype = {
             // Add all openSeadragon event handlers
             this.openSD.addHandler(key, function(e) {
                 handler.call(this, interface, e);
+            });
+        }
+        for (var key of this.and(this.worldDefaults)) {
+            var hand = this[key].bind(this);
+            var face = this.interface[key].bind(this);
+            // Add all openSeadragon event handlers
+            this.openSD.world.addHandler(key, function(e) {
+                hand.call(this, face, e);
             });
         }
     },

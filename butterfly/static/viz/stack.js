@@ -39,7 +39,7 @@ DOJO.Stack.prototype = {
             dojo: {gl:0, dojo:true}
         };
         var src = layers[char] || layers.i;
-        var alpha = 1-(src.gl || src.dojo);
+        var alpha = 1-Number(src.gl || src.dojo == true);
         var set = {
             opacity: 1-(i>0)*alpha*(0.5)
         }
