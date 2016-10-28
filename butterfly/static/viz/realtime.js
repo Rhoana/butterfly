@@ -92,8 +92,9 @@ DOJO.RealTime.prototype = {
           var clickID = this.clickID || [-1,-1,-1,-1];
           this.gl.uniform4f(this.clicker, clickID[0], clickID[1], clickID[2], clickID[3]);
         }
-        seaGL.addHandler('gl-loaded',GLloaded);
+        found[1].childNodes[1].innerHTML = 0;
         seaGL.addHandler('gl-drawing',GLdrawing);
+        seaGL.addHandler('gl-loaded',GLloaded);
         seaGL.addHandler('canvas-click',click);
         seaGL.addHandler('tile-drawing',draw);
         return seaGL.init();
