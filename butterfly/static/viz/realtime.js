@@ -54,8 +54,8 @@ DOJO.RealTime.prototype = {
           var allItems = stack.getItems('now').reverse();
           var targets = allItems.filter(isTarget)[0];
           var dojo = allItems.filter(isDojo)[0];
-          if(targets && dojo && dojo.lastDrawn.length){
-            var here = {level: dojo.lastDrawn[0].level};
+          if(dojo && targets && targets.lastDrawn.length){
+            var here = {level: targets.lastDrawn[0].level};
             here.xy = dojo.source.getTileAtPoint(here.level,point);
             var hereTile = targets.lastDrawn.filter(nearTile.bind(here))[0];
             if(hereTile){
