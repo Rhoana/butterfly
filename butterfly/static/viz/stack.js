@@ -39,11 +39,7 @@ DOJO.Stack.prototype = {
             dojo: {gl:0, dojo:true}
         };
         var src = layers[char] || layers.i;
-        var alpha = 1-Number(src.gl || src.dojo == true);
-        var set = {
-            opacity: 1-(i>0)*alpha*(0.5)
-        }
-        return {src:src, set:set}
+        return {src:src}
     },
     make: function(zLevel, indices) {
         return this.preset.map(this.sourcer.bind(this,zLevel,indices));
@@ -52,7 +48,7 @@ DOJO.Stack.prototype = {
     sourcer: function(zLevel, indices, layer, i){
         var src = {z:zLevel,minLevel:this.level};
         var source = this.protoSource.init(this.share(layer.src, src));
-        return this.share(this.share(layer.set, {index:indices[i]}), source);
+        return this.share({index:indices[i]}, source);
     },
     indexer: function(preset){
         var buffer = function(zb){

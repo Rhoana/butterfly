@@ -15,7 +15,9 @@ openSeadragonGL = function(openSD) {
         'tile-drawing': function(e) {
             // Render a webGL canvas to an input canvas
             var input = e.rendered.canvas;
-            e.rendered.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
+            e.output.canvas.width = input.width;
+            e.output.canvas.height = input.height;
+            e.output.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
         },
         'canvas-click': function(e) {
             // For clicking
@@ -30,6 +32,13 @@ openSeadragonGL = function(openSD) {
             e.output.canvas.width = input.width;
             e.output.canvas.height = input.height;
             e.output.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
+        },
+        'zoom': function(e) {
+            // For slicing
+            var input = e.rendered.canvas;
+            e.output.canvas.width = input.width;
+            e.output.canvas.height = input.height;
+            e.output.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
         }
     };
     this.defaults = {
@@ -37,12 +46,12 @@ openSeadragonGL = function(openSD) {
             callback(e);
         },
         'tile-drawing': function(callback, e) {
-            if (!e.tile.drawn) {
-                e.tile.drawn = 1;
-                callback(e);
-            }
+            callback(e);
         },
         'canvas-click': function(callback, e) {
+            callback(e);
+        },
+        'zoom': function(callback, e) {
             callback(e);
         }
     };
@@ -94,20 +103,24 @@ openSeadragonGL.prototype = {
     // Add all seadragon properties
     adder: function(e) {
         for (var key of this.and(this.defaults)) {
-            var handler = this[key].bind(this);
-            var interface = this.interface[key].bind(this);
+            var that = {
+              handler: this[key].bind(this),
+              interface: this.interface[key].bind(this)
+            }
             // Add all openSeadragon event handlers
             this.openSD.addHandler(key, function(e) {
-                handler.call(this, interface, e);
-            });
+                this.handler(this.interface, e);
+            }.bind(that));
         }
         for (var key of this.and(this.worldDefaults)) {
-            var hand = this[key].bind(this);
-            var face = this.interface[key].bind(this);
+            var that = {
+              handler: this[key].bind(this),
+              interface: this.interface[key].bind(this)
+            }
             // Add all openSeadragon event handlers
-            this.openSD.world.addHandler(key, function(e) {
-                hand.call(this, face, e);
-            });
+            this.openSD.addHandler(key, function(e) {
+                this.handler(this.interface, e);
+            }.bind(that));
         }
     },
     // Joint keys

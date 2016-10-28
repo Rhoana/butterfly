@@ -62,14 +62,19 @@ DOJO.RealTime.prototype = {
             this.openSD.forceRedraw();
           }
         }
-        var slice = function(callback,e){
+        var zoom = function(callback,e){
           var allItems = stack.getItems('now').reverse();
           var targets = allItems.filter(isTarget)[0];
           var dojo = allItems.filter(isDojo)[0];
-          if(!targets || !dojo || !dojo.lastDrawn.length || !this.viaGL.clickID){
+          if(!targets || !dojo || !dojo.lastDrawn.length){
             return;
           }
           update(dojo,targets,callback,e);
+        }
+        var slice = function(callback,e){
+          if(0 <= stack.index['now'].indexOf(e.newIndex) && e.item.source.dojo){
+            zoom(callback,e);
+          }
         }
 
         // Load for glsl
@@ -79,13 +84,15 @@ DOJO.RealTime.prototype = {
 
         // Draw for glsl
         var GLdrawing = function() {
-          this.gl.uniform4f(this.clicker, this.clickID[0], this.clickID[1], this.clickID[2], this.clickID[3]);
+          var clickID = this.clickID || [-1,-1,-1,-1];
+          this.gl.uniform4f(this.clicker, clickID[0], clickID[1], clickID[2], clickID[3]);
         }
 
         seaGL.addHandler('gl-loaded',GLloaded);
         seaGL.addHandler('gl-drawing',GLdrawing);
         seaGL.addHandler('item-index-change',slice);
         seaGL.addHandler('canvas-click',click);
+        seaGL.addHandler('zoom',zoom);
 
         return seaGL.init();
     },
