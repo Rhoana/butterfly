@@ -11,10 +11,18 @@
 
 DOJO.Input = function(scope) {
 
+    var proto = document.getElementById('proto');
+    var corner = scope.openSD.element.childNodes[0].childNodes[3];
+    var list = proto.getElementsByTagName("UL")[0].cloneNode(true);
+    this.findings = list.getElementsByTagName("LI");
+    corner.appendChild(list);
+    list.id = 'findings';
+
     this.osd = scope.openSD;
     this.stack = scope.stack;
     this.realT = new DOJO.RealTime(scope);
-    this.realT.init().then(this.init.bind(this));
+    this.realT.init(this).then(this.init.bind(this));
+    this.findings[0].childNodes[1].innerHTML = this.stack.now;
 }
 
 DOJO.Input.prototype = {
@@ -64,11 +72,13 @@ DOJO.Input.prototype = {
         stack.show(stack.index.up);
         stack.lose(stack.index.start);
         stack.gain(stack.zBuff.end, stack.index.end);
+        this.findings[0].childNodes[1].innerHTML = stack.now;
     },
     down: function(stack){
         stack.now --;
         stack.show(stack.index.down);
         stack.lose(stack.index.end);
         stack.gain(-stack.zBuff.start, stack.index.start);
+        this.findings[0].childNodes[1].innerHTML = stack.now;
     }
 }

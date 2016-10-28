@@ -17,10 +17,14 @@ DOJO.RealTime = function(scope) {
 }
 
 DOJO.RealTime.prototype = {
-    init: function(){
+    init: function(input){
         var seaGL = this.seaGL;
         var stack = this.stack;
         var fun = function(){ };
+        var found = input.findings;
+        var rgb2id = function(rgb){
+          return rgb[0] + 256*rgb[1] + 65536*rgb[2];
+        }
         var isTarget = fun.call.bind(function(){
           return this.source && this.source.gl;
         });
@@ -60,6 +64,7 @@ DOJO.RealTime.prototype = {
             var hereTile = targets.lastDrawn.filter(nearTile.bind(here))[0];
             if(hereTile){
               this.viaGL.clickID = pointColor(point,hereTile);
+              found[1].childNodes[1].innerHTML = rgb2id(this.viaGL.clickID);
               this.openSD.forceRedraw();
             }
           }
