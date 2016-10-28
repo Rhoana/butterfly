@@ -69,7 +69,7 @@ DOJO.RealTime.prototype = {
           var ind = stack.w.getIndexOfItem(e.tiledImage);
           var allItems = stack.getItems('now').reverse();
           var targets = allItems.filter(isTarget)[0];
-          if(0 <= stack.index['now'].indexOf(ind) && dojo){
+          if(0 <= stack.index['now'].indexOf(ind) && dojo && targets && targets.lastDrawn.length){
             var fromTile = targets.lastDrawn.filter(isTile.bind(e.tile))[0];
             if(fromTile){
               e.output = contextualize(e.tile);
