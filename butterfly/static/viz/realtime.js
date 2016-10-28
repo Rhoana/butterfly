@@ -21,7 +21,7 @@ DOJO.RealTime.prototype = {
         var seaGL = this.seaGL;
         var stack = this.stack;
         var fun = function(){ };
-        var canClick = fun.call.bind(function(){
+        var isTarget = fun.call.bind(function(){
           return this.source && this.source.gl;
         });
         var isDojo = fun.call.bind(function(){
@@ -32,43 +32,57 @@ DOJO.RealTime.prototype = {
           var where = tile.bounds.getTopLeft();
           return this.level == tile.level && here.equals(where);
         }
-        // Image to Tile
-        var image2tile = function(point,space,shape) {
+        var nearTile = function(tile){
+          var where = new OpenSeadragon.Point(tile.x,tile.y);
+          return this.level == tile.level && this.xy.equals(where);
+        }
+        var contextualize = function(tile){
+          return tile.cacheImageRecord.getRenderedContext();
+        }
+        var pointColor = function(point,tile) {
+            var shape = tile.bounds.getSize();
+            var space = tile.bounds.getTopLeft();
+            var inImg = contextualize(tile);
+            var inCanv = inImg.canvas;
             var d = point.minus(space);
-            return [d.x/shape.x, d.y/shape.y];
+            var tmp = [d.x/shape.x, d.y/shape.y];
+            var xy = [inCanv.width*tmp[0], inCanv.height*tmp[1]].map(Math.ceil);
+            return inImg.getImageData(xy[0], xy[1], 1, 1).data;
         }
         var click = function(callback,e){
 
           var allItems = stack.getItems('now').reverse();
           var point = stack.vp.viewerElementToViewportCoordinates(e.position);
-          var layer = allItems.filter(canClick)[0];
+          var targets = allItems.filter(isTarget)[0];
           var dojo = allItems.filter(isDojo)[0];
-          if(!dojo || !layer){
+          if(!targets || !dojo || !dojo.lastDrawn.length){
             return;
           }
-          for (var toTile of dojo.lastDrawn){
-            var fromTile = layer.lastDrawn.filter(isTile.bind(toTile))[0];
-            if (fromTile){
-              e.rendered = fromTile.cacheImageRecord.getRenderedContext();
-              e.output = toTile.cacheImageRecord.getRenderedContext();
-              var tileShape = fromTile.bounds.getSize();
-              var tileSpace = fromTile.bounds.getTopLeft();
-              this.viaGL.clickSpot = image2tile(point,tileSpace,tileShape);
-              this.viaGL.clickSpot[1] = 1 - this.viaGL.clickSpot[1];
-              callback(e);
+          var here = {level: dojo.lastDrawn[0].level};
+          here.xy = dojo.source.getTileAtPoint(here.level,point);
+          var hereTile = targets.lastDrawn.filter(nearTile.bind(here))[0];
+          if(hereTile){
+            this.viaGL.clickID = pointColor(point,hereTile);
+            for (var toTile of dojo.lastDrawn){
+              var fromTile = targets.lastDrawn.filter(isTile.bind(toTile))[0];
+              if (fromTile){
+                e.output = contextualize(toTile);
+                e.rendered = contextualize(fromTile);
+                callback(e);
+              }
             }
+            this.openSD.forceRedraw();
           }
-          this.openSD.forceRedraw();
         }
 
         // Load for glsl
         var GLloaded = function(program) {
-          this.clicker = this.gl.getUniformLocation(program, 'u_click_pos');
+          this.clicker = this.gl.getUniformLocation(program, 'u_click_id');
         }
 
         // Draw for glsl
         var GLdrawing = function() {
-          this.gl.uniform2f(this.clicker, this.clickSpot[0], this.clickSpot[1]);
+          this.gl.uniform4f(this.clicker, this.clickID[0], this.clickID[1],this.clickID[2],this.clickID[3]);
         }
 
         seaGL.addHandler('gl-loaded',GLloaded);

@@ -34,8 +34,8 @@ DOJO.Stack.prototype = {
         var layers = {
             i: {gl:0, mod:''},
             s: {gl:0, mod:'&segmentation=y&segcolor=y'},
-            g: {gl:1, mod:'&segmentation=y'},
-            y: {gl:1, mod:'&synapse=y'},
+            g: {gl:1, target: true, mod:'&segmentation=y'},
+            y: {gl:1, target: true, mod:'&synapse=y'},
             dojo: {gl:0, dojo:true}
         };
         var src = layers[char] || layers.i;
