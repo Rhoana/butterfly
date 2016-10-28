@@ -25,20 +25,6 @@ openSeadragonGL = function(openSD) {
             e.output.canvas.width = input.width;
             e.output.canvas.height = input.height;
             e.output.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
-        },
-        'item-index-change': function(e) {
-            // For slicing
-            var input = e.rendered.canvas;
-            e.output.canvas.width = input.width;
-            e.output.canvas.height = input.height;
-            e.output.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
-        },
-        'zoom': function(e) {
-            // For slicing
-            var input = e.rendered.canvas;
-            e.output.canvas.width = input.width;
-            e.output.canvas.height = input.height;
-            e.output.drawImage(this.viaGL.toCanvas(input), 0, 0, input.width, input.height);
         }
     };
     this.defaults = {
@@ -49,14 +35,6 @@ openSeadragonGL = function(openSD) {
             callback(e);
         },
         'canvas-click': function(callback, e) {
-            callback(e);
-        },
-        'zoom': function(callback, e) {
-            callback(e);
-        }
-    };
-    this.worldDefaults = {
-        'item-index-change': function(callback, e) {
             callback(e);
         }
     };
@@ -81,9 +59,6 @@ openSeadragonGL.prototype = {
         if (key in this.defaults){
             this[key] = this.defaults[key];
         }
-        else if (key in this.worldDefaults){
-            this[key] = this.worldDefaults[key];
-        }
         if (typeof custom == 'function') {
             this[key] = custom;
         }
@@ -103,16 +78,6 @@ openSeadragonGL.prototype = {
     // Add all seadragon properties
     adder: function(e) {
         for (var key of this.and(this.defaults)) {
-            var that = {
-              handler: this[key].bind(this),
-              interface: this.interface[key].bind(this)
-            }
-            // Add all openSeadragon event handlers
-            this.openSD.addHandler(key, function(e) {
-                this.handler(this.interface, e);
-            }.bind(that));
-        }
-        for (var key of this.and(this.worldDefaults)) {
             var that = {
               handler: this[key].bind(this),
               interface: this.interface[key].bind(this)
