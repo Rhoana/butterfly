@@ -3,8 +3,6 @@ import re
 import os
 import cv2
 import argparse
-
-
 def main():
     '''
     Butterfly
@@ -19,7 +17,6 @@ def main():
         'port': 'port >1024 for hosting this server',
         'depth': 'search nth nested subfolders of exp path (default 2)'
     }
-    user = os.path.expanduser('~')
 
     parser = argparse.ArgumentParser(description=help['bfly'])
     parser.add_argument('-e','--exp', metavar='exp', help= help['folder'])
@@ -58,13 +55,8 @@ def main():
             source['name'] += '_'+str(dupes) if dupes else ''
             datasets.append(source)
         except:
-            datasets += sampler(path,depth-1)
-        return datasets
-
-    def sampler(root,depth):
-        datasets = []
-        for branch in folderer(root,depth):
-            datasets = trier(depth,datasets,branch)
+            for branch in folderer(path,depth):
+                datasets = trier(depth-1,datasets,branch)
         return datasets
 
     def starter(depth):
