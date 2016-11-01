@@ -53,7 +53,7 @@ def main():
     def trier(depth,datasets,path):
         try:
             source = sourcer(path)
-            dupes = sum(1 for d in datasets if d['name'] == source['name'])
+            dupes = sum(1 for d in datasets if source['name'] in d['name'])
             logger.report_event('Datasource found at '+ path)
             source['name'] += '_'+str(dupes) if dupes else ''
             datasets.append(source)
