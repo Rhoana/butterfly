@@ -72,14 +72,16 @@ DOJO.RealTime.prototype = {
         var draw = function(callback,e){
           var dojo = e.tiledImage.source.dojo;
           var ind = stack.w.getIndexOfItem(e.tiledImage);
-          var allItems = stack.getItems('now').reverse();
+          var allItems = stack.getItems('now')
           var targets = allItems.filter(isTarget)[0];
-          if(0 <= stack.index['now'].indexOf(ind) && dojo && targets && targets.lastDrawn.length){
-            var fromTile = targets.lastDrawn.filter(isTile.bind(e.tile))[0];
-            if(fromTile){
-              e.output = contextualize(e.tile);
-              e.rendered = contextualize(fromTile);
-              callback(e);
+          for (target of targets){
+            if(0 <= stack.index['now'].indexOf(ind) && dojo && target && target.lastDrawn.length){
+              var fromTile = target.lastDrawn.filter(isTile.bind(e.tile))[0];
+              if(fromTile){
+                e.output = contextualize(e.tile);
+                e.rendered = contextualize(fromTile);
+                callback(e);
+              }
             }
           }
         }
