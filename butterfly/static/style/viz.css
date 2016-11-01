@@ -12,10 +12,15 @@
 }
 
 #findings {
-    background-color: rgba(0, 0, 0, 0.8) !important;
+    background-color: rgba(0, 0, 0, 0.6) !important;
     padding: .5em .5em 0em 1em !important;
-    font-size: xx-large;
+    font-family: sans-serif;
+    font-size: large;
     color: white;
     height: 3em;
     width: 8em;
+}
+
+#findings li{
+  list-style: none;
 }
