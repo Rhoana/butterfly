@@ -53,7 +53,7 @@ DOJO.Write.prototype = {
            var matchID = Number(id)+1;
         }
       }
-      var path = 'viz.html?datapath='+source.path+'&width='+w+'&height='+h;
+      var path = 'viz.html?datapath='+source.path+'&width='+w+'&height='+h+'&depth='+d;
       cousin.children[0].href = path+ '&channel='+(['i','s','y'][matchID||0]);
       cousin.children[1].innerHTML = source['data-type'];
       uncle.children[1].innerHTML = [w,h,d].join(', ');

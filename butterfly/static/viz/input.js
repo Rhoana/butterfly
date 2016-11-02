@@ -59,6 +59,8 @@ DOJO.Input.prototype = {
         var level = this.stack.level;
         var check = function(slice){
             if (slice && slice.lastDrawn.length) {
+                 log(slice.lastDrawn[0].level)
+                 log(level)
                 return slice.lastDrawn[0].level >= level;
             }
         }
@@ -68,17 +70,15 @@ DOJO.Input.prototype = {
         }
     },
     up: function(stack){
+        stack.showLayer(1);
+        stack.hideLayer(0);
         stack.now ++;
-        stack.show(stack.index.up);
-        stack.lose(stack.index.start);
-        stack.gain(stack.zBuff, stack.index.end);
         this.findings[0].childNodes[1].innerHTML = stack.now;
     },
     down: function(stack){
+        stack.showLayer(-1);
+        stack.hideLayer(0);
         stack.now --;
-        stack.show(stack.index.down);
-        stack.lose(stack.index.end);
-        stack.gain(-stack.zBuff, stack.index.start);
         this.findings[0].childNodes[1].innerHTML = stack.now;
     }
 }
