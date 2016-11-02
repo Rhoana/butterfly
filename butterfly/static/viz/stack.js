@@ -26,7 +26,8 @@ DOJO.Stack.prototype = {
     now: 0,
     level: 0,
     zBuff: 0,
-    maxBuff: 3,
+    maxBuff: 100,
+    loadBuff: {up:3,down:-3},
     layerer: function(char,i){
         var layers = {
             i: {gl:0, mod:''},
@@ -43,38 +44,55 @@ DOJO.Stack.prototype = {
     },
     share: DOJO.Source.prototype.share.bind(null),
     sourcer: function(zLevel, indices, layer, i){
+        var levelDiff = zLevel - this.now;
         var src = {z:zLevel,minLevel:this.level};
-        var levelDiff = Math.abs(this.now - zLevel);
-        var set = {opacity: Number(levelDiff <= this.maxBuff)};
-        set.opacity = 1;
+        var set = {opacity: Number(levelDiff <= this.loadBuff.up && levelDiff >= this.loadBuff.down)};
         var source = this.protoSource.init(this.share(layer.src, src));
         return this.share(this.share(set, {index:indices[i]}), source);
     },
-    indexer: function(preset){
-        var buffer = function(zb){
+    indexer: function(zBuff){
+        var nL = this.nLayers;
+        var preset = this.preset;
+        var buffer = function(zbo){
           return preset.map(function(p,i){
-              return Math.max(zb,0)*preset.length+i;
+              return Math.max(zbo,0)*nL+i;
           });
         }
         return {
           'start': buffer(0),
-          'up': buffer(this.zBuff),
-          'down': buffer(this.zBuff-1),
-          'end': buffer(2*this.zBuff-1),
-          'now': buffer(2*this.zBuff)
+          'up': buffer(zBuff),
+          'down': buffer(zBuff-1),
+          'end': buffer(2*zBuff-1),
+          'now': buffer(2*zBuff)
         }
     },
     init: function(osd){
         var w = osd.world;
-        this.getItems = function(event){
-            return this.index[event].map(w.getItemAt, w);
+        var nL = this.nLayers;
+        this.getItems = function(event,loaded){
+            var indices = this.index[event];
+            if (loaded){
+              indices = indices.map(function(ind){
+                var offset = loaded[event]
+                if (event == 'up'){
+                  return ind + Math.max(offset-2,-1)*nL;
+                }
+                return ind + offset*nL;
+              });
+            }
+            return indices.map(w.getItemAt, w);
+        }
+        this.setOpacity = function(event,loaded){
+            var tiles = this.getItems(event,loaded);
+//            log('loaded ' + event + ' ' + loaded[event] )
+            tiles.map(function(t){
+              t.setOpacity(1);
+            });
         }
         this.check = function(event){
-            var needed = this.total - w.getItemCount();
-            if (needed == 0) {
+            if (this.total == w.getItemCount()) {
               return this.getItems(event);
             }
-            log(needed + ' needed')
         }
         this.lose = function(lost){
             lost.map(w.getItemAt,w).map(w.removeItem,w);
@@ -104,12 +122,18 @@ DOJO.Stack.prototype = {
         if (this.zBuff < this.maxBuff){
             this.zBuff += 1;
             this.total += 2*this.nLayers;
-            this.index = this.indexer(this.preset);
+            this.index = this.indexer(this.zBuff);
+//            if (this.zBuff > this.loadBuff.up){
+//                this.setOpacity('up',this.loadBuff)
+//                this.loadBuff.up ++;
+//            }
+//            if (-this.zBuff < this.loadBuff.down){
+//                this.setOpacity('down',this.loadBuff)
+//                this.loadBuff.down --;
+//            }
+
             this.gain(-this.zBuff, this.index.start);
             this.gain(this.zBuff, this.index.end);
-        }
-        else {
-          log('hi')
         }
     },
     refresher: function(e){
@@ -118,9 +142,17 @@ DOJO.Stack.prototype = {
             var source = event.source;
             if(e.fullyLoaded){
                 if(!this.w.needsDraw()){
-                    this.log()
+                    var levelDiff = source.z - this.now;
+                    if (levelDiff == this.loadBuff.up){
+                        for (var reps = levelDiff; reps < this.maxBuff; reps++){
+                          this.updater();
+                          log(this.zBuff)
+                        }
+                    }
                     this.updater();
-                };
+                    log(this.w)
+                    log(this.w.getItemCount())
+                }
                 source.minLevel = 0;
                 event.draw();
                 return;

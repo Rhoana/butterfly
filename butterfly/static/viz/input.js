@@ -58,9 +58,6 @@ DOJO.Input.prototype = {
         }
         var level = this.stack.level;
         var check = function(slice){
-            if(!slice.opacity){
-              slice.setOpacity(1);
-            }
             if (slice && slice.lastDrawn.length) {
                 return slice.lastDrawn[0].level >= level;
             }
