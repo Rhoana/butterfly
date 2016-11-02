@@ -57,7 +57,7 @@ DOJO.RealTime.prototype = {
           var point = stack.vp.viewerElementToViewportCoordinates(e.position);
           var allItems = stack.findLayer(0).reverse();
           var targets = allItems.filter(isTarget)[0];
-          var dojo = allItems.filter(isDojo)[0];
+          var dojo = stack.getDojo();
           if(dojo && targets && targets.lastDrawn.length){
             var here = {level: targets.lastDrawn[0].level};
             here.xy = dojo.source.getTileAtPoint(here.level,point);
@@ -72,9 +72,12 @@ DOJO.RealTime.prototype = {
         var draw = function(callback,e){
           var allItems = stack.findLayer(0);
           var dojo = e.tiledImage.source.dojo;
-          var ind = stack.w.getIndexOfItem(e.tiledImage);
+          if (!dojo){
+             return;
+          }
           var targets = allItems.filter(isTarget)[0];
-          if(0 <= stack.findIndex(0).indexOf(ind) && dojo && targets && targets.lastDrawn.length){
+          if(targets && targets.lastDrawn.length){
+            log('higi')
             var fromTile = targets.lastDrawn.filter(isTile.bind(e.tile))[0];
             if(fromTile){
               e.output = contextualize(e.tile);

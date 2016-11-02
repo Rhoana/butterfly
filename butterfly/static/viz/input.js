@@ -45,7 +45,7 @@ DOJO.Input.prototype = {
         return {name: event, onClick: this.event.bind(this,event)};
     },
     keyDown: function(toolbar,e){
-        if (e.keyCode in this.codes) {
+        if (e.eventSource && e.keyCode in this.codes) {
             var index = this.codes[e.keyCode];
             toolbar[index].onClick();
             e.stopHandlers = true;
@@ -59,8 +59,6 @@ DOJO.Input.prototype = {
         var level = this.stack.level;
         var check = function(slice){
             if (slice && slice.lastDrawn.length) {
-                 log(slice.lastDrawn[0].level)
-                 log(level)
                 return slice.lastDrawn[0].level >= level;
             }
         }

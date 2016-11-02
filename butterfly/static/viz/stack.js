@@ -12,15 +12,13 @@ DOJO.Stack = function(src_terms){
 
     // Setup
     var channels = src_terms.channel || ['i'];
-    channels = channels.split('').concat('dojo');
-    this.preset = channels.map(this.layerer);
+    this.preset = channels.split('').map(this.layerer);
     this.nLayers = this.preset.length;
     this.depth = src_terms.depth;
     // Prepare the sources
     var protoSource = new DOJO.Source(src_terms);
     this.source = this.sourcer(protoSource);
     this.maxLevel = this.source[0].tileSource.maxLevel;
-    log(this.maxLevel)
 }
 
 DOJO.Stack.prototype = {
@@ -32,7 +30,7 @@ DOJO.Stack.prototype = {
       up: 1,
       down: -1
     },
-    layerer: function(char,i){
+    layerer: function(char){
         var layers = {
             i: {gl:0, mod:''},
             s: {gl:0, mod:'&segmentation=y&segcolor=y'},
@@ -44,18 +42,25 @@ DOJO.Stack.prototype = {
         return {src:src, set:{}}
     },
     share: DOJO.Source.prototype.share.bind(null),
-    sourcer: function(protoSource){
+    make: function(protoSource,preset,src,set){
+        var source = protoSource.init(this.share(preset.src, src));
+        return this.share(set, source);
+    },
+    sourcer: function(proto){
         var sources = [];
         for (var preset of this.preset){
           for (var level = 0; level < this.depth; level++){
             var diff = Math.abs(level-this.now);
             var src = {z:level,minLevel:this.level};
             var set = {opacity: Number(diff <= 2)};
-            var source = protoSource.init(this.share(preset.src, src));
-            sources.push(this.share(set, source));
+            sources.push(this.make(proto,preset,src,set));
           }
         }
-        return sources
+        var set = {opacity: 1};
+        var src = {z:-1,minLevel:this.level};
+        var dojosource = this.layerer('dojo');
+        sources.push(this.make(proto,dojosource,src,set));
+        return sources;
     },
     init: function(osd){
         this.vp = osd.viewport;
@@ -83,6 +88,10 @@ DOJO.Stack.prototype = {
     },
     check: function(event){
         return this.findLayer(this.index[event]);
+    },
+    getDojo: function(){
+        var index = this.w.getItemCount()-1;
+        return this.w.getItemAt(index);
     },
     refresher: function(e){
         e.item.addHandler('fully-loaded-change',function(e){
