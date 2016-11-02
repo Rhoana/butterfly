@@ -53,16 +53,19 @@ DOJO.Input.prototype = {
     },
     event: function(event) {
         if (event == 'home'){
-            window.location = window.location.href.split('/viz.html')[0]+'/';
+            window.location = 'index.html';
             return;
         }
         var level = this.stack.level;
         var check = function(slice){
+            if(!slice.opacity){
+              slice.setOpacity(1);
+            }
             if (slice && slice.lastDrawn.length) {
                 return slice.lastDrawn[0].level >= level;
             }
         }
-        var slices = this.stack.event(event);
+        var slices = this.stack.check(event);
         if (slices && slices.every(check)) {
             return this[event](this.stack);
         }
@@ -71,14 +74,14 @@ DOJO.Input.prototype = {
         stack.now ++;
         stack.show(stack.index.up);
         stack.lose(stack.index.start);
-        stack.gain(stack.zBuff.end, stack.index.end);
+        stack.gain(stack.zBuff, stack.index.end);
         this.findings[0].childNodes[1].innerHTML = stack.now;
     },
     down: function(stack){
         stack.now --;
         stack.show(stack.index.down);
         stack.lose(stack.index.end);
-        stack.gain(-stack.zBuff.start, stack.index.start);
+        stack.gain(-stack.zBuff, stack.index.start);
         this.findings[0].childNodes[1].innerHTML = stack.now;
     }
 }

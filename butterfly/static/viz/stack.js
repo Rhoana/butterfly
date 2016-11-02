@@ -25,16 +25,9 @@ DOJO.Stack = function(src_terms){
 DOJO.Stack.prototype = {
     now: 0,
     level: 0,
-    zBuff: {
-      start: 0,
-      end: 0
-    },
+    zBuff: 0,
     maxBuff: 3,
     layerer: function(char,i){
-        var opacity = 1;
-        if (char == 's'){
-          opacity = 0.5;
-        }
         var layers = {
             i: {gl:0, mod:''},
             s: {gl:0, mod:'&segmentation=y&segcolor=y'},
@@ -43,7 +36,7 @@ DOJO.Stack.prototype = {
             dojo: {gl:0, dojo:true}
         };
         var src = layers[char] || layers.i;
-        return {src:src, set:{opacity: opacity}}
+        return {src:src, set:{}}
     },
     make: function(zLevel, indices) {
         return this.preset.map(this.sourcer.bind(this,zLevel,indices));
@@ -51,8 +44,11 @@ DOJO.Stack.prototype = {
     share: DOJO.Source.prototype.share.bind(null),
     sourcer: function(zLevel, indices, layer, i){
         var src = {z:zLevel,minLevel:this.level};
+        var levelDiff = Math.abs(this.now - zLevel);
+        var set = {opacity: Number(levelDiff <= this.maxBuff)};
+        set.opacity = 1;
         var source = this.protoSource.init(this.share(layer.src, src));
-        return this.share(this.share(layer.set, {index:indices[i]}), source);
+        return this.share(this.share(set, {index:indices[i]}), source);
     },
     indexer: function(preset){
         var buffer = function(zb){
@@ -62,10 +58,10 @@ DOJO.Stack.prototype = {
         }
         return {
           'start': buffer(0),
-          'up': buffer(this.zBuff.start),
-          'down': buffer(this.zBuff.start-1),
-          'end': buffer(this.zBuff.start+this.zBuff.end-1),
-          'now': buffer(this.zBuff.start+this.zBuff.end)
+          'up': buffer(this.zBuff),
+          'down': buffer(this.zBuff-1),
+          'end': buffer(2*this.zBuff-1),
+          'now': buffer(2*this.zBuff)
         }
     },
     init: function(osd){
@@ -73,12 +69,12 @@ DOJO.Stack.prototype = {
         this.getItems = function(event){
             return this.index[event].map(w.getItemAt, w);
         }
-        this.event = function(event){
-            var point = (event=='up')?'end':'start';
+        this.check = function(event){
             var needed = this.total - w.getItemCount();
             if (needed == 0) {
               return this.getItems(event);
             }
+            log(needed + ' needed')
         }
         this.lose = function(lost){
             lost.map(w.getItemAt,w).map(w.removeItem,w);
@@ -104,12 +100,16 @@ DOJO.Stack.prototype = {
         this.w = w;
         return this;
     },
-    updater: function(point,sign){
-        if (this.zBuff[point] < this.maxBuff){
-            this.zBuff[point] += 1;
-            this.total += this.nLayers;
+    updater: function(){
+        if (this.zBuff < this.maxBuff){
+            this.zBuff += 1;
+            this.total += 2*this.nLayers;
             this.index = this.indexer(this.preset);
-            this.gain(sign*this.zBuff[point], this.index[point]);
+            this.gain(-this.zBuff, this.index.start);
+            this.gain(this.zBuff, this.index.end);
+        }
+        else {
+          log('hi')
         }
     },
     refresher: function(e){
@@ -118,8 +118,8 @@ DOJO.Stack.prototype = {
             var source = event.source;
             if(e.fullyLoaded){
                 if(!this.w.needsDraw()){
-                    this.updater('start',-1);
-                    this.updater('end',1);
+                    this.log()
+                    this.updater();
                 };
                 source.minLevel = 0;
                 event.draw();
