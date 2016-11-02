@@ -1,6 +1,6 @@
 //! openseadragon 2.2.1
-//! Built on 2016-11-02
-//! Git commit: v2.2.1-102-c5d4e9f
+//! Built on 2016-10-20
+//! Git commit: v2.2.1-81-b04717a
 //! http://openseadragon.github.io
 //! License: http://openseadragon.github.io/license/
 
@@ -11296,17 +11296,10 @@ $.TileSource.prototype = {
      */
     getTileAtPoint: function(level, point) {
         var widthScaled = this.dimensions.x * this.getLevelScale(level);
-        var pixelX = $.positiveModulo(point.x, 1) * widthScaled;
-        var pixelY = $.positiveModulo(point.y, 1 / this.aspectRatio) * widthScaled;
-
+        var pixelX = point.x * widthScaled;
+        var pixelY = point.y * widthScaled;
         var x = Math.floor(pixelX / this.getTileWidth());
         var y = Math.floor(pixelY / this.getTileHeight());
-
-        // Fix for wrapping
-        var numTiles = this.getNumTiles(level);
-        x += numTiles.x * Math.floor(point.x);
-        y += numTiles.y * Math.floor(point.y * this.aspectRatio);
-
         return new $.Point(x, y);
     },
 
@@ -13070,7 +13063,12 @@ function filterFiles( files ){
         file = files[ i ];
         if( file.height &&
             file.width &&
-            file.url ){
+            file.url && (
+                file.url.toLowerCase().match(/^.*\.(png|jpg|jpeg|gif)(?:\?.*)?$/) || (
+                    file.mimetype &&
+                    file.mimetype.toLowerCase().match(/^.*\/(png|jpg|jpeg|gif)$/)
+                )
+            ) ){
             //This is sufficient to serve as a level
             filtered.push({
                 url: file.url,
@@ -13271,9 +13269,8 @@ function configureFromObject( tileSource, configuration ){
             }
 
             $.addEvent(image, 'load', function () {
-                /* IE8 fix since it has no naturalWidth and naturalHeight */
-                _this.width = Object.prototype.hasOwnProperty.call(image, 'naturalWidth') ? image.naturalWidth : image.width;
-                _this.height = Object.prototype.hasOwnProperty.call(image, 'naturalHeight') ? image.naturalHeight : image.height;
+                _this.width = image.naturalWidth;
+                _this.height = image.naturalHeight;
                 _this.aspectRatio = _this.width / _this.height;
                 _this.dimensions = new $.Point(_this.width, _this.height);
                 _this._tileWidth = _this.width;
@@ -13360,9 +13357,8 @@ function configureFromObject( tileSource, configuration ){
         _buildLevels: function () {
             var levels = [{
                     url: this._image.src,
-                    /* IE8 fix since it has no naturalWidth and naturalHeight */
-                    width: Object.prototype.hasOwnProperty.call(this._image, 'naturalWidth') ? this._image.naturalWidth : this._image.width,
-                    height:  Object.prototype.hasOwnProperty.call(this._image, 'naturalHeight') ? this._image.naturalHeight : this._image.height
+                    width: this._image.naturalWidth,
+                    height: this._image.naturalHeight
                 }];
 
             if (!this.buildPyramid || !$.supportsCanvas || !this.useCanvas) {
@@ -13371,10 +13367,8 @@ function configureFromObject( tileSource, configuration ){
                 return levels;
             }
 
-            /* IE8 fix since it has no naturalWidth and naturalHeight */
-            var currentWidth = Object.prototype.hasOwnProperty.call(this._image, 'naturalWidth') ? this._image.naturalWidth : this._image.width;
-            var currentHeight = Object.prototype.hasOwnProperty.call(this._image, 'naturalHeight') ? this._image.naturalHeight : this._image.height;
-
+            var currentWidth = this._image.naturalWidth;
+            var currentHeight = this._image.naturalHeight;
 
             var bigCanvas = document.createElement("canvas");
             var bigContext = bigCanvas.getContext("2d");
@@ -16981,6 +16975,7 @@ $.Drawer.prototype = {
                 this.sketchCanvas.height = sketchCanvasSize.y;
                 this.sketchContext = this.sketchCanvas.getContext( "2d" );
 
+                // FIXME: should check if any tiled image get rotated as well.
                 // If the viewport is not currently rotated, the sketchCanvas
                 // will have the same size as the main canvas. However, if
                 // the viewport get rotated later on, we will need to resize it.
@@ -17152,14 +17147,13 @@ $.Drawer.prototype = {
         context.fillStyle = this.debugGridColor;
 
         if ( this.viewport.degrees !== 0 ) {
-            this._offsetForRotation({degrees: this.viewport.degrees});
+            this._offsetForRotation(this.viewport.degrees);
         }
         if (tiledImage.getRotation() !== 0) {
-            this._offsetForRotation({
-                degrees: tiledImage.getRotation(),
-                point: tiledImage.viewport.pixelFromPointNoRotate(
-                    tiledImage._getRotationPoint(true), true)
-            });
+            this._offsetForRotation(
+                tiledImage.getRotation(),
+                tiledImage.viewport.pixelFromPointNoRotate(
+                    tiledImage._getRotationPoint(true), true));
         }
 
         context.strokeRect(
@@ -17264,16 +17258,13 @@ $.Drawer.prototype = {
     },
 
     // private
-    _offsetForRotation: function(options) {
-        var point = options.point ?
-            options.point.times($.pixelDensityRatio) :
-            this.getCanvasCenter();
-
-        var context = this._getContext(options.useSketch);
+    _offsetForRotation: function(degrees, point, useSketch) {
+        point = point || this.getCanvasCenter();
+        var context = this._getContext(useSketch);
         context.save();
 
         context.translate(point.x, point.y);
-        context.rotate(Math.PI / 180 * options.degrees);
+        context.rotate(Math.PI / 180 * degrees);
         context.translate(-point.x, -point.y);
     },
 
@@ -17296,7 +17287,8 @@ $.Drawer.prototype = {
     // private
     _calculateSketchCanvasSize: function() {
         var canvasSize = this._calculateCanvasSize();
-        if (this.viewport.getRotation() === 0) {
+        if (this.viewport.getRotation() === 0 &&
+            !this.viewer.world._hasRotatedItem()) {
             return canvasSize;
         }
         // If the viewport is rotated, we need a larger sketch canvas in order
@@ -19354,8 +19346,20 @@ $.extend($.TiledImage.prototype, $.EventSource.prototype, /** @lends OpenSeadrag
     },
 
     // private
-    // Convert rectangle in viewport coordinates to this tiled image point
-    // coordinates (x in [0, 1] and y in [0, aspectRatio])
+    // Convert rectangle in tiled image coordinates to viewport coordinates.
+    _tiledImageToViewportRectangle: function(rect) {
+        var scale = this._scaleSpring.current.value;
+        return new $.Rect(
+            rect.x * scale + this._xSpring.current.value,
+            rect.y * scale + this._ySpring.current.value,
+            rect.width * scale,
+            rect.height * scale,
+            rect.degrees)
+            .rotate(this.getRotation(), this._getRotationPoint(true));
+    },
+
+    // private
+    // Convert rectangle in viewport coordinates to tiled image coordinates.
     _viewportToTiledImageRectangle: function(rect) {
         var scale = this._scaleSpring.current.value;
         rect = rect.rotate(-this.getRotation(), this._getRotationPoint(true));
@@ -19751,7 +19755,7 @@ $.extend($.TiledImage.prototype, $.EventSource.prototype, /** @lends OpenSeadrag
             var targetRenderPixelRatio = viewport.deltaPixelsFromPointsNoRotate(
                 this.source.getPixelRatio(level),
                 false
-            ).x * this._scaleSpring.current.value;
+            ).x * this._scaleSpring.current.value; //TODO: shouldn't that be target.value?
 
             var targetZeroRatio = viewport.deltaPixelsFromPointsNoRotate(
                 this.source.getPixelRatio(
@@ -19761,7 +19765,7 @@ $.extend($.TiledImage.prototype, $.EventSource.prototype, /** @lends OpenSeadrag
                     )
                 ),
                 false
-            ).x * this._scaleSpring.current.value;
+            ).x * this._scaleSpring.current.value; //TODO: shouldn't that be target.value?
 
             var optimalRatio = this.immediateRender ? 1 : targetZeroRatio;
             var levelOpacity = Math.min(1, (currentRenderPixelRatio - 0.5) / 0.5);
@@ -19850,12 +19854,16 @@ function updateLevel(tiledImage, haveDrawn, drawLevel, level, levelOpacity,
 
     resetCoverage(tiledImage.coverage, level);
 
-    if (!tiledImage.wrapHorizontal) {
+    if (tiledImage.wrapHorizontal) {
+        topLeftTile.x -= 1; // left invisible column (othervise we will have empty space after scroll at left)
+    } else {
         // Adjust for floating point error
         topLeftTile.x = Math.max(topLeftTile.x, 0);
         bottomRightTile.x = Math.min(bottomRightTile.x, numberOfTiles.x - 1);
     }
-    if (!tiledImage.wrapVertical) {
+    if (tiledImage.wrapVertical) {
+        topLeftTile.y -= 1; // top invisible row (othervise we will have empty space after scroll at top)
+    } else {
         // Adjust for floating point error
         topLeftTile.y = Math.max(topLeftTile.y, 0);
         bottomRightTile.y = Math.min(bottomRightTile.y, numberOfTiles.y - 1);
@@ -19866,14 +19874,11 @@ function updateLevel(tiledImage, haveDrawn, drawLevel, level, levelOpacity,
     for (var x = topLeftTile.x; x <= bottomRightTile.x; x++) {
         for (var y = topLeftTile.y; y <= bottomRightTile.y; y++) {
 
-            // Optimisation disabled with wrapping because getTileBounds does not
-            // work correctly with x and y outside of the number of tiles
-            if (!tiledImage.wrapHorizontal && !tiledImage.wrapVertical) {
-                var tileBounds = tiledImage.source.getTileBounds(level, x, y);
-                if (drawArea.intersection(tileBounds) === null) {
-                    // This tile is outside of the viewport, no need to draw it
-                    continue;
-                }
+            var tileBounds = tiledImage.source.getTileBounds(level, x, y);
+
+            if (drawArea.intersection(tileBounds) === null) {
+                // This tile is outside of the viewport, no need to draw it
+                continue;
             }
 
             best = updateTile(
@@ -20335,9 +20340,7 @@ function drawTiles( tiledImage, lastDrawn ) {
 
     var zoom = tiledImage.viewport.getZoom(true);
     var imageZoom = tiledImage.viewportToImageZoom(zoom);
-    // TODO: support tile edge smoothing with tiled image rotation.
-    if (imageZoom > tiledImage.smoothTileEdgesMinZoom && !tiledImage.iOSDevice &&
-        tiledImage.getRotation() === 0 && $.supportsCanvas) {
+    if (imageZoom > tiledImage.smoothTileEdgesMinZoom && !tiledImage.iOSDevice) {
         // When zoomed in a lot (>100%) the tile edges are visible.
         // So we have to composite them at ~100% and scale them up together.
         // Note: Disabled on iOS devices per default as it causes a native crash
@@ -20365,18 +20368,15 @@ function drawTiles( tiledImage, lastDrawn ) {
     // avoid interpolation
     if (!sketchScale) {
         if (tiledImage.viewport.degrees !== 0) {
-            tiledImage._drawer._offsetForRotation({
-                degrees: tiledImage.viewport.degrees,
-                useSketch: useSketch
-            });
+            tiledImage._drawer._offsetForRotation(
+                tiledImage.viewport.degrees, useSketch);
         }
         if (tiledImage._degrees !== 0) {
-            tiledImage._drawer._offsetForRotation({
-                degrees: tiledImage._degrees,
-                point: tiledImage.viewport.pixelFromPointNoRotate(
+            tiledImage._drawer._offsetForRotation(
+                tiledImage._degrees,
+                tiledImage.viewport.pixelFromPointNoRotate(
                     tiledImage._getRotationPoint(true), true),
-                useSketch: useSketch
-            });
+                useSketch);
         }
     }
 
@@ -20458,18 +20458,15 @@ function drawTiles( tiledImage, lastDrawn ) {
     if (useSketch) {
         if (sketchScale) {
             if (tiledImage.viewport.degrees !== 0) {
-                tiledImage._drawer._offsetForRotation({
-                    degrees: tiledImage.viewport.degrees,
-                    useSketch: false
-                });
+                tiledImage._drawer._offsetForRotation(
+                    tiledImage.viewport.degrees, false);
             }
             if (tiledImage._degrees !== 0) {
-                tiledImage._drawer._offsetForRotation({
-                    degrees: tiledImage._degrees,
-                    point: tiledImage.viewport.pixelFromPointNoRotate(
+                tiledImage._drawer._offsetForRotation(
+                    tiledImage._degrees,
+                    tiledImage.viewport.pixelFromPointNoRotate(
                         tiledImage._getRotationPoint(true), true),
-                    useSketch: false
-                });
+                    false);
             }
         }
         tiledImage._drawer.blendSketch({
@@ -21219,6 +21216,16 @@ $.extend( $.World.prototype, $.EventSource.prototype, /** @lends OpenSeadragon.W
          * @property {?Object} userData - Arbitrary subscriber-defined object.
          */
         this.raiseEvent( 'remove-item', { item: item } );
+    },
+
+    // private
+    _hasRotatedItem: function() {
+        for (var i = 0; i < this._items.length; i++) {
+            if (this._items[i].getRotation() !== 0) {
+                return true;
+            }
+        }
+        return false;
     }
 });
 
