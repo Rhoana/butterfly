@@ -24,6 +24,7 @@ DOJO.Stack = function(src_terms){
 DOJO.Stack.prototype = {
     w: null,
     vp: null,
+    maxBuff = 10,
     level: 0,
     now: 0,
     index: {
@@ -42,24 +43,22 @@ DOJO.Stack.prototype = {
         return {src:src, set:{}}
     },
     share: DOJO.Source.prototype.share.bind(null),
-    make: function(protoSource,preset,src,set){
+    make: function(protoSource,preset,src,alpha){
         var source = protoSource.init(this.share(preset.src, src));
-        return this.share(set, source);
+        return this.share({opacity: alpha}, source);
     },
     sourcer: function(proto){
         var sources = [];
         for (var preset of this.preset){
           for (var level = 0; level < this.depth; level++){
-            var diff = Math.abs(level-this.now);
+            var alp = Number(level == this.now);
             var src = {z:level,minLevel:this.level};
-            var set = {opacity: Number(diff <= 2)};
-            sources.push(this.make(proto,preset,src,set));
+            sources.push(this.make(proto,preset,src,alp));
           }
         }
-        var set = {opacity: 1};
         var src = {z:-1,minLevel:this.level};
         var dojosource = this.layerer('dojo');
-        sources.push(this.make(proto,dojosource,src,set));
+        sources.push(this.make(proto,dojosource,src,1));
         return sources;
     },
     init: function(osd){
