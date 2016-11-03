@@ -120,13 +120,14 @@ DOJO.Stack.prototype = {
         }
         if(zBuff.down > -this.maxBuff && this.now + zBuff.down > 0){
           newBuff.down --;
+          this.findLayer(newBuff.down).map(this.setOpacity,1);
           this.findLayer(newBuff.down).map(this.setPreload,true);
         }
         if(zBuff.up < this.maxBuff && this.now + zBuff.up < this.depth-1){
           newBuff.up ++;
+          this.findLayer(newBuff.up).map(this.setOpacity,1);
           this.findLayer(newBuff.up).map(this.setPreload,true);
         }
-        log(newBuff);
         return newBuff;
     },
     refresher: function(e){
