@@ -77,11 +77,12 @@ class WebServer:
             (r'/metainfo/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/data/(.*)', WebServerHandler, dict(webserver=self)),
             (r'/stop/(.*)', WebServerHandler, dict(webserver=self)),
-            (r'/(index\.html)', PkgResourcesHandler, {}),
+            (r'/(.*\.html)', PkgResourcesHandler, {}),
             (r'/(.*\.js)', PkgResourcesHandler, {}),
             (r'/(.*\.css)', PkgResourcesHandler, {}),
             (r'/(.*\.glsl)', PkgResourcesHandler, {}),
-            (r'/(images/.*\.png)', PkgResourcesHandler, {}),
+            (r'/(.*\.png)', PkgResourcesHandler, {}),
+            (r'/(.*\.ico)', PkgResourcesHandler, {}),
             (r'(/)', PkgResourcesHandler, {})
 
         ])
@@ -123,17 +124,14 @@ class WebServer:
                 args = parser.parse(splitted_request[2:])
 
                 # Call the cutout method
-                volume = self._core.get(*args)
+                volume = self._core.get(*args[0:3],**args[3])
 
                 # Check if we got nothing in the case of a request outside the
                 # data with fit=True
                 if volume.size == 0:
                     raise IndexError('Tile index out of bounds')
 
-                # Color mode is equivalent to segmentation color request right
-                # now
-                color = parser.optional_queries[
-                    'segcolor'] and parser.optional_queries['segmentation']
+                color = parser.optional_queries['segcolor']
 
                 # Accepted image output formats
                 image_formats = settings.SUPPORTED_IMAGE_FORMATS

@@ -13,7 +13,7 @@ class RequestParser(object):
 
         # Optional queries
         self.optional_queries = {}
-        self.optional_query_list = ('segmentation', 'segcolor', 'fit')
+        self.optional_query_list = ('segmentation', 'segcolor', 'fit', 'synapse')
         self.assent_list = settings.ASSENT_LIST
 
         # Set these to false in case we use OCP format or some other format
@@ -100,11 +100,5 @@ class RequestParser(object):
 
         self.output_format = self.output_format.lstrip('.').lower()
 
-        return [
-            datapath,
-            start,
-            volsize,
-            self.optional_queries['segmentation'],
-            self.optional_queries['segcolor'],
-            self.optional_queries['fit'],
-            w]
+        self.optional_queries['w'] = w;
+        return [ datapath, start, volsize, self.optional_queries]

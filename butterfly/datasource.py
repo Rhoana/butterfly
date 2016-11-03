@@ -1,3 +1,5 @@
+import os
+import re
 import cv2
 import h5py
 import settings
@@ -110,3 +112,14 @@ class DataSource(object):
         Get maximum data size
         '''
         pass
+
+    def get_dataset(self,path):
+        '''
+        # Override for >1 channels with own 'data-type'
+        :param path: the root/path/to/this/data
+        :returns: dataset of meta info about self
+        '''
+        dimensions = dict(zip(('x','y','z'),self.get_boundaries()))
+        channel = {'path':path,'name':'img','dimensions':dimensions}
+        dataset = {'name':os.path.basename(path),'channels':[channel]}
+        return dataset

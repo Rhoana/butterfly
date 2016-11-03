@@ -2,31 +2,30 @@ var SCOPE = {};
 var DOJO = {};
 //-----------------------------------
 //
-// http://<host>:<port>/index.html?server=<...>&datapath=<...>
+// http://<host>:<port>/viz.html?server=<...>&datapath=<...>
 // New DOJO.Stack
 //     DOJO.Stack.init
 // New OpenSeadragon
 // New DOJO.Input
 // -- Called first
 //-----------------------------------
-window.onload = function(e){{}
+window.onload = function(e){
 
     OpenSeadragon.ImageLoader = ZipLoader;
-
     // preset tile source
     SCOPE.stack  = new DOJO.Stack(SCOPE.parse());
     // Open a seadragon with two layers
     SCOPE.openSD = OpenSeadragon({
         tileSources: SCOPE.stack.source,
         crossOriginPolicy: 'Anonymous',
-        prefixUrl: 'images/icons/',
+        prefixUrl: '../images/icons/',
         minZoomImageRatio: .2,
         maxZoomPixelRatio: 8,
         showZoomControl: 0,
+        showHomeControl: 0,
         id: 'viaWebGL'
     });
     SCOPE.openSD.world.addHandler('add-item', SCOPE.stack.refresher.bind(SCOPE.stack));
-    SCOPE.openSD.addHandler('update-level',SCOPE.stack.porter.bind(SCOPE.stack));
     SCOPE.openSD.addHandler('zoom',SCOPE.stack.zoomer.bind(SCOPE.stack));
     // Link everything to WebGL
     SCOPE.stack.init(SCOPE.openSD);

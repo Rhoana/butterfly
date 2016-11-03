@@ -2,25 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Butterfly Dojoscope</title>
-  <meta name="author" content="viaWebGL">
-  <meta name="description" content="Use Dojoscope to proofread microscopic data. Show the neural data on the Butterfly Image Server.">
-  <link rel = "stylesheet" type = "text/css" href = "style/scope.css" />
-  <script type='text/javascript' src='tools/viaWebGL.js'></script>
-  <script type='text/javascript' src='tools/zlib.min.js'></script>
-  <script type='text/javascript' src='tools/osd/zipjob.js'></script>
-  <script type='text/javascript' src='tools/osd/imagejob.js'></script>
-  <script type='text/javascript' src='tools/osd/ziploader.js'></script>
-  <script type='text/javascript' src='tools/osd/openseadragon.js'></script>
-  <script type='text/javascript' src='tools/osd/viewerinputhook.js'></script>
-  <script type='text/javascript' src='tools/openSeadragonGL.js'></script>
-  <script type='text/javascript' src='main.js'></script>
-  <script type='text/javascript' src='source.js'></script>
-  <script type='text/javascript' src='stack.js'></script>
-  <script type='text/javascript' src='realtime.js'></script>
-  <script type='text/javascript' src='input.js'></script>
+  <title>RhoANAScope</title>
+  <meta name="author" content="RhoANA">
+  <meta name="description" content="List the neural data on the Butterfly Image Server.">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+  <link rel = "stylesheet" type = "text/css" href = "style/index.css" />
+  <script type='text/javascript' src='index/main.js'></script>
+  <script type='text/javascript' src='index/setup.js'></script>
+  <script type='text/javascript' src='index/write.js'></script>
 </head>
 <body>
-    <div id='viaWebGL'></div>
+  <div id='api'>
+    <ul id='root'></ul>
+    <ul id='proto'>
+        <li>
+            <input type="checkbox"/>
+            <label>
+                <svg viewBox="0 0 10 10" width="1em" height="1em">
+                  <path d="M 0,4 L 3,7 L 6,4"/>
+                </svg>
+                <span>
+                  <a>None</a>
+                  <span>?</span>
+                </span>
+            </label>
+            <ul></ul>
+        </li>
+        <li id='total'>
+            <a>Total Experiments</a>
+            <span>?</span>
+        </li>
+        <li>
+          <label>
+            <span>
+              <a></a>
+              <span></span>
+            </span>
+          </label>
+        </li>
+    </ul>
+  </div>
 </body>
 </html>

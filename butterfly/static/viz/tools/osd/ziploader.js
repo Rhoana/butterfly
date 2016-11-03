@@ -8,10 +8,8 @@
  */
 function ZipLoader( options ) {
     this.viaGL = new ViaWebGL();
-    this.viaGL.width = 512;
-    this.viaGL.height = 512;
-    this.viaGL.vShader = './shaders/vertex/square.glsl';
-    this.viaGL.fShader = './shaders/fragment/outline.glsl';
+    this.viaGL.vShader = '../shaders/vertex/square.glsl';
+    this.viaGL.fShader = '../shaders/fragment/ids.glsl';
     this.viaGL.init();
     OpenSeadragon.extend( true, this, {
         jobLimit:       OpenSeadragon.DEFAULT_SETTINGS.imageLoaderLimit,

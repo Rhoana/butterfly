@@ -19,19 +19,28 @@ class Core(object):
         self._max_cache_size = settings.MAX_CACHE_SIZE
         self._current_cache_size = 0
 
-    def get(
-            self,
-            datapath,
-            start_coord,
-            vol_size,
-            segmentation=False,
-            segcolor=False,
-            fit=False,
-            w=0,
-            dtype=np.uint8):
+    def get(self,datapath, start_coord, vol_size, **kwargs):
         '''
         Request a subvolume of the datapath at a given zoomlevel.
         '''
+        presets = {
+            'segmentation': False,
+            'segcolor': False,
+            'fit': False,
+            'w': 0,
+            'dtype': np.uint8,
+            'synapse': False
+        }
+        for k,v in presets.iteritems():
+            kwargs.setdefault(k,v)
+
+        segmentation= kwargs['segmentation']
+        segcolor= kwargs['segcolor']
+        synapse=kwargs['synapse']
+        dtype= kwargs['dtype']
+        fit= kwargs['fit']
+        w= kwargs['w']
+
 
         # if datapath is not indexed (knowing the meta information like width,
         # height),do it now
@@ -41,7 +50,7 @@ class Core(object):
         datasource = self._datasources[datapath]
 
         rh_logger.logger.report_event('Loading tiles:')
-        if not segmentation:
+        if not segmentation and not synapse:
             try:
                 planes = []
                 x0 = start_coord[0] * 2 ** w
@@ -75,9 +84,11 @@ class Core(object):
                 if start_coord[i] + vol_size[i] > boundaries[i]:
                     vol_size[i] = boundaries[i] - start_coord[i]
 
-        # Use 4D volume for rgb data, currently segmentation color is the only
-        # use for color
-        color = segcolor and segmentation
+        # Use modified segmentation flag to support synapses
+        segmentation = 2 if synapse else segmentation
+
+        # Use 4D volume for rgb data
+        color = segcolor
         if color:
             vol = np.zeros(
                 (vol_size[1],
@@ -226,7 +237,7 @@ class Core(object):
                     ds = MultiBeam(self, datapath, dtype=dtype)
                     break
                 elif datasource == 'hdf5':
-                    from .hdf5 import HDF5DataSource
+                    from hdf5 import HDF5DataSource
                     ds = HDF5DataSource(self, datapath, dtype=dtype)
                     break
             except:
@@ -245,3 +256,6 @@ class Core(object):
         ds.index()
 
         self._datasources[datapath] = ds
+
+    def get_datasource(self,datapath):
+        return self._datasources[datapath]

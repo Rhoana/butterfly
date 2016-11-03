@@ -1,16 +1,8 @@
-from rh_logger import logger, ExitCode
 import logging
 import re
-import sys
-import argparse
-
+import os
 import cv2
-
-from butterfly import core
-from butterfly import settings
-from butterfly import webserver
-
-
+import argparse
 def main():
     '''
     Butterfly
@@ -18,19 +10,66 @@ def main():
     Eagon Meng and Daniel Haehn
     Lichtman Lab, 2015
     '''
-    port = settings.PORT
-    if len(sys.argv) == 2:
-        port = sys.argv[1]
 
-    logger.start_process(
-        "bfly", "Starting butterfly server on port {}".format(port), [port])
+    help = {
+        'bfly': 'Host a butterfly server!',
+        'folder': 'relative, absolute, or user path/of/all/experiments',
+        'port': 'port >1024 for hosting this server',
+        'depth': 'search nth nested subfolders of exp path (default 2)'
+    }
 
-    logger.report_event("Datasources: " + ", ".join(settings.DATASOURCES),
-                        log_level=logging.DEBUG)
-    logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),
-                        log_level=logging.DEBUG)
+    parser = argparse.ArgumentParser(description=help['bfly'])
+    parser.add_argument('-e','--exp', metavar='exp', help= help['folder'])
+    parser.add_argument('port', type=int, default = 2001, nargs='?', help=help['port'])
+    parser.add_argument('-n','--nth',type=int, metavar='nth', default = 2, help= help['depth'])
+    [homefolder,port,nth] = [parser.parse_args().exp, parser.parse_args().port, parser.parse_args().nth]
+    home = os.path.realpath(os.path.expanduser(homefolder if homefolder else '~'))
+    homename = os.path.basename(home)
+
+    if os.path.isfile(home):
+        os.environ['RH_CONFIG_FILENAME'] = home
+    from butterfly import settings,core,webserver
+    from rh_logger import logger
+
+    port = settings.PORT if settings.PORT else port
+    logger.start_process("bfly", "Starting butterfly server on port {}".format(port), [port])
+    logger.report_event("Datasources: " + ", ".join(settings.DATASOURCES),log_level=logging.DEBUG)
+    logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),log_level=logging.DEBUG)
     c = core.Core()
 
+    def sourcer(fold):
+        c.create_datasource(fold)
+        source = c.get_datasource(fold)
+        return source.get_dataset(fold)
+
+    def folderer(root,depth):
+        if not os.path.isdir(root) or depth <= 0: return []
+        files = [os.path.realpath(os.path.join(root,f)) for f in os.listdir(root) if not f.startswith('.')]
+        return [v for v in files if os.path.isdir(v) or v.endswith('.json')]
+
+    def trier(depth,datasets,path):
+        try:
+            source = sourcer(path)
+            dupes = sum(1 for d in datasets if source['name'] in d['name'])
+            logger.report_event('Datasource found at '+ path)
+            source['name'] += '_'+str(dupes) if dupes else ''
+            datasets.append(source)
+        except:
+            for branch in folderer(path,depth):
+                datasets = trier(depth-1,datasets,branch)
+        return datasets
+
+    def starter(depth):
+        exp = {'name': homename,'samples': []}
+        sample = {'name':'/','datasets': []}
+        datasets = trier(depth+1,[],home)
+        if datasets:
+            sample['datasets'] += datasets
+            exp['samples'].append(sample)
+        return exp
+
+    if homefolder and not os.path.isfile(home):
+        settings.bfly_config.setdefault('experiments',[]).append(starter(nth))
     ws = webserver.WebServer(c, port)
     ws.start()
 
@@ -59,6 +98,8 @@ def parseNumRange(num_arg):
 
 
 def query():
+    from butterfly import core
+    from rh_logger import logger, ExitCode
     logger.start_process("bquery", "Starting butterfly query")
     c = core.Core()
 
@@ -174,7 +215,7 @@ def query():
     ris.blocksize = args.blocksize
 
     # Grab the sample volume
-    volume = c.get(datapath, start_coord, vol_size, zoom_level)
+    volume = c.get(datapath, start_coord, vol_size, w=zoom_level)
 
     if vol_size[2] == 1:
         # Is there a better way to catch errors?

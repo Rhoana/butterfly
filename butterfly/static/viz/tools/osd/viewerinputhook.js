@@ -39,11 +39,6 @@
      *
      **/
     $.ViewerInputHook = function(options) {
-        options = options || {};
-
-        if (!options.viewer) {
-            throw new Error("A viewer must be specified.");
-        }
 
         var tracker = options.viewer.innerTracker;
 
@@ -59,6 +54,13 @@
             var keyDownHandler = tracker.keyDownHandler;
             tracker.keyDownHandler = function (event) {
                 return callHandlers(options.keyDown, keyDownHandler, event);
+            };
+        }
+
+        if (options.clickHandler) {
+            var clickHandler = tracker.clickHandler;
+            tracker.clickHandler = function (event) {
+                return callHandlers(options.clickHandler, clickHandler, event);
             };
         }
     };

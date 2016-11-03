@@ -4,7 +4,7 @@ uniform vec2 u_tile_size;
 varying vec2 v_tile_pos;
 
 //
-// FLOAT COMPARE FUNCTIONS WITH DELTA
+// FLOAT COMPARE FUNCTIONS
 //
 bool equals4(vec4 id1, vec4 id2) {
   return all(equal(id1,id2));
@@ -49,11 +49,16 @@ vec4 offset(vec2 off) {
 //
 vec4 borders() {
   vec4 here_id = offset(vec2(0, 0));
+  if(equals4(vec4(0),here_id)) {
+      return vec4(0);
+  }
   // Borders if any corner not shared
   for (int n = 0; n < 4; n++){
+      float side = float(n > 1);
       float even = mod(float(n),2.);
-      vec2 square = vec2(!(n > 1),(n > 1))*even;
-      if(!equals4(here_id, offset(square))){
+      vec2 square = vec2(even,side)*2.-1.;
+      vec4 edge = offset(square);
+      if(!equals4(here_id, edge)) {
           return vec4(0.,0.,0.,1.);
       }
   }
