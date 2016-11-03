@@ -31,6 +31,10 @@ DOJO.Stack.prototype = {
       up: 1,
       down: -1
     },
+    zBuff: {
+      up: 0,
+      down: 0
+    },
     layerer: function(char){
         var layers = {
             i: {gl:0, mod:''},
@@ -76,8 +80,25 @@ DOJO.Stack.prototype = {
     findLayer: function(z){
         return this.findIndex(z).map(this.w.getItemAt,this.w);
     },
+    findBuffer: function(zBuff,dojo){
+        var buffer = []
+        for (var zb = zBuff.down; zb <= zBuff.up; zb++){
+          [].push.apply(buffer,this.findLayer(zb));
+        }
+        if (dojo){
+          buffer.push(this.getDojo());
+        }
+        return buffer;
+    },
+    getDojo: function(){
+        var index = this.w.getItemCount()-1;
+        return this.w.getItemAt(index);
+    },
+    setPreload: function(image){
+        image.setPreload(this);
+    },
     setOpacity: function(image){
-      image.setOpacity(this);
+        image.setOpacity(this);
     },
     showLayer: function(z){
         this.findLayer(z).map(this.setOpacity,1);
@@ -88,15 +109,34 @@ DOJO.Stack.prototype = {
     check: function(event){
         return this.findLayer(this.index[event]);
     },
-    getDojo: function(){
-        var index = this.w.getItemCount()-1;
-        return this.w.getItemAt(index);
+    needsDraw: function(zBuff){
+        var needsDraw = OpenSeadragon.TiledImage.prototype.needsDraw;
+        return this.findBuffer(zBuff,1).some(Function.call.bind(needsDraw));
+    },
+    updateBuff: function(zBuff){
+        var newBuff = {
+          up: zBuff.up,
+          down: zBuff.down
+        }
+        if(zBuff.down > -this.maxBuff && this.now + zBuff.down > 0){
+          newBuff.down --;
+          this.findLayer(newBuff.down).map(this.setPreload,true);
+        }
+        if(zBuff.up < this.maxBuff && this.now + zBuff.up < this.depth-1){
+          newBuff.up ++;
+          this.findLayer(newBuff.up).map(this.setPreload,true);
+        }
+        log(newBuff);
+        return newBuff;
     },
     refresher: function(e){
         e.item.addHandler('fully-loaded-change',function(e){
             var event = e.eventSource;
             var source = event.source;
             if(e.fullyLoaded){
+                if(!this.needsDraw(this.zBuff)){
+                    this.zBuff = this.updateBuff(this.zBuff)
+                }
                 source.minLevel = 0;
                 event.draw();
                 return;
