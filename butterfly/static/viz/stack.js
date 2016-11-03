@@ -20,6 +20,7 @@ DOJO.Stack = function(src_terms){
     this.source = this.make(this.now, new Array(this.nLayers));
     this.index = this.indexer(this.preset);
     this.total = this.source.length;
+    this.depth = src_terms.depth;
 }
 
 DOJO.Stack.prototype = {

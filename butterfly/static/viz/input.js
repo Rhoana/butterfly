@@ -22,7 +22,8 @@ DOJO.Input = function(scope) {
     this.stack = scope.stack;
     this.realT = new DOJO.RealTime(scope);
     this.realT.init(this).then(this.init.bind(this));
-    this.findings[0].childNodes[1].innerHTML = this.stack.now;
+    this.findings[0].childNodes[0].innerHTML = this.stack.now;
+    this.findings[0].childNodes[1].innerHTML = '/'+this.stack.depth;
 }
 
 DOJO.Input.prototype = {
@@ -75,13 +76,13 @@ DOJO.Input.prototype = {
         stack.show(stack.index.up);
         stack.lose(stack.index.start);
         stack.gain(stack.zBuff, stack.index.end);
-        this.findings[0].childNodes[1].innerHTML = stack.now;
+        this.findings[0].childNodes[0].innerHTML = stack.now;
     },
     down: function(stack){
         stack.now --;
         stack.show(stack.index.down);
         stack.lose(stack.index.end);
         stack.gain(-stack.zBuff, stack.index.start);
-        this.findings[0].childNodes[1].innerHTML = stack.now;
+        this.findings[0].childNodes[0].innerHTML = stack.now;
     }
 }
