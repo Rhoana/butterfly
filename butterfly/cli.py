@@ -19,8 +19,8 @@ def main():
     }
 
     parser = argparse.ArgumentParser(description=help['bfly'])
+    parser.add_argument('port', type=int, nargs='?', help=help['port'])
     parser.add_argument('-e','--exp', metavar='exp', help= help['folder'])
-    parser.add_argument('port', type=int, default = 2001, nargs='?', help=help['port'])
     parser.add_argument('-n','--nth',type=int, metavar='nth', default = 2, help= help['depth'])
     [homefolder,port,nth] = [parser.parse_args().exp, parser.parse_args().port, parser.parse_args().nth]
     home = os.path.realpath(os.path.expanduser(homefolder if homefolder else '~'))
@@ -31,7 +31,7 @@ def main():
     from butterfly import settings,core,webserver
     from rh_logger import logger
 
-    port = settings.PORT if settings.PORT else port
+    port = port if port else settings.PORT
     logger.start_process("bfly", "Starting butterfly server on port {}".format(port), [port])
     logger.report_event("Datasources: " + ", ".join(settings.DATASOURCES),log_level=logging.DEBUG)
     logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),log_level=logging.DEBUG)
