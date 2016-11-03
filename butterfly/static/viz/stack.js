@@ -16,7 +16,7 @@ DOJO.Stack = function(src_terms){
     this.nLayers = this.preset.length;
     this.depth = src_terms.depth;
     // Prepare the sources
-    var protoSource = new DOJO.Source(src_terms);
+    protoSource = new DOJO.Source(src_terms);
     this.source = this.sourcer(protoSource);
     this.maxLevel = this.source[0].tileSource.maxLevel;
 }
