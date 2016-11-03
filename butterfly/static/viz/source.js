@@ -25,8 +25,8 @@ DOJO.Source.prototype = {
         width: 8192,
         height: 8192,
         tileSize: 512,
-        server: window.location.href.split('/')[2],
-        datapath: '/data/',
+        server: '',
+        datapath: '',
         getTileUrl: function( level, x, y ) {
 
             if (this.dojo) {
