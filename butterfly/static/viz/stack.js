@@ -24,7 +24,7 @@ DOJO.Stack = function(src_terms){
 DOJO.Stack.prototype = {
     w: null,
     vp: null,
-    maxBuff = 10,
+    maxBuff: 10,
     level: 0,
     now: 0,
     index: {
