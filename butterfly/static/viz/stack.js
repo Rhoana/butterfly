@@ -95,16 +95,17 @@ DOJO.Stack.prototype = {
         return this.w.getItemAt(index);
     },
     setPreload: function(image){
-        image.setPreload(this);
+        image.setPreload(Boolean(this==true));
     },
     setOpacity: function(image){
-        image.setOpacity(this);
+        image.setOpacity(Number(this));
     },
     showLayer: function(z){
-        this.findLayer(z).map(this.setOpacity,1);
+        this.findLayer(z).map(this.setPreload,false);
+        log(this.findLayer(z))
     },
     hideLayer: function(z){
-        this.findLayer(z).map(this.setOpacity,0);
+        this.findLayer(z).map(this.setPreload,true);
     },
     check: function(event){
         return this.findLayer(this.index[event]);
@@ -123,7 +124,7 @@ DOJO.Stack.prototype = {
           this.findLayer(newBuff.down).map(this.setOpacity,1);
           this.findLayer(newBuff.down).map(this.setPreload,true);
         }
-        if(zBuff.up < this.maxBuff && this.now + zBuff.up < this.depth-1){
+        if(zBuff.up < this.maxBuff && this.now + zBuff.up < this.depth){
           newBuff.up ++;
           this.findLayer(newBuff.up).map(this.setOpacity,1);
           this.findLayer(newBuff.up).map(this.setPreload,true);

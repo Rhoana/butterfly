@@ -23,7 +23,7 @@ DOJO.Input = function(scope) {
     this.realT = new DOJO.RealTime(scope);
     this.realT.init(this).then(this.init.bind(this));
     this.findings[0].childNodes[0].innerHTML = this.stack.now;
-    this.findings[0].childNodes[1].innerHTML = '/'+this.stack.depth;
+    this.findings[0].childNodes[1].innerHTML = '/'+(this.stack.depth-1);
 }
 
 DOJO.Input.prototype = {
@@ -59,9 +59,7 @@ DOJO.Input.prototype = {
         }
         var level = this.stack.level;
         var check = function(slice){
-            if (slice && slice.lastDrawn.length) {
-                return slice.lastDrawn[0].level >= level;
-            }
+            return slice && slice.getOpacity()==1;
         }
         var slices = this.stack.check(event);
         if (slices && slices.every(check)) {
@@ -72,12 +70,12 @@ DOJO.Input.prototype = {
         stack.showLayer(1);
         stack.hideLayer(0);
         stack.now ++;
-        this.findings[0].childNodes[1].innerHTML = stack.now;
+        this.findings[0].childNodes[0].innerHTML = stack.now;
     },
     down: function(stack){
         stack.showLayer(-1);
         stack.hideLayer(0);
         stack.now --;
-        this.findings[0].childNodes[1].innerHTML = stack.now;
+        this.findings[0].childNodes[0].innerHTML = stack.now;
     }
 }
