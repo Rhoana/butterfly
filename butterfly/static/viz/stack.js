@@ -28,6 +28,10 @@ DOJO.Stack.prototype = {
     zBuff: 0,
     maxBuff: 3,
     layerer: function(char,i){
+        var opacity = 1;
+        if (char == 's'){
+          opacity = 0.5;
+        }
         var layers = {
             i: {gl:0, mod:''},
             s: {gl:0, mod:'&segmentation=y&segcolor=y'},
@@ -36,7 +40,7 @@ DOJO.Stack.prototype = {
             dojo: {gl:0, dojo:true}
         };
         var src = layers[char] || layers.i;
-        return {src:src, set:{}}
+        return {src:src, set:{opacity: opacity}}
     },
     make: function(zLevel, indices) {
         return this.preset.map(this.sourcer.bind(this,zLevel,indices));
@@ -45,10 +49,8 @@ DOJO.Stack.prototype = {
     sourcer: function(zLevel, indices, layer, i){
         var src = {z:zLevel,minLevel:this.level};
         var levelDiff = Math.abs(this.now - zLevel);
-        var set = {opacity: Number(levelDiff <= this.maxBuff)};
-        set.opacity = 1;
         var source = this.protoSource.init(this.share(layer.src, src));
-        return this.share(this.share(set, {index:indices[i]}), source);
+        return this.share(this.share(layer.set, {index:indices[i]}), source);
     },
     indexer: function(preset){
         var buffer = function(zb){
