@@ -115,7 +115,7 @@ DOJO.Stack.prototype = {
     },
     fullyLoaded: function(zBuff){
         var fullyLoaded = function(image){
-          return  image && image.getFullyLoaded() && !!image.lastDrawn.length;
+          return  image && image.getFullyLoaded();
         }
         return this.findBuffer(zBuff,1).every(fullyLoaded);
     },
