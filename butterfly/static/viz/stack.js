@@ -53,7 +53,7 @@ DOJO.Stack.prototype = {
     share: DOJO.Source.prototype.share.bind(null),
     make: function(protoSource,preset,src,alpha){
         var source = protoSource.init(this.share(preset.src, src));
-        return this.share({opacity: alpha, preload: !!alpha}, source);
+        return this.share({opacity: 1, preload: !!alpha}, source);
     },
     sourcer: function(proto){
         var sources = [];
@@ -151,10 +151,12 @@ DOJO.Stack.prototype = {
           if(this.clamp(newBuff,'down')){
             newBuff.down --;
             this.findLayer(newBuff.down).map(this.setPreload,true);
+            this.findLayer(newBuff.down).map(this.setOpacity,true);
           }
           if(this.clamp(newBuff,'up')){
             newBuff.up ++;
             this.findLayer(newBuff.up).map(this.setPreload,true);
+            this.findLayer(newBuff.up).map(this.setOpacity,true);
           }
         }
         return newBuff;
@@ -164,6 +166,7 @@ DOJO.Stack.prototype = {
             var image = e.eventSource;
             var source = image.source;
             if(e.fullyLoaded){
+                log('Fully loaded: '+ source.getTileUrl(0,0,0))
                 this.zBuff = this.updateBuff(this.zBuff);
                 source.minLevel = 0;
                 image.draw();
