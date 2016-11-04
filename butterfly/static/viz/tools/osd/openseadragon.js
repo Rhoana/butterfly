@@ -1,6 +1,6 @@
 //! openseadragon 2.2.1
-//! Built on 2016-11-02
-//! Git commit: v2.2.1-103-bac2cab
+//! Built on 2016-11-04
+//! Git commit: v2.2.1-110-2915ee0
 //! http://openseadragon.github.io
 //! License: http://openseadragon.github.io/license/
 
@@ -191,10 +191,11 @@
   *     If 0, adjusts to fit viewer.
   *
   * @property {Number} [opacity=1]
-  *     Default opacity of the tiled images (1=opaque, 0=transparent)
+  *     Default proportional opacity of the tiled images (1=opaque, 0=hidden)
+  *     Hidden images do not draw and only load when preloading is allowed.
   *
   * @property {Boolean} [preload=false]
-  *     If true, tiles in image load without drawing. Defaults to false, so tiles are loaded and drawn.
+  *     Default switch for loading hidden images (true loads, false blocks)
   *
   * @property {String} [compositeOperation=null]
   *     Valid values are 'source-over', 'source-atop', 'source-in', 'source-out',
@@ -8062,8 +8063,8 @@ $.extend( $.Viewer.prototype, $.EventSource.prototype, $.ControlDock.prototype, 
      * @param {OpenSeadragon.Rect} [options.clip] - An area, in image pixels, to clip to
      * (portions of the image outside of this area will not be visible). Only works on
      * browsers that support the HTML5 canvas.
-     * @param {Number} [options.opacity=1] Opacity the tiled image should be drawn at by default.
-     * @param {Boolean} [options.preload=false]  If true, tiles in image load without drawing by default.
+     * @param {Number} [options.opacity=1] Default proportional opacity of the tiled images (1=opaque, 0=hidden)
+     * @param {Boolean} [options.preload=false]  Default switch for loading hidden images (true loads, false blocks)
      * @param {Number} [options.degrees=0] Initial rotation of the tiled image around
      * its top left corner in degrees.
      * @param {String} [options.compositeOperation] How the image is composited onto other images.
@@ -18883,8 +18884,8 @@ $.Viewport.prototype = {
  * @param {Number} [options.minPixelRatio] - See {@link OpenSeadragon.Options}.
  * @param {Number} [options.smoothTileEdgesMinZoom] - See {@link OpenSeadragon.Options}.
  * @param {Boolean} [options.iOSDevice] - See {@link OpenSeadragon.Options}.
- * @param {Number} [options.opacity=1] - Opacity the tiled image should be drawn at.
- * @param {Boolean} [options.preload=false] - If true, tiles in image load without drawing. Defaults to false, so tiles are loaded and drawn.
+ * @param {Number} [options.opacity=1] - Set to draw at proportional opacity. If zero, images will not draw.
+ * @param {Boolean} [options.preload=false] - Set true to load even when the image is hidden by zero opacity.
  * @param {String} [options.compositeOperation] - How the image is composited onto other images; see compositeOperation in {@link OpenSeadragon.Options} for possible values.
  * @param {Boolean} [options.debugMode] - See {@link OpenSeadragon.Options}.
  * @param {String|CanvasGradient|CanvasPattern|Function} [options.placeholderFillStyle] - See {@link OpenSeadragon.Options}.
@@ -18976,7 +18977,7 @@ $.TiledImage = function( options ) {
         crossOriginPolicy:      $.DEFAULT_SETTINGS.crossOriginPolicy,
         placeholderFillStyle:   $.DEFAULT_SETTINGS.placeholderFillStyle,
         opacity:                $.DEFAULT_SETTINGS.opacity,
-        preload:                $.DEFAULT_SETTINGS.preload,
+        _preload:               $.DEFAULT_SETTINGS.preload,
         compositeOperation:     $.DEFAULT_SETTINGS.compositeOperation
     }, options );
 
@@ -19105,7 +19106,7 @@ $.extend($.TiledImage.prototype, $.EventSource.prototype, /** @lends OpenSeadrag
      * Draws the TiledImage to its Drawer.
      */
     draw: function() {
-        if (this.opacity !== 0 && !this.preload) {
+        if (!(this.opacity === 0 && !this._preload)) {
             this._midDraw = true;
             this._updateViewport();
             this._midDraw = false;
@@ -19583,18 +19584,17 @@ $.extend($.TiledImage.prototype, $.EventSource.prototype, /** @lends OpenSeadrag
     },
 
     /**
-     * @returns {Boolean} whether the tiledImage is set to load tiles without drawing them.
+     * @returns {Boolean} whether the tiledImage can load hidden tiles of zero opacity.
      */
     getPreload: function() {
-        return this.preload;
+        return this._preload;
     },
 
     /**
-     * Set true to load without drawing. Set false for default loading and drawing.
-     * @param {Boolean} whether to load tiles without drawing in this tiledImage.
+     * Set true to load even when hidden. Set false to block loading when hidden.
      */
     setPreload: function(preload) {
-        this.preload = Boolean(preload);
+        this._preload = !!preload;
         this._needsDraw = true;
     },
 
@@ -20347,7 +20347,7 @@ function compareTiles( previousBest, tile ) {
 }
 
 function drawTiles( tiledImage, lastDrawn ) {
-    if (lastDrawn.length === 0) {
+    if (this.opacity === 0 || lastDrawn.length === 0) {
         return;
     }
     var tile = lastDrawn[0];
