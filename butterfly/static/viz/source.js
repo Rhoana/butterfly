@@ -21,12 +21,12 @@ DOJO.Source.prototype = {
     tileSource: {
         z: 0,
         mod: '',
+        server: '',
+        datapath: '',
         minLevel: 0,
         width: 8192,
         height: 8192,
         tileSize: 512,
-        server: window.location.href.split('/')[2],
-        datapath: '/data/',
         getTileUrl: function( level, x, y ) {
 
             if (this.dojo) {
@@ -40,8 +40,8 @@ DOJO.Source.prototype = {
             var size = [Math.round(shape.x), Math.round(shape.y), 1];
             var start = [x*width, y*height, this.z];
 
-            return 'http://' + this.server + '/data/?datapath=' + this.datapath +
-              '&start=' + start + '&mip=' + blevel + '&size=' +  size + this.mod;
+            return this.server + '/data/?datapath=' + this.datapath + '&start=' +
+              start + '&mip=' + blevel + '&size=' +  size + this.mod;
         }
     },
     share: function(from, to) {
