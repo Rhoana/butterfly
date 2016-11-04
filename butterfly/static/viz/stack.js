@@ -162,14 +162,14 @@ DOJO.Stack.prototype = {
     },
     refresher: function(e){
         e.item.addHandler('fully-loaded-change',function(e){
-            var event = e.eventSource;
-            var source = event.source;
+            var image = e.eventSource;
+            var source = image.source;
             if(e.fullyLoaded){
                 if(this.fullyLoaded(this.zBuff)){
                     this.zBuff = this.updateBuff(this.zBuff)
                 }
                 source.minLevel = 0;
-                event.draw();
+                image.draw();
                 return;
             }
         }.bind(this));
