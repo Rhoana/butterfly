@@ -109,11 +109,22 @@ DOJO.Stack.prototype = {
     check: function(event){
         return this.findLayer(this.index[event]);
     },
-    needsDraw: function(zBuff){
-        var needsDraw = OpenSeadragon.TiledImage.prototype.needsDraw;
-        return this.findBuffer(zBuff,1).some(Function.call.bind(needsDraw));
+    fullyLoaded: function(zBuff){
+        var fullyLoaded = function(image){
+//          log(image.lastDrawn.length + ' '+ image.getFullyLoaded())
+          return !!image.lastDrawn.length && image.getFullyLoaded();
+        }
+        return this.findBuffer(zBuff,1).every(fullyLoaded);
     },
-    updateBuff: function(zBuff){
+    updateBuff: function(zBuff,action){
+        if (action){
+          var shift = -this.index[action];
+          var nextStep = zBuff[action] + shift;
+          if (Math.sign(nextStep) !== shift){
+            zBuff[action] = nextStep;
+          }
+        }
+//        log(zBuff)
         var newBuff = {
           up: zBuff.up,
           down: zBuff.down
@@ -133,7 +144,7 @@ DOJO.Stack.prototype = {
             var event = e.eventSource;
             var source = event.source;
             if(e.fullyLoaded){
-                if(!this.needsDraw(this.zBuff)){
+                if(this.fullyLoaded(this.zBuff)){
                     this.zBuff = this.updateBuff(this.zBuff)
                 }
                 source.minLevel = 0;

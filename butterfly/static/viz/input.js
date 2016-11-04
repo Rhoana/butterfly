@@ -59,7 +59,7 @@ DOJO.Input.prototype = {
         }
         var level = this.stack.level;
         var check = function(slice){
-            return slice && slice.getPreload();
+            return slice && slice.getFullyLoaded();
         }
         var slices = this.stack.check(event);
         if (slices && slices.every(check)) {
@@ -70,12 +70,14 @@ DOJO.Input.prototype = {
         stack.showLayer(1);
         stack.hideLayer(0);
         stack.now ++;
+        stack.zBuff = stack.updateBuff(stack.zBuff,'up');
         this.findings[0].childNodes[0].innerHTML = stack.now;
     },
     down: function(stack){
         stack.showLayer(-1);
         stack.hideLayer(0);
         stack.now --;
+        stack.zBuff = stack.updateBuff(stack.zBuff,'down');
         this.findings[0].childNodes[0].innerHTML = stack.now;
     }
 }
