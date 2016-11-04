@@ -31,6 +31,10 @@ DOJO.Stack.prototype = {
       up: 1,
       down: -1
     },
+    flip: {
+      up: 'down',
+      down: 'up'
+    },
     zBuff: {
       up: 0,
       down: 0
@@ -111,31 +115,48 @@ DOJO.Stack.prototype = {
     },
     fullyLoaded: function(zBuff){
         var fullyLoaded = function(image){
-//          log(image.lastDrawn.length + ' '+ image.getFullyLoaded())
-          return !!image.lastDrawn.length && image.getFullyLoaded();
+          return  image && image.getFullyLoaded() && !!image.lastDrawn.length;
         }
         return this.findBuffer(zBuff,1).every(fullyLoaded);
     },
+    clamp: function(buff,action){
+      var z = this.now + buff[action];
+      var small = Math.abs(buff[action]) < this.maxBuff;
+      var bounds = {
+        up: small && z < this.depth-2,
+        down: small && z > 0
+      }
+      return bounds[action];
+    },
     updateBuff: function(zBuff,action){
-        if (action){
-          var shift = -this.index[action];
-          var nextStep = zBuff[action] + shift;
-          if (Math.sign(nextStep) !== shift){
-            zBuff[action] = nextStep;
-          }
-        }
-//        log(zBuff)
         var newBuff = {
           up: zBuff.up,
           down: zBuff.down
         }
-        if(zBuff.down > -this.maxBuff && this.now + zBuff.down > 0){
-          newBuff.down --;
-          this.findLayer(newBuff.down).map(this.setPreload,true);
+        if (action){
+          var back = this.flip[action];
+          var backStep = newBuff[back] + this.index[back];
+          var shiftStep = newBuff[action] - this.index[action];
+          if (Math.sign(shiftStep) === this.index[action]){
+            newBuff[action] = shiftStep;
+          }
+          if (this.clamp(newBuff,back)){
+            newBuff[back] = backStep;
+          }
+          else{
+            this.findLayer(zBuff[back]).map(this.setPreload,false);
+          }
         }
-        if(zBuff.up < this.maxBuff && this.now + zBuff.up < this.depth-2){
-          newBuff.up ++;
-          this.findLayer(newBuff.up).map(this.setPreload,true);
+        log(newBuff)
+        if(this.fullyLoaded(newBuff)){
+          if(this.clamp(newBuff,'down')){
+            newBuff.down --;
+            this.findLayer(newBuff.down).map(this.setPreload,true);
+          }
+          if(this.clamp(newBuff,'up')){
+            newBuff.up ++;
+            this.findLayer(newBuff.up).map(this.setPreload,true);
+          }
         }
         return newBuff;
     },
