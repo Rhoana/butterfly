@@ -101,11 +101,10 @@ DOJO.Stack.prototype = {
         image.setOpacity(Number(this));
     },
     showLayer: function(z){
-        this.findLayer(z).map(this.setPreload,false);
-        log(this.findLayer(z))
+        this.findLayer(z).map(this.setOpacity,1);
     },
     hideLayer: function(z){
-        this.findLayer(z).map(this.setPreload,true);
+        this.findLayer(z).map(this.setOpacity,0);
     },
     check: function(event){
         return this.findLayer(this.index[event]);
@@ -119,14 +118,12 @@ DOJO.Stack.prototype = {
           up: zBuff.up,
           down: zBuff.down
         }
-        if(zBuff.down > -this.maxBuff && this.now + zBuff.down > 0){
+        if(zBuff.down > -this.maxBuff && this.now + zBuff.down >= 0){
           newBuff.down --;
-          this.findLayer(newBuff.down).map(this.setOpacity,1);
           this.findLayer(newBuff.down).map(this.setPreload,true);
         }
         if(zBuff.up < this.maxBuff && this.now + zBuff.up < this.depth){
           newBuff.up ++;
-          this.findLayer(newBuff.up).map(this.setOpacity,1);
           this.findLayer(newBuff.up).map(this.setPreload,true);
         }
         return newBuff;
