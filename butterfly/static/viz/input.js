@@ -59,7 +59,7 @@ DOJO.Input.prototype = {
         }
         var level = this.stack.level;
         var check = function(slice){
-            return slice && slice.getFullyLoaded();
+            return slice && slice.lastDrawn.length;
         }
         var slices = this.stack.check(event);
         if (slices && slices.every(check)) {
