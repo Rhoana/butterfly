@@ -133,7 +133,7 @@ DOJO.Stack.prototype = {
           newBuff.down --;
           this.findLayer(newBuff.down).map(this.setPreload,true);
         }
-        if(zBuff.up < this.maxBuff && this.now + zBuff.up < this.depth){
+        if(zBuff.up < this.maxBuff && this.now + zBuff.up < this.depth-2){
           newBuff.up ++;
           this.findLayer(newBuff.up).map(this.setPreload,true);
         }
