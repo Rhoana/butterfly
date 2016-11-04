@@ -147,7 +147,6 @@ DOJO.Stack.prototype = {
             this.findLayer(zBuff[back]).map(this.setPreload,false);
           }
         }
-        log(newBuff)
         if(this.fullyLoaded(newBuff)){
           if(this.clamp(newBuff,'down')){
             newBuff.down --;
@@ -165,9 +164,7 @@ DOJO.Stack.prototype = {
             var image = e.eventSource;
             var source = image.source;
             if(e.fullyLoaded){
-                if(this.fullyLoaded(this.zBuff)){
-                    this.zBuff = this.updateBuff(this.zBuff)
-                }
+                this.zBuff = this.updateBuff(this.zBuff);
                 source.minLevel = 0;
                 image.draw();
                 return;
