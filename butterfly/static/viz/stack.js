@@ -49,7 +49,7 @@ DOJO.Stack.prototype = {
     share: DOJO.Source.prototype.share.bind(null),
     make: function(protoSource,preset,src,alpha){
         var source = protoSource.init(this.share(preset.src, src));
-        return this.share({opacity: alpha}, source);
+        return this.share({opacity: alpha, preload: !!alpha}, source);
     },
     sourcer: function(proto){
         var sources = [];
@@ -118,7 +118,7 @@ DOJO.Stack.prototype = {
           up: zBuff.up,
           down: zBuff.down
         }
-        if(zBuff.down > -this.maxBuff && this.now + zBuff.down >= 0){
+        if(zBuff.down > -this.maxBuff && this.now + zBuff.down > 0){
           newBuff.down --;
           this.findLayer(newBuff.down).map(this.setPreload,true);
         }

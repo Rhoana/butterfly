@@ -59,6 +59,8 @@ DOJO.Input.prototype = {
         }
         var level = this.stack.level;
         var check = function(slice){
+            log(slice)
+            log(slice.getPreload())
             return slice && slice.getPreload();
         }
         var slices = this.stack.check(event);
