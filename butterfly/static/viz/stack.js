@@ -143,9 +143,6 @@ DOJO.Stack.prototype = {
           if (this.clamp(newBuff,back)){
             newBuff[back] = backStep;
           }
-          else{
-            this.findLayer(zBuff[back]).map(this.setPreload,false);
-          }
         }
         if(this.fullyLoaded(newBuff)){
           if(this.clamp(newBuff,'down')){
@@ -157,7 +154,7 @@ DOJO.Stack.prototype = {
             this.findLayer(newBuff.up).map(this.setPreload,true);
           }
         }
-        this.log();
+//        this.log();
         return newBuff;
     },
     log: function(){
