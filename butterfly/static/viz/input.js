@@ -65,6 +65,7 @@ DOJO.Input.prototype = {
         if (slices && slices.every(check)) {
             return this[event](this.stack);
         }
+        this.stack.zBuff = this.stack.updateBuff(this.stack.zBuff);
     },
     up: function(stack){
         stack.showLayer(1);

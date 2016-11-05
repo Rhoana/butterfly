@@ -24,7 +24,7 @@ DOJO.Stack = function(src_terms){
 DOJO.Stack.prototype = {
     w: null,
     vp: null,
-    maxBuff: 10,
+    maxBuff: 3,
     level: 0,
     now: 0,
     index: {
@@ -157,7 +157,24 @@ DOJO.Stack.prototype = {
             this.findLayer(newBuff.up).map(this.setPreload,true);
           }
         }
+        this.log();
         return newBuff;
+    },
+    log: function(){
+      console.clear();
+      log('now:' + this.now);
+      log('buffer: [' + this.zBuff.down + ':' + this.zBuff.up+']');
+      for (var zb = this.zBuff.down; zb <= this.zBuff.up; zb++){
+        var tab = '   ';
+        var star = zb===0? '*' : ' ';
+        var image = this.findLayer(zb).pop();
+        var source = image.source;
+        log(star+tab+'layer '+ source.z);
+        log(tab+tab+'opacity:'+image.getOpacity());
+        log(tab+tab+'preload:'+image.getPreload());
+        log(tab+tab+'index: ['+this.findIndex(zb)+']');
+      };
+      log(' ');
     },
     refresher: function(e){
         e.item.addHandler('fully-loaded-change',function(e){
