@@ -168,10 +168,14 @@ DOJO.Stack.prototype = {
         var tab = '   ';
         var star = zb===0? '*' : ' ';
         var image = this.findLayer(zb).pop();
-        var source = image.source;
-        log(star+tab+'layer '+ source.z);
-        log(tab+tab+'opacity:'+image.getOpacity());
-        log(tab+tab+'preload:'+image.getPreload());
+        if (image) {
+          var zeta = image.source.z;
+          var alpha = image.getOpacity();
+          var preload = image.getPreload();
+        }
+        log(star+tab+'layer '+ zeta || 'null' );
+        log(tab+tab+'opacity:'+alpha || 'null');
+        log(tab+tab+'preload:'+preload || 'null');
         log(tab+tab+'index: ['+this.findIndex(zb)+']');
       };
       log(' ');
