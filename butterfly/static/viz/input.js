@@ -61,7 +61,8 @@ DOJO.Input.prototype = {
         var check = function(slice){
             return slice && slice.lastDrawn.length;
         }
-        var slices = this.stack.check(event);
+        var sign = this.stack.sign[event];
+        var slices = this.stack.findLayer(sign);
         if (slices && slices.every(check)) {
             return this[event](this.stack);
         }

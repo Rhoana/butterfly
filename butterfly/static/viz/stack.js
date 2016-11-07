@@ -27,10 +27,6 @@ DOJO.Stack.prototype = {
     maxBuff: 3,
     level: 0,
     now: 0,
-    index: {
-      up: 1,
-      down: -1
-    },
     flip: {
       up: 'down',
       down: 'up'
@@ -38,6 +34,10 @@ DOJO.Stack.prototype = {
     zBuff: {
       up: 0,
       down: 0
+    },
+    sign: {
+      up: 1,
+      down: -1
     },
     layerer: function(char){
         var layers = {
@@ -74,19 +74,19 @@ DOJO.Stack.prototype = {
         this.w = osd.world;
         return this;
     },
-    findIndex: function(z){
+    findIndex: function(zb){
         var found = []
         for (var layi in this.preset){
-            found.push(layi*this.depth + this.now + z);
+            found.push(layi*this.depth + this.now + zb);
         }
         return found;
     },
-    findLayer: function(z){
-        return this.findIndex(z).map(this.w.getItemAt,this.w);
+    findLayer: function(zb){
+        return this.findIndex(zb).map(this.w.getItemAt,this.w);
     },
     findBuffer: function(zBuff,dojo){
         var buffer = []
-        for (var zb = zBuff.down; zb <= zBuff.up; zb++){
+        for (var zb = -zBuff.down; zb <= zBuff.up; zb++){
           [].push.apply(buffer,this.findLayer(zb));
         }
         if (dojo){
@@ -110,58 +110,60 @@ DOJO.Stack.prototype = {
     hideLayer: function(z){
         this.findLayer(z).map(this.setOpacity,0);
     },
-    check: function(event){
-        return this.findLayer(this.index[event]);
-    },
     fullyLoaded: function(zBuff){
         var fullyLoaded = function(image){
           return  image && image.getFullyLoaded();
         }
         return this.findBuffer(zBuff,1).every(fullyLoaded);
     },
-    clamp: function(buff,action){
-      var z = this.now + buff[action];
-      var small = Math.abs(buff[action]) < this.maxBuff;
-      var bounds = {
-        up: small && z < this.depth-2,
-        down: small && z > 0
-      }
-      return bounds[action];
+    preload: function(buffer,sign,value){
+      this.findLayer(this.sign[sign]*buffer).map(this.setPreload,value);
+    },
+    range: function(buffer,sign){
+        var z = this.now + buffer*this.sign[sign];
+        return z < this.depth && z >= 0;
+    },
+    clamp: function(buffer,sign){
+      var small = 0 <= buffer && buffer <= this.maxBuff;
+      return small && this.range(buffer,sign);
     },
     updateBuff: function(zBuff,action){
+        console.clear();
         var newBuff = {
           up: zBuff.up,
           down: zBuff.down
         }
         if (action){
           var back = this.flip[action];
-          var backStep = newBuff[back] + this.index[back];
-          var shiftStep = newBuff[action] - this.index[action];
-          if (Math.sign(shiftStep) === this.index[action]){
-            newBuff[action] = shiftStep;
-          }
-          if (this.clamp(newBuff,back)){
+          var backStep = newBuff[back]+1;
+          var actStep = newBuff[action]-1;
+          if(this.clamp(backStep, back)) {
             newBuff[back] = backStep;
+          }
+          else if (this.range(backStep, back)){
+            this.preload(backStep, back, false);
+          }
+          if (this.clamp(actStep, action)){
+            newBuff[action] = actStep;
+            log(actStep)
           }
         }
         if(this.fullyLoaded(newBuff)){
-          if(this.clamp(newBuff,'down')){
-            newBuff.down --;
-            this.findLayer(newBuff.down).map(this.setPreload,true);
-          }
-          if(this.clamp(newBuff,'up')){
-            newBuff.up ++;
-            this.findLayer(newBuff.up).map(this.setPreload,true);
+          for (var arrow of ['down', 'up']){
+            var nextStep = newBuff[arrow]+1;
+            if(this.clamp(nextStep, arrow)){
+                this.preload(nextStep, arrow, true);
+                newBuff[arrow] = nextStep;
+            }
           }
         }
-//        this.log();
+        this.log(newBuff);
         return newBuff;
     },
-    log: function(){
-      console.clear();
+    log: function(newBuff){
       log('now:' + this.now);
-      log('buffer: [' + this.zBuff.down + ':' + this.zBuff.up+']');
-      for (var zb = this.zBuff.down; zb <= this.zBuff.up; zb++){
+      log('buffer: [' + newBuff.down + ':' + newBuff.up+']');
+      for (var zb = -newBuff.down; zb <= newBuff.up; zb++){
         var tab = '   ';
         var star = zb===0? '*' : ' ';
         var image = this.findLayer(zb).pop();
