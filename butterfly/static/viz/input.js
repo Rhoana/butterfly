@@ -57,7 +57,9 @@ DOJO.Input.prototype = {
             window.location = 'index.html';
             return;
         }
-        var level = this.stack.level;
+        if (!this.stack.clamp(1,event)){
+            return;
+        }
         var check = function(slice){
             return slice && slice.lastDrawn.length;
         }

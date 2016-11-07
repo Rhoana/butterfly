@@ -117,18 +117,18 @@ DOJO.Stack.prototype = {
         return this.findBuffer(zBuff,1).every(fullyLoaded);
     },
     preload: function(buffer,sign,value){
-      this.findLayer(this.sign[sign]*buffer).map(this.setPreload,value);
+        this.findLayer(this.sign[sign]*buffer).map(this.setPreload,value);
     },
     range: function(buffer,sign){
         var z = this.now + buffer*this.sign[sign];
         return z < this.depth && z >= 0;
     },
     clamp: function(buffer,sign){
-      var small = 0 <= buffer && buffer <= this.maxBuff;
-      return small && this.range(buffer,sign);
+        var small = 0 <= buffer && buffer <= this.maxBuff;
+        return small && this.range(buffer,sign);
     },
     updateBuff: function(zBuff,action){
-        console.clear();
+//        console.clear();
         var newBuff = {
           up: zBuff.up,
           down: zBuff.down
@@ -145,7 +145,6 @@ DOJO.Stack.prototype = {
           }
           if (this.clamp(actStep, action)){
             newBuff[action] = actStep;
-            log(actStep)
           }
         }
         if(this.fullyLoaded(newBuff)){
@@ -157,7 +156,7 @@ DOJO.Stack.prototype = {
             }
           }
         }
-        this.log(newBuff);
+//        this.log(newBuff);
         return newBuff;
     },
     log: function(newBuff){
