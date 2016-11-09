@@ -224,8 +224,11 @@ class RestAPIHandler(RequestHandler):
         vol = self.core.get(channel[self.PATH],
                             [x, y, z], [width, height, 1],
                             w=resolution, dtype=dtype)
-        data = cv2.imencode(
-            "." + fmt, vol[:height, :width, 0].astype(dtype))[1]
+	cropped = vol[:height, :width, 0].astype(dtype)
+	if dtype is np.uint32:
+		imageType = np.dtype(('i4', [('rgba','u1',4)]))
+		cropped = cropped.view(dtype=imageType)['rgba'][:,:,:3]
+        data = cv2.imencode(  "." + fmt, cropped)[1]
         data = data.tostring()
         self.set_header("Content-Type", "image/"+fmt)
         self.write(data)
