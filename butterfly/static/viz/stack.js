@@ -15,6 +15,7 @@ DOJO.Stack = function(src_terms){
     this.preset = channels.split('').map(this.layerer);
     this.nLayers = this.preset.length;
     this.depth = src_terms.depth;
+    this.z = src_terms.z || this.z;
     // Prepare the sources
     protoSource = new DOJO.Source(src_terms);
     this.source = this.sourcer(protoSource);
