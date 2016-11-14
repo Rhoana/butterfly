@@ -1,6 +1,7 @@
 tornado==4.3
 h5py==2.6.0
 scipy==0.16.0
+https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/pyrtree/source-archive.zip
 https://github.com/Rhoana/rh_config/archive/1.0.0.tar.gz#egg=rh_config-1.0.0
 https://github.com/Rhoana/rh_logger/archive/2.0.0.tar.gz#egg=rh_logger-2.0.0
 https://github.com/Rhoana/dataspec/archive/1.1.1.tar.gz#egg=dataspec-1.1.1
