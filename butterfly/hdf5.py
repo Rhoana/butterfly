@@ -27,17 +27,17 @@ K_PRESET_CHANNELS = ['img','seg','syn']
 
 class HDF5DataSource(DataSource):
     '''An HDF5 data source
-    
+
     An HDF5 data source consists of a .json file that contains a dictionary
     with the following keys:
-    
+
     filename: the name of the HDF5 file
     dataset-path: the path inside the HDF5 file to the dataset
-    
+
     The dataset may be sparse (with zero for areas w/o data) so the coordinate
     system is implicit, starting at 0, 0, 0.
     '''
-    
+
     def __init__(self, core, datapath, dtype=np.uint8):
         layers = self.defaultLayers(datapath)
         if not layers:
@@ -82,7 +82,7 @@ class HDF5DataSource(DataSource):
         with h5py.File(firstChannel[K_FILENAME], "r") as fd:
             self.blocksize = fd[firstChannel[K_DATASET_PATH]].shape[-1:0:-1]
         return
-    
+
     def load_cutout(self, x0, x1, y0, y1, z, w):
         channelKind = self.kindGuess(0)
         if channelKind not in self.kinds:
@@ -108,7 +108,7 @@ class HDF5DataSource(DataSource):
         colors[:,:,1] = np.mod(509*slice[:,:],900).astype(np.uint8)
         colors[:,:,2] = np.mod(200*slice[:,:],777).astype(np.uint8)
         return colors
-    
+
     def get_boundaries(self):
         firstChannel = self.channels[self.kinds[0]]
         with h5py.File(firstChannel[K_FILENAME], "r") as fd:
