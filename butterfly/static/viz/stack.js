@@ -129,7 +129,6 @@ DOJO.Stack.prototype = {
         return small && this.range(buffer,sign);
     },
     updateBuff: function(zBuff,action){
-//        console.clear();
         var newBuff = {
           up: zBuff.up,
           down: zBuff.down
@@ -157,7 +156,6 @@ DOJO.Stack.prototype = {
             }
           }
         }
-//        this.log(newBuff);
         return newBuff;
     },
     log: function(newBuff){
