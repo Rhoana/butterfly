@@ -90,6 +90,15 @@ class HDF5DataSource(DataSource):
         channel = self.channels[channelKind]
         with h5py.File(channel[K_FILENAME], "r") as fd:
             ds = fd[channel[K_DATASET_PATH]]
+            if z >= ds.shape[0]:
+                return np.zeros(((y1 - y0) / (2 ** w),
+                                 (x1-x0) / (2**w)), dtype=ds.dtype)
+            elif ds.shape[1] < y1 or ds.shape[2] < x1:
+                result = np.zeros(((y1 - y0) / (2 ** w),
+                                   (x1-x0) / (2**w)), dtype=ds.dtype)
+                cutout = ds[z, y0:y1:(2 ** w), x0:x1:(2 ** w)]
+                result[:cutout.shape[0], :cutout.shape[1]] = cutout
+                return result
             return ds[z, y0:y1:(2 ** w), x0:x1:(2 ** w)]
 
     def load(self, x, y, z, w, segmentation):
