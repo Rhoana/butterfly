@@ -226,12 +226,10 @@ class RestAPIHandler(RequestHandler):
                             w=resolution, dtype=dtype)
 	cropped = vol[:height, :width, 0].astype(dtype)
 	if dtype is np.uint32:
-		imageType = np.dtype(('i4', [('rgba','u1',4)]))
-		cropped = cropped.view(dtype=imageType)['rgba'][:,:,:3]
+            cropped = cropped.view(np.uint8).reshape(cropped.shape+(4,))[:,:,:3]
         data = cv2.imencode(  "." + fmt, cropped)[1]
-        data = data.tostring()
         self.set_header("Content-Type", "image/"+fmt)
-        self.write(data)
+        self.write(data.tostring())
 
     def get_mask(self):
         # TODO: implement this
