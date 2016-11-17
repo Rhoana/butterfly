@@ -84,25 +84,29 @@ class RestAPIHandler(RequestHandler):
             self.set_header('Content-Type', "text/plain")
             self.write(http_error.msg)
 
+    def _get_config(self,kind):
+        '''Get the config dictionary for a named kind'''
+        target = self._get_query_param(kind['param'])
+        for d in kind['parent'].get(kind['plural'],[]):
+            if d[self.NAME] == target:
+                return d
+        else:
+            msg = 'Unknown '+kind['name']+': '+ target
+            rh_logger.logger.report_event(msg)
+            raise HTTPError(self.request.uri, 400, msg, [], None)
+
     def get_experiments(self):
         '''Handle the /api/experiments GET request'''
         experiments = settings.bfly_config.get(self.EXPERIMENTS, [])
         return [_[self.NAME] for _ in experiments]
 
     def _get_experiment_config(self):
-        '''Get the config dictionary for a named experiment
-
-        Fetches the named experiment config dictionary using query params
-        or throws an HTTPError if not present or no experiment query param
-        '''
-        experiment = self._get_query_param(self.Q_EXPERIMENT)
-        for d in settings.bfly_config.get(self.EXPERIMENTS, []):
-            if d[self.NAME] == experiment:
-                return d
-        else:
-            msg = "Unknown experiment name: " + experiment
-            rh_logger.logger.report_event(msg)
-            raise HTTPError(self.request.uri, 400, msg, [], None)
+        return self._get_config({
+            'parent': settings.bfly_config,
+            'plural': self.EXPERIMENTS,
+            'param': self.Q_EXPERIMENT,
+            'name': 'experiment name'
+        })
 
     def get_samples(self):
         '''Handle the /api/samples GET request'''
@@ -110,19 +114,12 @@ class RestAPIHandler(RequestHandler):
         return [_[self.NAME] for _ in experiment.get(self.SAMPLES, [])]
 
     def _get_sample_config(self):
-        '''Get the config dictionary for a named sample
-
-        Fetches the named sample config dictionary using query params.
-        '''
-        experiment = self._get_experiment_config()
-        sample = self._get_query_param(self.Q_SAMPLE)
-        for d in experiment.get(self.SAMPLES, []):
-            if d[self.NAME] == sample:
-                return d
-        else:
-            msg = "Unknown sample name: " + sample
-            rh_logger.logger.report_event(msg)
-            raise HTTPError(self.request.uri, 400, msg, [], None)
+        return self._get_config({
+            'parent': self._get_experiment_config(),
+            'plural': self.SAMPLES,
+            'param': self.Q_SAMPLE,
+            'name': 'sample name'
+        })
 
     def get_datasets(self):
         '''Handle the /api/datasets GET request'''
@@ -130,19 +127,12 @@ class RestAPIHandler(RequestHandler):
         return [_[self.NAME] for _ in sample.get(self.DATASETS, [])]
 
     def _get_dataset_config(self):
-        '''Get the config dictionary for a named dataset
-
-        Fetches the sample config dictionary using query param values
-        '''
-        sample = self._get_sample_config()
-        dataset = self._get_query_param(self.Q_DATASET)
-        for d in sample.get(self.DATASETS, []):
-            if d[self.NAME] == dataset:
-                return d
-        else:
-            msg = "Unknown dataset name: " + dataset
-            rh_logger.logger.report_event(msg)
-            raise HTTPError(self.request.uri, 400, msg, [], None)
+        return self._get_config({
+            'parent': self._get_sample_config(),
+            'plural': self.DATASETS,
+            'param': self.Q_DATASET,
+            'name': 'dataset name'
+        })
 
     def get_channels(self):
         '''Handle the /api/channels GET request'''
@@ -150,16 +140,12 @@ class RestAPIHandler(RequestHandler):
         return [_[self.NAME] for _ in dataset.get(self.CHANNELS, [])]
 
     def _get_channel_config(self):
-        '''Get the config dictionary for a named channel'''
-        dataset = self._get_dataset_config()
-        channel = self._get_query_param(self.Q_CHANNEL)
-        for d in dataset.get(self.CHANNELS, []):
-            if d[self.NAME] == channel:
-                return d
-        else:
-            msg = "Unknown channel: " + channel
-            rh_logger.logger.report_event(msg)
-            raise HTTPError(self.request.uri, 400, msg, [], None)
+        return self._get_config({
+            'parent': self._get_dataset_config(),
+            'plural': self.CHANNELS,
+            'param': self.Q_CHANNEL,
+            'name': 'channel'
+        })
 
     def get_channel_metadata(self):
         '''Handle the /api/channel_metadata GET request'''
