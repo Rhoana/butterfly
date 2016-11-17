@@ -42,35 +42,25 @@ class Core(object):
         w= kwargs['w']
 
 
-        # if datapath is not indexed (knowing the meta information like width,
-        # height),do it now
+        # if datapath is not indexed (knowing the meta information),
+        # do it now
         if datapath not in self._datasources:
             self.create_datasource(datapath, dtype=dtype)
 
         datasource = self._datasources[datapath]
 
-        rh_logger.logger.report_event('Loading tiles:')
-        if not segmentation and not synapse:
-            try:
-                planes = []
-                x0 = start_coord[0] * 2 ** w
-                x1 = (start_coord[0] + vol_size[0]) * 2 ** w
-                y0 = start_coord[1] * 2 ** w
-                y1 = (start_coord[1] + vol_size[1]) * 2 ** w
-                for z in range(start_coord[2], start_coord[2] + vol_size[2]):
-                    plane = datasource.load_cutout(x0, x1, y0, y1, z, w)
-                    planes.append(plane)
-                return np.dstack(planes)
-            except:
-                rh_logger.logger.report_exception()
-
-        # If the datasource has zoom levels already, we assume their tiles are
-        # the same size across zooms
-        f = w
-        if w <= datasource.max_zoom:
-            f = 0
-
-        blocksize = [x // (2**f) for x in datasource.blocksize]
+        planes = []
+        scale = 2 ** w
+        [x0,y0] = np.array(start_coord) * scale
+        [x1,y1] = np.array(vol_size) + [x0,y0]
+        try:
+            rh_logger.logger.report_event('Loading tiles:')
+            for z in range(start_coord[2], start_coord[2] + vol_size[2]):
+                plane = datasource.load_cutout(x0, x1, y0, y1, z, w)
+                planes.append(plane)
+            return np.dstack(planes)
+        except:
+            rh_logger.logger.report_exception()
 
         # If we need to fit the volume to existing data, calculate volume size
         # now
@@ -102,109 +92,6 @@ class Core(object):
                  vol_size[0],
                     vol_size[2]),
                 dtype=np.uint32)
-
-        # Loop through all z-slices requested, using x,y offsets to calculate
-        # distance until next block or volume end
-        for z in range(vol_size[2]):
-            # Calculate list of tiles that we need
-            x_tiles = range(
-                (start_coord[0] // blocksize[0]),
-                (((start_coord[0] + vol_size[0] - 1) // blocksize[0]) + 1))
-            y_tiles = range(
-                (start_coord[1] // blocksize[1]),
-                (((start_coord[1] + vol_size[1] - 1) // blocksize[1]) + 1))
-
-            # Reset the x-starting coordinate for the next row of calculations
-            self.vol_xy_start[0] = 0
-            self.tile_xy_start[0] = (start_coord[0] % blocksize[0])
-            for x in x_tiles:
-                x_offset = min(
-                    (blocksize[0] - self.tile_xy_start[0]),
-                    (vol_size[0] - self.vol_xy_start[0]))
-
-                # Reset the y-starting coordinate for the next column of areas
-                self.vol_xy_start[1] = 0
-                self.tile_xy_start[1] = (start_coord[1] % blocksize[1])
-
-                for y in y_tiles:
-                    y_offset = min(
-                        (blocksize[1] - self.tile_xy_start[1]),
-                        (vol_size[1] - self.vol_xy_start[1]))
-                    try:
-                        cur_img = datasource.load(
-                            x, y, z + start_coord[2], w, segmentation)
-                    except (IndexError, IOError, AttributeError):
-                        cur_img = np.zeros(blocksize, dtype=np.uint8)
-
-                    if color:
-                        cur_img = datasource.seg_to_color(cur_img)
-
-                    # Debug code to show which cutouts we are grabbing and from
-                    # where
-                    rh_logger.logger.report_event(
-                        'tile:       ' + '(' + str(x) + ', ' + str(y) + ')')
-                    rh_logger.logger.report_event(
-                        'z slice:    ' + str(z + start_coord[2]),
-                        log_level=logging.DEBUG)
-                    rh_logger.logger.report_event(
-                        'vol start:  ' + str(self.vol_xy_start),
-                        log_level=logging.DEBUG)
-                    rh_logger.logger.report_event(
-                        'tile start: ' + str(self.tile_xy_start),
-                        log_level=logging.DEBUG)
-                    rh_logger.logger.report_event(
-                        'x offset:   ' + str(x_offset),
-                        log_level=logging.DEBUG)
-                    rh_logger.logger.report_event(
-                        'y offset:   ' + str(y_offset) + "\n",
-                        log_level=logging.DEBUG)
-
-                    # Add offsets in current y direction
-                    target_boundaries = (
-                        self.vol_xy_start[1],
-                        self.vol_xy_start[1] +
-                        y_offset,
-                        self.vol_xy_start[0],
-                        self.vol_xy_start[0] +
-                        x_offset,
-                        z)
-                    source_boundaries = (
-                        self.tile_xy_start[1],
-                        self.tile_xy_start[1] + y_offset,
-                        self.tile_xy_start[0],
-                        self.tile_xy_start[0] + x_offset)
-
-                    # print cur_img
-                    rh_logger.logger.report_event(
-                        "Adding image of size %d, %d to cache" %
-                        (cur_img.shape[0], cur_img.shape[1]),
-                        log_level=logging.DEBUG)
-
-                    if color:
-                        data = cur_img[
-                            source_boundaries[0]:source_boundaries[1],
-                            source_boundaries[2]:source_boundaries[3], :]
-                        vol[target_boundaries[0]:target_boundaries[1],
-                            target_boundaries[2]:target_boundaries[3],
-                            target_boundaries[4], :] = data
-                    else:
-                        data = cur_img[
-                            source_boundaries[0]:source_boundaries[1],
-                            source_boundaries[2]:source_boundaries[3]]
-                        vol[target_boundaries[0]:target_boundaries[1],
-                            target_boundaries[2]:target_boundaries[3],
-                            target_boundaries[4]] = data
-
-                    self.tile_xy_start[1] = (
-                        self.tile_xy_start[1] + y_offset) % blocksize[1]
-                    self.vol_xy_start[1] += y_offset
-
-                # Add offsets in current x direction
-                self.tile_xy_start[0] = (
-                    self.tile_xy_start[0] + x_offset) % blocksize[0]
-                self.vol_xy_start[0] += x_offset
-
-        return vol
 
     def create_datasource(self, datapath, dtype=np.uint8):
         '''
