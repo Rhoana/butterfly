@@ -121,6 +121,35 @@ class Mojo(DataSource):
             cur_filename)
         return super(Mojo, self).load(cur_path, w, segmentation)
 
+    def cut2tiles(self,corners,w):
+        scale = 2**w
+        blockscale = np.array(self.blocksize)*scale
+        gridshape = (corners[2:]-corners[:1])//blockscale
+        return np.indices(gridshape).T
+
+    def cut2bounds(self,corners,w):
+        scale = 2**w
+        blockscale = np.array(self.blocksize)*scale
+        origin = blockscale*(corners[:1]//blockscale)
+        return corners//scale - list(origin)*2
+
+    def load_cutout(self, x0, x1, y0, y1, z, w):
+        corners = np.array([x0,y0,x1,y1])
+        grid = self.cut2tiles(corners,w)
+        [left,top,right,down] = self.cut2bounds(corners,w)
+        blockshape = np.array(self.blocksize)
+        cutshape = blockshape*grid.shape[:-1]
+        cutout = np.zeros(cutshape)
+        fixed = [z,w]
+        for row in grid:
+            for where in row:
+                [i0,j0] = blockshape*where
+                [i1,j1] = blockshape*(where+1)
+                one_tile = list(where)+fixed
+                tile = self.load(*one_tile)
+                cutout[j0:j1,i0:i1] = tile
+        return cutout[left:right,top:down]
+
     def seg_to_color(self, slice):
         # super(Mojo, self).seg_to_color()
 
