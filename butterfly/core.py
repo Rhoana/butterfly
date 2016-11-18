@@ -51,8 +51,8 @@ class Core(object):
 
         planes = []
         scale = 2 ** w
-        [x0,y0] = np.array(start_coord) * scale
-        [x1,y1] = np.array(vol_size) + [x0,y0]
+        [x0,y0] = np.array(start_coord[:-1]) * scale
+        [x1,y1] = np.array(vol_size[:-1])*scale + [x0,y0]
         try:
             rh_logger.logger.report_event('Loading tiles:')
             for z in range(start_coord[2], start_coord[2] + vol_size[2]):
