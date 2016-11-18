@@ -154,28 +154,45 @@ class RestAPIHandler(RequestHandler):
         #     del channel[self.PATH]
         return channel
 
+    def _except(kwargs):
+        rh_logger.logger.report_event(kwargs['msg'])
+        raise HTTPError(self.request.uri, 400, kwargs['msg'], [], None)
+
+    def _match_condition(self,result,kwargs):
+        if kwargs['condition']: self._except(kwargs)
+        return result
+
+    def _try_condition(self,result,kwargs):
+        try: return kwargs['condition'](result)
+        except: self._except(kwargs)
+
+    def _try_typecast_int(self,qparam,result):
+        return self._try_condition(result, {
+            'condition' : int,
+            'msg' : "Received non-integer %s: %s" % (qparam, result)
+        })
+
     def _get_query_param(self, qparam):
         result = self.get_query_argument(qparam, default=None)
-        if result is None:
-            rh_logger.logger.report_event(
-                "Received REST API call without %s query param" % qparam)
-            raise HTTPError(
-                self.request.uri, 400, "Missing %s parameter" % qparam,
-                [], None)
-        return result
+        return self._match_condition(result, {
+            'condition' : result is None,
+            'msg' : "Missing %s parameter" % qparam
+        })
+
+    def _get_list_query_argument(self, qparam, whitelist):
+        result = self.get_query_argument(qparam, whitelist[0])
+        return self._match_condition(result, {
+            'condition': result not in whitelist,
+            'msg': "The %s must be one of %s." % (qparam, whitelist)
+        })
 
     def _get_int_query_param(self, qparam):
         result = self._get_query_param(qparam)
-        try:
-            return int(result)
-        except ValueError:
-            rh_logger.logger.report_event(
-                "Received REST API call with non-integer %s: %s" %
-                (qparam, result))
-            raise HTTPError(
-                self.request.uri, 400,
-                "The %s query parameter must be an integer, but was %s" %
-                (qparam, result), [], None)
+        return self._try_typecast_int(qparam, result)
+
+    def _get_int_query_argument(self, qparam):
+        result = self.get_query_argument(qparam, 0)
+        return self._try_typecast_int(qparam, result)
 
     def get_data(self):
         channel = self._get_channel_config()
@@ -184,16 +201,9 @@ class RestAPIHandler(RequestHandler):
         z = self._get_int_query_param(self.Q_Z)
         width = self._get_int_query_param(self.Q_WIDTH)
         height = self._get_int_query_param(self.Q_HEIGHT)
-        resolution = self.get_query_argument(self.Q_RESOLUTION, 0)
-        fmt = self.get_query_argument(self.Q_FORMAT, "png")
-        if fmt not in settings.SUPPORTED_IMAGE_FORMATS:
-            rh_logger.logger.report_event(
-                "Received unsupported %s query parameter: " + fmt)
-            raise HTTPError(
-                self.request.uri, 400,
-                "The %s query parameter must be one of \"%s\"." %
-                (self.Q_FORMAT, '","'.join(settings.SUPPORTED_IMAGE_FORMATS)),
-                [], None)
+        resolution = self._get_int_query_argument(self.Q_RESOLUTION)
+        fmt = self._get_list_query_argument(self.Q_FORMAT, settings.SUPPORTED_IMAGE_FORMATS)
+
         dtype = getattr(np, channel[self.DATA_TYPE])
         rh_logger.logger.report_event(
             "Encoding image as dtype %s" % repr(dtype))
