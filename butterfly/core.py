@@ -24,23 +24,16 @@ class Core(object):
         Request a subvolume of the datapath at a given zoomlevel.
         '''
         presets = {
-            'segmentation': False,
-            'segcolor': False,
-            'fit': False,
             'w': 0,
             'dtype': np.uint8,
-            'synapse': False
+            'view': 'grayscale',
+            'format': 'png'
         }
         for k,v in presets.iteritems():
             kwargs.setdefault(k,v)
 
-        segmentation= kwargs['segmentation']
-        segcolor= kwargs['segcolor']
-        synapse=kwargs['synapse']
         dtype= kwargs['dtype']
-        fit= kwargs['fit']
-        w= kwargs['w']
-
+        w= int(kwargs['w'])
 
         # if datapath is not indexed (knowing the meta information),
         # do it now
@@ -53,45 +46,14 @@ class Core(object):
         scale = 2 ** w
         [x0,y0] = np.array(start_coord[:-1]) * scale
         [x1,y1] = np.array(vol_size[:-1])*scale + [x0,y0]
-        try:
-            rh_logger.logger.report_event('Loading tiles:')
-            for z in range(start_coord[2], start_coord[2] + vol_size[2]):
-                plane = datasource.load_cutout(x0, x1, y0, y1, z, w)
-                planes.append(plane)
-            return np.dstack(planes)
-        except:
-            rh_logger.logger.report_exception()
+        rh_logger.logger.report_event('Loading tiles:')
+        for z in range(start_coord[2], start_coord[2] + vol_size[2]):
+            plane = datasource.load_cutout(x0, x1, y0, y1, z, w)
+            planes.append(plane)
+        vol = np.dstack(planes)
 
-        # If we need to fit the volume to existing data, calculate volume size
-        # now
-        if fit:
-            boundaries = datasource.get_boundaries()
-            # No mip zoom for slices right now
-            boundaries = [boundaries[0] //
-                          (2**w), boundaries[1] //
-                          (2**w), boundaries[2]]
-            for i in range(3):
-                if start_coord[i] + vol_size[i] > boundaries[i]:
-                    vol_size[i] = boundaries[i] - start_coord[i]
-
-        # Use modified segmentation flag to support synapses
-        segmentation = 2 if synapse else segmentation
-
-        # Use 4D volume for rgb data
-        color = segcolor
-        if color:
-            vol = np.zeros(
-                (vol_size[1],
-                 vol_size[0],
-                    vol_size[2],
-                    3),
-                dtype=np.uint16)
-        else:
-            vol = np.zeros(
-                (vol_size[1],
-                 vol_size[0],
-                    vol_size[2]),
-                dtype=np.uint32)
+        # simply return volume
+        return vol
 
     def create_datasource(self, datapath, dtype=np.uint8):
         '''
