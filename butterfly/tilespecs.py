@@ -73,6 +73,9 @@ class Tilespecs(DataSource):
              self.max_z - self.min_z + 1))
 
     def load_cutout(self, x0, x1, y0, y1, z, w):
+        '''
+        @override
+        '''
         if z not in self.layer_ts or len(self.layer_ts[z]) == 0:
             super(Tilespecs, self).load_cutout(x0, x1, y0, y1, z, w)
         #if hasattr(self.ts[z][0], "section"):
@@ -98,69 +101,13 @@ class Tilespecs(DataSource):
         '''
         @override
         '''
-        # TODO - need to understand how to implement
         pass
 
-#        if z < self.min_z:
-#            z = self.min_z
-#        elif z > self.max_z:
-#            z = self.max_z
-#        if segmentation:
-#            return np.zeros((self.blocksize[0] / 2**w,
-#                             self.blocksize[1] / 2**w, 3))
-#        if z not in self.kdtrees:
-#            return np.zeros(self.blocksize)
-#
-#        x0 = x * self.blocksize[0]
-#        y0 = y * self.blocksize[0]
-#        x1 = x0 + self.blocksize[0]
-#        y1 = y0 + self.blocksize[1]
-#        logger.report_event(
-#            "Fetching x=%d:%d, y=%d:%d, z=%d" % (x0, x1, y0, y1, z))
-#
-#        kdtree = self.kdtrees[z]
-#        assert isinstance(kdtree, KDTree)
-#        #
-#        # Look every "blocksize" within the kdtree for the closest center
-#        #
-#        nx = 2 * (x1 - x0) / self.tile_width + 1
-#        ny = 2 * (y1 - y0) / self.tile_height + 1
-#        xr = np.vstack([np.linspace(x0, x1, nx)] * ny)
-#        yr = np.column_stack([np.linspace(y0, y1, ny)] * nx)
-#        coords = np.column_stack([xr.flatten(), yr.flatten()])
-#        d, idxs = kdtree.query(coords)
-#        idxs = np.unique(idxs)
-#        single_renderers = []
-#        for idx in idxs:
-#            ts = self.ts[z][idx]
-#            renderer = TilespecSingleTileRenderer(
-#                ts, compute_distances=False,
-#                mipmap_level=w)
-#            single_renderers.append(renderer)
-#            if w > 0:
-#                model = AffineModel(m=np.eye(3) * 2.0 ** w)
-#                renderer.add_transformation(model)
-#            for ts_transform in ts.get_transforms():
-#                model = Transforms.from_tilespec(ts_transform)
-#                renderer.add_transformation(model)
-#            if w > 0:
-#                model = AffineModel(m=np.eye(3) / 2.0 ** w)
-#                renderer.add_transformation(model)
-#        renderer = MultipleTilesRenderer(single_renderers)
-#        return renderer.crop(
-#            x0 / 2**w, y0 / 2**w, x1 / 2**w, y1 / 2**w)[0]
-
     def seg_to_color(self, slice):
-        '''
-        @override
-        '''
 
         return slice
 
     def get_boundaries(self):
-        '''
-        @override
-        '''
 
         return self.max_x - self.min_x, self.max_y - self.min_y, self.max_z
 

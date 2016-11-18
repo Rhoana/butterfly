@@ -2,6 +2,7 @@ import os
 import re
 import cv2
 import h5py
+import numpy as np
 import settings
 
 
@@ -28,20 +29,33 @@ class DataSource(object):
         pass
 
     def load_cutout(self, x0, x1, y0, y1, z, w):
-        '''Load a cutout from a plane
-
-        :param x0: leftmost coordinate of the cutout
-        :param x1: rightmost coordinate of the cutout (not inclusive)
-        :param y0: top coordinate of the cutout
-        :param y1: bottom coordinate of the cutout (not inclusive)
-        :param z: plane # of the cutout
-        :param w: the mipmap level
-
-        :returns: the downsampled (if necessary) image of the cutout
-        :raises: NotImplementedError if the datasource doesn't implement this
-        (which is OK)
         '''
-        raise NotImplementedError()
+        Load a cutout from a plane
+        '''
+        scale = 2 ** w
+        blockshape = np.array(self.blocksize)
+        x0y0 = np.array([x0,y0]) // scale
+        x1y1 = np.array([x1,y1]) // scale
+        top_left = x0y0 // blockshape
+        lo_right = x1y1 // blockshape
+        origin = top_left * blockshape
+        [left,top] = x0y0 - origin
+        [right,down] = x1y1 - origin
+        gridshape = lo_right-top_left
+        grid = np.indices(gridshape).T
+
+        cutshape = blockshape*grid.shape[:-1]
+        cutout = np.zeros(cutshape)
+        fixed = [z,w]
+        for row in grid:
+            for where in row:
+                here = top_left + where
+                [i0,j0] = blockshape*(where)
+                [i1,j1] = blockshape*(where+1)
+                one_tile = list(here)+fixed
+                tile = self.load(*one_tile)
+                cutout[j0:j1,i0:i1] = tile
+        return cutout[top:down,left:right]
 
     def load(self, cur_path, w, segmentation=False):
         '''

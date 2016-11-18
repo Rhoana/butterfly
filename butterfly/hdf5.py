@@ -78,12 +78,18 @@ class HDF5DataSource(DataSource):
         return channels
 
     def index(self):
+        '''
+        @override
+        '''
         firstChannel = self.channels[self.kinds[0]]
         with h5py.File(firstChannel[K_FILENAME], "r") as fd:
             self.blocksize = fd[firstChannel[K_DATASET_PATH]].shape[-1:0:-1]
         return
 
     def load_cutout(self, x0, x1, y0, y1, z, w):
+        '''
+        @override
+        '''
         channelKind = self.kindGuess(0)
         if channelKind not in self.kinds:
             return 0
@@ -93,6 +99,9 @@ class HDF5DataSource(DataSource):
             return ds[z, y0:y1:(2 ** w), x0:x1:(2 ** w)]
 
     def load(self, x, y, z, w, segmentation):
+        '''
+        @override
+        '''
         channelKind = self.kindGuess(segmentation)
         if channelKind not in self.kinds:
             return 0

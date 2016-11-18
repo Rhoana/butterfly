@@ -15,7 +15,6 @@ class MultiBeam(DataSource):
         '''
         @override
         '''
-
         if not dataspec.can_load(datapath):
             raise HTTPError(
                 None, 404,
@@ -28,7 +27,6 @@ class MultiBeam(DataSource):
         '''
         @override
         '''
-
         self.ts = {}
         self.coords = {}
         self.kdtrees = {}
@@ -72,6 +70,9 @@ class MultiBeam(DataSource):
              self.max_z - self.min_z + 1))
 
     def load_cutout(self, x0, x1, y0, y1, z, w):
+        '''
+        @override
+        '''
         if z not in self.ts or len(self.ts[z]) == 0:
             return np.zeros((int((x1 - x0) / 2**w),
                              int((y1 - y0) / 2**w)), np.uint8)
@@ -119,7 +120,6 @@ class MultiBeam(DataSource):
         '''
         @override
         '''
-
         if z < self.min_z:
             z = self.min_z
         elif z > self.max_z:
@@ -170,16 +170,10 @@ class MultiBeam(DataSource):
             x0 / 2**w, y0 / 2**w, x1 / 2**w, y1 / 2**w)[0]
 
     def seg_to_color(self, slice):
-        '''
-        @override
-        '''
 
         return slice
 
     def get_boundaries(self):
-        '''
-        @override
-        '''
 
         return self.max_x - self.min_x, self.max_y - self.min_y, self.max_z
 
