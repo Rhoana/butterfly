@@ -99,7 +99,7 @@ class HDF5DataSource(DataSource):
             ds = fd[channel[K_DATASET_PATH]]
             return ds[z, y0:y1:(2 ** w), x0:x1:(2 ** w)]
 
-    def load(self, x, y, z, w, segmentation):
+    def load(self, x, y, z, w, segmentation=False):
         '''
         @override
         '''
@@ -111,13 +111,6 @@ class HDF5DataSource(DataSource):
             (bx,by) = self.blocksize
             ds = fd[channel[K_DATASET_PATH]]
             return ds[z, y:y+by:(2 ** w), x:x+bx:(2 ** w)]
-
-    def seg_to_color(self, slice):
-        colors = np.zeros(slice.shape+(3,),dtype=np.uint8)
-        colors[:,:,0] = np.mod(107*slice[:,:],700).astype(np.uint8)
-        colors[:,:,1] = np.mod(509*slice[:,:],900).astype(np.uint8)
-        colors[:,:,2] = np.mod(200*slice[:,:],777).astype(np.uint8)
-        return colors
 
     def get_boundaries(self):
         firstChannel = self.channels[self.kinds[0]]

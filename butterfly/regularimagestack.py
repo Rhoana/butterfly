@@ -93,11 +93,6 @@ class RegularImageStack(DataSource):
             cur_filename)
         return super(RegularImageStack, self).load(cur_path, w, segmentation)
 
-    def seg_to_color(self, slice):
-        # super(RegularImageStack, self).seg_to_color()
-
-        return slice
-
     def get_boundaries(self):
         # super(RegularImageStack, self).get_boundaries()
 

@@ -122,10 +122,10 @@ class Mojo(DataSource):
         return super(Mojo, self).load(cur_path, w, segmentation)
 
     def seg_to_color(self, slice):
-        # super(Mojo, self).seg_to_color()
-
+        '''
+        @override
+        '''
         # Modulo by length of color map, then advanced indexing to return rgb
-        # image
         return self._color_map[np.fmod(slice, len(self._color_map))]
 
     def get_boundaries(self):

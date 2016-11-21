@@ -117,11 +117,12 @@ class DataSource(object):
 
         return tmp_image
 
-    def seg_to_color(self):
-        '''
-        Get segmentation color from color map
-        '''
-        pass
+    def seg_to_color(self, slice):
+        colors = np.zeros(slice.shape+(3,),dtype=np.uint8)
+        colors[:,:,0] = np.mod(107*slice[:,:],700).astype(np.uint8)
+        colors[:,:,1] = np.mod(509*slice[:,:],900).astype(np.uint8)
+        colors[:,:,2] = np.mod(200*slice[:,:],777).astype(np.uint8)
+        return colors
 
     def get_boundaries(self):
         '''

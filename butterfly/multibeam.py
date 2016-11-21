@@ -171,10 +171,6 @@ class MultiBeam(DataSource):
         return renderer.crop(
             x0 / 2**w, y0 / 2**w, x1 / 2**w, y1 / 2**w)[0]
 
-    def seg_to_color(self, slice):
-
-        return slice
-
     def get_boundaries(self):
 
         return self.max_x - self.min_x, self.max_y - self.min_y, self.max_z
