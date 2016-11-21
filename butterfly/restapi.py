@@ -86,7 +86,7 @@ class RestAPIHandler(RequestHandler):
 
     def _get_config(self,kind):
         '''Get the config dictionary for a named kind'''
-        target = self._get_query_param(kind['param'])
+        target = self._get_necessary_param(kind['param'])
         for d in kind['parent'].get(kind['plural'],[]):
             if d[self.NAME] == target:
                 return d
@@ -172,7 +172,7 @@ class RestAPIHandler(RequestHandler):
             'msg' : "Received non-integer %s: %s" % (qparam, result)
         })
 
-    def _get_query_param(self, qparam):
+    def _get_necessary_param(self, qparam):
         result = self.get_query_argument(qparam, default=None)
         return self._match_condition(result, {
             'condition' : result is None,
@@ -186,8 +186,8 @@ class RestAPIHandler(RequestHandler):
             'msg': "The %s must be one of %s." % (qparam, whitelist)
         })
 
-    def _get_int_query_param(self, qparam):
-        result = self._get_query_param(qparam)
+    def _get_int_necessary_param(self, qparam):
+        result = self._get_necessary_param(qparam)
         return self._try_typecast_int(qparam, result)
 
     def _get_int_query_argument(self, qparam):
@@ -196,11 +196,11 @@ class RestAPIHandler(RequestHandler):
 
     def get_data(self):
         channel = self._get_channel_config()
-        x = self._get_int_query_param(self.Q_X)
-        y = self._get_int_query_param(self.Q_Y)
-        z = self._get_int_query_param(self.Q_Z)
-        width = self._get_int_query_param(self.Q_WIDTH)
-        height = self._get_int_query_param(self.Q_HEIGHT)
+        x = self._get_int_necessary_param(self.Q_X)
+        y = self._get_int_necessary_param(self.Q_Y)
+        z = self._get_int_necessary_param(self.Q_Z)
+        width = self._get_int_necessary_param(self.Q_WIDTH)
+        height = self._get_int_necessary_param(self.Q_HEIGHT)
         resolution = self._get_int_query_argument(self.Q_RESOLUTION)
         fmt = self._get_list_query_argument(self.Q_FORMAT, settings.SUPPORTED_IMAGE_FORMATS)
 
