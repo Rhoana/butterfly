@@ -39,8 +39,6 @@ class RegularImageStack(DataSource):
         @override
         '''
 
-        super(RegularImageStack, self).index()
-
         args_file = os.path.join(self._datapath, '*.args')
         args_file = glob.glob(args_file)[0]
 
@@ -65,6 +63,8 @@ class RegularImageStack(DataSource):
 
         # Grab blocksize from first image
         self.blocksize = self.get_blocksize()
+
+        super(RegularImageStack, self).index()
 
     def load_info(self, folderpaths, filename, indices):
         self._folderpaths = folderpaths

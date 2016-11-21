@@ -19,7 +19,17 @@ class Core(object):
         self._max_cache_size = settings.MAX_CACHE_SIZE
         self._current_cache_size = 0
 
-    def get(self,datapath, start_coord, vol_size, **kwargs):
+    def load_view(self,datasource,view,bounds):
+        plane = datasource.load_cutout(*bounds)
+        if view == 'rgb':
+            color_plane = plane.astype(np.uint32).view(np.uint8)
+            return color_plane.reshape(plane.shape+(4,))[:,:,:3]
+        elif view == 'colormap':
+            return datasource.seg_to_color(plane)
+        else:
+            return plane
+
+    def get(self, datapath, start_coord, vol_size, **kwargs):
         '''
         Request a subvolume of the datapath at a given zoomlevel.
         '''
@@ -33,6 +43,8 @@ class Core(object):
             kwargs.setdefault(k,v)
 
         dtype= kwargs['dtype']
+        fmt= kwargs['format']
+        view= kwargs['view']
         w= int(kwargs['w'])
 
         # if datapath is not indexed (knowing the meta information),
@@ -48,12 +60,10 @@ class Core(object):
         [x1,y1] = np.array(vol_size[:-1])*scale + [x0,y0]
         rh_logger.logger.report_event('Loading tiles:')
         for z in range(start_coord[2], start_coord[2] + vol_size[2]):
-            plane = datasource.load_cutout(x0, x1, y0, y1, z, w)
+            bounds = [x0, x1, y0, y1, z, w]
+            plane = self.load_view(datasource, view, bounds)
             planes.append(plane)
-        vol = np.dstack(planes)
-
-        # simply return volume
-        return vol
+        return np.dstack(planes)
 
     def create_datasource(self, datapath, dtype=np.uint8):
         '''

@@ -2,9 +2,8 @@ import os
 import re
 import cv2
 import h5py
-import numpy as np
 import settings
-
+import numpy as np
 
 class DataSource(object):
 
@@ -26,7 +25,10 @@ class DataSource(object):
         Index all files without loading to
         create bounding box for this data.
         '''
-        pass
+        self.dtype = self.get_type()
+
+    def get_type(self):
+        return self.load(0,0,0,0).dtype
 
     def load_cutout(self, x0, x1, y0, y1, z, w):
         '''
@@ -45,7 +47,7 @@ class DataSource(object):
         grid = np.indices(gridshape).T
 
         cutshape = blockshape*grid.shape[:-1]
-        cutout = np.zeros(cutshape)
+        cutout = np.zeros(cutshape, dtype=self.dtype)
         fixed = [z,w]
         for row in grid:
             for where in row:

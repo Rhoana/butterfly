@@ -19,6 +19,7 @@ class RestAPIHandler(RequestHandler):
     Q_CHANNEL = "channel"
     '''Encode image/mask in this image format (e.g. "tif")'''
     Q_FORMAT = "format"
+    Q_VIEW = "view"
     Q_X = "x"
     Q_Y = "y"
     Q_Z = "z"
@@ -154,7 +155,7 @@ class RestAPIHandler(RequestHandler):
         #     del channel[self.PATH]
         return channel
 
-    def _except(kwargs):
+    def _except(self,kwargs):
         rh_logger.logger.report_event(kwargs['msg'])
         raise HTTPError(self.request.uri, 400, kwargs['msg'], [], None)
 
@@ -203,18 +204,14 @@ class RestAPIHandler(RequestHandler):
         height = self._get_int_necessary_param(self.Q_HEIGHT)
         resolution = self._get_int_query_argument(self.Q_RESOLUTION)
         fmt = self._get_list_query_argument(self.Q_FORMAT, settings.SUPPORTED_IMAGE_FORMATS)
+        view = self._get_list_query_argument(self.Q_VIEW, settings.SUPPORTED_IMAGE_VIEWS)
 
         dtype = getattr(np, channel[self.DATA_TYPE])
-        rh_logger.logger.report_event(
-            "Encoding image as dtype %s" % repr(dtype))
-        vol = self.core.get(channel[self.PATH],
-                            [x, y, z], [width, height, 1],
-                            w=resolution, dtype=dtype)
-	cropped = vol[:height, :width, 0].astype(dtype)
-	if dtype is np.uint32:
-            cropped = cropped.view(np.uint8).reshape(cropped.shape+(4,))[:,:,:3]
-        data = cv2.imencode(  "." + fmt, cropped)[1]
+        slice_define = [channel[self.PATH], [x, y, z], [width, height, 1]]
+        rh_logger.logger.report_event("Encoding image as dtype %s" % repr(dtype))
+        vol = self.core.get(*slice_define, w=resolution, dtype=dtype, view=view, format=fmt)
         self.set_header("Content-Type", "image/"+fmt)
+        data = cv2.imencode(  "." + fmt, vol)[1]
         self.write(data.tostring())
 
     def get_mask(self):

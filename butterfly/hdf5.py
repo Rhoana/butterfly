@@ -84,7 +84,8 @@ class HDF5DataSource(DataSource):
         firstChannel = self.channels[self.kinds[0]]
         with h5py.File(firstChannel[K_FILENAME], "r") as fd:
             self.blocksize = fd[firstChannel[K_DATASET_PATH]].shape[-1:0:-1]
-        return
+
+        super(HDF5DataSource, self).index()
 
     def load_cutout(self, x0, x1, y0, y1, z, w):
         '''

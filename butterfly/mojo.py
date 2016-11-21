@@ -22,8 +22,6 @@ class Mojo(DataSource):
         @override
         '''
 
-        super(Mojo, self).index()
-
         folderpaths = 'z=%08d'
 
         # Max zoom level
@@ -72,6 +70,8 @@ class Mojo(DataSource):
                 datasets = []
                 f.visit(datasets.append)
                 self._color_map = f[datasets[0]][()]
+
+        super(Mojo, self).index()
 
     def load_info(self, folderpaths, filename, ids_filename, indices):
         self._folderpaths = folderpaths

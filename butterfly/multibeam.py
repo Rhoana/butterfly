@@ -69,6 +69,8 @@ class MultiBeam(DataSource):
              self.max_y - self.min_y + 1,
              self.max_z - self.min_z + 1))
 
+        super(MultiBeam, self).index()
+
     def load_cutout(self, x0, x1, y0, y1, z, w):
         '''
         @override

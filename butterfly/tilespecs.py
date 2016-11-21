@@ -1,15 +1,15 @@
-from datasource import DataSource
-import dataspec
-import numpy as np
-from rh_logger import logger
-from rh_renderer.models import AffineModel, Transforms
 from rh_renderer.tilespec_renderer import TilespecRenderer
+from rh_renderer.models import AffineModel, Transforms
+from datasource import DataSource
 from urllib2 import HTTPError
+from rh_logger import logger
+from copy import deepcopy
+import numpy as np
+import dataspec
+import logging
+import json
 import glob
 import os
-import json
-import logging
-import numpy as np
 
 class Tilespecs(DataSource):
 
@@ -72,36 +72,32 @@ class Tilespecs(DataSource):
              self.max_y - self.min_y + 1,
              self.max_z - self.min_z + 1))
 
+        super(Tilespecs, self).index()
+
+    def get_type(self):
+        '''
+        @override
+        '''
+        return self.load(0,0,0,0).crop(0,0,1,1)[0].dtype
+
     def load_cutout(self, x0, x1, y0, y1, z, w):
         '''
         @override
         '''
-        if z not in self.layer_ts or len(self.layer_ts[z]) == 0:
-            super(Tilespecs, self).load_cutout(x0, x1, y0, y1, z, w)
-        #if hasattr(self.ts[z][0], "section"):
-        #    section = self.ts[z][0].section
-        #    return section.imread(x0, y0, x1, y1, w)
-        return self.load_tilespec_cutout(x0, x1, y0, y1, z, w)
-
-    def load_tilespec_cutout(self, x0, x1, y0, y1, z, w):
-        '''Load a cutout from tilespecs'''
-        if w > 0:
-            model = AffineModel(m=np.eye(3) / 2.0 ** w)
-            self.layer_renderer[z].add_transformation(model)
-        img, start_point = self.layer_renderer[z].crop(
-            int(x0 / 2**w), int(y0 / 2**w), int(x1 / 2**w), int(y1 / 2**w))
-        # TODO pad the image (left and top), if necessary
-        # Removing the downsampling... TODO - this should be done with a temporary transformation so no need for upsampling all the time
-        if w > 0:
-            model = AffineModel(m=np.eye(3) * 2.0 ** w)
-            self.layer_renderer[z].add_transformation(model)
+        cutout_bounds = (np.array([x0, y0, x1, y1])/(2.0 ** w)).astype(np.uint32)
+        img = self.load(0,0,z,w).crop(*cutout_bounds)[0]
         return img
 
     def load(self, x, y, z, w, segmentation=False):
         '''
         @override
         '''
-        pass
+        plane_rendered = deepcopy(self.layer_renderer[z])
+        if w > 0:
+            model = AffineModel(m=np.eye(3) / 2.0 ** w)
+            plane_rendered.add_transformation(model)
+
+        return plane_rendered
 
     def seg_to_color(self, slice):
 
@@ -110,21 +106,3 @@ class Tilespecs(DataSource):
     def get_boundaries(self):
 
         return self.max_x - self.min_x, self.max_y - self.min_y, self.max_z
-
-
-#class TilespecSingleTileRenderer(SingleTileRendererBase):
-#    '''SingleTileRenderer using tilespec to retrieve images'''
-#
-#    def __init__(self, ts,
-#                 compute_mask=False,
-#                 compute_distances=True,
-#                 mipmap_level=0):
-#        width = ts.width / 2 ** mipmap_level
-#        height = ts.height / 2 ** mipmap_level
-#        super(TilespecSingleTileRenderer, self).__init__(
-#            width, height, compute_mask, compute_distances)
-#        self.ts = ts
-#        self.mipmap_level = mipmap_level
-#
-#    def load(self):
-#        return self.ts.imread(mipmap_level=self.mipmap_level)
