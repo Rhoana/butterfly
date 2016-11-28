@@ -137,6 +137,14 @@ class DataSource(object):
         :returns: dataset of meta info about self
         '''
         dimensions = dict(zip(('x','y','z'),self.get_boundaries()))
-        channel = {'path':path,'name':'img','dimensions':dimensions}
-        dataset = {'name':os.path.basename(path),'channels':[channel]}
+        channel = {
+            'path': path,
+            'name': 'img',
+            'dimensions': dimensions,
+            'data-type': self.dtype
+        }
+        dataset = {
+            'name': os.path.basename(path),
+            'channels': [channel]
+        }
         return dataset
