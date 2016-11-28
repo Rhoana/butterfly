@@ -12,10 +12,6 @@ DOJO.Write.prototype = {
   copy: function(id,i){
     return document.getElementById(id).children[i].cloneNode(1);
   },
-  chan: [
-    new RegExp('(seg|id).*', 'i'),
-    new RegExp('(syn).*', 'i')
-  ],
   grandparent: function(el){
     return el.parentElement.parentElement;
   },
@@ -28,12 +24,12 @@ DOJO.Write.prototype = {
     var self = this.copy('proto',0);
     var offspring = this.grandkid(self,[1,1]);
     var id = this.totalIds++;
-    var path = [
+    var factsheet = [
       ['id', 'in'+id],
       ['for', 'in'+id],
       ['id', source.self]
     ];
-    path.forEach(function(tag,tagi){
+    factsheet.forEach(function(tag,tagi){
       var temp = self.children[tagi];
       temp.setAttribute.apply(temp,tag);
     });
@@ -48,23 +44,26 @@ DOJO.Write.prototype = {
     var uncle = this.grandkid(ancestor,[1,1]);
     var size = source.dimensions;
     var [w,h,d] = [size.x,size.y,size.z];
-    for (var id in this.chan){
-      if (this.chan[id].test(source.name)){
-         var matchID = Number(id)+1;
-      }
+
+    log(source)
+    var path = 'viz.html?depth='+d+'&width='+w+'&height='+h+'&'+source.old;
+    cousin.children[0].href = path
+    if (uncle.children[0].href) {
+      uncle.children[0].href += ',' + source.channel;
     }
-    var path = 'viz.html?datapath='+source.path+'&width='+w+'&height='+h+'&depth='+d;
-    cousin.children[0].href = path+ '&channel='+(['i','s','y'][matchID||0]);
+    else {
+      uncle.children[0].href = path;
+    }
     cousin.children[1].innerHTML = source['data-type'];
     uncle.children[1].innerHTML = [w,h,d].join(', ');
-    uncle.children[0].href = path+'&channel=is';
     grandparent.children[0].checked = false;
     ancestor.children[0].checked = false;
-    var path = [
-      ['name', source['short-description'] || source['name']],
-      ['path', source.path]
+    var factsheet = [
+      ['description', source['short-description'] || source['name']],
+      ['datasource', source.datasource || 'unknown'],
+      ['path', source.path || 'unknown']
     ]
-    path.forEach(function(items){
+    factsheet.forEach(function(items){
       var temp = this.copy('proto',2);
       var info = this.grandkid(temp,[0,0]);
       info.children[0].innerHTML = items[0];
