@@ -61,7 +61,7 @@ class Mojo(DataSource):
         self._filename = filename
         self._indices = indices
 
-    def load(self, x, y, z, w, segmentation=False):
+    def load(self, x, y, z, w):
         '''
         @override
         '''
@@ -92,7 +92,7 @@ class Mojo(DataSource):
             self._folderpaths %
             self._indices[2][z],
             cur_filename)
-        return super(Mojo, self).load(cur_path, w, segmentation)
+        return super(Mojo, self).load(cur_path, w)
 
     def get_boundaries(self):
         # super(Mojo, self).get_boundaries()

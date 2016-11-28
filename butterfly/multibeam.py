@@ -118,7 +118,7 @@ class MultiBeam(DataSource):
             int(x0 / 2**w), int(y0 / 2**w), int(x1 / 2**w), int(y1 / 2**w))[0]
 
 
-    def load(self, x, y, z, w, segmentation=False):
+    def load(self, x, y, z, w):
         '''
         @override
         '''
@@ -126,9 +126,7 @@ class MultiBeam(DataSource):
             z = self.min_z
         elif z > self.max_z:
             z = self.max_z
-        if segmentation:
-            return np.zeros((self.blocksize[0] / 2**w,
-                             self.blocksize[1] / 2**w, 3))
+
         if z not in self.kdtrees:
             return np.zeros(self.blocksize)
 

@@ -71,7 +71,7 @@ class HDF5DataSource(DataSource):
             dataset = fd[self._dataset[K_DATASET_PATH]]
             return dataset[z, y0:y1:(2 ** w), x0:x1:(2 ** w)]
 
-    def load(self, x, y, z, w, segmentation=False):
+    def load(self, x, y, z, w):
         '''
         @override
         '''

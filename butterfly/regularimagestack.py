@@ -75,7 +75,7 @@ class RegularImageStack(DataSource):
         tmp_img = self.load(self._indices[0][0], self._indices[1][0], 0, 0)
         return tmp_img.shape
 
-    def load(self, x, y, z, w, segmentation=False):
+    def load(self, x, y, z, w):
         '''
         @override
         '''
@@ -91,7 +91,7 @@ class RegularImageStack(DataSource):
             self._folderpaths % {
                 'z': self._indices[2][z]},
             cur_filename)
-        return super(RegularImageStack, self).load(cur_path, w, segmentation)
+        return super(RegularImageStack, self).load(cur_path, w)
 
     def get_boundaries(self):
         # super(RegularImageStack, self).get_boundaries()

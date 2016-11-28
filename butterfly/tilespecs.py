@@ -88,7 +88,7 @@ class Tilespecs(DataSource):
         img = self.load(0,0,z,w).crop(*cutout_bounds)[0]
         return img
 
-    def load(self, x, y, z, w, segmentation=False):
+    def load(self, x, y, z, w):
         '''
         @override
         '''

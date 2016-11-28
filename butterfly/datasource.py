@@ -59,7 +59,7 @@ class DataSource(object):
                 cutout[j0:j1,i0:i1] = tile
         return cutout[top:down,left:right]
 
-    def load(self, cur_path, w, segmentation=False):
+    def load(self, cur_path, w):
         '''
         Loads this file from the data path.
         '''
@@ -87,7 +87,7 @@ class DataSource(object):
         # Resize if necessary, then also store to cache
         if w > 0:
             # We will use subsampling for all requests right now for speed
-            if settings.ALWAYS_SUBSAMPLE or segmentation:
+            if settings.ALWAYS_SUBSAMPLE or self.dtype == np.uint32:
                 # Subsample to preserve accuracy for segmentations
                 tmp_image = tmp_image[::2 ** w, ::2 ** w]
             else:
