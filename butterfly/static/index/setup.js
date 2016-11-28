@@ -10,7 +10,7 @@ DOJO.Setup = function(api){
   this.write = new DOJO.Write(this);
   var allData = this.start('');
   allData.then(function(all){
-//      log(all)
+    log(all)
   })
 }
 
@@ -20,7 +20,6 @@ DOJO.Setup.prototype = {
     'dataset','channel',
     'channel_metadata'
   ],
-  output: [],
   start: function(old){
     return this.loader(['root'],{old:old},0);
   },
@@ -65,27 +64,35 @@ DOJO.Setup.prototype = {
     return this.write.main(terms);
   },
   draw: function(parent, depth, result) {
+    var constant = {
+      old: result.old,
+      depth: depth
+    }
+    var target = {
+      self: parent.concat(0),
+      parent: parent,
+      target: 'body'
+    }
     var loader = this.loader.bind(this);
-    var build = this.build.bind(this,{old: result.old, depth: depth});
-    var target = {self:parent.concat(0), parent:parent, target:'body'};
+    var build = this.build.bind(this,constant);
     if (result.out instanceof Array){
       var promises = result.out.map(function(name,i){
         target.target = 'head';
         target.self = parent.concat(i);
         var sources = [target,{name:name,length:result.out.length}];
-        return loader(target.self,build(sources),depth+1);
+        return loader(target.self, build(sources), depth+1);
       });
       return Promise.all(promises);
     }
-    var sources = [target,this.parse(result.old),result.out];
-    return build(sources);
+      var sources = [target,this.parse(result.old),result.out];
+      return build(sources);
   },
   find: function(hash,depth){
     var where = this.plural(this.ask[depth])+'?';
     return this.get('/api/' + where + this.hash(hash));
   },
   loader: function(parent,folder,depth){
-      var draw = this.draw.bind(this, parent, depth);
-      return this.find(folder, depth).then(draw);
+    var draw = this.draw.bind(this, parent, depth);
+    return this.find(folder, depth).then(draw);
   }
 }
