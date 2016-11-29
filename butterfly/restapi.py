@@ -1,8 +1,10 @@
 from tornado.web import RequestHandler
-import json
 from urllib2 import HTTPError
-import cv2
 import numpy as np
+import StringIO
+import json
+import zlib
+import cv2
 
 import rh_logger
 import settings
@@ -10,7 +12,7 @@ import settings
 
 class RestAPIHandler(RequestHandler):
     '''Request handler for the documented public Butterfly REST API'''
-    #
+
     # Query params
     #
     Q_EXPERIMENT = "experiment"
@@ -209,10 +211,17 @@ class RestAPIHandler(RequestHandler):
         dtype = getattr(np, channel[self.DATA_TYPE])
         slice_define = [channel[self.PATH], [x, y, z], [width, height, 1]]
         rh_logger.logger.report_event("Encoding image as dtype %s" % repr(dtype))
-        vol = self.core.get(*slice_define, w=resolution, dtype=dtype, view=view, format=fmt)
+        vol = self.core.get(*slice_define, w=resolution, dtype=dtype, view=view)
         self.set_header("Content-Type", "image/"+fmt)
-        data = cv2.imencode(  "." + fmt, vol)[1]
-        self.write(data.tostring())
+        if fmt in ['zip']:
+            output = StringIO.StringIO()
+            volstring = vol.transpose(1,0,2).astype(np.uint32).tostring('F')
+            output.write(zlib.compress(volstring))
+            content = output.getvalue()
+        else:
+            content = cv2.imencode(  "." + fmt, vol)[1].tostring()
+
+        self.write(content)
 
     def get_mask(self):
         # TODO: implement this

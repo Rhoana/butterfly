@@ -46,11 +46,11 @@ DOJO.Write.prototype = {
     var dtype = source['data-type'];
     var withGL = Number(dtype=='uint32');
     var [w,h,d] = [size.x,size.y,size.z];
-    var channel = source.channel += withGL;
+    var channel = withGL + source.channel;
+    log(channel);
     var path = 'viz.html?depth='+d+'&width='+w+'&height='+h;
-
-    path += '&'+source.old + withGL;
-    cousin.children[0].href = path;
+    var old = source.old.replace(/&channel=(\w+)/,'&channel='+channel);;
+    cousin.children[0].href = path + '&' + old;
     if (uncle.children[0].href) {
       uncle.children[0].href += ',' + channel;
     }

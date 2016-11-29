@@ -27,7 +27,7 @@ IMAGE_RESIZE_METHOD = \
 # Output settings
 DEFAULT_OUTPUT = '.png'
 # Using cv2 - please check if supported before adding!
-SUPPORTED_IMAGE_FORMATS = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp')
+SUPPORTED_IMAGE_FORMATS = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp', 'zip')
 SUPPORTED_IMAGE_VIEWS = ('grayscale','colormap','rgb')
 
 '''List of datasources to try, in order, given a path'''

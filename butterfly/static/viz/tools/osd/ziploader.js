@@ -41,7 +41,7 @@ ZipLoader.prototype = {
                 abort: options.abort
             };
         // Cool Hack from 2016-09-26
-        if (options.src.slice(-3) == 'zip') {
+        if (options.src.indexOf('&format=zip') >= 0) {
             var newJob = new ZipJob( this.viaGL, jobOptions );
         }
         else {
