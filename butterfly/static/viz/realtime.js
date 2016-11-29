@@ -26,7 +26,7 @@ DOJO.RealTime.prototype = {
       return rgb[0] + 256*rgb[1] + 65536*rgb[2];
     }
     var isTarget = fun.call.bind(function(){
-      return this.source && this.source.gl;
+      return this.source && this.source.target;
     });
     var isDojo = fun.call.bind(function(){
       return this.source && this.source.dojo;

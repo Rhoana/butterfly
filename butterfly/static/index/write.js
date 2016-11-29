@@ -43,18 +43,21 @@ DOJO.Write.prototype = {
     var ancestor = this.grandparent(grandparent);
     var uncle = this.grandkid(ancestor,[1,1]);
     var size = source.dimensions;
+    var dtype = source['data-type'];
+    var withGL = Number(dtype=='uint32');
     var [w,h,d] = [size.x,size.y,size.z];
+    var channel = source.channel += withGL;
+    var path = 'viz.html?depth='+d+'&width='+w+'&height='+h;
 
-    log(source)
-    var path = 'viz.html?depth='+d+'&width='+w+'&height='+h+'&'+source.old;
-    cousin.children[0].href = path
+    path += '&'+source.old + withGL;
+    cousin.children[0].href = path;
     if (uncle.children[0].href) {
-      uncle.children[0].href += ',' + source.channel;
+      uncle.children[0].href += ',' + channel;
     }
     else {
       uncle.children[0].href = path;
     }
-    cousin.children[1].innerHTML = source['data-type'];
+    cousin.children[1].innerHTML = dtype;
     uncle.children[1].innerHTML = [w,h,d].join(', ');
     grandparent.children[0].checked = false;
     ancestor.children[0].checked = false;

@@ -11,11 +11,12 @@ log = console.log.bind(window.console);
 DOJO.Stack = function(src_terms){
 
   // Setup
-  var channels = src_terms.channel || ['i'];
-  this.preset = channels.split('').map(this.layerer);
-  this.nLayers = this.preset.length;
+  this.src_terms = src_terms;
   this.depth = src_terms.depth;
   this.z = src_terms.z || this.z;
+  var channels = src_terms.channel || ['i0'];
+  this.preset = channels.split(',').map(this.layerer,this);
+  this.nLayers = this.preset.length;
   // Prepare the sources
   protoSource = new DOJO.Source(src_terms);
   this.source = this.sourcer(protoSource);
@@ -41,14 +42,14 @@ DOJO.Stack.prototype = {
     down: -1
   },
   layerer: function(char){
-    var layers = {
-      i: {gl:0, mod:''},
-      s: {gl:0, mod:'&segmentation=y&segcolor=y'},
-      g: {gl:1, target: true, mod:'&segmentation=y'},
-      y: {gl:1, target: true, mod:'&synapse=y'},
-      dojo: {gl:0, dojo:true}
-    };
-    var src = layers[char] || layers.i;
+    var the = this.src_terms;
+    src.target = (char.slice(-1) == '1');
+    src.datapath = '/api/data?experiment=' + the.experiment +
+      '&sample=' + the.sample + '&dataset=' + the.dataset +
+      '&channel=' + char.slice(0,-1);
+    if (char == 'dojo0'){
+      src.dojo = true;
+    }
     return {src:src, set:{}}
   },
   share: DOJO.Source.prototype.share.bind(null),
@@ -66,7 +67,7 @@ DOJO.Stack.prototype = {
       }
     }
     var src = {z:-1,minLevel:this.level};
-    var dojosource = this.layerer('dojo');
+    var dojosource = this.layerer('dojo0');
     sources.push(this.make(proto,dojosource,src,1));
     return sources;
   },
