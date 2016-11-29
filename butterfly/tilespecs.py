@@ -84,7 +84,8 @@ class Tilespecs(DataSource):
         '''
         @override
         '''
-        cutout_bounds = (np.array([x0, y0, x1, y1])/(2.0 ** w)).astype(np.uint32)
+        cutout_bounds = np.array([x0, y0, x1, y1])/(2.0 ** w)
+        cutout_bounds = cutout_bounds.astype(np.uint32)-(0,0,1,1)
         img = self.load(0,0,z,w).crop(*cutout_bounds)[0]
         return img
 

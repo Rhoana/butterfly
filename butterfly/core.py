@@ -25,7 +25,7 @@ class Core(object):
             color_plane = plane.astype(np.uint32).view(np.uint8)
             return color_plane.reshape(plane.shape+(4,))[:,:,:3]
         elif view == 'colormap':
-            return datasource.seg_to_color(plane)
+            return datasource.seg_to_color(plane.astype(np.uint32))
         else:
             return plane
 
