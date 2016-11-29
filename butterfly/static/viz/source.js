@@ -15,7 +15,7 @@ DOJO.Source.prototype = {
     var source = this.share(src_terms, sourcer);
     var maxLevel = source.width/source.tileSize;
     source.maxLevel = Math.floor(Math.log2(maxLevel));
-    source.path += ['','&format=zip'][source.target];
+    source.datapath += ['','&format=zip'][source.target];
     return {tileSource: source};
   },
   tileSource: {
