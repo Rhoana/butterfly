@@ -10,7 +10,7 @@ DOJO.Setup = function(api){
   this.write = new DOJO.Write(this);
   var allData = this.start('');
   allData.then(function(all){
-    log(all)
+//    log(all)
   })
 }
 
