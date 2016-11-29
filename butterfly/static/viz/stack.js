@@ -42,6 +42,7 @@ DOJO.Stack.prototype = {
     down: -1
   },
   layerer: function(char){
+    var src = {};
     var the = this.src_terms;
     src.target = (char.slice(-1) == '1');
     src.datapath = '/api/data?experiment=' + the.experiment +
