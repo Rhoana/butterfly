@@ -84,3 +84,4 @@ class HDF5DataSource(DataSource):
         with h5py.File(self._dataset[K_FILENAME], "r") as fd:
             dataset = fd[self._dataset[K_DATASET_PATH]]
             self.blocksize = dataset.shape[::-1]
+        return self.blocksize
