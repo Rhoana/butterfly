@@ -78,7 +78,7 @@ class Tilespecs(DataSource):
         '''
         @override
         '''
-        return self.load(0,0,0,0).crop(0,0,1,1)[0].dtype
+        return self.load(0,0,0,0).single_tiles[0].render()[0].dtype
 
     def load_cutout(self, x0, x1, y0, y1, z, w):
         '''
@@ -86,7 +86,7 @@ class Tilespecs(DataSource):
         '''
         cutout_bounds = np.array([x0, y0, x1, y1])/(2.0 ** w)
         cutout_bounds = cutout_bounds.astype(np.uint32)-(0,0,1,1)
-        img = self.load(0,0,z,w).crop(*cutout_bounds)[0]
+        img = self.load(0,0,z,w).single_tiles[0].crop(*cutout_bounds)[0]
         return img
 
     def load(self, x, y, z, w):
