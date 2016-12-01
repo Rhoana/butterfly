@@ -37,13 +37,11 @@ class Core(object):
             'w': 0,
             'dtype': np.uint8,
             'view': 'grayscale',
-            'format': 'png'
         }
         for k,v in presets.iteritems():
             kwargs.setdefault(k,v)
 
         dtype= kwargs['dtype']
-        fmt= kwargs['format']
         view= kwargs['view']
         w= int(kwargs['w'])
 
