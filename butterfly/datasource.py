@@ -139,12 +139,12 @@ class DataSource(object):
         dimensions = dict(zip(('x','y','z'),self.get_boundaries()))
         channel = {
             'path': path,
-            'name': 'img',
+            'name': os.path.basename(path),
             'dimensions': dimensions,
-            'data-type': self.dtype
+            'data-type': str(self.dtype)
         }
         dataset = {
-            'name': os.path.basename(path),
+            'name': os.path.basename(os.path.dirname(path)),
             'channels': [channel]
         }
         return dataset
