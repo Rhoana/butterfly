@@ -47,14 +47,14 @@ DOJO.Write.prototype = {
     var withGL = Number(dtype!='uint8');
     var [w,h,d] = [size.x,size.y,size.z];
     var channel = withGL + source.channel;
-    var old = source.old.replace(/&channel=(\w+)/,'&channel='+channel);;
-    var path = 'viz.html?depth='+d+'&width='+w+'&height='+h+'&'+old;
-    cousin.children[0].href = path;
+    var path = 'viz.html?depth='+d+'&width='+w+'&height='+h;
+    var old = source.old.replace(/&channel=([^&]+)/,'&channel='+channel);;
+    cousin.children[0].href = path + '&' + old;
     if (uncle.children[0].href) {
       uncle.children[0].href += ',' + channel;
     }
     else {
-      uncle.children[0].href = path;
+      uncle.children[0].href = path +'&'+old;
     }
     cousin.children[1].innerHTML = dtype;
     uncle.children[1].innerHTML = [w,h,d].join(', ');
