@@ -1,8 +1,10 @@
-import logging
 import re
 import os
 import cv2
+import logging
 import argparse
+import numpy as np
+
 def main():
     '''
     Butterfly
@@ -10,7 +12,6 @@ def main():
     Eagon Meng and Daniel Haehn
     Lichtman Lab, 2015
     '''
-
     help = {
         'bfly': 'Host a butterfly server!',
         'folder': 'relative, absolute, or user path/of/all/experiments',
@@ -37,39 +38,91 @@ def main():
     logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),log_level=logging.DEBUG)
     c = core.Core()
 
-    def sourcer(fold):
-        c.create_datasource(fold)
-        source = c.get_datasource(fold)
-        return source.get_dataset(fold)
+    cat_name = ['root','experiments','samples','datasets','channels']
+    new_kid = lambda n: {'kids': [], 'name': n}
+    path_root = [new_kid(homename)]
+    for cat in cat_name:
+        path_root.append(new_kid('root'))
+        path_root[-1]['kids'].append(path_root[-2])
+    path_root.reverse()
 
-    def folderer(root,depth):
-        if not os.path.isdir(root) or depth <= 0: return []
-        files = [os.path.realpath(os.path.join(root,f)) for f in os.listdir(root) if not f.startswith('.')]
-        return [v for v in files if os.path.isdir(v) or v.endswith('.json')]
+    def sourcer(fold, child, pointer):
+        tmp_path = os.path.join(fold, child)
+        try: c.create_datasource(tmp_path)
+        except: return path_walk(tmp_path, pointer)
+        pointer.pop('kids', None)
+        source = c.get_datasource(tmp_path)
+        return source.get_channel(tmp_path)
 
-    def trier(depth,datasets,path):
-        try:
-            source = sourcer(path)
-            dupes = sum(1 for d in datasets if source['name'] in d['name'])
-            logger.report_event('Datasource found at '+ path)
-            source['name'] += '_'+str(dupes) if dupes else ''
-            datasets.append(source)
-        except:
-            for branch in folderer(path,depth):
-                datasets = trier(depth-1,datasets,branch)
-        return datasets
+    def path_walk(root, parent):
+        [fold,folds,files] = next(os.walk(root), [[]]*3)
+        for my_path in folds+files:
+            my_name = os.path.basename(my_path)
+            myself = new_kid(my_name)
+            parent['kids'].append(myself)
+            myself.update(sourcer(fold, my_path, myself))
+            if 'kids' in myself:
+                my_kids = myself['kids']
+                mv_key = ['kids' not in k for k in my_kids]
+                mv_val = [my_kids[ki] for ki in np.where(mv_key)[0]]
+                if not my_kids: parent['kids'].pop()
+                if any(mv_key) and not all(mv_key):
+                    new_group = new_kid(my_name)
+                    new_group['channels'] = True
+                    for mover in mv_val:
+                        new_group['kids'].append(mover)
+                        my_kids.remove(mover)
+                    my_kids.append(new_group)
+                if my_kids and all(mv_key):
+                    myself['channels'] = True
+        return {}
 
-    def starter(depth):
-        exp = {'name': homename,'samples': []}
-        sample = {'name':'/','datasets': []}
-        datasets = trier(depth+1,[],home)
-        if datasets:
-            sample['datasets'] += datasets
-            exp['samples'].append(sample)
-        return exp
+    def depth_walk(depth, parent):
+        for kid in parent['kids']:
+            return depth if 'channels' in kid else depth_walk(depth+1,kid)
 
-    if homefolder and not os.path.isfile(home):
-        settings.bfly_config.setdefault('experiments',[]).append(starter(nth))
+    def flat_walk(depth, parent, myself):
+        my_kids = [kid for kid in myself['kids']]
+        for kid in my_kids:
+            kid_depth = depth+1
+            if 'channels' not in kid:
+                cat = cat_name[(kid_depth)%len(cat_name)]
+                flat_walk(kid_depth, myself, kid)
+                kid['cat'] = cat
+            if 'channels' in kid:
+                kid['channels'] = kid['kids']
+                del kid['kids']
+        if depth+1 >= len(cat_name):
+            parent['kids']+= myself['kids']
+            parent['kids'].remove(myself)
+
+    def cat_walk(parent):
+        if 'kids' in parent:
+            for kid in parent['kids']:
+                new_cat = cat_walk(kid)
+                if new_cat:
+                    return new_cat
+                if 'kids' in kid and 'cat' in kid:
+                    kid[kid['cat']] = kid['kids']
+                    del kid['kids']
+                    del kid['cat']
+                if 'experiments' in kid:
+                    return kid
+        return False
+
+    experiments = settings.bfly_config.setdefault('experiments',[])
+    if homefolder and os.path.isdir(home):
+        path_walk(home, path_root[-1])
+        min_depth = depth_walk(0, path_root[-1])
+        print 'important: ' + str(min_depth)
+        flat_walk(0, path_root[min_depth], path_root[min_depth+1])
+        exp_tree = cat_walk(path_root[min_depth+1])
+        experiments += exp_tree['experiments']
+        import yaml
+        kapow = open('/home/harvard/kapow.yaml','w')
+        kapow.write(yaml.dump(exp_tree))
+        kapow.close()
+
     ws = webserver.WebServer(c, port)
     ws.start()
 
