@@ -130,21 +130,15 @@ class DataSource(object):
         '''
         pass
 
-    def get_dataset(self,path):
+    def get_channel(self,path):
         '''
-        # Override for >1 channels with own 'data-type'
         :param path: the root/path/to/this/data
-        :returns: dataset of meta info about self
+        :returns: channel of meta info about self
         '''
         dimensions = dict(zip(('x','y','z'),self.get_boundaries()))
-        channel = {
+        return {
             'path': path,
             'name': os.path.basename(path),
             'dimensions': dimensions,
             'data-type': str(self.dtype)
         }
-        dataset = {
-            'name': os.path.basename(os.path.dirname(path)),
-            'channels': [channel]
-        }
-        return dataset
