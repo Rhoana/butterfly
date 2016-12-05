@@ -74,22 +74,21 @@ def main():
         return parent
 
     def depth_walk(depth, parent):
-        for kid in parent['kids']:
-            return depth if 'kids' not in kid else depth_walk(depth+1,kid)
+        kids_w_kids = [k for k in parent['kids'] if 'kids' in k]
+        depth_walk_kids = [depth_walk(depth+1,k) for k in kids_w_kids]
+        if len(depth_walk_kids):
+            return np.min(depth_walk_kids)
+        parent['done'] = True
+        return depth
 
     def flat_walk(depth, parent):
         if 'kids' in parent:
-            sib_depth = depth+1
-            for sibling in parent['kids']:
-                myself = flat_walk(sib_depth, sibling)
-                if 'kids' in myself and sib_depth >= len(cat_name)-1:
-                    for kid in myself['kids']:
-                        if 'kids' not in kid:
-                            continue
-                        if 'lol' not in myself:
-                            myself['lol'] = []
-                        myself['lol'].append(kid['name'])
-                        myself['depth'] = sib_depth - len(cat_name)
+            for kid in [k for k in parent['kids']]:
+                if 'flat' in flat_walk(depth+1, kid):
+                    parent['kids'] += kid['kids']
+                    parent['kids'].remove(kid)
+                if depth >= len(cat_name) and 'done' in kid:
+                    parent['flat'] = True
         return parent
 
     def cat_walk(depth, parent):
@@ -105,11 +104,10 @@ def main():
     experiments = settings.bfly_config.setdefault('experiments',[])
     if homefolder and os.path.isdir(home):
         path_tree = path_walk(home, path_root[-1])
-        min_depth = min(depth_walk(0, path_tree), len(cat_name)-1)
+        min_depth = min(depth_walk(0, path_tree), len(cat_name)-2)
         path_tree = flat_walk(0, path_root[min_depth])
-        #exp_tree = cat_walk(0, path_root[min_depth+1])
-        #experiments += exp_tree[0]['experiments']
-        exp_tree = path_tree
+        exp_tree = cat_walk(0, path_root[min_depth+1])
+        experiments += exp_tree[0]['experiments']
         kapow = open(os.path.join(user,'bfly_indexed.yaml'),'w')
         kapow.write(yaml.dump(exp_tree))
         kapow.close()
