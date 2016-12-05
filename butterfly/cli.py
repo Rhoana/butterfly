@@ -79,21 +79,17 @@ def main():
 
     def flat_walk(depth, parent):
         if 'kids' in parent:
-            flat = False
-            cat_kids = []
-            kid_depth = depth+1
-            for kid in parent['kids']:
-                myself = flat_walk(kid_depth, kid)
-                if 'kids' in myself:
-                    cat_kids += myself['kids']
-                if 'flat' in myself:
-                    #parent['kids'].remove(myself)
-                    flat = True
-            #if cat_kids and flat:
-                #parent['kids'] += cat_kids
-            if not flat and cat_kids and kid_depth >= len(cat_name):
-                parent['flat'] = True
-                parent['fat'] = [k['name'] for k in cat_kids]
+            sib_depth = depth+1
+            for sibling in parent['kids']:
+                myself = flat_walk(sib_depth, sibling)
+                if 'kids' in myself and sib_depth >= len(cat_name):
+                    for kid in myself['kids']:
+                        if 'kids' not in kid:
+                            continue
+                        if 'lol' not in myself:
+                            myself['lol'] = []
+                        myself['lol'].append(kid['name'])
+                        myself['depth'] = sib_depth - len(cat_name)
         return parent
 
     def cat_walk(depth, parent):
