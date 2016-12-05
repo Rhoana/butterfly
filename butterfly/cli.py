@@ -87,12 +87,13 @@ def main():
                 if 'kids' in myself:
                     cat_kids += myself['kids']
                 if 'flat' in myself:
-                    parent['kids'].remove(myself)
+                    #parent['kids'].remove(myself)
                     flat = True
-            if flat:
-                parent['kids'] += cat_kids
-            elif cat_kids and kid_depth >= len(cat_name):
+            #if cat_kids and flat:
+                #parent['kids'] += cat_kids
+            if not flat and cat_kids and kid_depth >= len(cat_name):
                 parent['flat'] = True
+                parent['fat'] = [k['name'] for k in cat_kids]
         return parent
 
     def cat_walk(depth, parent):
@@ -110,8 +111,9 @@ def main():
         path_tree = path_walk(home, path_root[-1])
         min_depth = min(depth_walk(0, path_tree), len(cat_name)-1)
         path_tree = flat_walk(0, path_root[min_depth])
-        exp_tree = cat_walk(0, path_root[min_depth])
-        experiments += exp_tree[0]['experiments']
+        #exp_tree = cat_walk(0, path_root[min_depth+1])
+        #experiments += exp_tree[0]['experiments']
+        exp_tree = path_tree
         kapow = open(os.path.join(user,'bfly_indexed.yaml'),'w')
         kapow.write(yaml.dump(exp_tree))
         kapow.close()
