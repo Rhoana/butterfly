@@ -106,7 +106,7 @@ def main():
     experiments = settings.bfly_config.setdefault('experiments',[])
     if homefolder and os.path.isdir(home):
         path_tree = path_walk(home, path_root[-1])
-        min_depth = min(depth_walk(0, path_tree), len(cat_name)-2)
+        min_depth = min(depth_walk(0, path_tree), len(cat_name)-1)
         path_tree = flat_walk(0, path_root[min_depth])
         exp_tree = cat_walk(0, path_root[min_depth])
         experiments += exp_tree[0]['experiments']
