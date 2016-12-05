@@ -25,6 +25,7 @@ def main():
     parser.add_argument('-n','--nth',type=int, metavar='nth', default = 2, help= help['depth'])
     [homefolder,port,nth] = [parser.parse_args().exp, parser.parse_args().port, parser.parse_args().nth]
     home = os.path.realpath(os.path.expanduser(homefolder if homefolder else '~'))
+    user = os.path.realpath(os.path.expanduser('~'))
     homename = os.path.basename(home)
 
     if os.path.isfile(home):
@@ -119,7 +120,7 @@ def main():
         exp_tree = cat_walk(path_root[min_depth+1])
         experiments += exp_tree['experiments']
         import yaml
-        kapow = open('/home/harvard/kapow.yaml','w')
+        kapow = open(os.path.join(user,'bfly_indexed.yaml'),'w')
         kapow.write(yaml.dump(exp_tree))
         kapow.close()
 
