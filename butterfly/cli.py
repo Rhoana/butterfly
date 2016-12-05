@@ -82,7 +82,7 @@ def main():
             sib_depth = depth+1
             for sibling in parent['kids']:
                 myself = flat_walk(sib_depth, sibling)
-                if 'kids' in myself and sib_depth >= len(cat_name):
+                if 'kids' in myself and sib_depth >= len(cat_name)-1:
                     for kid in myself['kids']:
                         if 'kids' not in kid:
                             continue
