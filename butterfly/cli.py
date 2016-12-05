@@ -1,6 +1,7 @@
 import re
 import os
 import cv2
+import yaml
 import logging
 import argparse
 import numpy as np
@@ -25,6 +26,7 @@ def main():
     parser.add_argument('-n','--nth',type=int, metavar='nth', default = 2, help= help['depth'])
     [homefolder,port,nth] = [parser.parse_args().exp, parser.parse_args().port, parser.parse_args().nth]
     home = os.path.realpath(os.path.expanduser(homefolder if homefolder else '~'))
+    user = os.path.realpath(os.path.expanduser('~'))
     homename = os.path.basename(home)
 
     if os.path.isfile(home):
@@ -110,7 +112,9 @@ def main():
         path_tree = flat_walk(0, path_root[min_depth])
         exp_tree = cat_walk(0, path_root[min_depth])
         experiments += exp_tree[0]['experiments']
-
+        kapow = open(os.path.join(user,'bfly_indexed.yaml'),'w')
+        kapow.write(yaml.dump(exp_tree))
+        kapow.close()
     ws = webserver.WebServer(c, port)
     ws.start()
 
