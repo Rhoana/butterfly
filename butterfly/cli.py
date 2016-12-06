@@ -1,6 +1,7 @@
 import re
 import os
 import cv2
+import yaml
 import logging
 import argparse
 import numpy as np
@@ -47,83 +48,69 @@ def main():
         path_root[-1]['kids'].append(path_root[-2])
     path_root.reverse()
 
-    def sourcer(fold, child, pointer):
-        tmp_path = os.path.join(fold, child)
+    def sourcer(tmp_path, my_path):
         try: c.create_datasource(tmp_path)
-        except: return path_walk(tmp_path, pointer)
-        pointer.pop('kids', None)
+        except: return new_kid(my_path)
         source = c.get_datasource(tmp_path)
         return source.get_channel(tmp_path)
 
     def path_walk(root, parent):
         [fold,folds,files] = next(os.walk(root), [[]]*3)
         for my_path in folds+files:
-            my_name = os.path.basename(my_path)
-            myself = new_kid(my_name)
+            tmp_path = os.path.join(fold, my_path)
+            myself = sourcer(tmp_path, my_path)
             parent['kids'].append(myself)
-            myself.update(sourcer(fold, my_path, myself))
             if 'kids' in myself:
-                my_kids = myself['kids']
-                mv_key = ['kids' not in k for k in my_kids]
-                mv_val = [my_kids[ki] for ki in np.where(mv_key)[0]]
-                if not my_kids: parent['kids'].pop()
-                if any(mv_key) and not all(mv_key):
-                    new_group = new_kid(my_name)
-                    new_group['channels'] = True
-                    for mover in mv_val:
-                        new_group['kids'].append(mover)
-                        my_kids.remove(mover)
-                    my_kids.append(new_group)
-                if my_kids and all(mv_key):
-                    myself['channels'] = True
-        return {}
+                myself = path_walk(tmp_path, myself)
+                root_kid = new_kid(my_path)
+                root_kid['kids'] = [k for k in myself['kids'] if 'kids' not in k]
+                myself['kids'] = [k for k in myself['kids'] if 'kids' in k]
+                if root_kid['kids']:
+                    myself['kids'].append(root_kid)
+                if len(myself['kids']) == 1:
+                    myself['kids'] = myself['kids'][0]['kids']
+                if not myself['kids']:
+                    parent['kids'].pop()
+        return parent
 
     def depth_walk(depth, parent):
-        for kid in parent['kids']:
-            return depth if 'channels' in kid else depth_walk(depth+1,kid)
+        kids_w_kids = [k for k in parent['kids'] if 'kids' in k]
+        depth_walk_kids = [depth_walk(depth+1,k) for k in kids_w_kids]
+        if len(depth_walk_kids):
+            return np.min(depth_walk_kids)
+        parent['done'] = True
+        return depth
 
-    def flat_walk(depth, parent, myself):
-        my_kids = [kid for kid in myself['kids']]
-        for kid in my_kids:
-            kid_depth = depth+1
-            if 'channels' not in kid:
-                cat = cat_name[(kid_depth)%len(cat_name)]
-                flat_walk(kid_depth, myself, kid)
-                kid['cat'] = cat
-            if 'channels' in kid:
-                kid['channels'] = kid['kids']
-                del kid['kids']
-        if depth+1 >= len(cat_name):
-            parent['kids']+= myself['kids']
-            parent['kids'].remove(myself)
+    def flat_walk(depth, parent):
+        if 'kids' in parent:
+            for kid in [k for k in parent['kids']]:
+                if 'flat' in flat_walk(depth+1, kid):
+                    parent['kids'] += kid['kids']
+                    parent['kids'].remove(kid)
+                if depth >= len(cat_name) and 'done' in kid:
+                    parent['flat'] = True
+        return parent
 
-    def cat_walk(parent):
+    def cat_walk(depth, parent):
         if 'kids' in parent:
             for kid in parent['kids']:
-                new_cat = cat_walk(kid)
-                if new_cat:
-                    return new_cat
-                if 'kids' in kid and 'cat' in kid:
-                    kid[kid['cat']] = kid['kids']
-                    del kid['kids']
-                    del kid['cat']
-                if 'experiments' in kid:
-                    return kid
-        return False
+                cat_walk(depth+1, kid)
+            cat = cat_name[(depth)%len(cat_name)]
+            parent[cat] = parent['kids']
+            del parent['kids']
+            return parent[cat]
+        return parent
 
     experiments = settings.bfly_config.setdefault('experiments',[])
     if homefolder and os.path.isdir(home):
-        path_walk(home, path_root[-1])
-        min_depth = min(depth_walk(0, path_root[-1]),len(cat_name)-2)
-        print 'important: ' + str(min_depth)
-        flat_walk(0, path_root[min_depth], path_root[min_depth+1])
-        exp_tree = cat_walk(path_root[min_depth+1])
-        experiments += exp_tree['experiments']
-        import yaml
+        path_tree = path_walk(home, path_root[-1])
+        min_depth = min(depth_walk(0, path_tree), len(cat_name)-2)
+        path_tree = flat_walk(0, path_root[min_depth])
+        exp_tree = cat_walk(0, path_root[min_depth+1])
+        experiments += exp_tree[0]['experiments']
         kapow = open(os.path.join(user,'bfly_indexed.yaml'),'w')
         kapow.write(yaml.dump(exp_tree))
         kapow.close()
-
     ws = webserver.WebServer(c, port)
     ws.start()
 
