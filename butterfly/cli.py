@@ -16,17 +16,18 @@ def main():
     help = {
         'bfly': 'Host a butterfly server!',
         'folder': 'relative, absolute, or user path/of/all/experiments',
-        'port': 'port >1024 for hosting this server',
-        'depth': 'search nth nested subfolders of exp path (default 2)'
+        'save': 'path of output yaml file indexing experiments',
+        'port': 'port >1024 for hosting this server'
     }
 
     parser = argparse.ArgumentParser(description=help['bfly'])
     parser.add_argument('port', type=int, nargs='?', help=help['port'])
     parser.add_argument('-e','--exp', metavar='exp', help= help['folder'])
-    parser.add_argument('-n','--nth',type=int, metavar='nth', default = 2, help= help['depth'])
-    [homefolder,port,nth] = [parser.parse_args().exp, parser.parse_args().port, parser.parse_args().nth]
+    parser.add_argument('-o','--out', metavar='out', help= help['save'])
+    parsed = parser.parse_args()
+    [homefolder,port,outyaml] = [getattr(parsed,s) for s in ['exp','port','out']]
     home = os.path.realpath(os.path.expanduser(homefolder if homefolder else '~'))
-    user = os.path.realpath(os.path.expanduser('~'))
+    saveyaml = os.path.realpath(os.path.expanduser(outyaml if outyaml else '~/out.yaml'))
     homename = os.path.basename(home)
 
     if os.path.isfile(home):
@@ -108,15 +109,16 @@ def main():
         path_tree = flat_walk(0, path_root[min_depth])
         exp_tree = cat_walk(0, path_root[min_depth+1])
         experiments += exp_tree[0]['experiments']
-        indexed = open(os.path.join(user,'bfly_indexed.yaml'),'w')
-        indexed.write(yaml.dump({
-            'bfly': {
-                'allowed-paths': [home],
-                'datasource': ['mojo','tilespec','hdf5'],
-                'experiments': experiments
-            }
-        }))
-        indexed.close()
+        if outyaml:
+            indexed = open(saveyaml,'w')
+            indexed.write(yaml.dump({
+                'bfly': {
+                    'allowed-paths': [home],
+                    'datasource': ['mojo','tilespec','hdf5'],
+                    'experiments': experiments
+                }
+            }))
+            indexed.close()
     ws = webserver.WebServer(c, port)
     ws.start()
 
