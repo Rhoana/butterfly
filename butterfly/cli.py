@@ -108,9 +108,15 @@ def main():
         path_tree = flat_walk(0, path_root[min_depth])
         exp_tree = cat_walk(0, path_root[min_depth+1])
         experiments += exp_tree[0]['experiments']
-        kapow = open(os.path.join(user,'bfly_indexed.yaml'),'w')
-        kapow.write(yaml.dump(exp_tree))
-        kapow.close()
+        indexed = open(os.path.join(user,'bfly_indexed.yaml'),'w')
+        indexed.write(yaml.dump({
+            'bfly': {
+                'allowed-paths': [home],
+                'datasource': ['mojo','tilespec','hdf5'],
+                'experiments': experiments
+            }
+        }))
+        indexed.close()
     ws = webserver.WebServer(c, port)
     ws.start()
 
