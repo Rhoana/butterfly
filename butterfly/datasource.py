@@ -41,8 +41,8 @@ class DataSource(object):
         top_left = np.floor(x0y0 / blockshape).astype(int)
         lo_right = np.ceil(x1y1 / blockshape).astype(int)
         origin = top_left * blockshape
-        [left,top] = x0y0 - origin
-        [right,down] = x1y1 - origin
+        [left,top] = (x0y0 - origin).astype(int)
+        [right,down] = (x1y1 - origin).astype(int)
         gridshape = lo_right-top_left
         grid = np.indices(gridshape).T
 
