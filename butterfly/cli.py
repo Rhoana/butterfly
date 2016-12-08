@@ -115,7 +115,8 @@ def main():
                 'bfly': {
                     'allowed-paths': [home],
                     'datasource': ['mojo','tilespec','hdf5'],
-                    'experiments': experiments
+                    'experiments': experiments,
+                    'port': port
                 }
             }))
             indexed.close()
