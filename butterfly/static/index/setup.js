@@ -1,4 +1,4 @@
-log = console.log.bind(window.console);
+//log = console.log.bind(window.console);
 //-----------------------------------
 //
 // DOJO.Setup: request data from server
