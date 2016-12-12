@@ -79,7 +79,7 @@ class Tilespecs(DataSource):
         #    section = self.ts[z][0].section
         #    return section.imread(x0, y0, x1, y1, w)
         return self.load_tilespec_cutout(x0, x1, y0, y1, z, w)
-    
+
     def load_tilespec_cutout(self, x0, x1, y0, y1, z, w):
         '''Load a cutout from tilespecs'''
         if w > 0:
@@ -93,8 +93,6 @@ class Tilespecs(DataSource):
             model = AffineModel(m=np.eye(3) * 2.0 ** w)
             self.layer_renderer[z].add_transformation(model)
         return img
-        
-        
 
     def load(self, x, y, z, w, segmentation=False):
         '''

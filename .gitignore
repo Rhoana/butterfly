@@ -53,6 +53,10 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+# Remote debugging
+butterfly/debug.py
+*.swp
+
 # PyBuilder
 target/
 .idea
