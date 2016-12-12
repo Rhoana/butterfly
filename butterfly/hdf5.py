@@ -127,13 +127,6 @@ class HDF5DataSource(DataSource):
             ds = fd[dataset_path]
             return dataset[z, y:y+by:(2 ** w), x:x+bx:(2 ** w)]
 
-    def seg_to_color(self, slice):
-        colors = np.zeros(slice.shape+(3,),dtype=np.uint8)
-        colors[:,:,0] = np.mod(107*slice[:,:],700).astype(np.uint8)
-        colors[:,:,1] = np.mod(509*slice[:,:],900).astype(np.uint8)
-        colors[:,:,2] = np.mod(200*slice[:,:],777).astype(np.uint8)
-        return colors
-
     def get_boundaries(self):
         with h5py.File(self._dataset[K_FILENAME], "r") as fd:
             dataset = fd[self._dataset[K_DATASET_PATH]]
