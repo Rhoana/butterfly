@@ -10,97 +10,122 @@ import settings
 
 from .datasource import DataSource
 
-'''The JSON dictionary key for layer channel type'''
-K_CHANNEL = 'channel'
-
 '''The JSON dictionary key for the filename (including path) of the HDF5 file'''
 K_FILENAME = 'filename'
 
 '''The JSON dictionary key of the path to the dataset inside the HDF5 file'''
 K_DATASET_PATH = 'dataset-path'
 
-'''The default filenames data if no JSON file'''
-K_PRESET_FILENAMES = ['image.h5','segmentation.h5','synapse.h5']
+'''The JSON dictionary key for the Z offset of the volume'''
+K_Z_OFFSET = 'z-offset'
 
-'''The default channels by array index if not in JSON file'''
-K_PRESET_CHANNELS = ['img','seg','syn']
+K_DEPTH = 'depth'
+
+K_DTYPE = 'dtype'
 
 class HDF5DataSource(DataSource):
     '''An HDF5 data source
-    
+
     An HDF5 data source consists of a .json file that contains a dictionary
-    with the following keys:
-    
+    or a list of dictionaries with the following keys:
+
     filename: the name of the HDF5 file
     dataset-path: the path inside the HDF5 file to the dataset
-    
+    z-offset (optional): the z offset of the volume (default = 0)
+
     The dataset may be sparse (with zero for areas w/o data) so the coordinate
     system is implicit, starting at 0, 0, 0.
     '''
-    
+
     def __init__(self, core, datapath, dtype=np.uint8):
-        layers = self.defaultLayers(datapath)
-        if not layers:
+        self._dataset = self.loadFolder(datapath)
+        if not self._dataset:
             warn = "HDF5 path %s must point to valid h5" % datapath
             raise IndexError(warn)
-        self.channels = self.storeChannels(layers)
-        self.kinds = list(self.channels.keys())
         super(HDF5DataSource, self).__init__(core, datapath)
 
-    def defaultLayers(self,path):
-        layers = []
+    def loadFolder(self,path):
         if path.endswith('.json'):
-            layers = json.load(open(path, "r"))
-            if type(layers) is not list:
-                layers = [layers]
-        elif os.path.isdir(path):
-            h5files = [i for i in os.listdir(path) if i.endswith('.h5')]
-            if h5files:
-                for name, kind in zip(K_PRESET_FILENAMES,K_PRESET_CHANNELS):
-                    if name in h5files:
-                        fullName = os.path.join(path,name)
-                        with h5py.File(fullName, "r") as fd:
-                            layer = dict([(K_FILENAME, fullName)])
-                            layer[K_DATASET_PATH] = fd.keys()[0]
-                            layer[K_CHANNEL] = kind
-                            layers.append(layer)
-        return layers
-
-    def kindGuess(self,id):
-        return K_PRESET_CHANNELS[int(id)%len(K_PRESET_CHANNELS)]
-
-    def storeChannels(self,layers):
-        channels = {}
-        for lid,layer in enumerate(layers):
-            if K_CHANNEL not in layer:
-                layer[K_CHANNEL] = self.kindGuess(lid)
-            channels[layer[K_CHANNEL]] = layer
-        return channels
+            result = json.load(open(path, "r"))
+            if isinstance(result, dict):
+                result = [result]
+            for d in result:
+                if K_Z_OFFSET not in d:
+                    d[K_Z_OFFSET] = 0
+                with h5py.File(d[K_FILENAME]) as fd:
+                    d[K_DEPTH] = fd[d[K_DATASET_PATH]].shape[0]
+                    self._dtype = fd[d[K_DATASET_PATH]].dtype
+            return result
+                        
+        elif path.endswith('.h5'):
+            with h5py.File(path, "r") as fd:
+                key0 = fd.keys()[0]
+                self._dtype = fd[key0].dtype
+                return {
+                    K_FILENAME : path,
+                    K_DATASET_PATH : key0,
+                    K_DEPTH: fd[key0].shape[0],
+                    K_Z_OFFSET: 0,
+                }
+        else:
+            return False
 
     def index(self):
-        firstChannel = self.channels[self.kinds[0]]
-        with h5py.File(firstChannel[K_FILENAME], "r") as fd:
-            self.blocksize = fd[firstChannel[K_DATASET_PATH]].shape[-1:0:-1]
-        return
-    
-    def load_cutout(self, x0, x1, y0, y1, z, w):
-        channelKind = self.kindGuess(0)
-        if channelKind not in self.kinds:
-            return 0
-        channel = self.channels[channelKind]
-        with h5py.File(channel[K_FILENAME], "r") as fd:
-            ds = fd[channel[K_DATASET_PATH]]
-            return ds[z, y0:y1:(2 ** w), x0:x1:(2 ** w)]
+        '''
+        @override
+        '''
+        with h5py.File(self._dataset[0][K_FILENAME], "r") as fd:
+            dataset = fd[self._dataset[0][K_DATASET_PATH]]
+            self.blocksize = dataset.shape[1:][::-1]
 
-    def load(self, x, y, z, w, segmentation):
-        channelKind = self.kindGuess(segmentation)
-        if channelKind not in self.kinds:
-            return 0
-        channel = self.channels[channelKind]
-        with h5py.File(channel[K_FILENAME], "r") as fd:
-            (bx,by) = self.blocksize
-            ds = fd[channel[K_DATASET_PATH]]
-            return ds[z, y:y+by:(2 ** w), x:x+bx:(2 ** w)]
+        super(HDF5DataSource, self).index()
+    
+    def get_plane_info(self, z):
+        '''Get the filename, dataset path and z-index for a given plane
+        
+        :param z: plane #
+        :returns: a tuple of HDF5 filename, dataset name and z index or 
+                  (None, None, None) if no HDF5 file is within range
+        '''
+        for d in self._dataset:
+            z_offset = d[K_Z_OFFSET]
+            depth = d[K_DEPTH]
+            if z_offset <= z and z_offset+depth > z:
+                return d[K_FILENAME], d[K_DATASET_PATH], z-z_offset
+        return (None, None, None)
+        
+    def load_cutout(self, x0, x1, y0, y1, z, w):
+        '''
+        @override
+        '''
+        filename, dataset_path, z_idx = self.get_plane_info(z)
+        if filename is None:
+            return np.zeros(((y1 - y0) / (2 ** w),
+                             (x1-x0) / (2**w)), dtype=self._dtype)
+            
+        with h5py.File(filename, "r") as fd:
+            ds = fd[dataset_path]
+            if ds.shape[1] < y1 or ds.shape[2] < x1:
+                result = np.zeros(((y1 - y0) / (2 ** w),
+                                   (x1-x0) / (2**w)), dtype=self._dtype)
+                cutout = ds[z_idx, y0:y1:(2 ** w), x0:x1:(2 ** w)]
+                result[:cutout.shape[0], :cutout.shape[1]] = cutout
+                return result
+            return ds[z_idx, y0:y1:(2 ** w), x0:x1:(2 ** w)]
+
+    def load(self, x, y, z, w, segmentation=False):
+        '''
+        @override
+        '''
+        (bx,by) = self.blocksize
+        filename, dataset_path, z_idx = self.get_plane_info(z)
+        if filename is None:
+            return np.zeros((by / (2 ** w),
+                             bx / (2**w)), dtype=self._dtype)
+            
+        with h5py.File(filename, "r") as fd:
+            ds = fd[dataset_path]
+            return dataset[z, y:y+by:(2 ** w), x:x+bx:(2 ** w)]
 
     def seg_to_color(self, slice):
         colors = np.zeros(slice.shape+(3,),dtype=np.uint8)
@@ -108,21 +133,9 @@ class HDF5DataSource(DataSource):
         colors[:,:,1] = np.mod(509*slice[:,:],900).astype(np.uint8)
         colors[:,:,2] = np.mod(200*slice[:,:],777).astype(np.uint8)
         return colors
-    
-    def get_boundaries(self):
-        firstChannel = self.channels[self.kinds[0]]
-        with h5py.File(firstChannel[K_FILENAME], "r") as fd:
-            return fd[firstChannel[K_DATASET_PATH]].shape[::-1]
 
-    def get_dataset(self,path):
-        dataset = {'name':os.path.basename(path),'channels':[]}
-        dimensions = dict(zip(('x','y','z'),self.get_boundaries()))
-        for kind,channel in self.channels.iteritems():
-            innerPath = channel[K_DATASET_PATH]
-            base = os.path.splitext(os.path.basename(channel[K_FILENAME]))[0]
-            base += ' '+os.path.basename(innerPath)
-            subset = {'path':path,'dimensions':dimensions,'name':base}
-            with h5py.File(channel[K_FILENAME], "r") as fd:
-                subset['data-type'] = fd[innerPath].dtype.name
-            dataset['channels'].append(subset)
-        return dataset
+    def get_boundaries(self):
+        with h5py.File(self._dataset[K_FILENAME], "r") as fd:
+            dataset = fd[self._dataset[K_DATASET_PATH]]
+            self.blocksize = dataset.shape[::-1]
+        return self.blocksize
