@@ -10,9 +10,6 @@ import settings
 
 from .datasource import DataSource
 
-'''The JSON dictionary key for layer channel type'''
-K_CHANNEL = 'channel'
-
 '''The JSON dictionary key for the filename (including path) of the HDF5 file'''
 K_FILENAME = 'filename'
 
@@ -48,7 +45,6 @@ class HDF5DataSource(DataSource):
                 return {
                     K_FILENAME : path,
                     K_DATASET_PATH : key0,
-                    K_CHANNEL : fd[key0].dtype
                 }
         else:
             return False
