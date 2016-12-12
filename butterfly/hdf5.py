@@ -78,6 +78,7 @@ class HDF5DataSource(DataSource):
                 cutout = ds[z, y0:y1:(2 ** w), x0:x1:(2 ** w)]
                 result[:cutout.shape[0], :cutout.shape[1]] = cutout
                 return result
+            return ds[z, y0:y1:(2 ** w), x0:x1:(2 ** w)]
 
     def load(self, x, y, z, w, segmentation=False):
         '''
