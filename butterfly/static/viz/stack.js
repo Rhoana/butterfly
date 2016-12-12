@@ -15,6 +15,7 @@ DOJO.Stack = function(src_terms){
     this.preset = channels.split('').map(this.layerer);
     this.nLayers = this.preset.length;
     this.depth = src_terms.depth;
+    this.z = src_terms.z || this.z;
     // Prepare the sources
     protoSource = new DOJO.Source(src_terms);
     this.source = this.sourcer(protoSource);
@@ -26,7 +27,7 @@ DOJO.Stack.prototype = {
     vp: null,
     maxBuff: 3,
     level: 0,
-    now: 0,
+    z: 0,
     flip: {
       up: 'down',
       down: 'up'
@@ -59,7 +60,7 @@ DOJO.Stack.prototype = {
         var sources = [];
         for (var preset of this.preset){
           for (var level = 0; level < this.depth; level++){
-            var alp = Number(level == this.now);
+            var alp = Number(level == this.z);
             var src = {z:level,minLevel:this.level};
             sources.push(this.make(proto,preset,src,alp));
           }
@@ -77,7 +78,7 @@ DOJO.Stack.prototype = {
     findIndex: function(zb){
         var found = []
         for (var layi in this.preset){
-            found.push(layi*this.depth + this.now + zb);
+            found.push(layi*this.depth + this.z + zb);
         }
         return found;
     },
@@ -120,7 +121,7 @@ DOJO.Stack.prototype = {
         this.findLayer(this.sign[sign]*buffer).map(this.setPreload,value);
     },
     range: function(buffer,sign){
-        var z = this.now + buffer*this.sign[sign];
+        var z = this.z + buffer*this.sign[sign];
         return z < this.depth && z >= 0;
     },
     clamp: function(buffer,sign){
@@ -160,7 +161,7 @@ DOJO.Stack.prototype = {
         return newBuff;
     },
     log: function(newBuff){
-      log('now:' + this.now);
+      log('z:' + this.z);
       log('buffer: [' + newBuff.down + ':' + newBuff.up+']');
       for (var zb = -newBuff.down; zb <= newBuff.up; zb++){
         var tab = '   ';
