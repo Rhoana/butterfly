@@ -34,15 +34,15 @@ class DataSource(object):
         '''
         Load a cutout from a plane
         '''
-        scale = 2 ** w
+        scale = float(2 ** w)
         blockshape = np.array(self.blocksize)
         x0y0 = np.array([x0,y0]) // scale
         x1y1 = np.array([x1,y1]) // scale
-        top_left = x0y0 // blockshape
-        lo_right = x1y1 // blockshape
+        top_left = np.floor(x0y0 / blockshape).astype(int)
+        lo_right = np.ceil(x1y1 / blockshape).astype(int)
         origin = top_left * blockshape
-        [left,top] = x0y0 - origin
-        [right,down] = x1y1 - origin
+        [left,top] = (x0y0 - origin).astype(int)
+        [right,down] = (x1y1 - origin).astype(int)
         gridshape = lo_right-top_left
         grid = np.indices(gridshape).T
 
