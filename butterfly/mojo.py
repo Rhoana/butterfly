@@ -1,8 +1,7 @@
+import os
 import glob
 import h5py
 import numpy as np
-from os import path
-from os import listdir
 from rh_logger import logger
 from datasource import DataSource
 
@@ -12,7 +11,7 @@ class Mojo(DataSource):
         '''
         @override
         '''
-        if not path.isdir(datapath) or 'tiles' not in listdir(datapath):
+        if not os.path.isdir(datapath) or 'tiles' not in os.listdir(datapath):
             raise IndexError("Datapath %s is not a Mojo data path" % datapath)
         super(Mojo, self).__init__(core, datapath)
 
@@ -23,23 +22,23 @@ class Mojo(DataSource):
         folderpaths = 'z=%08d'
 
         # Max zoom level
-        base_path = path.join(self._datapath, 'tiles')
-        zoom_folders = path.join(base_path, 'w=*')
+        base_path = os.path.join(self._datapath, 'tiles')
+        zoom_folders = os.path.join(base_path, 'w=*')
         self.max_zoom = len(glob.glob(zoom_folders)) - 1
 
         # Try first image to get extension
-        tmp_file = path.join(
+        tmp_file = os.path.join(
             base_path,
             'w=00000000',
             'z=00000000',
             'y=00000000,x=00000000.*')
-        img_ext = path.splitext(glob.glob(tmp_file)[0])[1]
+        img_ext = os.path.splitext(glob.glob(tmp_file)[0])[1]
         filename = 'y=%(y)08d,x=%(x)08d' + img_ext
 
         # Tile and slice index ranges
-        slice_folders = glob.glob(path.join(base_path, 'w=00000000', 'z=*'))
-        y_tiles = path.join(slice_folders[0], 'y=*,x=00000000' + img_ext)
-        x_tiles = path.join(slice_folders[0], 'y=00000000,x=*' + img_ext)
+        slice_folders = glob.glob(os.path.join(base_path, 'w=00000000', 'z=*'))
+        y_tiles = os.path.join(slice_folders[0], 'y=*,x=00000000' + img_ext)
+        x_tiles = os.path.join(slice_folders[0], 'y=00000000,x=*' + img_ext)
         num_slices = len(slice_folders)
         z_ind = range(num_slices)
         y_ind = range(len(glob.glob(y_tiles)))
@@ -61,7 +60,7 @@ class Mojo(DataSource):
         self._filename = filename
         self._indices = indices
 
-    def load(self, x, y, z, w):
+    def load(self, x, y, z, w, segmentation=False):
         '''
         @override
         '''
@@ -74,7 +73,7 @@ class Mojo(DataSource):
         logger.report_event("Mojo loading " + cur_filename)
 
         if w <= self.max_zoom:
-            cur_path = path.join(
+            cur_path = os.path.join(
                 self._datapath,
                 'tiles',
                 'w=%08d' % w,
@@ -85,14 +84,21 @@ class Mojo(DataSource):
             # .load() to resize
             return super(Mojo, self).load(cur_path, 0)
 
-        cur_path = path.join(
+        cur_path = os.path.join(
             self._datapath,
             'tiles',
             'w=00000000',
             self._folderpaths %
             self._indices[2][z],
             cur_filename)
-        return super(Mojo, self).load(cur_path, w)
+        return super(Mojo, self).load(cur_path, w, segmentation)
+
+    def seg_to_color(self, slice):
+        colors = np.zeros(slice.shape+(3,),dtype=np.uint8)
+        colors[:,:,0] = np.mod(107*slice[:,:],700).astype(np.uint8)
+        colors[:,:,1] = np.mod(509*slice[:,:],900).astype(np.uint8)
+        colors[:,:,2] = np.mod(200*slice[:,:],777).astype(np.uint8)
+        return colors
 
     def get_boundaries(self):
         # super(Mojo, self).get_boundaries()
