@@ -55,6 +55,7 @@ docs/_build/
 
 # Remote debugging
 butterfly/debug.py
+.*DS_STORE
 *.swp
 
 # PyBuilder
