@@ -22,7 +22,8 @@ DOJO.Input = function(scope) {
     this.stack = scope.stack;
     this.realT = new DOJO.RealTime(scope);
     this.realT.init(this).then(this.init.bind(this));
-    this.findings[0].childNodes[1].innerHTML = this.stack.now;
+    this.findings[0].childNodes[0].innerHTML = this.stack.z;
+    this.findings[0].childNodes[1].innerHTML = '/'+(this.stack.depth-1);
 }
 
 DOJO.Input.prototype = {
@@ -56,13 +57,14 @@ DOJO.Input.prototype = {
             window.location = 'index.html';
             return;
         }
-        var level = this.stack.level;
-        var check = function(slice){
-            if (slice && slice.lastDrawn.length) {
-                return slice.lastDrawn[0].level >= level;
-            }
+        if (!this.stack.clamp(1,event)){
+            return;
         }
-        var slices = this.stack.check(event);
+        var check = function(slice){
+            return slice && slice.lastDrawn.length;
+        }
+        var sign = this.stack.sign[event];
+        var slices = this.stack.findLayer(sign);
         if (slices && slices.every(check)) {
             return this[event](this.stack);
         }
@@ -70,13 +72,15 @@ DOJO.Input.prototype = {
     up: function(stack){
         stack.showLayer(1);
         stack.hideLayer(0);
-        stack.now ++;
-        this.findings[0].childNodes[1].innerHTML = stack.now;
+        stack.z ++;
+        stack.zBuff = stack.updateBuff(stack.zBuff,'up');
+        this.findings[0].childNodes[0].innerHTML = stack.z;
     },
     down: function(stack){
         stack.showLayer(-1);
         stack.hideLayer(0);
-        stack.now --;
-        this.findings[0].childNodes[1].innerHTML = stack.now;
+        stack.z --;
+        stack.zBuff = stack.updateBuff(stack.zBuff,'down');
+        this.findings[0].childNodes[0].innerHTML = stack.z;
     }
 }

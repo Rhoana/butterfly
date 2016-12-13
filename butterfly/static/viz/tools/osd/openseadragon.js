@@ -1,6 +1,6 @@
 //! openseadragon 2.2.1
-//! Built on 2016-11-02
-//! Git commit: v2.2.1-102-c5d4e9f
+//! Built on 2016-11-04
+//! Git commit: v2.2.1-113-fef680a
 //! http://openseadragon.github.io
 //! License: http://openseadragon.github.io/license/
 
@@ -191,7 +191,11 @@
   *     If 0, adjusts to fit viewer.
   *
   * @property {Number} [opacity=1]
-  *     Default opacity of the tiled images (1=opaque, 0=transparent)
+  *     Default proportional opacity of the tiled images (1=opaque, 0=hidden)
+  *     Hidden images do not draw and only load when preloading is allowed.
+  *
+  * @property {Boolean} [preload=false]
+  *     Default switch for loading hidden images (true loads, false blocks)
   *
   * @property {String} [compositeOperation=null]
   *     Valid values are 'source-over', 'source-atop', 'source-in', 'source-out',
@@ -1087,6 +1091,7 @@ function OpenSeadragon( options ){
 
             // APPEARANCE
             opacity:                    1,
+            preload:                    false,
             compositeOperation:         null,
             placeholderFillStyle:       null,
 
@@ -8058,7 +8063,8 @@ $.extend( $.Viewer.prototype, $.EventSource.prototype, $.ControlDock.prototype, 
      * @param {OpenSeadragon.Rect} [options.clip] - An area, in image pixels, to clip to
      * (portions of the image outside of this area will not be visible). Only works on
      * browsers that support the HTML5 canvas.
-     * @param {Number} [options.opacity] Opacity the tiled image should be drawn at by default.
+     * @param {Number} [options.opacity=1] Default proportional opacity of the tiled images (1=opaque, 0=hidden)
+     * @param {Boolean} [options.preload=false]  Default switch for loading hidden images (true loads, false blocks)
      * @param {Number} [options.degrees=0] Initial rotation of the tiled image around
      * its top left corner in degrees.
      * @param {String} [options.compositeOperation] How the image is composited onto other images.
@@ -8095,6 +8101,9 @@ $.extend( $.Viewer.prototype, $.EventSource.prototype, $.ControlDock.prototype, 
         }
         if (options.opacity === undefined) {
             options.opacity = this.opacity;
+        }
+        if (options.preload === undefined) {
+            options.preload = this.preload;
         }
         if (options.compositeOperation === undefined) {
             options.compositeOperation = this.compositeOperation;
@@ -8202,6 +8211,7 @@ $.extend( $.Viewer.prototype, $.EventSource.prototype, $.ControlDock.prototype, 
                     clip: queueItem.options.clip,
                     placeholderFillStyle: queueItem.options.placeholderFillStyle,
                     opacity: queueItem.options.opacity,
+                    preload: queueItem.options.preload,
                     degrees: queueItem.options.degrees,
                     compositeOperation: queueItem.options.compositeOperation,
                     springStiffness: _this.springStiffness,
@@ -18874,7 +18884,8 @@ $.Viewport.prototype = {
  * @param {Number} [options.minPixelRatio] - See {@link OpenSeadragon.Options}.
  * @param {Number} [options.smoothTileEdgesMinZoom] - See {@link OpenSeadragon.Options}.
  * @param {Boolean} [options.iOSDevice] - See {@link OpenSeadragon.Options}.
- * @param {Number} [options.opacity=1] - Opacity the tiled image should be drawn at.
+ * @param {Number} [options.opacity=1] - Set to draw at proportional opacity. If zero, images will not draw.
+ * @param {Boolean} [options.preload=false] - Set true to load even when the image is hidden by zero opacity.
  * @param {String} [options.compositeOperation] - How the image is composited onto other images; see compositeOperation in {@link OpenSeadragon.Options} for possible values.
  * @param {Boolean} [options.debugMode] - See {@link OpenSeadragon.Options}.
  * @param {String|CanvasGradient|CanvasPattern|Function} [options.placeholderFillStyle] - See {@link OpenSeadragon.Options}.
@@ -18950,6 +18961,7 @@ $.TiledImage = function( options ) {
         _midDraw:       false, // Is the tiledImage currently updating the viewport?
         _needsDraw:     true,  // Does the tiledImage need to update the viewport again?
         _hasOpaqueTile: false,  // Do we have even one fully opaque tile?
+        _tilesLoading:  0,     // The number of pending tile requests.
         //configurable settings
         springStiffness:        $.DEFAULT_SETTINGS.springStiffness,
         animationTime:          $.DEFAULT_SETTINGS.animationTime,
@@ -18966,8 +18978,12 @@ $.TiledImage = function( options ) {
         crossOriginPolicy:      $.DEFAULT_SETTINGS.crossOriginPolicy,
         placeholderFillStyle:   $.DEFAULT_SETTINGS.placeholderFillStyle,
         opacity:                $.DEFAULT_SETTINGS.opacity,
+        preload:                $.DEFAULT_SETTINGS.preload,
         compositeOperation:     $.DEFAULT_SETTINGS.compositeOperation
     }, options );
+
+    this._preload = this.preload;
+    delete this.preload;
 
     this._fullyLoaded = false;
 
@@ -19094,7 +19110,7 @@ $.extend($.TiledImage.prototype, $.EventSource.prototype, /** @lends OpenSeadrag
      * Draws the TiledImage to its Drawer.
      */
     draw: function() {
-        if (this.opacity !== 0) {
+        if (!(this.opacity === 0 && !this._preload)) {
             this._midDraw = true;
             this._updateViewport();
             this._midDraw = false;
@@ -19572,6 +19588,21 @@ $.extend($.TiledImage.prototype, $.EventSource.prototype, /** @lends OpenSeadrag
     },
 
     /**
+     * @returns {Boolean} whether the tiledImage can load hidden tiles of zero opacity.
+     */
+    getPreload: function() {
+        return this._preload;
+    },
+
+    /**
+     * Set true to load even when hidden. Set false to block loading when hidden.
+     */
+    setPreload: function(preload) {
+        this._preload = !!preload;
+        this._needsDraw = true;
+    },
+
+    /**
      * Get the current rotation of this tiled image in degrees.
      * @returns {Number} the current rotation of this tiled image in degrees.
      */
@@ -19702,6 +19733,7 @@ $.extend($.TiledImage.prototype, $.EventSource.prototype, /** @lends OpenSeadrag
     // private
     _updateViewport: function() {
         this._needsDraw = false;
+        this._tilesLoading = 0;
 
         // Reset tile's internal drawn state
         while (this.lastDrawn.length > 0) {
@@ -19798,7 +19830,7 @@ $.extend($.TiledImage.prototype, $.EventSource.prototype, /** @lends OpenSeadrag
             this._needsDraw = true;
             this._setFullyLoaded(false);
         } else {
-            this._setFullyLoaded(true);
+            this._setFullyLoaded(this._tilesLoading === 0);
         }
     }
 });
@@ -19982,7 +20014,7 @@ function updateTile( tiledImage, drawLevel, haveDrawn, x, y, level, levelOpacity
         }
     } else if ( tile.loading ) {
         // the tile is already in the download queue
-        // thanks josh1093 for finally translating this typo
+        tiledImage._tilesLoading++;
     } else {
         best = compareTiles( best, tile );
     }
@@ -20320,7 +20352,7 @@ function compareTiles( previousBest, tile ) {
 }
 
 function drawTiles( tiledImage, lastDrawn ) {
-    if (lastDrawn.length === 0) {
+    if (this.opacity === 0 || lastDrawn.length === 0) {
         return;
     }
     var tile = lastDrawn[0];

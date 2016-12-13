@@ -77,7 +77,6 @@ DOJO.RealTime.prototype = {
           }
           var targets = allItems.filter(isTarget)[0];
           if(targets && targets.lastDrawn.length){
-            log('higi')
             var fromTile = targets.lastDrawn.filter(isTile.bind(e.tile))[0];
             if(fromTile){
               e.output = contextualize(e.tile);
