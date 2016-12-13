@@ -124,7 +124,7 @@ class HDF5DataSource(DataSource):
                              bx / (2**w)), dtype=self._dtype)
 
         with h5py.File(filename, "r") as fd:
-            ds = fd[dataset_path]
+            dataset = fd[dataset_path]
             return dataset[z, y:y+by:(2 ** w), x:x+bx:(2 ** w)]
 
     def get_boundaries(self):
