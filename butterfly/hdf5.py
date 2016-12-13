@@ -56,17 +56,17 @@ class HDF5DataSource(DataSource):
                     d[K_DEPTH] = fd[d[K_DATASET_PATH]].shape[0]
                     self._dtype = fd[d[K_DATASET_PATH]].dtype
             return result
-                        
+
         elif path.endswith('.h5'):
             with h5py.File(path, "r") as fd:
                 key0 = fd.keys()[0]
                 self._dtype = fd[key0].dtype
-                return {
+                return [{
                     K_FILENAME : path,
                     K_DATASET_PATH : key0,
                     K_DEPTH: fd[key0].shape[0],
                     K_Z_OFFSET: 0,
-                }
+                }]
         else:
             return False
 
@@ -79,10 +79,10 @@ class HDF5DataSource(DataSource):
             self.blocksize = dataset.shape[1:][::-1]
 
         super(HDF5DataSource, self).index()
-    
+
     def get_plane_info(self, z):
         '''Get the filename, dataset path and z-index for a given plane
-        
+
         :param z: plane #
         :returns: a tuple of HDF5 filename, dataset name and z index or 
                   (None, None, None) if no HDF5 file is within range
@@ -93,7 +93,7 @@ class HDF5DataSource(DataSource):
             if z_offset <= z and z_offset+depth > z:
                 return d[K_FILENAME], d[K_DATASET_PATH], z-z_offset
         return (None, None, None)
-        
+
     def load_cutout(self, x0, x1, y0, y1, z, w):
         '''
         @override
@@ -102,7 +102,7 @@ class HDF5DataSource(DataSource):
         if filename is None:
             return np.zeros(((y1 - y0) / (2 ** w),
                              (x1-x0) / (2**w)), dtype=self._dtype)
-            
+
         with h5py.File(filename, "r") as fd:
             ds = fd[dataset_path]
             if ds.shape[1] < y1 or ds.shape[2] < x1:
@@ -122,9 +122,9 @@ class HDF5DataSource(DataSource):
         if filename is None:
             return np.zeros((by / (2 ** w),
                              bx / (2**w)), dtype=self._dtype)
-            
+
         with h5py.File(filename, "r") as fd:
-            ds = fd[dataset_path]
+            dataset = fd[dataset_path]
             return dataset[z, y:y+by:(2 ** w), x:x+bx:(2 ** w)]
 
     def get_boundaries(self):
