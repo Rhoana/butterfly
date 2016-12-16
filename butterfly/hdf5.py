@@ -128,7 +128,7 @@ class HDF5DataSource(DataSource):
             return dataset[z, y:y+by:(2 ** w), x:x+bx:(2 ** w)]
 
     def get_boundaries(self):
-        with h5py.File(self._dataset[K_FILENAME], "r") as fd:
-            dataset = fd[self._dataset[K_DATASET_PATH]]
+        with h5py.File(self._dataset[0][K_FILENAME], "r") as fd:
+            dataset = fd[self._dataset[0][K_DATASET_PATH]]
             self.blocksize = dataset.shape[::-1]
         return self.blocksize
