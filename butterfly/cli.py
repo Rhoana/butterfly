@@ -1,8 +1,11 @@
-import logging
 import re
 import os
 import cv2
+import yaml
+import logging
 import argparse
+import numpy as np
+
 def main():
     '''
     Butterfly
@@ -10,20 +13,21 @@ def main():
     Eagon Meng and Daniel Haehn
     Lichtman Lab, 2015
     '''
-
     help = {
         'bfly': 'Host a butterfly server!',
         'folder': 'relative, absolute, or user path/of/all/experiments',
-        'port': 'port >1024 for hosting this server',
-        'depth': 'search nth nested subfolders of exp path (default 2)'
+        'save': 'path of output yaml file indexing experiments',
+        'port': 'port >1024 for hosting this server'
     }
 
     parser = argparse.ArgumentParser(description=help['bfly'])
     parser.add_argument('port', type=int, nargs='?', help=help['port'])
     parser.add_argument('-e','--exp', metavar='exp', help= help['folder'])
-    parser.add_argument('-n','--nth',type=int, metavar='nth', default = 2, help= help['depth'])
-    [homefolder,port,nth] = [parser.parse_args().exp, parser.parse_args().port, parser.parse_args().nth]
+    parser.add_argument('-o','--out', metavar='out', help= help['save'])
+    parsed = parser.parse_args()
+    [homefolder,port,outyaml] = [getattr(parsed,s) for s in ['exp','port','out']]
     home = os.path.realpath(os.path.expanduser(homefolder if homefolder else '~'))
+    saveyaml = os.path.realpath(os.path.expanduser(outyaml if outyaml else '~/out.yaml'))
     homename = os.path.basename(home)
 
     if os.path.isfile(home):
@@ -37,39 +41,85 @@ def main():
     logger.report_event("Allowed paths: " + ", ".join(settings.ALLOWED_PATHS),log_level=logging.DEBUG)
     c = core.Core()
 
-    def sourcer(fold):
-        c.create_datasource(fold)
-        source = c.get_datasource(fold)
-        return source.get_dataset(fold)
+    cat_name = ['root','experiments','samples','datasets','channels']
+    new_kid = lambda n: {'kids': [], 'name': n}
+    path_root = [new_kid(homename)]
+    for cat in cat_name:
+        path_root.append(new_kid('root'))
+        path_root[-1]['kids'].append(path_root[-2])
+    path_root.reverse()
 
-    def folderer(root,depth):
-        if not os.path.isdir(root) or depth <= 0: return []
-        files = [os.path.realpath(os.path.join(root,f)) for f in os.listdir(root) if not f.startswith('.')]
-        return [v for v in files if os.path.isdir(v) or v.endswith('.json')]
+    def sourcer(tmp_path, my_path):
+        try: c.create_datasource(tmp_path)
+        except: return new_kid(my_path)
+        source = c.get_datasource(tmp_path)
+        return source.get_channel(tmp_path)
 
-    def trier(depth,datasets,path):
-        try:
-            source = sourcer(path)
-            dupes = sum(1 for d in datasets if source['name'] in d['name'])
-            logger.report_event('Datasource found at '+ path)
-            source['name'] += '_'+str(dupes) if dupes else ''
-            datasets.append(source)
-        except:
-            for branch in folderer(path,depth):
-                datasets = trier(depth-1,datasets,branch)
-        return datasets
+    def path_walk(root, parent):
+        [fold,folds,files] = next(os.walk(root), [[]]*3)
+        for my_path in folds+files:
+            tmp_path = os.path.join(fold, my_path)
+            myself = sourcer(tmp_path, my_path)
+            parent['kids'].append(myself)
+            if 'kids' in myself:
+                myself = path_walk(tmp_path, myself)
+                root_kid = new_kid(my_path)
+                root_kid['kids'] = [k for k in myself['kids'] if 'kids' not in k]
+                myself['kids'] = [k for k in myself['kids'] if 'kids' in k]
+                if root_kid['kids']:
+                    myself['kids'].append(root_kid)
+                if len(myself['kids']) == 1:
+                    myself['kids'] = myself['kids'][0]['kids']
+                if not myself['kids']:
+                    parent['kids'].pop()
+        return parent
 
-    def starter(depth):
-        exp = {'name': homename,'samples': []}
-        sample = {'name':'/','datasets': []}
-        datasets = trier(depth+1,[],home)
-        if datasets:
-            sample['datasets'] += datasets
-            exp['samples'].append(sample)
-        return exp
+    def depth_walk(depth, parent):
+        kids_w_kids = [k for k in parent['kids'] if 'kids' in k]
+        depth_walk_kids = [depth_walk(depth+1,k) for k in kids_w_kids]
+        if len(depth_walk_kids):
+            return np.min(depth_walk_kids)
+        parent['done'] = True
+        return depth
 
-    if homefolder and not os.path.isfile(home):
-        settings.bfly_config.setdefault('experiments',[]).append(starter(nth))
+    def flat_walk(depth, parent):
+        if 'kids' in parent:
+            for kid in [k for k in parent['kids']]:
+                if 'flat' in flat_walk(depth+1, kid):
+                    parent['kids'] += kid['kids']
+                    parent['kids'].remove(kid)
+                if depth >= len(cat_name) and 'done' in kid:
+                    parent['flat'] = True
+        return parent
+
+    def cat_walk(depth, parent):
+        if 'kids' in parent:
+            for kid in parent['kids']:
+                cat_walk(depth+1, kid)
+            cat = cat_name[(depth)%len(cat_name)]
+            parent[cat] = parent['kids']
+            del parent['kids']
+            return parent[cat]
+        return parent
+
+    experiments = settings.bfly_config.setdefault('experiments',[])
+    if homefolder and os.path.isdir(home):
+        path_tree = path_walk(home, path_root[-1])
+        min_depth = min(depth_walk(0, path_tree), len(cat_name)-2)
+        path_tree = flat_walk(0, path_root[min_depth])
+        exp_tree = cat_walk(0, path_root[min_depth+1])
+        experiments += exp_tree[0]['experiments']
+        if outyaml:
+            indexed = open(saveyaml,'w')
+            indexed.write(yaml.dump({
+                'bfly': {
+                    'allowed-paths': [home],
+                    'datasource': ['mojo','tilespec','hdf5'],
+                    'experiments': experiments,
+                    'port': port
+                }
+            }))
+            indexed.close()
     ws = webserver.WebServer(c, port)
     ws.start()
 

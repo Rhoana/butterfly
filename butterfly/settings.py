@@ -27,12 +27,13 @@ IMAGE_RESIZE_METHOD = \
 # Output settings
 DEFAULT_OUTPUT = '.png'
 # Using cv2 - please check if supported before adding!
-SUPPORTED_IMAGE_FORMATS = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp')
+SUPPORTED_IMAGE_FORMATS = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp', 'zip')
+SUPPORTED_IMAGE_VIEWS = ('grayscale','colormap','rgb')
 
 '''List of datasources to try, in order, given a path'''
 DATASOURCES = bfly_config.get(
-    "datasource", 
-    ["hdf5", "comprimato", "multibeam", "mojo", "regularimagestack"])
+    "datasource",
+    ["hdf5", "tilespecs", "multibeam", "mojo", "regularimagestack"])
 
 '''Paths must start with one of the following allowed paths'''
 ALLOWED_PATHS = bfly_config.get("allowed-paths", [os.sep])

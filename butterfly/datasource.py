@@ -3,7 +3,7 @@ import re
 import cv2
 import h5py
 import settings
-
+import numpy as np
 
 class DataSource(object):
 
@@ -25,25 +25,41 @@ class DataSource(object):
         Index all files without loading to
         create bounding box for this data.
         '''
-        pass
+        self.dtype = self.get_type()
+
+    def get_type(self):
+        return self.load(0,0,0,0).dtype
 
     def load_cutout(self, x0, x1, y0, y1, z, w):
-        '''Load a cutout from a plane
-
-        :param x0: leftmost coordinate of the cutout
-        :param x1: rightmost coordinate of the cutout (not inclusive)
-        :param y0: top coordinate of the cutout
-        :param y1: bottom coordinate of the cutout (not inclusive)
-        :param z: plane # of the cutout
-        :param w: the mipmap level
-
-        :returns: the downsampled (if necessary) image of the cutout
-        :raises: NotImplementedError if the datasource doesn't implement this
-        (which is OK)
         '''
-        raise NotImplementedError()
+        Load a cutout from a plane
+        '''
+        scale = float(2 ** w)
+        blockshape = np.array(self.blocksize)
+        x0y0 = np.array([x0,y0]) // scale
+        x1y1 = np.array([x1,y1]) // scale
+        top_left = np.floor(x0y0 / blockshape).astype(int)
+        lo_right = np.ceil(x1y1 / blockshape).astype(int)
+        origin = top_left * blockshape
+        [left,top] = (x0y0 - origin).astype(int)
+        [right,down] = (x1y1 - origin).astype(int)
+        gridshape = lo_right-top_left
+        grid = np.indices(gridshape).T
 
-    def load(self, cur_path, w, segmentation=False):
+        cutshape = blockshape*grid.shape[:-1]
+        cutout = np.zeros(cutshape, dtype=self.dtype)
+        fixed = [z,w]
+        for row in grid:
+            for where in row:
+                here = top_left + where
+                [i0,j0] = blockshape*(where)
+                [i1,j1] = blockshape*(where+1)
+                one_tile = list(here)+fixed
+                tile = self.load(*one_tile)
+                cutout[j0:j1,i0:i1] = tile
+        return cutout[top:down,left:right]
+
+    def load(self, cur_path, w):
         '''
         Loads this file from the data path.
         '''
@@ -71,7 +87,7 @@ class DataSource(object):
         # Resize if necessary, then also store to cache
         if w > 0:
             # We will use subsampling for all requests right now for speed
-            if settings.ALWAYS_SUBSAMPLE or segmentation:
+            if settings.ALWAYS_SUBSAMPLE or self.dtype == np.uint32:
                 # Subsample to preserve accuracy for segmentations
                 tmp_image = tmp_image[::2 ** w, ::2 ** w]
             else:
@@ -101,11 +117,12 @@ class DataSource(object):
 
         return tmp_image
 
-    def seg_to_color(self):
-        '''
-        Get segmentation color from color map
-        '''
-        pass
+    def seg_to_color(self, slice):
+        colors = np.zeros(slice.shape+(3,),dtype=np.uint8)
+        colors[:,:,0] = np.mod(107*slice[:,:],700).astype(np.uint8)
+        colors[:,:,1] = np.mod(509*slice[:,:],900).astype(np.uint8)
+        colors[:,:,2] = np.mod(200*slice[:,:],777).astype(np.uint8)
+        return colors
 
     def get_boundaries(self):
         '''
@@ -113,13 +130,15 @@ class DataSource(object):
         '''
         pass
 
-    def get_dataset(self,path):
+    def get_channel(self,path):
         '''
-        # Override for >1 channels with own 'data-type'
         :param path: the root/path/to/this/data
-        :returns: dataset of meta info about self
+        :returns: channel of meta info about self
         '''
         dimensions = dict(zip(('x','y','z'),self.get_boundaries()))
-        channel = {'path':path,'name':'img','dimensions':dimensions}
-        dataset = {'name':os.path.basename(path),'channels':[channel]}
-        return dataset
+        return {
+            'path': path,
+            'name': os.path.basename(path),
+            'dimensions': dimensions,
+            'data-type': str(self.dtype)
+        }

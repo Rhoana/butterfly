@@ -25,52 +25,57 @@ DOJO.Write.prototype = {
     },el);
   },
   head: function(source,parent,cousin){
-      var self = this.copy('proto',0);
-      var offspring = this.grandkid(self,[1,1]);
-      var id = this.totalIds++;
-      var path = [
-        ['id', 'in'+id],
-        ['for', 'in'+id],
-        ['id', source.self]
-      ];
-      path.forEach(function(tag,tagi){
-        var temp = self.children[tagi];
-        temp.setAttribute.apply(temp,tag);
-      });
-      self.children[0].checked = true;
-      parent.appendChild(self);
-      offspring.children[0].innerHTML = source.name;
-      cousin.children[1].innerHTML = source.length;
+    var self = this.copy('proto',0);
+    var offspring = this.grandkid(self,[1,1]);
+    var id = this.totalIds++;
+    var factsheet = [
+      ['id', 'in'+id],
+      ['for', 'in'+id],
+      ['id', source.self]
+    ];
+    factsheet.forEach(function(tag,tagi){
+      var temp = self.children[tagi];
+      temp.setAttribute.apply(temp,tag);
+    });
+    self.children[0].checked = true;
+    parent.appendChild(self);
+    offspring.children[0].innerHTML = source.name;
+    cousin.children[1].innerHTML = source.length;
   },
   body: function(source,parent,cousin){
-      var grandparent = this.grandparent(cousin);
-      var ancestor = this.grandparent(grandparent);
-      var uncle = this.grandkid(ancestor,[1,1]);
-      var size = source.dimensions;
-      var [w,h,d] = [size.x,size.y,size.z];
-      for (var id in this.chan){
-        if (this.chan[id].test(source.name)){
-           var matchID = Number(id)+1;
-        }
-      }
-      var path = 'viz.html?datapath='+source.path+'&width='+w+'&height='+h+'&depth='+d;
-      cousin.children[0].href = path+ '&channel='+(['i','s','y'][matchID||0]);
-      cousin.children[1].innerHTML = source['data-type'];
-      uncle.children[1].innerHTML = [w,h,d].join(', ');
-      uncle.children[0].href = path+'&channel=is';
-      grandparent.children[0].checked = false;
-      ancestor.children[0].checked = false;
-      var path = [
-        ['name', source['short-description'] || source['name']],
-        ['path', source.path]
-      ]
-      path.forEach(function(items){
-        var temp = this.copy('proto',2);
-        var info = this.grandkid(temp,[0,0]);
-        info.children[0].innerHTML = items[0];
-        info.children[1].innerHTML = items[1];
-        parent.appendChild(temp);
-      },this);
+    var grandparent = this.grandparent(cousin);
+    var ancestor = this.grandparent(grandparent);
+    var uncle = this.grandkid(ancestor,[1,1]);
+    var size = source.dimensions;
+    var dtype = source['data-type'];
+    var withGL = Number(dtype!='uint8');
+    var [w,h,d] = [size.x,size.y,size.z];
+    var channel = withGL + source.channel;
+    var path = 'viz.html?depth='+d+'&width='+w+'&height='+h;
+    var old = source.old.replace(/&channel=([^&]+)/,'&channel='+channel);;
+    cousin.children[0].href = path + '&' + old;
+    if (uncle.children[0].href) {
+      uncle.children[0].href += ',' + channel;
+    }
+    else {
+      uncle.children[0].href = path +'&'+old;
+    }
+    cousin.children[1].innerHTML = dtype;
+    uncle.children[1].innerHTML = [w,h,d].join(', ');
+    grandparent.children[0].checked = false;
+    ancestor.children[0].checked = false;
+    var factsheet = [
+      ['description', source['short-description'] || source['name']],
+      ['datasource', source.datasource || 'unknown'],
+      ['path', source.path || 'unknown']
+    ]
+    factsheet.forEach(function(items){
+      var temp = this.copy('proto',2);
+      var info = this.grandkid(temp,[0,0]);
+      info.children[0].innerHTML = items[0];
+      info.children[1].innerHTML = items[1];
+      parent.appendChild(temp);
+    },this);
   },
   main: function(terms){
     var source = this.share(terms,{self:terms.self.join(',')});

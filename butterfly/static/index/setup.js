@@ -10,7 +10,7 @@ DOJO.Setup = function(api){
   this.write = new DOJO.Write(this);
   var allData = this.start('');
   allData.then(function(all){
-//      log(all)
+//    log(all)
   })
 }
 
@@ -73,19 +73,19 @@ DOJO.Setup.prototype = {
         target.target = 'head';
         target.self = parent.concat(i);
         var sources = [target,{name:name,length:result.out.length}];
-        return loader(target.self,build(sources),depth+1);
+        return loader(target.self, build(sources), depth+1);
       });
       return Promise.all(promises);
     }
-    var sources = [target,this.parse(result.old),result.out];
-    return build(sources);
+      var sources = [target,this.parse(result.old),result.out];
+      return build(sources);
   },
   find: function(hash,depth){
     var where = this.plural(this.ask[depth])+'?';
     return this.get('/api/' + where + this.hash(hash));
   },
   loader: function(parent,folder,depth){
-      var draw = this.draw.bind(this, parent, depth);
-      return this.find(folder, depth).then(draw);
+    var draw = this.draw.bind(this, parent, depth);
+    return this.find(folder, depth).then(draw);
   }
 }

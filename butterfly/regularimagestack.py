@@ -39,8 +39,6 @@ class RegularImageStack(DataSource):
         @override
         '''
 
-        super(RegularImageStack, self).index()
-
         args_file = os.path.join(self._datapath, '*.args')
         args_file = glob.glob(args_file)[0]
 
@@ -66,6 +64,8 @@ class RegularImageStack(DataSource):
         # Grab blocksize from first image
         self.blocksize = self.get_blocksize()
 
+        super(RegularImageStack, self).index()
+
     def load_info(self, folderpaths, filename, indices):
         self._folderpaths = folderpaths
         self._filename = filename
@@ -75,7 +75,7 @@ class RegularImageStack(DataSource):
         tmp_img = self.load(self._indices[0][0], self._indices[1][0], 0, 0)
         return tmp_img.shape
 
-    def load(self, x, y, z, w, segmentation=False):
+    def load(self, x, y, z, w):
         '''
         @override
         '''
@@ -91,12 +91,7 @@ class RegularImageStack(DataSource):
             self._folderpaths % {
                 'z': self._indices[2][z]},
             cur_filename)
-        return super(RegularImageStack, self).load(cur_path, w, segmentation)
-
-    def seg_to_color(self, slice):
-        # super(RegularImageStack, self).seg_to_color()
-
-        return slice
+        return super(RegularImageStack, self).load(cur_path, w)
 
     def get_boundaries(self):
         # super(RegularImageStack, self).get_boundaries()

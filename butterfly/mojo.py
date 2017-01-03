@@ -60,7 +60,7 @@ class Mojo(DataSource):
         self._filename = filename
         self._indices = indices
 
-    def load(self, x, y, z, w, segmentation=False):
+    def load(self, x, y, z, w):
         '''
         @override
         '''
@@ -91,14 +91,7 @@ class Mojo(DataSource):
             self._folderpaths %
             self._indices[2][z],
             cur_filename)
-        return super(Mojo, self).load(cur_path, w, segmentation)
-
-    def seg_to_color(self, slice):
-        colors = np.zeros(slice.shape+(3,),dtype=np.uint8)
-        colors[:,:,0] = np.mod(107*slice[:,:],700).astype(np.uint8)
-        colors[:,:,1] = np.mod(509*slice[:,:],900).astype(np.uint8)
-        colors[:,:,2] = np.mod(200*slice[:,:],777).astype(np.uint8)
-        return colors
+        return super(Mojo, self).load(cur_path, w)
 
     def get_boundaries(self):
         # super(Mojo, self).get_boundaries()
