@@ -54,6 +54,9 @@ class RestAPIHandler(RequestHandler):
         '''
         self.core = core
 
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header('Access-Control-Allow-Methods', 'GET')
+
     def get(self, command):
         '''Handle an HTTP GET request'''
 
