@@ -44,8 +44,8 @@ DOJO.Write.prototype = {
     var uncle = this.grandkid(ancestor,[1,1]);
     var size = source.dimensions;
     var dtype = source['data-type'];
-    var withGL = Number(dtype!='uint8');
     var [w,h,d] = [size.x,size.y,size.z];
+    var withGL = !dtype.match(/float|uint8/);
     var channel = withGL + source.channel;
     var path = 'viz.html?depth='+d+'&width='+w+'&height='+h;
     var old = source.old.replace(/&channel=([^&]+)/,'&channel='+channel);;
