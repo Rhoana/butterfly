@@ -97,6 +97,10 @@ class Core(object):
                     from hdf5 import HDF5DataSource
                     ds = HDF5DataSource(self, datapath, dtype=dtype)
                     break
+            except ImportError, err:
+                rh_logger.logger.report_event(
+                    "%s needed by %s" % (err, datasource),
+                    log_level=logging.WARNING)
             except:
                 rh_logger.logger.report_event(
                     "Can't load %s with %s" % (datapath, datasource),
