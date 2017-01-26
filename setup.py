@@ -29,13 +29,17 @@ setup(
     install_requires=[
         "numpy>=1.9.3",
         "h5py>=2.6.0",
-        "scipy>=0.16.0",
         "tornado>=4.3",
+        "scipy>=0.16.0",
         "rh_logger>=2.0.0",
-        "rh_config>=1.0.0"],
+        "rh_config>=1.0.0"
+    ],
     dependency_links=[
+        "https://github.com/Rhoana/pyrtree/archive/master.zip",
         "https://github.com/Rhoana/rh_logger/tarball/master#egg=rh_logger-2.0.0",
-        "https://github.com/Rhoana/rh_config/tarball/master#egg=rh_config-1.0.0"
+        "https://github.com/Rhoana/rh_config/tarball/master#egg=rh_config-1.0.0",
+        "https://github.com/Rhoana/dataspec/archive/1.1.1.tar.gz#egg=dataspec-1.1.1",
+        "https://github.com/Rhoana/rh_renderer/archive/master.zip#egg=rh_renderer-0.0.1"
     ],
     entry_points=dict(console_scripts=[
         'bfly = butterfly.cli:main',
