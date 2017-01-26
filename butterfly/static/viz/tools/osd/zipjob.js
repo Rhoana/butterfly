@@ -23,7 +23,8 @@ ZipJob.prototype = {
     },
 
     set: function(raw) {
-        var size = this.parse(this.src).size.split(",").slice(0,2).map(Number);
+        var src = this.parse(this.src);
+        var size = [src.width, src.height].map(Number);
         var output = this.viaGL.toCanvas(raw,size);
         this.image.onload = this.finish.bind(this);
         this.image.src = output.toDataURL();

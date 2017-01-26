@@ -6,7 +6,7 @@
 // -- Made by main.js
 // -- Init by main.js
 //-----------------------------------
-log = console.log.bind(window.console);
+//log = console.log.bind(window.console);
 
 DOJO.Stack = function(src_terms){
 
@@ -160,25 +160,6 @@ DOJO.Stack.prototype = {
       }
     }
     return newBuff;
-  },
-  log: function(newBuff){
-    log('z:' + this.z);
-    log('buffer: [' + newBuff.down + ':' + newBuff.up+']');
-    for (var zb = -newBuff.down; zb <= newBuff.up; zb++){
-      var tab = '   ';
-      var star = zb===0? '*' : ' ';
-      var image = this.findLayer(zb).pop();
-      if (image) {
-        var zeta = image.source.z;
-        var alpha = image.getOpacity();
-        var preload = image.getPreload();
-      }
-      log(star+tab+'layer '+ zeta || 'null' );
-      log(tab+tab+'opacity:'+alpha || 'null');
-      log(tab+tab+'preload:'+preload || 'null');
-      log(tab+tab+'index: ['+this.findIndex(zb)+']');
-    };
-    log(' ');
   },
   refresher: function(e){
     e.item.addHandler('fully-loaded-change',function(e){

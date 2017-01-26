@@ -1,4 +1,4 @@
-log = console.log.bind(window.console);
+//log = console.log.bind(window.console);
 //-----------------------------------
 //
 // DOJO.Setup: request data from server
@@ -20,7 +20,6 @@ DOJO.Setup.prototype = {
     'dataset','channel',
     'channel_metadata'
   ],
-  output: [],
   start: function(old){
     return this.loader(['root'],{old:old},0);
   },
@@ -65,9 +64,17 @@ DOJO.Setup.prototype = {
     return this.write.main(terms);
   },
   draw: function(parent, depth, result) {
+    var constant = {
+      old: result.old,
+      depth: depth
+    }
+    var target = {
+      self: parent.concat(0),
+      parent: parent,
+      target: 'body'
+    }
     var loader = this.loader.bind(this);
-    var build = this.build.bind(this,{old: result.old, depth: depth});
-    var target = {self:parent.concat(0), parent:parent, target:'body'};
+    var build = this.build.bind(this,constant);
     if (result.out instanceof Array){
       var promises = result.out.map(function(name,i){
         target.target = 'head';

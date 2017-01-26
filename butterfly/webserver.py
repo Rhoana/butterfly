@@ -144,7 +144,7 @@ class WebServer:
                     # Rotate out of numpy array
                     volume = volume.transpose(1, 0, 2)
                     zipped_data = zlib.compress(
-                        volume.astype(np.uint32).tostring('F'))
+                        volume.astype(out_dtype).tostring('F'))
 
                     output = StringIO.StringIO()
                     output.write(zipped_data)
