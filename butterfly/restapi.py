@@ -185,8 +185,8 @@ class RestAPIHandler(RequestHandler):
             'msg' : "Missing %s parameter" % qparam
         })
 
-    def _get_list_query_argument(self, qparam, whitelist):
-        result = self.get_query_argument(qparam, whitelist[0])
+    def _get_list_query_argument(self, qparam, default, whitelist):
+        result = self.get_query_argument(qparam, default)
         return self._match_condition(result, {
             'condition': result not in whitelist,
             'msg': "The %s must be one of %s." % (qparam, whitelist)
@@ -202,16 +202,25 @@ class RestAPIHandler(RequestHandler):
 
     def get_data(self):
         channel = self._get_channel_config()
+        dtype = channel[self.DATA_TYPE]
+
+
+        defaultFormat = 'png'
+        defaultView = 'grayscale'
+        views = settings.SUPPORTED_IMAGE_VIEWS
+        formats = settings.SUPPORTED_IMAGE_FORMATS
+        if 'float' not in dtype and 'uint8' not in dtype:
+            defaultView = 'colormap'
+
         x = self._get_int_necessary_param(self.Q_X)
         y = self._get_int_necessary_param(self.Q_Y)
         z = self._get_int_necessary_param(self.Q_Z)
         width = self._get_int_necessary_param(self.Q_WIDTH)
         height = self._get_int_necessary_param(self.Q_HEIGHT)
         resolution = self._get_int_query_argument(self.Q_RESOLUTION)
-        fmt = self._get_list_query_argument(self.Q_FORMAT, settings.SUPPORTED_IMAGE_FORMATS)
-        view = self._get_list_query_argument(self.Q_VIEW, settings.SUPPORTED_IMAGE_VIEWS)
+        view = self._get_list_query_argument(self.Q_VIEW, defaultView, views)
+        fmt = self._get_list_query_argument(self.Q_FORMAT, defaultFormat, formats)
 
-        dtype = getattr(np, channel[self.DATA_TYPE])
         slice_define = [channel[self.PATH], [x, y, z], [width, height, 1]]
         rh_logger.logger.report_event("Encoding image as dtype %s" % repr(dtype))
         vol = self.core.get(*slice_define, w=resolution, dtype=dtype, view=view)

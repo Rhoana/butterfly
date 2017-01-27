@@ -33,15 +33,7 @@ class Core(object):
         '''
         Request a subvolume of the datapath at a given zoomlevel.
         '''
-        presets = {
-            'w': 0,
-            'dtype': np.uint8,
-            'view': 'grayscale',
-        }
-        for k,v in presets.iteritems():
-            kwargs.setdefault(k,v)
-
-        dtype= kwargs['dtype']
+        dtype= getattr(np, kwargs['dtype'])
         view= kwargs['view']
         w= int(kwargs['w'])
 
@@ -63,7 +55,7 @@ class Core(object):
             planes.append(plane)
         return np.dstack(planes)
 
-    def create_datasource(self, datapath, dtype=np.uint8):
+    def create_datasource(self, datapath, dtype):
         '''
         '''
 
