@@ -57,7 +57,7 @@ class RequestParser(object):
                 if self.output_format == 'xy':
                     # Match OCP's image cutout service, use default image
                     # format
-                    self.output_format = '.png'
+                    self.output_format = 'png'
             except IndexError:
                 # Convert index errors in OCP format to key errors of the
                 # standard query

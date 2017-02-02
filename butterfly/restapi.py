@@ -1,3 +1,4 @@
+from tornado.web import RequestHandler
 from urllib2 import HTTPError
 import numpy as np
 import StringIO
@@ -222,7 +223,7 @@ class RestAPIHandler(RequestHandler):
 
         slice_define = [channel[self.PATH], [x, y, z], [width, height, 1]]
         rh_logger.logger.report_event("Encoding image as dtype %s" % repr(dtype))
-        vol = self.core.get(*slice_define, w=resolution, dtype=dtype, view=view)
+        vol = self.core.get(*slice_define, w=resolution, view=view)
         self.set_header("Content-Type", "image/"+fmt)
         if fmt in ['zip']:
             output = StringIO.StringIO()
@@ -230,7 +231,7 @@ class RestAPIHandler(RequestHandler):
             output.write(zlib.compress(volstring))
             content = output.getvalue()
         else:
-            content = cv2.imencode(  "." + fmt, vol)[1].tostring()
+            content = cv2.imencode("." + fmt, vol)[1].tostring()
 
         # invalid request
         if not content:
