@@ -1,4 +1,3 @@
-from tornado.web import RequestHandler
 from urllib2 import HTTPError
 import numpy as np
 import StringIO

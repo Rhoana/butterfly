@@ -33,8 +33,12 @@ class Core(object):
         '''
         Request a subvolume of the datapath at a given zoomlevel.
         '''
-        view= getattr(kwargs, 'view', 'grayscale')
-        w = getattr(kwargs, 'w', 0)
+        w = 0
+        view = 'grayscale'
+        if 'view' in kwargs:
+            view = kwargs['view']
+        if 'w' in kwargs:
+            w = int(kwargs['w'])
 
         # if datapath is not indexed (knowing the meta information),
         # do it now
