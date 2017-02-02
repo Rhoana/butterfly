@@ -204,13 +204,14 @@ class RestAPIHandler(RequestHandler):
         channel = self._get_channel_config()
         dtype = channel[self.DATA_TYPE]
 
-
         defaultFormat = 'png'
         defaultView = 'grayscale'
         views = settings.SUPPORTED_IMAGE_VIEWS
         formats = settings.SUPPORTED_IMAGE_FORMATS
+        fmt = self._get_list_query_argument(self.Q_FORMAT, defaultFormat, formats)
         if 'float' not in dtype and 'uint8' not in dtype:
-            defaultView = 'colormap'
+            if fmt in ['png']:
+                defaultView = 'colormap'
 
         x = self._get_int_necessary_param(self.Q_X)
         y = self._get_int_necessary_param(self.Q_Y)
@@ -219,7 +220,6 @@ class RestAPIHandler(RequestHandler):
         height = self._get_int_necessary_param(self.Q_HEIGHT)
         resolution = self._get_int_query_argument(self.Q_RESOLUTION)
         view = self._get_list_query_argument(self.Q_VIEW, defaultView, views)
-        fmt = self._get_list_query_argument(self.Q_FORMAT, defaultFormat, formats)
 
         slice_define = [channel[self.PATH], [x, y, z], [width, height, 1]]
         rh_logger.logger.report_event("Encoding image as dtype %s" % repr(dtype))
@@ -232,6 +232,12 @@ class RestAPIHandler(RequestHandler):
             content = output.getvalue()
         else:
             content = cv2.imencode(  "." + fmt, vol)[1].tostring()
+
+        # invalid request
+        if not content:
+            handler.set_status(404)
+            content = 'Error 404: Not found'
+            handler.set_header("Content-Type", 'text/html')
 
         self.write(content)
 

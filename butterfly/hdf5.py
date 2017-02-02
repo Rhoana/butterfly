@@ -37,7 +37,7 @@ class HDF5DataSource(DataSource):
     system is implicit, starting at 0, 0, 0.
     '''
 
-    def __init__(self, core, datapath, dtype=np.uint8):
+    def __init__(self, core, datapath):
         self._dataset = self.loadFolder(datapath)
         if not self._dataset:
             warn = "HDF5 path %s must point to valid h5" % datapath

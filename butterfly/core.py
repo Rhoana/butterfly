@@ -33,14 +33,13 @@ class Core(object):
         '''
         Request a subvolume of the datapath at a given zoomlevel.
         '''
-        dtype= getattr(np, kwargs['dtype'])
-        view= kwargs['view']
-        w= int(kwargs['w'])
+        view= getattr(kwargs, 'view', 'grayscale')
+        w = getattr(kwargs, 'w', 0)
 
         # if datapath is not indexed (knowing the meta information),
         # do it now
         if datapath not in self._datasources:
-            self.create_datasource(datapath, dtype=dtype)
+            self.create_datasource(datapath)
 
         datasource = self._datasources[datapath]
 
@@ -55,7 +54,7 @@ class Core(object):
             planes.append(plane)
         return np.dstack(planes)
 
-    def create_datasource(self, datapath, dtype):
+    def create_datasource(self, datapath):
         '''
         '''
 
@@ -79,15 +78,15 @@ class Core(object):
                     break
                 elif datasource in ("tilespecs"):
                     from tilespecs import Tilespecs
-                    ds = Tilespecs(self, datapath, dtype=dtype)
+                    ds = Tilespecs(self, datapath)
                     break
                 elif datasource in ("comprimato", "multibeam"):
                     from multibeam import MultiBeam
-                    ds = MultiBeam(self, datapath, dtype=dtype)
+                    ds = MultiBeam(self, datapath)
                     break
                 elif datasource == 'hdf5':
                     from hdf5 import HDF5DataSource
-                    ds = HDF5DataSource(self, datapath, dtype=dtype)
+                    ds = HDF5DataSource(self, datapath)
                     break
             except ImportError, err:
                 rh_logger.logger.report_event(
