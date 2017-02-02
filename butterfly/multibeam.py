@@ -11,7 +11,7 @@ from urllib2 import HTTPError
 
 class MultiBeam(DataSource):
 
-    def __init__(self, core, datapath, dtype = np.uint8):
+    def __init__(self, core, datapath):
         '''
         @override
         '''
@@ -21,7 +21,7 @@ class MultiBeam(DataSource):
                 None, 404,
                 "Failed to load %s as multibeam data source" % datapath,
                 [], None)
-        self.dtype = dtype
+
         super(MultiBeam, self).__init__(core, datapath)
 
     def index(self):
