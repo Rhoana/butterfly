@@ -34,7 +34,7 @@ class Core(object):
         Request a subvolume of the datapath at a given zoomlevel.
         '''
         w = 0
-        view = 'grayscale'
+        view = settings.DEFAULTVIEW
         if 'view' in kwargs:
             view = kwargs['view']
         if 'w' in kwargs:

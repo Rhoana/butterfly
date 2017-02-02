@@ -203,8 +203,8 @@ class RestAPIHandler(RequestHandler):
         channel = self._get_channel_config()
         dtype = channel[self.DATA_TYPE]
 
-        defaultFormat = 'png'
-        defaultView = 'grayscale'
+        defaultFormat = settings.DEFAULT_OUTPUT
+        defaultView = settings.DEFAULT_VIEW
         views = settings.SUPPORTED_IMAGE_VIEWS
         formats = settings.SUPPORTED_IMAGE_FORMATS
         fmt = self._get_list_query_argument(self.Q_FORMAT, defaultFormat, formats)
