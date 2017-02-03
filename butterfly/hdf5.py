@@ -37,7 +37,7 @@ class HDF5DataSource(DataSource):
     system is implicit, starting at 0, 0, 0.
     '''
 
-    def __init__(self, core, datapath, dtype=np.uint8):
+    def __init__(self, core, datapath):
         self._dataset = self.loadFolder(datapath)
         if not self._dataset:
             warn = "HDF5 path %s must point to valid h5" % datapath
@@ -99,19 +99,13 @@ class HDF5DataSource(DataSource):
         @override
         '''
         filename, dataset_path, z_idx = self.get_plane_info(z)
-        if filename is None:
-            return np.zeros(((y1 - y0) / (2 ** w),
-                             (x1-x0) / (2**w)), dtype=self._dtype)
-
-        with h5py.File(filename, "r") as fd:
-            ds = fd[dataset_path]
-            if ds.shape[1] < y1 or ds.shape[2] < x1:
-                result = np.zeros(((y1 - y0) / (2 ** w),
-                                   (x1-x0) / (2**w)), dtype=self._dtype)
-                cutout = ds[z_idx, y0:y1:(2 ** w), x0:x1:(2 ** w)]
+        result = np.zeros(((y1- y0) / (2**w), (x1-x0) / (2**w)), dtype=self._dtype)
+        if filename is not None:
+            with h5py.File(filename, "r") as fd:
+                ds = fd[dataset_path]
+                cutout = ds[z_idx, y0:y1:(2**w), x0:x1:(2**w)]
                 result[:cutout.shape[0], :cutout.shape[1]] = cutout
-                return result
-            return ds[z_idx, y0:y1:(2 ** w), x0:x1:(2 ** w)]
+        return result
 
     def load(self, x, y, z, w, segmentation=False):
         '''
