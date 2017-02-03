@@ -1,9 +1,10 @@
 from tornado.web import RequestHandler
 from urllib2 import HTTPError
+import tifffile
 import numpy as np
 import StringIO
-import json
 import zlib
+import json
 import cv2
 
 import rh_logger
@@ -208,6 +209,7 @@ class RestAPIHandler(RequestHandler):
         defaultView = settings.DEFAULT_VIEW
         views = settings.SUPPORTED_IMAGE_VIEWS
         formats = settings.SUPPORTED_IMAGE_FORMATS
+
         fmt = self._get_list_query_argument(self.Q_FORMAT, defaultFormat, formats)
         if 'float' not in dtype and 'uint8' not in dtype:
             if fmt in ['png']:
@@ -227,22 +229,19 @@ class RestAPIHandler(RequestHandler):
         self.set_header("Content-Type", "image/"+fmt)
         if fmt in ['zip']:
             output = StringIO.StringIO()
-            volstring = vol.transpose(1,0,2).astype(np.uint32).tostring('F')
+            volstring = vol[:,:,0].T.astype(np.uint32).tostring('F')
             output.write(zlib.compress(volstring))
+            content = output.getvalue()
+        elif fmt in ['tif','tiff']:
+            output = StringIO.StringIO()
+            tiffvol = vol[:,:,0].astype(np.uint32)
+            tifffile.imsave(output, tiffvol)
             content = output.getvalue()
         else:
             content = cv2.imencode("." + fmt, vol)[1].tostring()
-
-        # invalid request
-        if not content:
-            handler.set_status(404)
-            content = 'Error 404: Not found'
-            handler.set_header("Content-Type", 'text/html')
 
         self.write(content)
 
     def get_mask(self):
         # TODO: implement this
-        raise HTTPError(self.request.uri, 501,
-                        "The server does not yet support /api/mask requests",
-                        [], None)
+        raise HTTPError(self.request.uri, 501, "The server does not yet support /api/mask requests", [], None)
