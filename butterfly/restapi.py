@@ -222,6 +222,8 @@ class RestAPIHandler(RequestHandler):
             output.write(zlib.compress(volstring))
             content = output.getvalue()
         else:
+            if vol.dtype.itemsize == 4:
+                vol = vol.view(np.uint8).reshape(vol.shape[0], vol.shape[1], 4)
             content = cv2.imencode(  "." + fmt, vol)[1].tostring()
 
         self.write(content)
