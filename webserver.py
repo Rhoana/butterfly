@@ -2,73 +2,45 @@ import time
 import tornado
 import tornado.gen
 import tornado.web
+from concurrent.futures import ThreadPoolExecutor
 
-# class MainHandler(tornado.web.RequestHandler):
+class Core():
 
-#     def initialize(self, webserver):
-#         self._webserver = webserver
+  def get(self, a, b, c):
 
-#     @tornado.web.asynchronous
-#     def get(self, uri):
-#         '''
-#         '''
-        
-#         #self._webserver.handle(self)
-#         print 'bef', self
-#         time.sleep(10)
+    print 'getting in there', c
+    time.sleep(10)
+    print 'done sleeping', c
 
-
-
-#         print 'aft', self
-
-# class MainHandler(tornado.web.RequestHandler):
-#   def initialize(self, webserver):
-#     self._webserver = webserver
-
-
-#   @tornado.web.asynchronous
-#   @tornado.gen.coroutine
-#   def get(self, uri):
-    
-#     # self.write("Greetings from the instance %s!" % tornado.process.task_id())
-#     print 'start', tornado.process.task_id(), self
-#     time.sleep(10)
-#     print 'end', tornado.process.task_id(), self
-#     # self.write("2Greetings from the instance %s!" % tornado.process.task_id())
-
-def long_blocking_function(index, sleep_time, callback):
-    print ("Entering run counter:%s" % (index,))
-    time.sleep(sleep_time)
-    print ("Exiting run counter:%s" % (index,))
-    return "Result from %d" % index
-
+    return 'msg to client' + c
 
 class MainHandler(tornado.web.RequestHandler):
 
-    def initialize(self, webserver):
+    def initialize(self, executor, core, webserver):
+        self._executor = executor
+        self._core = core
         self._webserver = webserver
 
     @tornado.gen.coroutine
     def get(self, uri):
-        global counter
-        counter += 1
-        current_counter = str(counter)
+        '''
+        '''        
+        dyn = self.request.remote_ip
 
-        print ("ABOUT to spawn thread for counter:%s" % (current_counter,))
-        result = yield self.executor.submit(long_blocking_function,
-                                            index=current_counter,
-                                            sleep_time=5)
-        self.write(result)
-        print ("DONE with the long function")
+        #self._webserver.handle(self)
+        res = yield self._executor.submit(self._core.get, a=100, b=200, c=dyn)
+
+        self.write(res)
+
 
 class WebServer:
 
-    def __init__(self, port=3333):
+    def __init__(self, port=8888):
         '''
         '''
         self._port = port
 
-    def start(self):
+    def start(self, core):
         '''
         '''
 
@@ -76,7 +48,9 @@ class WebServer:
         port = self._port
 
         webapp = tornado.web.Application([
-            (r'(/)', MainHandler, {'webserver':self})
+            (r'(/bar)', MainHandler, {'executor':ThreadPoolExecutor(max_workers=10),
+                                      'core':core,
+                                      'webserver':self})
         ])
 
         webapp.listen(port, max_buffer_size=1024 * 1024 * 150000)
@@ -85,5 +59,7 @@ class WebServer:
         tornado.ioloop.IOLoop.instance().start()
 
 
+core = Core()
+
 ws = WebServer()
-ws.start()
+ws.start(core)
