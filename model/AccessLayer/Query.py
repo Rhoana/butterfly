@@ -1,21 +1,15 @@
-
 class Query(object):
-    def __init__(self):
-        self.view = ""
-        self.z = 0
-        self.id = 0
-        self.height = 0
-        self.format = ""
-        self.width = 0
-        self.feature = ""
-        self.resolution = 0
-        self.x = 0
-        self.y = 0
-        
-    # Start of user code -> properties/constructors for Query class
-
-    # End of user code
-    # Start of user code -> methods for Query class
-
-    # End of user code
-
+    raw = dict()
+    basic = {
+        'format': 'png',
+        'feature': 'data',
+        'view': 'grayscale',
+    }
+    def __init__(self,**kwargs):
+        methods = ['feature','format','view','id']
+        groups = ['experiment','sample','dataset','channel']
+        box = ['x','y','z','height','width','depth','resolution']
+        allkeys = ['datapath'] + box + groups + methods
+        rawlist = [k for k in allkeys if k in kwargs]
+        for key in rawlist:
+            self.raw[key] = kwargs[key]

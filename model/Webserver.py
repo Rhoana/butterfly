@@ -1,16 +1,27 @@
+from CoreLayer import Core
+from AccessLayer import API
+from AccessLayer import OCP
+from tornado.web import Application
+from tornado.ioloop import IOLoop
 
 class Webserver(object):
-    def __init__(self):
-        self._core = None
-        
-    # Start of user code -> properties/constructors for Webserver class
+    maxbuffer = 1024 * 1024 * 150000
+    def __init__(self,_port=8888):
+        self._core = Core()
+        port = _port
 
-    # End of user code
-    def handle(self, request):
-        # Start of user code protected zone for handle function body
-        return ""
-        # End of user code	
-    # Start of user code -> methods for Webserver class
+        appio = {
+            '_server': self
+        }
+        webapp = Application([
+            (r'(/api)', API, appio),
+            (r'(/ocp)', OCP, appio)
+        ])
 
-    # End of user code
+        webapp.listen(port, max_buffer_size=self.maxbuffer)
+        IOLoop.instance().start()
 
+    def handle(self,_handler,_query):
+        _handler.write(_query.raw['feature'])
+
+Webserver()

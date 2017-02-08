@@ -1,17 +1,22 @@
-class RequestHandler(object):
-    pass
-    # Start of user code -> properties/constructors for RequestHandler class(interface)
+from tornado import web
+from tornado import gen
+from concurrent.futures import ThreadPoolExecutor
 
-    # End of user code
-    def parse(self, request):
-        # Start of user code protected zone for parse function body
-        return None
-        # End of user code	
-    def check(self, query):
-        # Start of user code protected zone for check function body
-        return None
-        # End of user code	
-    # Start of user code -> methods for RequestHandler class(interface)
+class RequestHandler(web.RequestHandler):
 
-    # End of user code
+    def initialize(self, _server):
+        self._ex = ThreadPoolExecutor(max_workers=10)
+        self._server = _server
 
+    # Each Handler must define
+    def parse(self, _request):
+        pass
+
+    @gen.coroutine
+    def get(self, *args):
+        handle = self._server.handle
+        query = yield self._ex.submit(self.parse, *args)
+        yield self._ex.submit(handle, self, query)
+
+    def check(self, _query):
+        return _query

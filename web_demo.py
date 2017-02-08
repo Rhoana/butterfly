@@ -1,4 +1,4 @@
-import time 
+import time
 import tornado
 import tornado.gen
 import tornado.web
@@ -23,8 +23,7 @@ class MainHandler(tornado.web.RequestHandler):
 
     @tornado.gen.coroutine
     def get(self, uri):
-        '''
-        '''        
+
         dyn = self.request.remote_ip
 
         #self._webserver.handle(self)

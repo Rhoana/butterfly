@@ -1,0 +1,2 @@
+tornado>=4.4.2
+futures>=3.0.5
