@@ -23,7 +23,7 @@ def parseArgv(argv):
     }
 
     parser = argparse.ArgumentParser(description=help['bfly'])
-    parser.add_argument('port', type=int, nargs='?', help=help['port'])
+    parser.add_argument('port', type=int, nargs='?', default=2001, help=help['port'])
     parser.add_argument('-e','--exp', metavar='exp', help= help['folder'])
     parser.add_argument('-o','--out', metavar='out', help= help['save'])
     return vars(parser.parse_args())

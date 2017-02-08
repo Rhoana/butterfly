@@ -1,3 +1,4 @@
+import time
 from CoreLayer import Core
 from AccessLayer import API
 from AccessLayer import OCP
@@ -6,7 +7,7 @@ from tornado.ioloop import IOLoop
 
 class Webserver(object):
     maxbuffer = 1024 * 1024 * 150000
-    def __init__(self,_port=8888):
+    def __init__(self,_port):
         self._core = Core()
         port = _port
 
@@ -23,8 +24,9 @@ class Webserver(object):
 
     def handle(self,_handler,_query):
         client_id = _query.raw['feature']
-        print 'starting' + client_id
-        time.sleep(10)
-        print 'done' + client_id
-        print '-'*20
-        _handler.write(client_id)
+        print 'starting ' + client_id
+        time.sleep(4)
+        done_txt = '\ndone with {ID}\n'+'-'*40
+        print done_txt.replace('{ID}',client_id)
+        _handler.set_header("Content-Type", "text/plain")
+        _handler.write(client_id+'\n')
