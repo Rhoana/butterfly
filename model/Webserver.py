@@ -1,4 +1,5 @@
 import time
+import logging
 from CoreLayer import Core
 from AccessLayer import API
 from AccessLayer import OCP
@@ -24,9 +25,25 @@ class Webserver(object):
 
     def handle(self,_handler,_query):
         client_id = _query.raw['feature']
-        print 'starting ' + client_id
+        self.log('start',id=client_id)
         time.sleep(4)
-        done_txt = '\ndone with {ID}\n'+'-'*40
-        print done_txt.replace('{ID}',client_id)
+        self.log('done',id=client_id)
         _handler.set_header("Content-Type", "text/plain")
         _handler.write(client_id+'\n')
+
+    def log(self,action,**kwargs):
+        def start(kwargs):
+            c_id = kwargs['id']
+            start_log = 'Starting {ID}'
+            started = start_log.replace('{ID}',c_id)
+            logging.info(started)
+        def done(kwargs):
+            c_id = kwargs['id']
+            done_log = 'done with {ID}\n'+'-'*40
+            is_done = done_log.replace('{ID}',c_id)
+            logging.info(is_done)
+        actions ={
+            'start':start,
+            'done':done
+        }
+        actions[action](kwargs)

@@ -1,5 +1,6 @@
 from Webserver import Webserver
 import sys, argparse
+import logging
 
 def start(_argv):
     '''
@@ -7,9 +8,18 @@ def start(_argv):
     EM Data server
     2017 VCG + Lichtman Lab
     '''
+    begin ='''
+Started Butterfly on port {port}
+    '''
+
     args = parseArgv(_argv)
     port = args['port']
-    Webserver(port)
+
+    logging.basicConfig(filename='bfly.log', level=logging.INFO)
+    begin_log = begin.replace('{port}',str(port))
+    logging.info(begin_log)
+
+    server = Webserver(port)
     return 0
 
 def parseArgv(argv):
