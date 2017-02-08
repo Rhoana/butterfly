@@ -22,4 +22,9 @@ class Webserver(object):
         IOLoop.instance().start()
 
     def handle(self,_handler,_query):
-        _handler.write(_query.raw['feature'])
+        client_id = _query.raw['feature']
+        print 'starting' + client_id
+        time.sleep(10)
+        print 'done' + client_id
+        print '-'*20
+        _handler.write(client_id)
