@@ -23,5 +23,3 @@ class Webserver(object):
 
     def handle(self,_handler,_query):
         _handler.write(_query.raw['feature'])
-
-Webserver()

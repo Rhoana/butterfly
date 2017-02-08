@@ -1,5 +1,4 @@
-__all__ = ["DataType", "np.array", "Webserver"]
+__all__ = ["Main", "Webserver"]
 
-from .DataType import DataType
-from .np.array import np.array
 from .Webserver import Webserver
+from .Main import Main
