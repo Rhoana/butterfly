@@ -1,0 +1,14 @@
+
+class Mojo(Datasource):
+    pass
+    # Start of user code -> properties/constructors for Mojo class
+
+    # End of user code
+    def load_tile(self, id):
+        # Start of user code protected zone for load_tile function body
+        return None
+        # End of user code	
+    # Start of user code -> methods for Mojo class
+
+    # End of user code
+
