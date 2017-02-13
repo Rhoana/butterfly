@@ -106,31 +106,34 @@ class Query(object):
         return self.raw.get('depth',-1)
 
     @property
-    def scale(self):
-        return float(2 ** self.resolution)
-    @property
     def bounds(self):
         x0y0 = np.array(self.x, self.y)
         x1y1 = x0y0 + [self.width,self.height]
-        return [x0y0, x1y1]
+        return np.r_[x0y0, x1y1]
+
+    @property
+    def scale(self):
+        return float(2 ** self.resolution)
+
     @property
     def scaled_bounds(self):
-        return [b//self.scale for b in self.bounds]
+        return self.bounds // self.scale
+
     @property
     def indexed_bounds(self):
-        x0y0,x1y1 = self.scaled_bounds
-        bounds_start = np.floor(x0y0/self.blocksize).astype(int)
-        bounds_end = np.ceil(x1y1/self.blocksize).astype(int)
-        return [bounds_start, bounds_end]
+        raw_bounds = self.scaled_bounds / self.blocksize
+        bounds_start = np.floor(raw_bounds[:2]).astype(int)
+        bounds_end = np.ceil(raw_bounds[2:]).astype(int)
+        return np.r_[bounds_start, bounds_end]
 
-    def index_offset(self, tile_index):
-        indexed_origin = self.indexed_bounds[0]
-        return tile_index - indexed_origin
+    def tile_bounds(self, tile_index):
+        tile_start = self.blocksize * tile_index
+        tile_end = self.blocksize * (tile_index+1)
+        return np.r_[tile_start, tile_end]
 
     def scale_offset(self, tile_pixel):
-        scaled_origin = self.scaled_bounds[0]
+        scaled_origin = self.scaled_bounds[:2]
         return tile_pixel - scaled_origin
-
 
     def log(self,action,**kwargs):
         statuses = {

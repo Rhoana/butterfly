@@ -31,27 +31,25 @@ class Core(object):
         return write_tiles(query, tiles)
 
     def find_tiles(self, query):
-        box_start, box_end = query.indexed_bounds
+        box = query.indexed_bounds
+        box_start, box_end = np.split(box, 2)
         index_grid = np.ones(box_end - box_start)
-        offsets_needed = np.argwhere(index_grid)
-        tiles_needed = offsets_needed+box_start
+        tiles_needed = np.argwhere(index_grid) + box_start
 
-        cutshape = query.blocksize*index_grid.shape
-        cutout = np.zeros(cutshape, dtype=self.dtype)
-        fixed = [query.z, query.scale]
+        # all tiles loaded at full size in cutout
+        full_shape = query.blocksize * index_grid.shape
+        cutout = np.zeros(full_shape, dtype=self.dtype)
+        always_same = [query.z, query.scale]
         for tile_index in tiles_needed:
-            offset = query.index_offset(tile_index)
-            [i0,j0] = query.blocksize*(offset)
-            [i1,j1] = query.blocksize*(offset+1)
-            one_tile = list(tile_index)+fixed
-            tile = self.load(*one_tile)
-            cutout[j0:j1,i0:i1] = tile
+            tile_bounds = query.tile_bounds(tile_index)
+            x0, y0, x1, y1 = query.scale_offset(tile_bounds)
+            one_tile = list(tile_index)+always_same
+            tile = self.load_tile(*one_tile)
+            cutout[y0:y1,x0:x1] = tile
 
-        x0y0,x1y1 = query.scaled_bounds
-        origin = box_start * query.blocksize
-        left,top = (x0y0 - origin).astype(int)
-        right,down = (x1y1 - origin).astype(int)
-        return cutout[top:down,left:right]
+        px_box = query.scale_offset(query.scaled_bounds)
+        left,top,right,down = px_box.astype(int)
+        return cutout[top:down, left:right]
 
     def load_tiles(self, query, im_ids):
         all_tiles = [load_tile(query,im) for im in im_ids]
