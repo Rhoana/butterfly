@@ -45,9 +45,9 @@ class Core(object):
             tile = self.load_tile(one_tile)
             cutout[y0:y1,x0:x1] = tile
 
-        px_box = query.scale_offset(query.scaled_bounds)
-        left,top,right,down = px_box.astype(int)
-        return cutout[top:down, left:right]
+        all_bounds = query.scaled_bounds
+        X0, Y0, X1, Y1 = query.scale_offset(all_bounds)
+        return cutout[Y0:Y1, X0:X1]
 
     def load_tile(self, t_id):
         # Load from cache or from disk if needed

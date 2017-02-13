@@ -133,7 +133,7 @@ class Query(object):
 
     def scale_offset(self, tile_pixel):
         scaled_origin = self.scaled_bounds[:2]
-        return tile_pixel - scaled_origin
+        return (tile_pixel - scaled_origin).astype(int)
 
     def log(self,action,**kwargs):
         statuses = {
