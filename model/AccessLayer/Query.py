@@ -133,13 +133,13 @@ class Query(object):
 
 
     def log(self,action,**kwargs):
-        statuses = [
-            'info': ['miss']
-        ]
+        statuses = {
+            'miss': 'info'
+        }
         actions ={
             'miss': 'Missing {lost} from {group}'
         }
+        status = statuses[action]
         message = actions[action].format(**kwargs)
-        status = next(s for s in statuses if action in s)
         getattr(logging, status)(message)
         return message

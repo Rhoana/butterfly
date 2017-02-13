@@ -34,7 +34,7 @@ class Core(object):
         box_start, box_end = query.indexed_bounds
         index_grid = np.ones(box_end - box_start)
         offsets_needed = np.argwhere(index_grid)
-        tiles_needed = box_start+offsets_needed
+        tiles_needed = offsets_needed+box_start
 
         cutshape = query.blocksize*index_grid.shape
         cutout = np.zeros(cutshape, dtype=self.dtype)
@@ -70,7 +70,7 @@ class Core(object):
         return ""
 
     def get_json(self,query):
-        return '[]'
+        return '[test]'
 
     def update_feature(self, query, volume):
         return 0
