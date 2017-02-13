@@ -25,10 +25,8 @@ class Core(object):
         return dbclass()
 
     def get_data(self, query):
-        image_ids = self.find_tiles(query)
-        # Load from cache or from disk if needed
-        tiles = self.load_tiles(query, image_ids)
-        return write_tiles(query, tiles)
+        image = self.find_tiles(query)
+        return write_image(query, image)
 
     def find_tiles(self, query):
         box = query.indexed_bounds
@@ -43,19 +41,16 @@ class Core(object):
         for tile_index in tiles_needed:
             tile_bounds = query.tile_bounds(tile_index)
             x0, y0, x1, y1 = query.scale_offset(tile_bounds)
-            one_tile = list(tile_index)+always_same
-            tile = self.load_tile(*one_tile)
+            one_tile = Image_ID(tile_index, *always_same)
+            tile = self.load_tile(one_tile)
             cutout[y0:y1,x0:x1] = tile
 
         px_box = query.scale_offset(query.scaled_bounds)
         left,top,right,down = px_box.astype(int)
         return cutout[top:down, left:right]
 
-    def load_tiles(self, query, im_ids):
-        all_tiles = [load_tile(query,im) for im in im_ids]
-        return self.write_tiles(query, im_ids, all_tiles)
-
     def load_tile(self, t_id):
+        # Load from cache or from disk if needed
         cache_tile = self._cache.load_image(query,t_id)
         if len(cache_tile):
             return cache_tile
@@ -64,7 +59,7 @@ class Core(object):
         self._cache.add_image(query,t_id,tile)
         return tile
 
-    def write_tiles(self, query, im_ids, tiles):
+    def write_image(self, query, volume):
         return ""
 
     def get_json(self,query):
