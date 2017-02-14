@@ -1,6 +1,6 @@
+from CacheSource import CacheSource
 from DatabaseLayer import *
 from ImageLayer import *
-from Cache import Cache
 
 class Core(object):
     dnames = {
@@ -18,7 +18,7 @@ class Core(object):
     }
     def __init__(self, dname):
         self._database = self.start_db(dname)
-        self._cache = Cache()
+        self._cache = CacheSource()
 
     def start_db(self, dname):
         dbclass = self.dnames.get(dname, self.basic['dname'])
@@ -37,11 +37,10 @@ class Core(object):
         # all tiles loaded at full size in cutout
         full_shape = query.blocksize * index_grid.shape
         cutout = np.zeros(full_shape, dtype=self.dtype)
-        always_same = [query.z, query.scale]
         for tile_index in tiles_needed:
             tile_bounds = query.tile_bounds(tile_index)
             x0, y0, x1, y1 = query.scale_offset(tile_bounds)
-            one_tile = Image_ID(tile_index, *always_same)
+            one_tile = Image_ID(query, tile_index)
             tile = self.load_tile(one_tile)
             cutout[y0:y1,x0:x1] = tile
 
