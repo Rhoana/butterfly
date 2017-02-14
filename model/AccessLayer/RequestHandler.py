@@ -36,10 +36,14 @@ class RequestHandler(web.RequestHandler):
     def log(self, action, **kwargs):
         statuses = {
             'start': 'info',
+            'exist': 'error',
+            'check' : 'error',
             'done': 'info'
         }
         actions = {
             'start': 'Starting {id}',
+            'exist': 'Missing {term} parameter',
+            'check' : 'The {term} {val} is not {check}',
             'done': 'Done with {id}\n'+'-'*40
         }
         status = statuses[action]

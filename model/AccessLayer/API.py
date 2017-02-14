@@ -1,4 +1,5 @@
 from Query import Query
+from Settings import *
 from RequestHandler import RequestHandler
 
 class API(RequestHandler):
@@ -151,17 +152,3 @@ class API(RequestHandler):
         # TODO: implement this
         msg ="The server does not yet support /api/mask requests"
         raise HTTPError(self.request.uri, 501, msg, [], None)
-
-    def log(self,action,**kwargs):
-        statuses = {
-            'exist': 'error',
-            'check' : 'error'
-        }
-        actions = {
-            'exist': 'Missing {term} parameter',
-            'check' : 'The {term} {val} is not {check}'
-        }
-        status = statuses[action]
-        message = actions[action].format(**kwargs)
-        getattr(logging, status)(message)
-        return message
