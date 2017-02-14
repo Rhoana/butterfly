@@ -51,12 +51,12 @@ class Core(object):
 
     def load_tile(self, t_id):
         # Load from cache or from disk if needed
-        cache_tile = self._cache.load_image(query,t_id)
+        cache_tile = self._cache.get_tile(query,t_id)
         if len(cache_tile):
             return cache_tile
         source_class = tile_id['disk_format']
         tile = source_class.load_tile(tile_id)
-        self._cache.add_image(query,t_id,tile)
+        self._cache.add_tile(query,t_id,tile)
         return tile
 
     def write_image(self, query, volume):

@@ -1,6 +1,6 @@
-__all__ = ["Cache", "Core", "ImageSource", "CacheSource"]
+__all__ = ["Cache", "Core", "TileSource", "CacheSource"]
 
 from .Cache import Cache
 from .Core import Core
-from .ImageSource import ImageSource
+from .TileSource import TileSource
 from .CacheSource import CacheSource

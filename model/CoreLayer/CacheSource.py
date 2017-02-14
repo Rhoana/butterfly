@@ -1,17 +1,19 @@
+import numpy as np
+unknown = ['datapath','blocksize','disk_format']
 
 class CacheSource(object):
     def __init__(self):
-        self._imageSource = []
+        self._tileSource = []
         self.query = None
 
-    def add_image(self, id, content):
-        return 0
+    def add_tile(self, id, content):
+        return np.zeros([2,2])
 
-    def lose_image(self, id):
-        return 0
+    def get_tile(self, id):
+        return np.zeros([2,2])
 
-    def load_image(self, id):
-        return ""
+    def lose_tile(self, id):
+        return 0
 
     def lose_all(self):
         return 0

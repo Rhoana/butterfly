@@ -24,6 +24,10 @@ class Query(object):
             self.log('miss',lost=lost_box,group='box')
 
     @property
+    def key(self):
+        return '_'.join(self[g] for g in self.groups)
+
+    @property
     def is_data(self):
         return self.feature in ['data']
 
