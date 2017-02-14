@@ -7,6 +7,8 @@ class RequestHandler(web.RequestHandler):
 
     def initialize(self, _core):
         self._ex = ThreadPoolExecutor(max_workers=10)
+        self.set_header("Access-Control-Allow-Origin", "*")
+        self.set_header('Access-Control-Allow-Methods', 'GET')
         self._core = _core
 
     # Each Handler must define

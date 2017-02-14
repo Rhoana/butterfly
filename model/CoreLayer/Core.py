@@ -1,6 +1,7 @@
 from CacheSource import CacheSource
 from DatabaseLayer import *
 from ImageLayer import *
+import json
 
 class Core(object):
     dnames = {
@@ -62,7 +63,21 @@ class Core(object):
         return ""
 
     def get_json(self,query):
-        return '[test]'
+        format = {
+            'indent': 4
+        }
+        testing = {
+            'scale': query.scale,
+            'channel': query.channel,
+            'height': query.height,
+            'width': query.width,
+            'format': query.format,
+            'view': query.view,
+            'x': query.x,
+            'y': query.y,
+            'z': query.z
+        }
+        return json.dumps(testing,**format)
 
     def update_feature(self, query, volume):
         return 0

@@ -1,36 +1,57 @@
+from RequestHandler import RequestHandler
 from Query import Query
 from Settings import *
-from RequestHandler import RequestHandler
 
 class API(RequestHandler):
+
+    '''Encode image/mask in this image format (e.g. "tif")'''
+    Q_X = "x"
+    Q_Y = "y"
+    Q_Z = "z"
+    Q_VIEW = "view"
+    Q_WIDTH = "width"
+    Q_HEIGHT = "height"
+    Q_FORMAT = "format"
+    Q_RESOLUTION = "resolution"
+
+    # Query params for grouping
+    Q_EXPERIMENT = "experiment"
+    EXPERIMENTS = "experiments"
+    Q_SAMPLE = "sample"
+    SAMPLES = "samples"
+    Q_DATASET = "dataset"
+    DATASETS = "datasets"
+    Q_CHANNEL = "channel"
+    CHANNELS = "channels"
+
+    NAME = "name"
+    PATH = "path"
+    DATA_TYPE = "data-type"
+    DIMENSIONS = "dimensions"
+    SHORT_DESCRIPTION = "short-description"
 
     def parse(self, request):
 
         whois = self.request.remote_ip
-        settings = {
-            'feature': whois
-        }
-        return Query(**settings)
+        return self.get_data()
 
-    def _get_config(self,kind):
-        # Get the config dictionary for a named kind
-        target = self._get_necessary_param(kind['param'])
-        for d in kind['parent'].get(kind['plural'],[]):
-            if d[self.NAME] == target:
-                return d
-        else:
-            msg = 'Unknown '+kind['name']+': '+ target
-            rh_logger.logger.report_event(msg)
-            raise HTTPError(self.request.uri, 400, msg, [], None)
+    def _get_config(self,terms):
+        # Get the config dictionary for a named terms
+        target = self._get_necessary_param(terms['param'])
+        valid_list = terms['parent'].get(terms['plural'],[])
+        result = next((t for t in valid_list if t == target), None)
+        return self._match_condition(result, result is not None, {
+            'term' : terms['param']
+        })
 
     def get_experiments(self):
         # Handle the /api/experiments GET request
-        experiments = settings.bfly_config.get(self.EXPERIMENTS, [])
+        experiments = bfly_config.get(self.EXPERIMENTS, [])
         return [_[self.NAME] for _ in experiments]
 
     def _get_experiment_config(self):
         return self._get_config({
-            'parent': settings.bfly_config,
+            'parent': bfly_config,
             'plural': self.EXPERIMENTS,
             'param': self.Q_EXPERIMENT,
             'name': 'experiment name'
@@ -39,7 +60,8 @@ class API(RequestHandler):
     def get_samples(self):
         # Handle the /api/samples GET request
         experiment = self._get_experiment_config()
-        return [_[self.NAME] for _ in experiment.get(self.SAMPLES, [])]
+        samples = experiment.get(self.SAMPLES, [])
+        return [_[self.NAME] for _ in samples]
 
     def _get_sample_config(self):
         return self._get_config({
@@ -52,7 +74,8 @@ class API(RequestHandler):
     def get_datasets(self):
         # Handle the /api/datasets GET request
         sample = self._get_sample_config()
-        return [_[self.NAME] for _ in sample.get(self.DATASETS, [])]
+        datasets = sample.get(self.DATASETS, [])
+        return [_[self.NAME] for _ in datasets]
 
     def _get_dataset_config(self):
         return self._get_config({
@@ -65,7 +88,8 @@ class API(RequestHandler):
     def get_channels(self):
         # Handle the /api/channels GET request
         dataset = self._get_dataset_config()
-        return [_[self.NAME] for _ in dataset.get(self.CHANNELS, [])]
+        channels = dataset.get(self.CHANNELS, [])
+        return [_[self.NAME] for _ in channels]
 
     def _get_channel_config(self):
         return self._get_config({
@@ -77,18 +101,18 @@ class API(RequestHandler):
 
     def get_channel_metadata(self):
         # Handle the /api/channel_metadata GET request
-        return self._get_channel_config().copy()
+        return self._get_channel_config()
 
     def _except(self,result,kwargs):
         action = 'exist'
         if 'check' in kwargs:
             kwargs['val'] = result
             action = 'check'
-        message = self.log(action, kwargs)
-        raise HTTPError(self.request.uri, 400, message, [], None)
+        message = self.log(action, **kwargs)
+        #raise HTTPError(self.request.uri, 400, message, [], None)
 
     def _match_condition(self,result,checked,kwargs):
-        if checked: self._except(result, kwargs)
+        if not checked: self._except(result, kwargs)
         return result
 
     def _try_condition(self,result,check,kwargs):
@@ -103,14 +127,14 @@ class API(RequestHandler):
 
     def _get_list_query_argument(self, qparam, whitelist):
         result = self.get_query_argument(qparam, whitelist[0])
-        return self._match_condition(result, result not in whitelist, {
+        return self._match_condition(result, result in whitelist, {
             'check' : 'in '+' '.join(whitelist),
             'term' : qparam
         })
 
     def _get_necessary_param(self, qparam):
         result = self.get_query_argument(qparam, default=None)
-        return self._match_condition(result, result is None, {
+        return self._match_condition(result, result is not None, {
             'term': qparam
         })
 
@@ -123,20 +147,34 @@ class API(RequestHandler):
         return self._try_typecast_int(qparam, result)
 
     def get_data(self):
-        channel = self._get_channel_config()
+        #channel = self.get_channel_metadata()
         x = self._get_int_necessary_param(self.Q_X)
         y = self._get_int_necessary_param(self.Q_Y)
         z = self._get_int_necessary_param(self.Q_Z)
         width = self._get_int_necessary_param(self.Q_WIDTH)
         height = self._get_int_necessary_param(self.Q_HEIGHT)
         resolution = self._get_int_query_argument(self.Q_RESOLUTION)
-        fmt = self._get_list_query_argument(self.Q_FORMAT, settings.SUPPORTED_IMAGE_FORMATS)
-        view = self._get_list_query_argument(self.Q_VIEW, settings.SUPPORTED_IMAGE_VIEWS)
+        fmt = self._get_list_query_argument(self.Q_FORMAT, SUPPORTED_IMAGE_FORMATS)
+        view = self._get_list_query_argument(self.Q_VIEW, SUPPORTED_IMAGE_VIEWS)
+        fmt = 'json'
+        testing = {
+            'resolution': resolution,
+            'channel': 'channel',
+            'height': height,
+            'width': width,
+            'format': fmt,
+            'view': view,
+            'x': x,
+            'y': y,
+            'z': z
+        }
+
+        return Query(**testing)
 
         dtype = getattr(np, channel[self.DATA_TYPE])
         slice_define = [channel[self.PATH], [x, y, z], [width, height, 1]]
         rh_logger.logger.report_event("Encoding image as dtype %s" % repr(dtype))
-        vol = self.core.get(*slice_define, w=resolution, dtype=dtype, view=view)
+        vol = self._core.get(*slice_define, w=resolution, dtype=dtype, view=view)
         self.set_header("Content-Type", "image/"+fmt)
         if fmt in ['zip']:
             output = StringIO.StringIO()
@@ -152,3 +190,6 @@ class API(RequestHandler):
         # TODO: implement this
         msg ="The server does not yet support /api/mask requests"
         raise HTTPError(self.request.uri, 501, msg, [], None)
+
+
+

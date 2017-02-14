@@ -8,7 +8,7 @@ class Query(object):
     box = ['x','y','z','height','width','depth','resolution']
     raw = {
         'format': 'json',
-        'feature': 'data',
+        'feature': 'experiments',
         'view': 'grayscale'
     }
     def __init__(self,**kwargs):
