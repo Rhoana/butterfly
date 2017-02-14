@@ -1,5 +1,3 @@
-import numpy as np
-
 class CacheTile(object):
     def __init__(self, query):
         self._tiles = {}

@@ -1,5 +1,4 @@
 from CacheTile import CacheTile
-import numpy as np
 
 class CacheSource(object):
     def __init__(self):
