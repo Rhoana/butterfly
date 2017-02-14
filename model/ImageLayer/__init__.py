@@ -1,8 +1,8 @@
-__all__ = ["TileSpecs", "Mojo", "Image_ID", "HDF5", "Datasource", "ImageStack"]
+__all__ = ["TileSpecs", "Mojo", "TileQuery", "HDF5", "Datasource", "ImageStack"]
 
 from .TileSpecs import TileSpecs
 from .Mojo import Mojo
-from .Image_ID import Image_ID
+from .TileQuery import TileQuery
 from .HDF5 import HDF5
 from .Datasource import Datasource
 from .ImageStack import ImageStack

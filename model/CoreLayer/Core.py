@@ -41,7 +41,7 @@ class Core(object):
         for tile_index in tiles_needed:
             tile_bounds = query.tile_bounds(tile_index)
             x0, y0, x1, y1 = query.scale_offset(tile_bounds)
-            one_tile = Image_ID(query, tile_index)
+            one_tile = TileQuery(query, tile_index)
             tile = self.load_tile(one_tile)
             cutout[y0:y1,x0:x1] = tile
 

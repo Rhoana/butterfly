@@ -1,4 +1,4 @@
-class Image_ID(object):
+class TileQuery(object):
     def __init__(self, query, xy_index):
 
         self.z = query.z
