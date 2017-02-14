@@ -18,8 +18,8 @@ class Webserver(object):
             'autoreload': True
         }
         webapp = Application([
-            (r'(/api)', API, app_in),
-            (r'(/ocp)', OCP, app_in)
+            (r'/api/(.*)', API, app_in),
+            (r'/ocp/(.*)', OCP, app_in)
         ], **app_set)
 
         webapp.listen(port, max_buffer_size=self.maxbuffer)

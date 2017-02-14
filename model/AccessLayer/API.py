@@ -24,84 +24,65 @@ class API(RequestHandler):
     Q_CHANNEL = "channel"
     CHANNELS = "channels"
 
+    GROUPINGS = {
+        EXPERIMENTS: Q_EXPERIMENT,
+        SAMPLES: Q_SAMPLE,
+        DATASETS: Q_DATASET,
+        CHANNELS: Q_CHANNEL
+    }
+    METADATA = 'channel_metadata'
+    RANKINGS = [EXPERIMENTS, SAMPLES, DATASETS]
+    RANKINGS = RANKINGS + [CHANNELS, METADATA]
+
     NAME = "name"
     PATH = "path"
     DATA_TYPE = "data-type"
     DIMENSIONS = "dimensions"
     SHORT_DESCRIPTION = "short-description"
 
-    def parse(self, request):
-
+    def parse(self, command):
+        if command in self.RANKINGS:
+            print command
+            return self._get_list(command)
         whois = self.request.remote_ip
         return self.get_data()
 
-    def _get_config(self,terms):
-        # Get the config dictionary for a named terms
-        target = self._get_necessary_param(terms['param'])
-        valid_list = terms['parent'].get(terms['plural'],[])
-        result = next((t for t in valid_list if t == target), None)
-        return self._match_condition(result, result is not None, {
-            'term' : terms['param']
-        })
+    def _get_ask(self, _method):
+        param = self.GROUPINGS.get(_method,{})
+        return self._get_necessary_param(param)
+
+    def _get_list(self, _method):
+        features = bfly_config.copy()
+        get_name = lambda g: g.get(self.NAME,'')
+        # List needed methods to find asked _method
+        needed = self.RANKINGS[:self.RANKINGS.index(_method)]
+        # Find the values of methods needed by request
+        asking = map(self._get_ask, needed)
+        # Find all needed groups as asked
+        for need,ask in zip(needed, asking):
+            grouplist = features.get(need,[])
+            # Find group matching name in list of groups 
+            ask_name = lambda g: get_name(g) == ask
+            features = next(filter(ask_name, grouplist),{})
+        # Get list of method groups from parent features group
+        results = features.get(_method, 0)
+        raw = map(get_name, results) if results else features
+        return Query(view=raw)
 
     def get_experiments(self):
-        # Handle the /api/experiments GET request
-        experiments = bfly_config.get(self.EXPERIMENTS, [])
-        return [_[self.NAME] for _ in experiments]
-
-    def _get_experiment_config(self):
-        return self._get_config({
-            'parent': bfly_config,
-            'plural': self.EXPERIMENTS,
-            'param': self.Q_EXPERIMENT,
-            'name': 'experiment name'
-        })
+        return self._get_list(self.EXPERIMENTS)
 
     def get_samples(self):
-        # Handle the /api/samples GET request
-        experiment = self._get_experiment_config()
-        samples = experiment.get(self.SAMPLES, [])
-        return [_[self.NAME] for _ in samples]
-
-    def _get_sample_config(self):
-        return self._get_config({
-            'parent': self._get_experiment_config(),
-            'plural': self.SAMPLES,
-            'param': self.Q_SAMPLE,
-            'name': 'sample name'
-        })
+        return self._get_list(self.SAMPLES)
 
     def get_datasets(self):
-        # Handle the /api/datasets GET request
-        sample = self._get_sample_config()
-        datasets = sample.get(self.DATASETS, [])
-        return [_[self.NAME] for _ in datasets]
-
-    def _get_dataset_config(self):
-        return self._get_config({
-            'parent': self._get_sample_config(),
-            'plural': self.DATASETS,
-            'param': self.Q_DATASET,
-            'name': 'dataset name'
-        })
+        return self._get_list(self.DATASETS)
 
     def get_channels(self):
-        # Handle the /api/channels GET request
-        dataset = self._get_dataset_config()
-        channels = dataset.get(self.CHANNELS, [])
-        return [_[self.NAME] for _ in channels]
-
-    def _get_channel_config(self):
-        return self._get_config({
-            'parent': self._get_dataset_config(),
-            'plural': self.CHANNELS,
-            'param': self.Q_CHANNEL,
-            'name': 'channel'
-        })
+        return self._get_list(self.CHANNELS)
 
     def get_channel_metadata(self):
-        # Handle the /api/channel_metadata GET request
-        return self._get_channel_config()
+        return self._get_list(self.METADATA)
 
     def _except(self,result,kwargs):
         action = 'exist'
