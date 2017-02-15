@@ -1,27 +1,51 @@
+from Settings import *
 import numpy as np
 import logging
 
-class Query(object):
-    methods = ['feature','format','view','id']
-    unknown = ['datapath','blocksize','disk_format']
-    groups = ['experiment','sample','dataset','channel']
-    box = ['x','y','z','height','width','depth','resolution']
+class Query():
+    info_keys = INFOTERMS
+    tile_keys = TILETERMS
+    rankings = RANKINGS[:-1]
+    position = POSITION
     raw = {
-        'format': 'json',
-        'feature': 'experiments',
-        'view': 'grayscale'
+        TILETERMS[0]: FORMAT_LIST[-1],
+        TILETERMS[1]: VIEW_LIST[-1],
+        INFOTERMS[1]: RANKINGS[0]
     }
+
     def __init__(self,**kwargs):
-        allkeys = self.unknown + self.methods
-        self.allkeys = allkeys + self.groups + self.box
+
+        # Add basic list of getters
+        self.groups = map(self._get_group, self.rankings)
+        self.make_getter('tile_keys', '')
+        self.make_getter('info_keys', '')
+        self.make_getter('position', -1)
+        self.make_getter('groups', '')
+
+        # Set all raw attributes
+        self.allkeys = self.tile_keys + self.info_keys
+        self.allkeys = self.allkeys + self.groups + self.position
         rawlist = set(self.allkeys) & set(kwargs.keys())
         for key in rawlist:
             self.raw[key] = kwargs[key]
 
+    def _get_group(self, _method):
+        return GROUPINGS.get(_method,'')
+
+    def get_getter(self, _pos, _default):
+        return lambda self: self.raw.get(_pos,_default)
+
+    def make_getter(self, _list, _default):
+        for pos in getattr(self, _list, []):
+            getter = self.get_getter(pos, _default)
+            setattr(Query, pos, property(getter))
+
     def check(self):
-        lost_box = list(set(self.box)-set(self.raw.key()))
-        if self.is_data and len(lost_box):
-            self.log('miss',lost=lost_box,group='box')
+        needs = set(self.position)
+        haves = set(self.raw_key())
+        lost_pos = list(needs - haves)
+        if self.is_data and len(lost_pos):
+            self.log('miss', lost=lost_pos, group='position')
 
     @property
     def key(self):
@@ -29,7 +53,7 @@ class Query(object):
 
     @property
     def is_data(self):
-        return self.feature in ['data']
+        return self.method in ['data']
 
     @property
     def is_zip(self):
@@ -46,13 +70,29 @@ class Query(object):
         content_type = content_types[is_img]
         return content_type.replace('{fmt}', fmt)
 
-    def update(self, key, value):
-        if key in self.allkeys:
-            self.raw[key] = value
+    @property
+    def result(self):
+        if self.method in self.rankings:
+            return self.list
+        return {
+            'scale': self.scale,
+            'channel': self.channel,
+            'height': self.height,
+            'width': self.width,
+            'format': self.format,
+            'view': self.view,
+            'x': self.x,
+            'y': self.y,
+            'z': self.z
+        }
 
     @property
-    def feature(self):
-        return self.raw.get('feature','')
+    def list(self):
+        return self.raw.get('list',[])
+
+    @property
+    def method(self):
+        return self.raw.get('method','')
     @property
     def format(self):
         return self.raw.get('format','')
@@ -85,29 +125,6 @@ class Query(object):
     @property
     def channel(self):
         return self.raw.get('channel','')
-
-    @property
-    def x(self):
-        return self.raw.get('x',-1)
-    @property
-    def y(self):
-        return self.raw.get('y',-1)
-    @property
-    def z(self):
-        return self.raw.get('z',-1)
-
-    @property
-    def resolution(self):
-        return self.raw.get('resolution',-1)
-    @property
-    def width(self):
-        return self.raw.get('width',-1)
-    @property
-    def height(self):
-        return self.raw.get('height',-1)
-    @property
-    def depth(self):
-        return self.raw.get('depth',-1)
 
     @property
     def bounds(self):

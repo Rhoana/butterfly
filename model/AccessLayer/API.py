@@ -1,88 +1,46 @@
 from RequestHandler import RequestHandler
+from urllib2 import HTTPError
 from Query import Query
 from Settings import *
 
 class API(RequestHandler):
 
-    '''Encode image/mask in this image format (e.g. "tif")'''
-    Q_X = "x"
-    Q_Y = "y"
-    Q_Z = "z"
-    Q_VIEW = "view"
-    Q_WIDTH = "width"
-    Q_HEIGHT = "height"
-    Q_FORMAT = "format"
-    Q_RESOLUTION = "resolution"
-
-    # Query params for grouping
-    Q_EXPERIMENT = "experiment"
-    EXPERIMENTS = "experiments"
-    Q_SAMPLE = "sample"
-    SAMPLES = "samples"
-    Q_DATASET = "dataset"
-    DATASETS = "datasets"
-    Q_CHANNEL = "channel"
-    CHANNELS = "channels"
-
-    GROUPINGS = {
-        EXPERIMENTS: Q_EXPERIMENT,
-        SAMPLES: Q_SAMPLE,
-        DATASETS: Q_DATASET,
-        CHANNELS: Q_CHANNEL
-    }
-    METADATA = 'channel_metadata'
-    RANKINGS = [EXPERIMENTS, SAMPLES, DATASETS]
-    RANKINGS = RANKINGS + [CHANNELS, METADATA]
-
-    NAME = "name"
-    PATH = "path"
-    DATA_TYPE = "data-type"
-    DIMENSIONS = "dimensions"
-    SHORT_DESCRIPTION = "short-description"
+    NAME = INFOTERMS[0]
 
     def parse(self, command):
-        if command in self.RANKINGS:
+        if command in RANKINGS:
             print command
             return self._get_list(command)
         whois = self.request.remote_ip
         return self.get_data()
 
-    def _get_ask(self, _method):
-        param = self.GROUPINGS.get(_method,{})
-        return self._get_necessary_param(param)
+    def _get_ask(self, _method, _list):
+        param = GROUPINGS.get(_method,'')
+        return self._get_list_query_argument(param,_list,'')
 
     def _get_list(self, _method):
+        terms = {
+            'method': _method,
+            'format': 'json'
+        }
         features = bfly_config.copy()
         get_name = lambda g: g.get(self.NAME,'')
         # List needed methods to find asked _method
-        needed = self.RANKINGS[:self.RANKINGS.index(_method)]
-        # Find the values of methods needed by request
-        asking = map(self._get_ask, needed)
+        needed = RANKINGS[:RANKINGS.index(_method)]
         # Find all needed groups as asked
-        for need,ask in zip(needed, asking):
+        for need in needed:
+            # Find the value of method needed
             grouplist = features.get(need,[])
+            groupnames = map(get_name, grouplist)
+            ask = self._get_ask(need, groupnames)
+            terms[need] = ask
             # Find group matching name in list of groups 
-            ask_name = lambda g: get_name(g) == ask
-            features = next(filter(ask_name, grouplist),{})
+            features = grouplist[groupnames.index(ask)]
         # Get list of method groups from parent features group
-        results = features.get(_method, 0)
-        raw = map(get_name, results) if results else features
-        return Query(view=raw)
-
-    def get_experiments(self):
-        return self._get_list(self.EXPERIMENTS)
-
-    def get_samples(self):
-        return self._get_list(self.SAMPLES)
-
-    def get_datasets(self):
-        return self._get_list(self.DATASETS)
-
-    def get_channels(self):
-        return self._get_list(self.CHANNELS)
-
-    def get_channel_metadata(self):
-        return self._get_list(self.METADATA)
+        terms.update(features)
+        result_list = features.get(_method, [])
+        name_list = map(get_name, result_list)
+        return Query(list=name_list,**terms)
 
     def _except(self,result,kwargs):
         action = 'exist'
@@ -90,7 +48,7 @@ class API(RequestHandler):
             kwargs['val'] = result
             action = 'check'
         message = self.log(action, **kwargs)
-        #raise HTTPError(self.request.uri, 400, message, [], None)
+        raise HTTPError(self.request.uri, 400, message, [], None)
 
     def _match_condition(self,result,checked,kwargs):
         if not checked: self._except(result, kwargs)
@@ -106,10 +64,10 @@ class API(RequestHandler):
             'term' : qparam
         })
 
-    def _get_list_query_argument(self, qparam, whitelist):
-        result = self.get_query_argument(qparam, whitelist[0])
+    def _get_list_query_argument(self, qparam, whitelist, _default):
+        result = self.get_query_argument(qparam, _default)
         return self._match_condition(result, result in whitelist, {
-            'check' : 'in '+' '.join(whitelist),
+            'check' : 'one of ['+', '.join(whitelist)+']',
             'term' : qparam
         })
 
@@ -128,19 +86,19 @@ class API(RequestHandler):
         return self._try_typecast_int(qparam, result)
 
     def get_data(self):
-        #channel = self.get_channel_metadata()
-        x = self._get_int_necessary_param(self.Q_X)
-        y = self._get_int_necessary_param(self.Q_Y)
-        z = self._get_int_necessary_param(self.Q_Z)
-        width = self._get_int_necessary_param(self.Q_WIDTH)
-        height = self._get_int_necessary_param(self.Q_HEIGHT)
-        resolution = self._get_int_query_argument(self.Q_RESOLUTION)
-        fmt = self._get_list_query_argument(self.Q_FORMAT, SUPPORTED_IMAGE_FORMATS)
-        view = self._get_list_query_argument(self.Q_VIEW, SUPPORTED_IMAGE_VIEWS)
-        fmt = 'json'
+        channel = self._get_list(RANKINGS[-1])
+        x = self._get_int_necessary_param(self.x)
+        y = self._get_int_necessary_param(self.y)
+        z = self._get_int_necessary_param(self.z)
+        width = self._get_int_necessary_param(self.width)
+        height = self._get_int_necessary_param(self.height)
+        resolution = self._get_int_query_argument(self.resolution)
+        fmt = self._get_list_query_argument(*FORMAT_LIST)
+        view = self._get_list_query_argument(*VIEW_LIST)
+
         testing = {
+            'feature': 'data',
             'resolution': resolution,
-            'channel': 'channel',
             'height': height,
             'width': width,
             'format': fmt,
@@ -152,14 +110,12 @@ class API(RequestHandler):
 
         return Query(**testing)
 
-        dtype = getattr(np, channel[self.DATA_TYPE])
         slice_define = [channel[self.PATH], [x, y, z], [width, height, 1]]
-        rh_logger.logger.report_event("Encoding image as dtype %s" % repr(dtype))
-        vol = self._core.get(*slice_define, w=resolution, dtype=dtype, view=view)
+        vol = self._core.get(*slice_define, w=resolution, view=view)
         self.set_header("Content-Type", "image/"+fmt)
         if fmt in ['zip']:
             output = StringIO.StringIO()
-            volstring = vol.transpose(1,0,2).astype(np.uint32).tostring('F')
+            volstring = vol.tostring('F')
             output.write(zlib.compress(volstring))
             content = output.getvalue()
         else:
@@ -171,6 +127,3 @@ class API(RequestHandler):
         # TODO: implement this
         msg ="The server does not yet support /api/mask requests"
         raise HTTPError(self.request.uri, 501, msg, [], None)
-
-
-
