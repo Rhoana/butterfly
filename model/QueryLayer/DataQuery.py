@@ -1,24 +1,13 @@
-from Settings import *
+from Query import Query
 import numpy as np
 import logging
 
-class Query():
-    rankings = RANKINGS[:-1]
-    METADATA = RANKINGS[-1]
-    tile_keys = TILETERMS
-    data_keys = DATATERMS
-    info_keys = INFOTERMS
-    position = POSITION
-    PATH = TILETERMS[2]
-    TYPE = DATATERMS[0]
-    BLOCK = DATATERMS[1]
-    NAME = INFOTERMS[0]
-    raw = {}
+class DataQuery(Query):
 
-    def __init__(self,**kwargs):
+    def __init__(self,*args,**kwargs):
 
         # Add basic list of getters
-        self.groups = map(self._get_group, self.rankings)
+        self.groups = map(self.grouper, self.rankings)
         self.X,self.Y,self.Z = self.position[:3]
         self.make_getter('tile_keys', '')
         self.make_getter('data_keys', '')
@@ -27,22 +16,13 @@ class Query():
         self.make_getter('groups', '')
 
         # Set all raw attributes
-        self.allkeys = self.tile_keys + self.info_keys
-        self.allkeys = self.allkeys + self.groups + self.position
-        rawlist = set(self.allkeys) & set(kwargs.keys())
-        for key in rawlist:
+        concat = lambda a,b: a+getattr(self,b)
+        keys = [[],'tile_keys','info_keys','data_keys']
+        keys = keys + ['position','groups']
+        allkeys = reduce(concat, keys)
+        havekeys = set(kwargs.keys())
+        for key in set(allkeys) & havekeys:
             self.raw[key] = kwargs[key]
-
-    def _get_group(self, _method):
-        return GROUPINGS.get(_method,'')
-
-    def get_getter(self, _pos, _default):
-        return lambda self: self.raw.get(_pos,_default)
-
-    def make_getter(self, _list, _default):
-        for pos in getattr(self, _list, []):
-            getter = self.get_getter(pos, _default)
-            setattr(Query, pos, property(getter))
 
     def check(self):
         needs = set(self.position)
@@ -57,40 +37,15 @@ class Query():
         return '_'.join(map(get,self.groups))
 
     @property
-    def is_data(self):
-        return self.method in ['data']
-
-    @property
     def is_zip(self):
-        return self.format in ['zip']
+        return self.att(self.FORM) in ['zip']
 
     @property
     def content_type(self):
-        content_types = [
-            'application/{fmt}',
-            'image/{fmt}',
-        ]
-        fmt = self.format
-        is_img = self.is_data and not self.is_zip
-        content_type = content_types[is_img]
+        is_img = not self.is_zip
+        fmt = self.att(self.FORM)
+        content_type = self.content_types[is_img]
         return content_type.replace('{fmt}', fmt)
-
-    @property
-    def result(self):
-        if self.method in self.rankings:
-            return self.list
-        if self.method in [self.METADATA]:
-            return {
-                self.PATH: getattr(self,self.PATH),
-                self.TYPE: getattr(self,self.TYPE),
-                'dimensions': {
-                    self.X: self.x,
-                    self.Y: self.y,
-                    self.Z: self.z
-                },
-                self.NAME: self.name
-            }
-        return self.list
 
     @property
     def blocksize(self):
@@ -136,14 +91,3 @@ class Query():
         scaled_origin = self.scaled_bounds[:2]
         return (tile_pixel - scaled_origin).astype(int)
 
-    def log(self,action,**kwargs):
-        statuses = {
-            'miss': 'info'
-        }
-        actions ={
-            'miss': 'Missing {lost} from {group}'
-        }
-        status = statuses[action]
-        message = actions[action].format(**kwargs)
-        getattr(logging, status)(message)
-        return message

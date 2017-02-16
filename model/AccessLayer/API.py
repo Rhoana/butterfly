@@ -1,6 +1,7 @@
 from RequestHandler import RequestHandler
+from QueryLayer import InfoQuery
+from QueryLayer import DataQuery
 from urllib2 import HTTPError
-from Query import Query
 from Settings import *
 
 class API(RequestHandler):
@@ -62,7 +63,7 @@ class API(RequestHandler):
         raw_terms[self.LIST] = map(get_name, result_list)
         terms = self._find_terms(raw_terms)
         print terms[self.LIST]
-        return Query(**terms)
+        return InfoQuery(**terms)
 
     def _except(self,result,kwargs):
         action = 'exist'
@@ -130,7 +131,7 @@ class API(RequestHandler):
             'z': z
         }
 
-        return Query(**testing)
+        return DataQuery(**testing)
 
         slice_define = [channel[self.PATH], [x, y, z], [width, height, 1]]
         vol = self._core.get(*slice_define, w=resolution, view=view)

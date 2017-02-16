@@ -1,4 +1,5 @@
 from CacheSource import CacheSource
+from QueryLayer import TileQuery
 from DatabaseLayer import *
 from ImageLayer import *
 import numpy as np

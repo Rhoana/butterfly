@@ -1,4 +1,4 @@
-from Query import Query
+from QueryLayer import InfoQuery
 from RequestHandler import RequestHandler
 
 class OCP(RequestHandler):
@@ -9,4 +9,4 @@ class OCP(RequestHandler):
         settings = {
             'feature': whois
         }
-        return Query(**settings)
+        return InfoQuery(**settings)
