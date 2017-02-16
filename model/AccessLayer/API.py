@@ -5,42 +5,64 @@ from Settings import *
 
 class API(RequestHandler):
 
+    DATA = METHODS[:2]
+    RANKINGS = RANKINGS
     NAME = INFOTERMS[0]
+    LIST = INFOTERMS[2]
+    METHOD = INFOTERMS[1]
+    FORMAT = TILETERMS[0]
+    LISTINGS = METHODS[2:]
 
     def parse(self, command):
-        if command in RANKINGS:
-            print command
+        metamethods = self.LISTINGS + self.RANKINGS
+        if command in metamethods:
             return self._get_list(command)
-        whois = self.request.remote_ip
-        return self.get_data()
+        if command in self.DATA:
+            return self.get_data()
+
+        good_methods = metamethods + self.DATA
+        return self._match_condition(command, False, {
+            'check' : 'one of ['+', '.join(good_methods)+']',
+            'term' : 'command'
+        })
 
     def _get_ask(self, _method, _list):
         param = GROUPINGS.get(_method,'')
         return self._get_list_query_argument(param,_list,'')
 
+    def _find_terms(self, _raw_terms):
+        if _raw_terms[self.METHOD] in self.LISTINGS:
+            _raw_terms[self.LIST] = ['not yet']
+        return _raw_terms
+
     def _get_list(self, _method):
-        terms = {
-            'method': _method,
-            'format': 'json'
+        n_meth = -1
+        raw_terms = {
+            self.METHOD: _method,
+            self.FORMAT: 'json'
         }
         features = bfly_config.copy()
         get_name = lambda g: g.get(self.NAME,'')
         # List needed methods to find asked _method
-        needed = RANKINGS[:RANKINGS.index(_method)]
+        if _method in self.RANKINGS:
+            n_meth = self.RANKINGS.index(_method)
+        needed = self.RANKINGS[:n_meth]
         # Find all needed groups as asked
         for need in needed:
             # Find the value of method needed
             grouplist = features.get(need,[])
             groupnames = map(get_name, grouplist)
             ask = self._get_ask(need, groupnames)
-            terms[need] = ask
+            raw_terms[need] = ask
             # Find group matching name in list of groups 
             features = grouplist[groupnames.index(ask)]
         # Get list of method groups from parent features group
-        terms.update(features)
+        raw_terms.update(features)
         result_list = features.get(_method, [])
-        name_list = map(get_name, result_list)
-        return Query(list=name_list,**terms)
+        raw_terms[self.LIST] = map(get_name, result_list)
+        terms = self._find_terms(raw_terms)
+        print terms[self.LIST]
+        return Query(**terms)
 
     def _except(self,result,kwargs):
         action = 'exist'

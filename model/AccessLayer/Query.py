@@ -3,21 +3,24 @@ import numpy as np
 import logging
 
 class Query():
+    METADATA = RANKINGS[-1]
     rankings = RANKINGS[:-1]
-    info_keys = INFOTERMS
     tile_keys = TILETERMS
+    data_keys = DATATERMS
+    info_keys = INFOTERMS
     position = POSITION
-    raw = {
-        TILETERMS[0]: FORMAT_LIST[-1],
-        TILETERMS[1]: VIEW_LIST[-1],
-        INFOTERMS[1]: RANKINGS[0]
-    }
+    PATH = TILETERMS[2]
+    TYPE = DATATERMS[0]
+    NAME = INFOTERMS[0]
+    raw = {}
 
     def __init__(self,**kwargs):
 
         # Add basic list of getters
         self.groups = map(self._get_group, self.rankings)
+        self.X,self.Y,self.Z = self.position[:3]
         self.make_getter('tile_keys', '')
+        self.make_getter('data_keys', '')
         self.make_getter('info_keys', '')
         self.make_getter('position', -1)
         self.make_getter('groups', '')
@@ -65,7 +68,7 @@ class Query():
             'application/{fmt}',
             'image/{fmt}',
         ]
-        fmt = self.raw['format']
+        fmt = self.format
         is_img = self.is_data and not self.is_zip
         content_type = content_types[is_img]
         return content_type.replace('{fmt}', fmt)
@@ -74,17 +77,18 @@ class Query():
     def result(self):
         if self.method in self.rankings:
             return self.list
-        return {
-            'scale': self.scale,
-            'channel': self.channel,
-            'height': self.height,
-            'width': self.width,
-            'format': self.format,
-            'view': self.view,
-            'x': self.x,
-            'y': self.y,
-            'z': self.z
-        }
+        if self.method in [self.METADATA]:
+            return {
+                self.PATH: getattr(self,self.PATH),
+                self.TYPE: getattr(self,self.TYPE),
+                'dimensions': {
+                    self.X: self.x,
+                    self.Y: self.y,
+                    self.Z: self.z
+                },
+                self.NAME: self.name
+            }
+        return self.list
 
     @property
     def bounds(self):

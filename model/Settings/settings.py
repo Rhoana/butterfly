@@ -51,17 +51,18 @@ GROUPINGS = {
 RANKINGS = [_experiments, _samples, _datasets]
 RANKINGS = RANKINGS + [_channels, _metadata]
 
+TILETERMS = ['format','view','path','disk-format']
+DATATERMS = ['data-type','block-size','dimensions']
 POSITION = ['x','y','z','width','height','resolution']
-TILETERMS = ['format','view','dimensions','disk-format']
-TILETERMS = TILETERMS + ['block-size','data-type','path']
 INFOTERMS = ['name','method','list','short-description','id']
 
 METHODS = ['synapse_ids','neuron_ids','is_synapse','is_neuron']
-METHODS = METHODS + ['data','entity_feature','mask','voxel_list']
+METHODS = METHODS + ['data','mask','entity_feature','voxel_list']
 METHODS = METHODS + ['synapse_keypoint','neuron_keypoint']
 METHODS = METHODS + ['synapse_parent','neuron_children']
 
-all = [FORMAT_LIST, VIEW_LIST, INFOTERMS, TILETERMS]
+all = [INFOTERMS, TILETERMS, DATATERMS]
 all = all + [ALLOWED_PATHS, DATASOURCES, ASSENT_LIST]
 all = all + [MAX_CACHE_SIZE, PORT, POSITION, METHODS]
+all = all + [FORMAT_LIST, VIEW_LIST]
 all = all + [GROUPINGS, RANKINGS]
