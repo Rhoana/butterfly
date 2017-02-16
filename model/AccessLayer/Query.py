@@ -3,14 +3,15 @@ import numpy as np
 import logging
 
 class Query():
-    METADATA = RANKINGS[-1]
     rankings = RANKINGS[:-1]
+    METADATA = RANKINGS[-1]
     tile_keys = TILETERMS
     data_keys = DATATERMS
     info_keys = INFOTERMS
     position = POSITION
     PATH = TILETERMS[2]
     TYPE = DATATERMS[0]
+    BLOCK = DATATERMS[1]
     NAME = INFOTERMS[0]
     raw = {}
 
@@ -52,7 +53,8 @@ class Query():
 
     @property
     def key(self):
-        return '_'.join(self[g] for g in self.groups)
+        get = lambda k: getattr(self,k)
+        return '_'.join(map(get,self.groups))
 
     @property
     def is_data(self):
@@ -91,8 +93,20 @@ class Query():
         return self.list
 
     @property
+    def blocksize(self):
+        blocksize = getattr(self,self.BLOCK)
+        if not len(blocksize):
+            return np.array([512,512],dtype=np.uint16)
+        return np.fromstring(blocksize,dtype=np.uint16)
+
+    @property
+    def dtype(self):
+        dtype = getattr(self,self.TYPE)
+        return getattr(np,dtype,np.uint8)
+
+    @property
     def bounds(self):
-        x0y0 = np.array(self.x, self.y)
+        x0y0 = np.array([self.x, self.y])
         x1y1 = x0y0 + [self.width,self.height]
         return np.r_[x0y0, x1y1]
 
@@ -106,9 +120,11 @@ class Query():
 
     @property
     def indexed_bounds(self):
-        raw_bounds = self.scaled_bounds / self.blocksize
-        bounds_start = np.floor(raw_bounds[:2]).astype(int)
-        bounds_end = np.ceil(raw_bounds[2:]).astype(int)
+        raw_bounds = self.scaled_bounds
+        raw_start = raw_bounds[:2] / self.blocksize
+        raw_end = raw_bounds[2:] / self.blocksize
+        bounds_start = np.floor(raw_start).astype(int)
+        bounds_end = np.ceil(raw_end).astype(int)
         return np.r_[bounds_start, bounds_end]
 
     def tile_bounds(self, tile_index):

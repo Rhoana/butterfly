@@ -17,10 +17,10 @@ class CacheSource(object):
         return src if src else self.add_source(query)
 
     def add_tile(self, query, t_id, content):
-        return get_source(query).add_tile(t_id, content)
+        return self.get_source(query).add_tile(t_id, content)
 
     def get_tile(self, query, t_id):
-        return get_source(query).get_tile(t_id)
+        return self.get_source(query).get_tile(t_id)
 
     def lose_old_tiles(self):
         return 0

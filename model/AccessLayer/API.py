@@ -108,7 +108,7 @@ class API(RequestHandler):
         return self._try_typecast_int(qparam, result)
 
     def get_data(self):
-        channel = self._get_list(RANKINGS[-1])
+        channel = self._get_list(self.RANKINGS[-1])
         x = self._get_int_necessary_param(self.x)
         y = self._get_int_necessary_param(self.y)
         z = self._get_int_necessary_param(self.z)
@@ -119,7 +119,7 @@ class API(RequestHandler):
         view = self._get_list_query_argument(*VIEW_LIST)
 
         testing = {
-            'feature': 'data',
+            'method': 'data',
             'resolution': resolution,
             'height': height,
             'width': width,

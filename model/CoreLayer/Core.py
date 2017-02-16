@@ -1,6 +1,7 @@
 from CacheSource import CacheSource
 from DatabaseLayer import *
 from ImageLayer import *
+import numpy as np
 import json
 
 class Core(object):
@@ -37,25 +38,27 @@ class Core(object):
 
         # all tiles loaded at full size in cutout
         full_shape = query.blocksize * index_grid.shape
-        cutout = np.zeros(full_shape, dtype=self.dtype)
+        cutout = np.zeros(full_shape, dtype=query.dtype)
         for tile_index in tiles_needed:
             tile_bounds = query.tile_bounds(tile_index)
-            x0, y0, x1, y1 = query.scale_offset(tile_bounds)
+            x0, y0 = query.scale_offset(tile_bounds[:2])
+            x1, y1 = query.scale_offset(tile_bounds[2:])
             one_tile = TileQuery(query, tile_index)
-            tile = self.load_tile(one_tile)
+            tile = self.load_tile(query, one_tile)
             cutout[y0:y1,x0:x1] = tile
 
         all_bounds = query.scaled_bounds
-        X0, Y0, X1, Y1 = query.scale_offset(all_bounds)
+        X0, Y0 = query.scale_offset(all_bounds[:2])
+        X1, Y1 = query.scale_offset(all_bounds[2:])
         return cutout[Y0:Y1, X0:X1]
 
-    def load_tile(self, t_id):
+    def load_tile(self, query, t_id):
         # Load from cache or from disk if needed
         cache_tile = self._cache.get_tile(query,t_id)
         if len(cache_tile):
             return cache_tile
-        source_class = tile_id['disk_format']
-        tile = source_class.load_tile(tile_id)
+        source_class = getattr(t_id,t_id.DISK)
+        tile = source_class.load_tile(t_id)
         self._cache.add_tile(query,t_id,tile)
         return tile
 

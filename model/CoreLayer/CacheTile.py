@@ -12,7 +12,7 @@ class CacheTile(object):
 
     def get_tile(self, t_id):
         tile = self.find_tile(t_id)
-        return tile if tile else self.add_tile(t_id)
+        return tile if tile else ''
 
     def lose_tile(self, t_id):
         return 0
