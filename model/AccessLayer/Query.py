@@ -3,9 +3,9 @@ import numpy as np
 import logging
 
 class Query():
+    rankings = RANKINGS[:-1]
     info_keys = INFOTERMS
     tile_keys = TILETERMS
-    rankings = RANKINGS[:-1]
     position = POSITION
     raw = {
         TILETERMS[0]: FORMAT_LIST[-1],
@@ -85,46 +85,6 @@ class Query():
             'y': self.y,
             'z': self.z
         }
-
-    @property
-    def list(self):
-        return self.raw.get('list',[])
-
-    @property
-    def method(self):
-        return self.raw.get('method','')
-    @property
-    def format(self):
-        return self.raw.get('format','')
-    @property
-    def view(self):
-        return self.raw.get('view','')
-    @property
-    def id(self):
-        return self.raw.get('id',-1)
-
-    @property
-    def datapath(self):
-        return self.raw.get('datapath','')
-    @property
-    def blocksize(self):
-        return self.raw.get('blocksize',[])
-    @property
-    def disk_format(self):
-        return self.raw.get('disk_format','')
-
-    @property
-    def experiment(self):
-        return self.raw.get('experiment','')
-    @property
-    def sample(self):
-        return self.raw.get('sample','')
-    @property
-    def dataset(self):
-        return self.raw.get('dataset','')
-    @property
-    def channel(self):
-        return self.raw.get('channel','')
 
     @property
     def bounds(self):
