@@ -5,24 +5,24 @@ from Settings import *
 
 class API(RequestHandler):
 
-    DATA = METHODS[:2]
     RANKINGS = RANKINGS
     NAME = INFOTERMS[0]
     LIST = INFOTERMS[2]
     METHOD = INFOTERMS[1]
     FORMAT = TILETERMS[0]
-    LISTINGS = METHODS[2:]
+    DATAMETHODS = DATAMETHODS
+    METHODS = METHODS
 
     def parse(self, command):
-        metamethods = self.LISTINGS + self.RANKINGS
+        metamethods = self.METHODS + self.RANKINGS
         if command in metamethods:
             return self._get_list(command)
-        if command in self.DATA:
+        if command in self.DATAMETHODS:
             return self.get_data()
 
-        good_methods = metamethods + self.DATA
+        all_methods = metamethods + self.DATAMETHODS
         return self._match_condition(command, False, {
-            'check' : 'one of ['+', '.join(good_methods)+']',
+            'check' : 'one of ['+', '.join(all_methods)+']',
             'term' : 'command'
         })
 
@@ -31,7 +31,7 @@ class API(RequestHandler):
         return self._get_list_query_argument(param,_list,'')
 
     def _find_terms(self, _raw_terms):
-        if _raw_terms[self.METHOD] in self.LISTINGS:
+        if _raw_terms[self.METHOD] in self.METHODS:
             _raw_terms[self.LIST] = ['not yet']
         return _raw_terms
 
