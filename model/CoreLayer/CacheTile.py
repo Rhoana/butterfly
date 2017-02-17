@@ -3,14 +3,14 @@ class CacheTile(object):
         self._tiles = {}
         self.query = query
 
-    def add_tile(self, t_id, content):
-        self._tiles[t_id.key] = content
-        return self.get_tile(t_id)
+    def add_tile(self, t_query, content):
+        self._tiles[t_query.key] = content
+        return self.get_tile(t_query)
 
-    def get_tile(self, t_id):
-        return self._tiles.get(t_id.key, [])
+    def get_tile(self, t_query):
+        return self._tiles.get(t_query.key, [])
 
-    def lose_tile(self, t_id):
+    def lose_tile(self, t_query):
         return []
 
     def lose_all(self):

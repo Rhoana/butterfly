@@ -5,11 +5,12 @@ from urllib2 import HTTPError
 
 class API(RequestHandler):
 
-    def parse(self, command):
+    def parse(self, *args):
+        command = str(args[0])
         if command in self.TXT_METH_LIST:
             return self._get_list(command)
         if command in self.DATA_METH_LIST:
-            return self.get_data()
+            return self.get_data(command)
 
         all_meth = ', '.join(self.ALL_METH_LIST)
         return self._match_condition(command, False, {
@@ -98,43 +99,20 @@ class API(RequestHandler):
         result = self.get_query_argument(qparam, 0)
         return self._try_typecast_int(qparam, result)
 
-    def get_data(self):
-        channel = self._get_list(self.GROUP_METH_LIST[-1])
-        x = self._get_int_necessary_param(self.x)
-        y = self._get_int_necessary_param(self.y)
-        z = self._get_int_necessary_param(self.z)
-        width = self._get_int_necessary_param(self.width)
-        height = self._get_int_necessary_param(self.height)
-        resolution = self._get_int_query_argument(self.resolution)
-        fmt = self._get_list_query_argument(*self.FORMAT_LIST)
+    def get_data(self, method):
+        resolution = self._get_int_query_argument(self.R)
+        form = self._get_list_query_argument(*self.FORMAT_LIST)
         view = self._get_list_query_argument(*self.VIEW_LIST)
-
-        testing = {
-            'method': 'data',
-            'resolution': resolution,
-            'height': height,
-            'width': width,
-            'format': fmt,
-            'view': view,
-            'x': x,
-            'y': y,
-            'z': z
+        terms = {
+            self.R: resolution,
+            self.METH: method,
+            self.FORM: form,
+            self.VIEW: view
         }
+        for k in self.XYZWH:
+            terms[k] = self._get_int_necessary_param(k)
 
-        return DataQuery(**testing)
-
-        slice_define = [channel[self.PATH], [x, y, z], [width, height, 1]]
-        vol = self._core.get(*slice_define, w=resolution, view=view)
-        self.set_header("Content-Type", "image/"+fmt)
-        if fmt in ['zip']:
-            output = StringIO.StringIO()
-            volstring = vol.tostring('F')
-            output.write(zlib.compress(volstring))
-            content = output.getvalue()
-        else:
-            content = cv2.imencode(  "." + fmt, vol)[1].tostring()
-
-        self.write(content)
+        return DataQuery(**terms)
 
     def get_mask(self):
         # TODO: implement this
