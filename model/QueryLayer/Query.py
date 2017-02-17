@@ -17,11 +17,12 @@ class Query():
     FORM = TILETERMS[0]
     VIEW = TILETERMS[1]
     PATH = TILETERMS[2]
+    DISK = TILETERMS[3]
     TYPE = DATATERMS[0]
     BLOCK = DATATERMS[1]
-    DISK = TILETERMS[3]
     NAME = INFOTERMS[0]
     METH = INFOTERMS[1]
+    LIST = INFOTERMS[2]
     raw = {}
 
     def __init__(self,*args,**kwargs):
@@ -41,9 +42,8 @@ class Query():
     def att(self,k):
         return getattr(self,k)
 
-    @property
-    def all(self):
-        return self.raw
+    def getatt(self,k):
+        return self.att(self.att(k))
 
     @property
     def is_data(self):

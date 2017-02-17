@@ -9,6 +9,7 @@ class DataQuery(Query):
         # Add basic list of getters
         self.groups = map(self.grouper, self.rankings)
         self.X,self.Y,self.Z = self.position[:3]
+        self.W,self.H,self.R = self.position[3:]
         self.make_getter('tile_keys', '')
         self.make_getter('data_keys', '')
         self.make_getter('info_keys', '')
@@ -26,15 +27,14 @@ class DataQuery(Query):
 
     def check(self):
         needs = set(self.position)
-        haves = set(self.raw_key())
+        haves = set(self.raw.key())
         lost_pos = list(needs - haves)
         if self.is_data and len(lost_pos):
             self.log('miss', lost=lost_pos, group='position')
 
     @property
     def key(self):
-        get = lambda k: getattr(self,k)
-        return '_'.join(map(get,self.groups))
+        return '_'.join(map(self.att,self.groups))
 
     @property
     def is_zip(self):
@@ -49,25 +49,25 @@ class DataQuery(Query):
 
     @property
     def blocksize(self):
-        blocksize = getattr(self,self.BLOCK)
+        blocksize = self.att(self.BLOCK)
         if not len(blocksize):
             return np.array([512,512],dtype=np.uint16)
         return np.fromstring(blocksize,dtype=np.uint16)
 
     @property
     def dtype(self):
-        dtype = getattr(self,self.TYPE)
+        dtype = self.att(self.TYPE)
         return getattr(np,dtype,np.uint8)
 
     @property
     def bounds(self):
-        x0y0 = np.array([self.x, self.y])
-        x1y1 = x0y0 + [self.width,self.height]
+        x0y0 = np.array(map(self.getatt,'XY'))
+        x1y1 = x0y0 + map(self.getatt,'WH')
         return np.r_[x0y0, x1y1]
 
     @property
     def scale(self):
-        return float(2 ** self.resolution)
+        return float(2 ** self.att(self.R))
 
     @property
     def scaled_bounds(self):

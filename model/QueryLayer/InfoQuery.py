@@ -26,8 +26,7 @@ class InfoQuery(Query):
 
     @property
     def key(self):
-        get = lambda k: getattr(self,k)
-        return '_'.join(map(get,self.groups))
+        return '_'.join(map(self.att,self.groups))
 
     @property
     def content_type(self):
@@ -37,18 +36,18 @@ class InfoQuery(Query):
 
     @property
     def result(self):
-        if self.method in self.rankings:
-            return self.list
-        if self.method in [self.METADATA]:
+        if self.att(self.METH) in self.rankings:
+            return self.att(self.LIST)
+        if self.att(self.METH) in [self.METADATA]:
             return {
-                self.PATH: getattr(self,self.PATH),
-                self.TYPE: getattr(self,self.TYPE),
+                self.PATH: self.att(self.PATH),
+                self.TYPE: self.att(self.TYPE),
                 'dimensions': {
-                    self.X: self.x,
-                    self.Y: self.y,
-                    self.Z: self.z
+                    self.X: self.att(self.X),
+                    self.Y: self.att(self.Y),
+                    self.Z: self.att(self.Z)
                 },
-                self.NAME: self.name
+                self.NAME: self.att(self.NAME)
             }
-        return self.list
+        return self.att(self.LIST)
 

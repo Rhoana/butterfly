@@ -22,5 +22,5 @@ class TileQuery(Query):
 
     @property
     def key(self):
-        rhwxyz = map(self.att,map(self.att,'RHWXYZ'))
+        rhwxyz = map(self.getatt,'RHWXYZ')
         return '_'.join(map(str,rhwxyz))
