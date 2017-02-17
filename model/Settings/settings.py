@@ -2,18 +2,18 @@ from rh_config import config
 import cv2
 import os
 
-bfly_config = config.get("bfly", {})
+BFLY_CONFIG = config.get("bfly", {})
 # Server settings
 
 #HTTP port for server
-PORT = int(bfly_config.get("port", 2001))
+PORT = int(BFLY_CONFIG.get("port", 2001))
 
 #Maximum size of the cache in MiB: 1 GiB by default
-_max_cache = bfly_config.get("max-cache-size", 1024)
+_max_cache = BFLY_CONFIG.get("max-cache-size", 1024)
 MAX_CACHE_SIZE = int(_max_cache) * (1024**2)
 
 #Queries that will enable flags
-ASSENT_LIST = bfly_config.get("assent-list", ('yes', 'y', 'true'))
+ASSENT_LIST = BFLY_CONFIG.get("assent-list", ('yes', 'y', 'true'))
 
 # Output settings
 _default_format = 'png'
@@ -24,12 +24,13 @@ _supported_views = ('grayscale','colormap','rgb')
 
 #List of datasources to try, in order, given a path
 _datasources = ["hdf5", "tilespecs", "mojo", "regularimagestack"]
-DATASOURCES = bfly_config.get("datasource", _datasources)
+DATASOURCES = BFLY_CONFIG.get("datasource", _datasources)
 
 #Paths must start with one of the following allowed paths
-ALLOWED_PATHS = bfly_config.get("allowed-paths", [os.sep])
+ALLOWED_PATHS = BFLY_CONFIG.get("allowed-paths", [os.sep])
 
 # Combined output settings
+TEXT_FORMAT_LIST = ['format', ('json','yaml'), 'json']
 FORMAT_LIST = ['format', _supported_formats, _default_format]
 VIEW_LIST = ['view', _supported_views, _default_view]
 
@@ -41,7 +42,7 @@ _channels = "channels"
 _metadata = 'channel_metadata'
 _entity = 'entity_feature'
 
-GROUPINGS = {
+_groupings = {
     _experiments: 'experiment',
     _samples: 'sample',
     _datasets: 'dataset',
@@ -52,7 +53,7 @@ GROUPMETHODS = [_experiments, _samples, _datasets, _channels]
 INFOMETHODS = [_metadata, _entity]
 DATAMETHODS = ['data','mask']
 
-GROUPTERMS = map(GROUPINGS.get, GROUPMETHODS)
+GROUPTERMS = map(_groupings.get, GROUPMETHODS)
 TILETERMS = ['format','view','path','disk-format']
 DATATERMS = ['data-type','block-size','dimensions']
 POSITION = ['x','y','z','width','height','resolution']
@@ -62,9 +63,3 @@ FEATURES = FEATURES + ['synapse_keypoint','neuron_keypoint']
 FEATURES = FEATURES + ['synapse_parent','neuron_children']
 FEATURES = FEATURES + ['voxel_list']
 
-
-all = [INFOTERMS, TILETERMS, DATATERMS, GROUPTERMS]
-all = all + [ALLOWED_PATHS, DATASOURCES, ASSENT_LIST]
-all = all + [MAX_CACHE_SIZE, PORT, POSITION, FEATURES]
-all = all + [GROUPINGS, DATAMETHODS, GROUPMETHODS, INFOMETHODS]
-all = all + [FORMAT_LIST, VIEW_LIST]

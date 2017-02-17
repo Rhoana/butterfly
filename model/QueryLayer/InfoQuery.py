@@ -1,6 +1,8 @@
 from Query import Query
 import numpy as np
 import logging
+import json
+import yaml
 
 class InfoQuery(Query):
 
@@ -23,15 +25,40 @@ class InfoQuery(Query):
         for key in set(allkeys) & havekeys:
             self.raw[key] = kwargs[key]
 
+        # Text format terms given explicitly
+        self.JSON, self.YAML = self.TEXT_FORMAT_LIST[1][:2]
+        self.formats = {
+            self.JSON: {
+                'terms': {
+                    'indent': 4
+                },
+                'writer': json.dumps,
+                'content': self.JSON
+            },
+            self.YAML: {
+                'terms': {
+                    'default_flow_style': False
+                },
+                'writer': yaml.dump,
+                'content': self.JSON
+            }
+        }
+
     @property
     def key(self):
         return '_'.join(map(self.att,self.GROUP_LIST))
 
     @property
-    def content_type(self):
+    def get_format(self):
         fmt = self.att(self.FORM)
+        fmt = fmt if fmt in self.formats else self.JSON
+        return self.formats[fmt]
+
+    @property
+    def content_type(self):
+        content = self.get_format['content']
         content_type = self.content_types[0]
-        return content_type.replace('{fmt}', fmt)
+        return content_type.replace('{fmt}', content)
 
     @property
     def result(self):
@@ -49,4 +76,10 @@ class InfoQuery(Query):
                 self.NAME: self.att(self.NAME)
             }
         return self.att(self.LIST)
+
+    @property
+    def dump(self):
+        out = self.get_format
+        raw_output = self.result
+        return out['writer'](raw_output,**out['terms'])
 

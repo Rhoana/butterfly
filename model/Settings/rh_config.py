@@ -11,4 +11,3 @@ config_filename = os.environ.get(config_env, default_config_filename)
 if os.path.exists(config_filename):
     config = yaml.safe_load(open(config_filename, "r"))
 
-all = [config]

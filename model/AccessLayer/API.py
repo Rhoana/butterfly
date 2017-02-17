@@ -2,60 +2,50 @@ from RequestHandler import RequestHandler
 from QueryLayer import InfoQuery
 from QueryLayer import DataQuery
 from urllib2 import HTTPError
-from Settings import *
 
 class API(RequestHandler):
 
-    NAME = INFOTERMS[0]
-    LIST = INFOTERMS[2]
-    METHOD = INFOTERMS[1]
-    FORMAT = TILETERMS[0]
-    TXTMETHODS = INFOMETHODS + GROUPMETHODS
-    FEATUREMETHOD = INFOMETHODS[1]
-    GROUPMETHODS = GROUPMETHODS
-    DATAMETHODS = DATAMETHODS
-    INFOMETHODS = INFOMETHODS
-
     def parse(self, command):
-        if command in self.TXTMETHODS:
+        if command in self.TXT_METH_LIST:
             return self._get_list(command)
-        if command in self.DATAMETHODS:
+        if command in self.DATA_METH_LIST:
             return self.get_data()
 
-        all_methods = self.TXTMETHODS + self.DATAMETHODS
+        all_meth = ', '.join(self.ALL_METH_LIST)
         return self._match_condition(command, False, {
-            'check' : 'one of ['+', '.join(all_methods)+']',
+            'check' : 'one of ['+all_meth+']',
             'term' : 'command'
         })
 
-    def _get_ask(self, _method, _list):
-        param = GROUPINGS.get(_method,'')
-        return self._get_list_query_argument(param,_list,'')
+    def _get_ask(self, _term, _list):
+        return self._get_list_query_argument(_term,_list,'')
 
     def _find_terms(self, _raw_terms):
-        if _raw_terms[self.METHOD] in [self.FEATUREMETHOD]:
+        if _raw_terms[self.METH] in [self.FEATUREMETHOD]:
             _raw_terms[self.LIST] = ['not yet']
         return _raw_terms
 
     def _get_list(self, _method):
-        n_meth = -1
+        output = self._get_list_query_argument(*self.TEXT_FORMAT_LIST)
         raw_terms = {
-            self.METHOD: _method,
-            self.FORMAT: 'json'
+            self.METH: _method,
+            self.FORM: output
         }
-        features = bfly_config.copy()
+        n_meth = -1
+        features = self.ROOT_FEATURE.copy()
         get_name = lambda g: g.get(self.NAME,'')
         # List needed methods to find asked _method
-        if _method in self.GROUPMETHODS:
-            n_meth = self.GROUPMETHODS.index(_method)
-        needed = self.GROUPMETHODS[:n_meth]
+        if _method in self.GROUP_METH_LIST:
+            n_meth = self.GROUP_METH_LIST.index(_method)
+        need_meth = self.GROUP_METH_LIST[:n_meth]
+        need_term = self.GROUP_LIST[:n_meth]
         # Find all needed groups as asked
-        for need in needed:
+        for nmeth,nterm in zip(need_meth,need_term):
             # Find the value of method needed
-            grouplist = features.get(need,[])
+            grouplist = features.get(nmeth,[])
             groupnames = map(get_name, grouplist)
-            ask = self._get_ask(need, groupnames)
-            raw_terms[need] = ask
+            ask = self._get_ask(nterm, groupnames)
+            raw_terms[nterm] = ask
             # Find group matching name in list of groups 
             features = grouplist[groupnames.index(ask)]
         # Get list of method groups from parent features group
@@ -63,7 +53,6 @@ class API(RequestHandler):
         result_list = features.get(_method, [])
         raw_terms[self.LIST] = map(get_name, result_list)
         terms = self._find_terms(raw_terms)
-        print terms[self.LIST]
         return InfoQuery(**terms)
 
     def _except(self,result,kwargs):
@@ -110,15 +99,15 @@ class API(RequestHandler):
         return self._try_typecast_int(qparam, result)
 
     def get_data(self):
-        channel = self._get_list(self.GROUPMETHODS[-1])
+        channel = self._get_list(self.GROUP_METH_LIST[-1])
         x = self._get_int_necessary_param(self.x)
         y = self._get_int_necessary_param(self.y)
         z = self._get_int_necessary_param(self.z)
         width = self._get_int_necessary_param(self.width)
         height = self._get_int_necessary_param(self.height)
         resolution = self._get_int_query_argument(self.resolution)
-        fmt = self._get_list_query_argument(*FORMAT_LIST)
-        view = self._get_list_query_argument(*VIEW_LIST)
+        fmt = self._get_list_query_argument(*self.FORMAT_LIST)
+        view = self._get_list_query_argument(*self.VIEW_LIST)
 
         testing = {
             'method': 'data',

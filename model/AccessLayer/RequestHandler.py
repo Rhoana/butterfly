@@ -7,6 +7,22 @@ from concurrent.futures import ThreadPoolExecutor
 
 class RequestHandler(web.RequestHandler):
 
+    NAME = INFOTERMS[0]
+    LIST = INFOTERMS[2]
+    METH = INFOTERMS[1]
+    FORM = TILETERMS[0]
+    VIEW_LIST = VIEW_LIST
+    FORMAT_LIST = FORMAT_LIST
+    TEXT_FORMAT_LIST = TEXT_FORMAT_LIST
+    TXT_METH_LIST = INFOMETHODS + GROUPMETHODS
+    ALL_METH_LIST = INFOMETHODS + GROUPMETHODS + DATAMETHODS
+    FEATUREMETHOD = INFOMETHODS[1]
+    GROUP_METH_LIST = GROUPMETHODS
+    DATA_METH_LIST = DATAMETHODS
+    INFO_METH_LIST = INFOMETHODS
+    ROOT_FEATURE = BFLY_CONFIG
+    GROUP_LIST = GROUPTERMS
+
     def initialize(self, _core):
         self._ex = ThreadPoolExecutor(max_workers=10)
         self.set_header("Access-Control-Allow-Origin", "*")
@@ -39,7 +55,7 @@ class RequestHandler(web.RequestHandler):
         if _query.is_data:
             content = self._core.get_data(_query)
         else:
-            content = self._core.get_json(_query)
+            content = self._core.get_info(_query)
         self.log('done', id=this_method)
         self.write(content)
         return content

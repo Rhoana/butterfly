@@ -3,7 +3,6 @@ from QueryLayer import TileQuery
 from DatabaseLayer import *
 from ImageLayer import *
 import numpy as np
-import json
 
 class Core(object):
     dnames = {
@@ -66,12 +65,8 @@ class Core(object):
     def write_image(self, query, volume):
         return ""
 
-    def get_json(self,query):
-        format = {
-            'indent': 4
-        }
-        testing = query.result
-        return json.dumps(testing,**format)
+    def get_info(self,query):
+        return query.dump
 
     def update_feature(self, query, volume):
         return 0

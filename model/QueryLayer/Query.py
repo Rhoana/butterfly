@@ -10,6 +10,7 @@ class Query():
     METADATA = INFOMETHODS[0]
     IMAGE_METH_LIST = DATAMETHODS
     GROUP_METH_LIST = GROUPMETHODS
+    TEXT_FORMAT_LIST = TEXT_FORMAT_LIST
     GROUP_LIST = GROUPTERMS
     TILE_LIST = TILETERMS
     DATA_LIST = DATATERMS
@@ -28,9 +29,6 @@ class Query():
 
     def __init__(self,*args,**kwargs):
         pass
-
-    def grouper(self, _method):
-        return GROUPINGS.get(_method,'')
 
     def get_getter(self, _pos, _default):
         return lambda self: self.raw.get(_pos,_default)
