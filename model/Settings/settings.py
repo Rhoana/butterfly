@@ -39,31 +39,32 @@ _samples = "samples"
 _datasets = "datasets"
 _channels = "channels"
 _metadata = 'channel_metadata'
+_entity = 'entity_feature'
 
 GROUPINGS = {
     _experiments: 'experiment',
     _samples: 'sample',
     _datasets: 'dataset',
     _channels: 'channel',
-    _metadata: ''
 }
 
-RANKINGS = [_experiments, _samples, _datasets]
-RANKINGS = RANKINGS + [_channels, _metadata]
+GROUPMETHODS = [_experiments, _samples, _datasets, _channels]
+INFOMETHODS = [_metadata, _entity]
+DATAMETHODS = ['data','mask']
 
+GROUPTERMS = map(GROUPINGS.get, GROUPMETHODS)
 TILETERMS = ['format','view','path','disk-format']
 DATATERMS = ['data-type','block-size','dimensions']
 POSITION = ['x','y','z','width','height','resolution']
-INFOTERMS = ['name','method','list','short-description','id']
+INFOTERMS = ['name','method','list','feature','short-description','id']
+FEATURES = ['synapse_ids','neuron_ids','is_synapse','is_neuron']
+FEATURES = FEATURES + ['synapse_keypoint','neuron_keypoint']
+FEATURES = FEATURES + ['synapse_parent','neuron_children']
+FEATURES = FEATURES + ['voxel_list']
 
-METHODS = ['synapse_ids','neuron_ids','is_synapse','is_neuron']
-METHODS = METHODS + ['synapse_keypoint','neuron_keypoint']
-METHODS = METHODS + ['synapse_parent','neuron_children']
-METHODS = METHODS + ['entity_feature','voxel_list']
-DATAMETHODS = ['data','mask']
 
-all = [INFOTERMS, TILETERMS, DATATERMS, DATAMETHODS]
+all = [INFOTERMS, TILETERMS, DATATERMS, GROUPTERMS]
 all = all + [ALLOWED_PATHS, DATASOURCES, ASSENT_LIST]
-all = all + [MAX_CACHE_SIZE, PORT, POSITION, METHODS]
+all = all + [MAX_CACHE_SIZE, PORT, POSITION, FEATURES]
+all = all + [GROUPINGS, DATAMETHODS, GROUPMETHODS, INFOMETHODS]
 all = all + [FORMAT_LIST, VIEW_LIST]
-all = all + [GROUPINGS, RANKINGS]

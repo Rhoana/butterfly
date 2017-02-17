@@ -6,22 +6,23 @@ from Settings import *
 
 class API(RequestHandler):
 
-    RANKINGS = RANKINGS
     NAME = INFOTERMS[0]
     LIST = INFOTERMS[2]
     METHOD = INFOTERMS[1]
     FORMAT = TILETERMS[0]
+    TXTMETHODS = INFOMETHODS + GROUPMETHODS
+    FEATUREMETHOD = INFOMETHODS[1]
+    GROUPMETHODS = GROUPMETHODS
     DATAMETHODS = DATAMETHODS
-    METHODS = METHODS
+    INFOMETHODS = INFOMETHODS
 
     def parse(self, command):
-        metamethods = self.METHODS + self.RANKINGS
-        if command in metamethods:
+        if command in self.TXTMETHODS:
             return self._get_list(command)
         if command in self.DATAMETHODS:
             return self.get_data()
 
-        all_methods = metamethods + self.DATAMETHODS
+        all_methods = self.TXTMETHODS + self.DATAMETHODS
         return self._match_condition(command, False, {
             'check' : 'one of ['+', '.join(all_methods)+']',
             'term' : 'command'
@@ -32,7 +33,7 @@ class API(RequestHandler):
         return self._get_list_query_argument(param,_list,'')
 
     def _find_terms(self, _raw_terms):
-        if _raw_terms[self.METHOD] in self.METHODS:
+        if _raw_terms[self.METHOD] in [self.FEATUREMETHOD]:
             _raw_terms[self.LIST] = ['not yet']
         return _raw_terms
 
@@ -45,9 +46,9 @@ class API(RequestHandler):
         features = bfly_config.copy()
         get_name = lambda g: g.get(self.NAME,'')
         # List needed methods to find asked _method
-        if _method in self.RANKINGS:
-            n_meth = self.RANKINGS.index(_method)
-        needed = self.RANKINGS[:n_meth]
+        if _method in self.GROUPMETHODS:
+            n_meth = self.GROUPMETHODS.index(_method)
+        needed = self.GROUPMETHODS[:n_meth]
         # Find all needed groups as asked
         for need in needed:
             # Find the value of method needed
@@ -109,7 +110,7 @@ class API(RequestHandler):
         return self._try_typecast_int(qparam, result)
 
     def get_data(self):
-        channel = self._get_list(self.RANKINGS[-1])
+        channel = self._get_list(self.GROUPMETHODS[-1])
         x = self._get_int_necessary_param(self.x)
         y = self._get_int_necessary_param(self.y)
         z = self._get_int_necessary_param(self.z)

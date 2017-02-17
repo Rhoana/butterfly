@@ -7,18 +7,17 @@ class InfoQuery(Query):
     def __init__(self,*args,**kwargs):
 
         # Add basic list of getters
-        self.groups = map(self.grouper, self.rankings)
-        self.X,self.Y,self.Z = self.position[:3]
-        self.make_getter('tile_keys', '')
-        self.make_getter('data_keys', '')
-        self.make_getter('info_keys', '')
-        self.make_getter('position', -1)
-        self.make_getter('groups', '')
+        self.X,self.Y,self.Z = self.SPACE_LIST[:3]
+        self.make_getter('TILE_LIST', '')
+        self.make_getter('DATA_LIST', '')
+        self.make_getter('INFO_LIST', '')
+        self.make_getter('SPACE_LIST', -1)
+        self.make_getter('GROUP_LIST', '')
 
         # Set all raw attributes
         concat = lambda a,b: a+getattr(self,b)
-        keys = [[],'tile_keys','info_keys','data_keys']
-        keys = keys + ['position','groups']
+        keys = [[],'TILE_LIST','INFO_LIST','DATA_LIST']
+        keys = keys + ['SPACE_LIST','GROUP_LIST']
         allkeys = reduce(concat, keys)
         havekeys = set(kwargs.keys())
         for key in set(allkeys) & havekeys:
@@ -26,7 +25,7 @@ class InfoQuery(Query):
 
     @property
     def key(self):
-        return '_'.join(map(self.att,self.groups))
+        return '_'.join(map(self.att,self.GROUP_LIST))
 
     @property
     def content_type(self):
@@ -36,7 +35,7 @@ class InfoQuery(Query):
 
     @property
     def result(self):
-        if self.att(self.METH) in self.rankings:
+        if self.att(self.METH) in self.GROUP_METH_LIST:
             return self.att(self.LIST)
         if self.att(self.METH) in [self.METADATA]:
             return {

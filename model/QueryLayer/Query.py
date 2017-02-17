@@ -7,13 +7,14 @@ class Query():
         'application/{fmt}',
         'image/{fmt}'
     ]
-    data_methods = DATAMETHODS
-    rankings = RANKINGS[:-1]
-    METADATA = RANKINGS[-1]
-    tile_keys = TILETERMS
-    data_keys = DATATERMS
-    info_keys = INFOTERMS
-    position = POSITION
+    METADATA = INFOMETHODS[0]
+    IMAGE_METH_LIST = DATAMETHODS
+    GROUP_METH_LIST = GROUPMETHODS
+    GROUP_LIST = GROUPTERMS
+    TILE_LIST = TILETERMS
+    DATA_LIST = DATATERMS
+    INFO_LIST = INFOTERMS
+    SPACE_LIST = POSITION
     FORM = TILETERMS[0]
     VIEW = TILETERMS[1]
     PATH = TILETERMS[2]
@@ -47,7 +48,7 @@ class Query():
 
     @property
     def is_data(self):
-        return self.att(self.METH) in self.data_methods
+        return self.att(self.METH) in self.IMAGE_METH_LIST
 
     def log(self,action,**kwargs):
         statuses = {
