@@ -20,9 +20,9 @@ class TileQuery(Query):
         query,xy_index,start,end = args
         self.S,self.I,self.J = self.TILE_LIST[:3]
         self.X,self.Y,self.Z = self.SPACE_LIST[:3]
+        self.make_getter('TILE_LIST', -1)
         self.make_getter('SPACE_LIST', -1)
-        self.make_getter('TILE_LIST', '')
-        self.make_getter('DATA_LIST', '')
+        self.make_getter('SOURCE_LIST', '')
         self.raw = {
             self.X: xy_index[1],
             self.Y: xy_index[0],
@@ -30,7 +30,7 @@ class TileQuery(Query):
             self.J: [start[1],end[1]],
             self.S: int(query.scale)
         }
-        for k in ['PATH','BLOCK','DISK','Z']:
+        for k in ['PATH','DISK','Z']:
             term = getattr(self,k)
             self.raw[term] = getattr(query,term)
 
@@ -45,11 +45,11 @@ class TileQuery(Query):
         return self.SOURCES.get(disk_fmt,self.HDF5)
 
     @property
-    def SIJ(self):
+    def pixels_sij(self):
         return map(self.getatt,'SIJ')
 
     @property
-    def XYZ(self):
+    def index_xyz(self):
         return map(self.getatt,'XYZ')
 
 

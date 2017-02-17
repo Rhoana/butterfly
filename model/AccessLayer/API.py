@@ -40,7 +40,7 @@ class API(RequestHandler):
         if _method in self.GROUP_METH_LIST:
             n_meth = self.GROUP_METH_LIST.index(_method)
             need_meth = need_meth[:n_meth]
-            need_term = neet_term[:n_meth]
+            need_term = need_term[:n_meth]
         # Find all needed groups as asked
         for nmeth,nterm in zip(need_meth,need_term):
             # Find the value of method needed
@@ -112,10 +112,10 @@ class API(RequestHandler):
             self.FORM: form,
             self.VIEW: view
         }
-        for k in self.XYZWH:
-            terms[k] = self._get_int_necessary_param(k)
-        for k in self.GROUP_LIST:
+        for k in self.GROUP_LIST+[self.PATH]:
             terms[k] = info_query.att(k)
+        for k in self.XYZWH_LIST:
+            terms[k] = self._get_int_necessary_param(k)
 
         return DataQuery(**terms)
 

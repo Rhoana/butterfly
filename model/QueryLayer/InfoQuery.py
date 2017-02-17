@@ -10,7 +10,6 @@ class InfoQuery(Query):
 
         # Add basic list of getters
         self.X,self.Y,self.Z = self.SPACE_LIST[:3]
-        self.make_getter('TILE_LIST', '')
         self.make_getter('DATA_LIST', '')
         self.make_getter('INFO_LIST', '')
         self.make_getter('SPACE_LIST', -1)
@@ -19,8 +18,8 @@ class InfoQuery(Query):
 
         # Set all raw attributes
         concat = lambda a,b: a+getattr(self,b)
-        keys = [[],'TILE_LIST','INFO_LIST','DATA_LIST']
-        keys = keys + ['SOURCE_LIST','SPACE_LIST','GROUP_LIST']
+        keys = [[],'INFO_LIST','DATA_LIST','SPACE_LIST']
+        keys = keys + ['SOURCE_LIST','GROUP_LIST']
         allkeys = reduce(concat, keys)
         havekeys = set(kwargs.keys())
         for key in set(allkeys) & havekeys:
