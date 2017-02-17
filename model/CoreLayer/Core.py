@@ -39,9 +39,9 @@ class Core(object):
 
     def load_tile(self, query, t_query):
         # Load from cache or from disk if needed
-#        cache_tile = self._cache.get_tile(query,t_query)
-#        if len(cache_tile):
-#            return cache_tile
+        cache_tile = self._cache.get_tile(query,t_query)
+        if len(cache_tile):
+            return cache_tile
         # Load from disk using source class
         source_class = t_query.source_class
         tile = source_class.load_tile(t_query)
