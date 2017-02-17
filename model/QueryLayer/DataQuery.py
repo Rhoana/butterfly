@@ -50,8 +50,8 @@ class DataQuery(Query):
     def blocksize(self):
         blocksize = self.att(self.BLOCK)
         if not len(blocksize):
-            return np.array([512,512],dtype=np.uint16)
-        return np.fromstring(blocksize,dtype=np.uint16)
+            return np.array([512,512],dtype=np.uint32)
+        return np.fromstring(blocksize,dtype=np.uint32)
 
     @property
     def dtype(self):
@@ -62,7 +62,11 @@ class DataQuery(Query):
     def bounds(self):
         x0y0 = np.array(map(self.getatt,'XY'))
         x1y1 = x0y0 + map(self.getatt,'WH')
-        return np.r_[x0y0, x1y1]
+        return [x0y0, x1y1]
+
+    @property
+    def shape(self):
+        return map(self.getatt,'WH')
 
     @property
     def scale(self):
@@ -70,23 +74,41 @@ class DataQuery(Query):
 
     @property
     def scaled_bounds(self):
-        return self.bounds // self.scale
+        scale = lambda b: (b // self.scale).astype(np.uint32)
+        return map(scale, self.bounds)
 
     @property
-    def indexed_bounds(self):
+    def tiled_bounds(self):
         raw_bounds = self.scaled_bounds
-        raw_start = raw_bounds[:2] / self.blocksize
-        raw_end = raw_bounds[2:] / self.blocksize
-        bounds_start = np.floor(raw_start).astype(int)
-        bounds_end = np.ceil(raw_end).astype(int)
-        return np.r_[bounds_start, bounds_end]
+        raw_start = raw_bounds[0] / self.blocksize
+        raw_end = raw_bounds[1] / self.blocksize
+        bounds_start = np.floor(raw_start).astype(np.uint32)
+        bounds_end = np.ceil(raw_end).astype(np.uint32)
+        return [bounds_start, bounds_end]
 
-    def tile_bounds(self, tile_index):
+    @property
+    def scaled_shape(self):
+        scale = lambda b: int(b // self.scale)
+        return map(scale, self.shape)
+
+    @property
+    def tiled_shape(self):
+        return -np.subtract(*self.tiled_bounds)
+
+    def scale_bounds(self, tile_index):
         tile_start = self.blocksize * tile_index
         tile_end = self.blocksize * (tile_index+1)
-        return np.r_[tile_start, tile_end]
+        return [tile_start, tile_end]
 
-    def scale_offset(self, tile_pixel):
-        scaled_origin = self.scaled_bounds[:2]
-        return (tile_pixel - scaled_origin).astype(int)
+    def some_in_all(self, t_index):
+        a_b = self.scaled_bounds
+        s_b = self.scale_bounds(t_index)
+        some_to_all = lambda s: np.clip(s-a_b[0],*a_b)
+        return map(some_to_all, s_b)
+
+    def all_in_some(self, t_index):
+        a_b = self.scaled_bounds
+        s_b = self.scale_bounds(t_index)
+        all_to_some = lambda a: np.clip(a-s_b[0],*s_b)
+        return map(all_to_some, a_b)
 

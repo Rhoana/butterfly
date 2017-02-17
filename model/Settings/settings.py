@@ -54,9 +54,9 @@ INFOMETHODS = [_metadata, _entity]
 DATAMETHODS = ['data','mask']
 
 GROUPTERMS = map(_groupings.get, GROUPMETHODS)
-TILETERMS = ['format','view','path','disk-format']
 DATATERMS = ['data-type','block-size','dimensions']
 POSITION = ['x','y','z','width','height','resolution']
+TILETERMS = ['i','j','format','view','path','disk-format']
 INFOTERMS = ['name','method','list','feature','short-description','id']
 FEATURES = ['synapse_ids','neuron_ids','is_synapse','is_neuron']
 FEATURES = FEATURES + ['synapse_keypoint','neuron_keypoint']
