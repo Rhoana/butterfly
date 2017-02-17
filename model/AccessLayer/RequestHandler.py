@@ -7,13 +7,13 @@ from concurrent.futures import ThreadPoolExecutor
 
 class RequestHandler(web.RequestHandler):
 
+    R = POSITION[6]
     NAME = INFOTERMS[0]
     METH = INFOTERMS[1]
     LIST = INFOTERMS[2]
-    FORM = TILETERMS[3]
-    VIEW = TILETERMS[4]
-    R = POSITION[5]
     XYZWH = POSITION[:5]
+    FORM = SOURCETERMS[0]
+    VIEW = SOURCETERMS[1]
     SPACE_LIST = POSITION
     VIEW_LIST = VIEW_LIST
     FORMAT_LIST = FORMAT_LIST
@@ -25,6 +25,7 @@ class RequestHandler(web.RequestHandler):
     DATA_METH_LIST = DATAMETHODS
     INFO_METH_LIST = INFOMETHODS
     ROOT_FEATURE = BFLY_CONFIG
+    METADATA = INFOMETHODS[0]
     GROUP_LIST = GROUPTERMS
 
     def initialize(self, _core):

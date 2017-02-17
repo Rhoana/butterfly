@@ -15,11 +15,12 @@ class InfoQuery(Query):
         self.make_getter('INFO_LIST', '')
         self.make_getter('SPACE_LIST', -1)
         self.make_getter('GROUP_LIST', '')
+        self.make_getter('SOURCE_LIST', '')
 
         # Set all raw attributes
         concat = lambda a,b: a+getattr(self,b)
         keys = [[],'TILE_LIST','INFO_LIST','DATA_LIST']
-        keys = keys + ['SPACE_LIST','GROUP_LIST']
+        keys = keys + ['SOURCE_LIST','SPACE_LIST','GROUP_LIST']
         allkeys = reduce(concat, keys)
         havekeys = set(kwargs.keys())
         for key in set(allkeys) & havekeys:

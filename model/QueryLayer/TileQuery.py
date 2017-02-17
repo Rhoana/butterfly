@@ -11,10 +11,10 @@ class TileQuery(Query):
     def __init__(self, *args, **kwargs):
 
         self.SOURCES = {
-            self.SOURCE_LIST[0]: self.HDF5,
-            self.SOURCE_LIST[1]: self.SPECS,
-            self.SOURCE_LIST[2]: self.MOJO,
-            self.SOURCE_LIST[3]: self.STACK
+            self.READ_LIST[0]: self.HDF5,
+            self.READ_LIST[1]: self.SPECS,
+            self.READ_LIST[2]: self.MOJO,
+            self.READ_LIST[3]: self.STACK
         }
 
         query,xy_index,start,end = args

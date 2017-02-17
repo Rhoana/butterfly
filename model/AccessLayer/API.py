@@ -32,14 +32,15 @@ class API(RequestHandler):
             self.METH: _method,
             self.FORM: output
         }
-        n_meth = -1
+        need_term = self.GROUP_LIST
+        need_meth = self.GROUP_METH_LIST
         features = self.ROOT_FEATURE.copy()
         get_name = lambda g: g.get(self.NAME,'')
         # List needed methods to find asked _method
         if _method in self.GROUP_METH_LIST:
             n_meth = self.GROUP_METH_LIST.index(_method)
-        need_meth = self.GROUP_METH_LIST[:n_meth]
-        need_term = self.GROUP_LIST[:n_meth]
+            need_meth = need_meth[:n_meth]
+            need_term = neet_term[:n_meth]
         # Find all needed groups as asked
         for nmeth,nterm in zip(need_meth,need_term):
             # Find the value of method needed
@@ -100,6 +101,8 @@ class API(RequestHandler):
         return self._try_typecast_int(qparam, result)
 
     def get_data(self, method):
+        # First validate group terms in query
+        info_query = self._get_list(self.METADATA)
         resolution = self._get_int_query_argument(self.R)
         form = self._get_list_query_argument(*self.FORMAT_LIST)
         view = self._get_list_query_argument(*self.VIEW_LIST)
@@ -111,6 +114,8 @@ class API(RequestHandler):
         }
         for k in self.XYZWH:
             terms[k] = self._get_int_necessary_param(k)
+        for k in self.GROUP_LIST:
+            terms[k] = info_query.att(k)
 
         return DataQuery(**terms)
 
