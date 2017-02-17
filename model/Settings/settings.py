@@ -23,8 +23,7 @@ _supported_formats = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp', 'zip')
 _supported_views = ('grayscale','colormap','rgb')
 
 #List of datasources to try, in order, given a path
-_datasources = ["hdf5", "tilespecs", "mojo", "regularimagestack"]
-DATASOURCES = BFLY_CONFIG.get("datasource", _datasources)
+DATASOURCES = ["hdf5", "tilespecs", "mojo", "regularimagestack"]
 
 #Paths must start with one of the following allowed paths
 ALLOWED_PATHS = BFLY_CONFIG.get("allowed-paths", [os.sep])
@@ -56,7 +55,7 @@ DATAMETHODS = ['data','mask']
 GROUPTERMS = map(_groupings.get, GROUPMETHODS)
 DATATERMS = ['data-type','block-size','dimensions']
 POSITION = ['x','y','z','width','height','resolution']
-TILETERMS = ['i','j','format','view','path','disk-format']
+TILETERMS = ['s','i','j','format','view','path','disk-format']
 INFOTERMS = ['name','method','list','feature','short-description','id']
 FEATURES = ['synapse_ids','neuron_ids','is_synapse','is_neuron']
 FEATURES = FEATURES + ['synapse_keypoint','neuron_keypoint']

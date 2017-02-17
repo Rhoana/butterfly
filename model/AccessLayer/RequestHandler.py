@@ -8,9 +8,9 @@ from concurrent.futures import ThreadPoolExecutor
 class RequestHandler(web.RequestHandler):
 
     NAME = INFOTERMS[0]
-    LIST = INFOTERMS[2]
     METH = INFOTERMS[1]
-    FORM = TILETERMS[2]
+    LIST = INFOTERMS[2]
+    FORM = TILETERMS[3]
     VIEW_LIST = VIEW_LIST
     FORMAT_LIST = FORMAT_LIST
     TEXT_FORMAT_LIST = TEXT_FORMAT_LIST
