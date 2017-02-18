@@ -45,7 +45,7 @@ INPUT:                   | RUNTIME:                  | OUTPUT:
     NAME: y              |     VALUE: 100            |
     VALUE: 0             |   X:                      |
   Z:                     |     NAME: x               |
-    NAME: z              |     VALUE: 100            |
+    NAME: z              |     VALUE: 0              |
     VALUE: 0             |   Y:                      |
                          |     NAME: y               |
                          |     VALUE: 0              |
