@@ -35,20 +35,33 @@ INPUT:                   | RUNTIME:                  | OUTPUT:
     ID:                  |       NAME: si            |
       NAME: id           |       VALUE: 2            |
       VALUE: 0           |     SJ:                   |
-  WIDTH:                 |       NAME: sj            |
-    NAME: width          |       VALUE: 2            |
-    VALUE: 100           |     SK:                   |
-  X:                     |       NAME: sk            |
-    NAME: x              |       VALUE: 1            |
-    VALUE: 0             |   WIDTH:                  |
-  Y:                     |     NAME: width           |
-    NAME: y              |     VALUE: 100            |
-    VALUE: 0             |   X:                      |
-  Z:                     |     NAME: x               |
-    NAME: z              |     VALUE: 0              |
-    VALUE: 0             |   Y:                      |
-                         |     NAME: y               |
-                         |     VALUE: 0              |
-                         |   Z:                      |
-                         |     NAME: z               |
-                         |     VALUE: 0              |
+  RESOLUTION:            |       NAME: sj            |
+    ALL:                 |       VALUE: 2            |
+      NAME: resolution   |     SK:                   |
+      VALUE: 1           |       NAME: sk            |
+    X:                   |       VALUE: 1            |
+      NAME: x-res        |   WIDTH:                  |
+      VALUE: 0           |     NAME: width           |
+    Y:                   |     VALUE: 100            |
+      NAME: y-res        |   X:                      |
+      VALUE: 0           |     NAME: x               |
+    Z:                   |     VALUE: 0              |
+      NAME: z-res        |   Y:                      |
+      VALUE: 0           |     NAME: y               |
+  WIDTH:                 |     VALUE: 0              |
+    NAME: width          |   Z:                      |
+    VALUE: 100           |     NAME: z               |
+  X:                     |     VALUE: 0              |
+    NAME: x              
+    VALUE: 0             
+  Y:                     
+    NAME: y              
+    VALUE: 0             
+  Z:                     
+    NAME: z              
+    VALUE: 0             
+                         
+                         
+                         
+                         
+                         

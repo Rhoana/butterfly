@@ -7,9 +7,11 @@ class API(RequestHandler):
 
     def parse(self, *args):
         command = str(args[0])
-        if command in self.TXT_METH_LIST:
+        if command in self.INPUT.METHODS.INFO_LIST:
             return self._get_list(command)
-        if command in self.DATA_METH_LIST:
+        if command in self.INPUT.METHODS.GROUP_LIST:
+            return self._get_list(command)
+        if command in self.INPUT.METHODS.IMAGE_LIST:
             return self.get_data(command)
 
         all_meth = ', '.join(self.ALL_METH_LIST)
