@@ -119,7 +119,7 @@ class INPUT():
         self.DEPTH = _name_value(_image_shape[2])
         # ALL THE RESOLUTION INPUTS
         self.RESOLUTION = _nameless(
-            ALL = _name_value(_scale_input[0]),
+            XY = _name_value(_scale_input[0]),
             X = _name_value(_scale_input[1]),
             Y = _name_value(_scale_input[2]),
             Z = _name_value(_scale_input[3])

@@ -36,7 +36,7 @@ INPUT:                   | RUNTIME:                  | OUTPUT:
       NAME: id           |       VALUE: 2            |
       VALUE: 0           |     SJ:                   |
   RESOLUTION:            |       NAME: sj            |
-    ALL:                 |       VALUE: 2            |
+    XY:                  |       VALUE: 2            |
       NAME: resolution   |     SK:                   |
       VALUE: 1           |       NAME: sk            |
     X:                   |       VALUE: 1            |
