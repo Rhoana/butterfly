@@ -2,8 +2,8 @@ from rh_config import config
 import cv2
 import os
 
-BFLY_CONFIG = config.get("bfly", {})
 # Server settings
+BFLY_CONFIG = config.get("bfly", {})
 
 #HTTP port for server
 PORT = int(BFLY_CONFIG.get("port", 2001))
@@ -12,34 +12,27 @@ PORT = int(BFLY_CONFIG.get("port", 2001))
 _max_cache = BFLY_CONFIG.get("max-cache-size", 1024)
 MAX_CACHE_SIZE = int(_max_cache) * (1024**2)
 
-#Queries that will enable flags
-ASSENT_LIST = BFLY_CONFIG.get("assent-list", ('yes', 'y', 'true'))
-
-# Output settings
-_default_format = 'png'
-_default_view = 'grayscale'
-# Using cv2 - please check if supported before adding!
-_supported_formats = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp', 'zip')
-_supported_views = ('grayscale','colormap','rgb')
-
-#List of datasources to try, in order, given a path
-DATASOURCES = ["hdf5", "tilespecs", "mojo", "regularimagestack"]
-
 #Paths must start with one of the following allowed paths
 ALLOWED_PATHS = BFLY_CONFIG.get("allowed-paths", [os.sep])
 
-# Combined output settings
-TEXT_FORMAT_LIST = ['format', ('json','yaml'), 'json']
-FORMAT_LIST = ['format', _supported_formats, _default_format]
-VIEW_LIST = ['view', _supported_views, _default_view]
+# FOR ALL NAMELESS KEYWORDS
+class _nameless():
+    def __init__(self,**_keywords):
+        for key in _keywords:
+            setattr(self,key,_keywords[key])
+
+# FOR ALL KEYWORDS WITH NAMES AND VALUES
+class _name_value(_nameless):
+    def __init__(self,_name,**_keywords):
+        _nameless.__init__(self, **_keywords)
+        self.NAME = _name
+        self.VALUE = 0
 
 # Query params for grouping
 _experiments = "experiments"
 _samples = "samples"
 _datasets = "datasets"
 _channels = "channels"
-_metadata = 'channel_metadata'
-_entity = 'entity_feature'
 
 _groupings = {
     _experiments: 'experiment',
@@ -48,20 +41,157 @@ _groupings = {
     _channels: 'channel',
 }
 
-GROUPMETHODS = [_experiments, _samples, _datasets, _channels]
-INFOMETHODS = [_metadata, _entity]
-DATAMETHODS = ['data','mask']
+# ALL THE METHOD NAMES
+_group_list = [_experiments, _samples, _datasets, _channels]
+_basic_input = ['method','feature']
+_metadata = 'channel_metadata'
+_entity = 'entity_feature'
+_image = 'data'
+_mask = 'mask'
 
-GROUPTERMS = map(_groupings.get, GROUPMETHODS)
-TILETERMS = ['s','i','j','k']
-INFOTERMS = ['name','method','list','feature']
-INFOTERMS = INFOTERMS + ['short-description','id']
-DATATERMS = ['data-type','block-size','dimensions']
-SOURCETERMS = ['format','view','path','disk-format']
-POSITION = ['x','y','z','width','height','depth','resolution']
+_all_methods = _name_value( _basic_input[0],
+    INFO_LIST = [_metadata, _entity],
+    IMAGE_LIST = [_image, _mask],
+    GROUP_LIST = _group_list
+)
 
-FEATURES = ['synapse_ids','neuron_ids','is_synapse','is_neuron']
-FEATURES = FEATURES + ['synapse_keypoint','neuron_keypoint']
-FEATURES = FEATURES + ['synapse_parent','neuron_children']
-FEATURES = FEATURES + ['voxel_list']
+# AL FEATURES FOR ENTITY METHOD
+_all_features = _name_value( _basic_input[1],
+    POINT_LIST = ['synapse_keypoint','neuron_keypoint'],
+    LINK_LIST = ['synapse_parent','neuron_children'],
+    LABEL_LIST = ['synapse_ids','neuron_ids'],
+    BOOL_LIST = ['is_synapse','is_neuron'],
+    VOXEL_LIST = ['voxel_list']
+)
+
+# TERMS USED FOR POSITION
+_image_origin = ['x','y','z']
+_image_shape = ['width','height','depth']
+
+# DATA SENT IN INPUT
+_group_input = map(_groupings.get, _group_list)
+_scale_input = ['resolution','x-res','y-res','z-res']
+_info_input = ['format','id']
+_image_input = ['format','view']
+
+# INPUT WHITELISTS AND DEFAULTS
+_info_formats = ['json','yaml']
+_image_views = ['grayscale','colormap','rgb']
+_image_formats = ['png', 'jpg', 'tif', 'bmp', 'zip']
+_source_formats = ["hdf5", "tilespecs", "mojo"]
+_source_formats.append("regularimagestack")
+_info_default = 'json'
+_view_default = 'grayscale'
+_source_default = 'hdf5'
+_image_default = 'png'
+
+# DATA USED DURING RUNTIME
+_pixels_runtime = ['i','j','k']
+_scale_runtime = ['si','sj','sk']
+_image_runtime = ['source-type','block-size','path']
+
+# DATA OUTPUT IN REQUESTS
+_image_output = ['data-type','dimensions','path']
+_info_output = ['name','list','path']
+
+
+"""
+THIS HELPS HANDLE URL REQUESTS
+"""
+class INPUT():
+    # ALL THE BASIC INPUT LISTS
+    METHODS = _all_methods
+    FEATURES = _all_features
+    # ALL THE LISTS OF INPUT NAMES
+    ORIGIN_LIST = _image_origin
+    SHAPE_LIST = _image_shape
+    SCALE_LIST = _scale_input
+    INFO_LIST = _info_input
+    IMAGE_LIST = _image_input
+    GROUP_LIST = _group_input
+    def __init__(self):
+        # ALL THE ORIGIN / SHAPE INPUTS
+        self.X = _name_value(_image_origin[0])
+        self.Y = _name_value(_image_origin[1])
+        self.Z = _name_value(_image_origin[2])
+        self.WIDTH = _name_value(_image_shape[0])
+        self.HEIGHT = _name_value(_image_shape[1])
+        self.DEPTH = _name_value(_image_shape[2])
+        # ALL THE INFO / FEATURE INPUTS
+        self.INFO = _nameless(
+            FORMAT = _name_value(_info_input[0],
+                LIST = _info_formats,
+                DEFAULT = _info_default
+            ),
+            ID = _name_value(_info_input[1])
+        )
+        # ALL THE IMAGE INPUTS
+        self.IMAGE = _nameless(
+            FORMAT = _name_value(_image_input[0],
+                LIST = _image_formats,
+                DEFAULT = _image_default
+            ),
+            VIEW = _name_value(_image_input[1],
+                LIST = _image_views,
+                DEFAULT = _view_default
+            )
+        )
+
+"""
+THIS HELPS LOAD TILES
+"""
+class RUNTIME():
+    #ALL THE LISTS OF RUNTIME NAMES
+    ORIGIN_LIST = _image_origin
+    SHAPE_LIST = _image_shape
+    PIXEL_LIST = _pixels_runtime
+    SCALE_LIST = _scale_runtime
+    IMAGE_LIST = _image_runtime
+    def __init__(self):
+        # ALL THE ORIGIN / SHAPE INPUTS
+        self.X = _name_value(_image_origin[0])
+        self.Y = _name_value(_image_origin[1])
+        self.Z = _name_value(_image_origin[2])
+        self.WIDTH = _name_value(_image_shape[0])
+        self.HEIGHT = _name_value(_image_shape[1])
+        self.DEPTH = _name_value(_image_shape[2])
+        # ALL THE TILE RUNTIME TERMS
+        self.TILE = _nameless(
+            I = _name_value(_pixels_runtime[0]),
+            J = _name_value(_pixels_runtime[1]),
+            K = _name_value(_pixels_runtime[2]),
+            SI = _name_value(_scale_runtime[0]),
+            SJ = _name_value(_scale_runtime[1]),
+            SK = _name_value(_scale_runtime[2])
+        )
+        # ALL THE IMAGE RUNTIME TERMS
+        self.IMAGE = _nameless(
+            SOURCE = _name_value(_image_runtime[0],
+                LIST = _source_formats,
+                DEFAULT = _source_default
+            ),
+            BLOCK = _name_value(_image_runtime[1]),
+            PATH = _name_value(_image_runtime[2])
+        )
+
+"""
+THIS HELPS RETURN TEXT
+"""
+class OUTPUT():
+    #ALL THE LISTS OF VALUE NAMES
+    INFO_LIST = _info_output
+    IMAGE_LIST = _image_output
+    def __init__(self):
+        # ALL THE INFO OUTPUT TERMS
+        self.INFO = _nameless(
+            NAME = _name_value(_info_output[0]),
+            LIST  = _name_value(_info_output[1]),
+            PATH  = _name_value(_info_output[2]),
+            TYPE = _name_value(_image_output[0]),
+            SIZE  = _name_value(_image_output[1],
+                X = _name_value(_image_origin[0]),
+                Y = _name_value(_image_origin[1]),
+                Z = _name_value(_image_origin[2])
+            )
+        )
 
