@@ -1,5 +1,6 @@
 from Datasource import Datasource
 import numpy as np
+import h5py
 
 class HDF5(Datasource):
     pass
@@ -7,7 +8,8 @@ class HDF5(Datasource):
     def load_tile(self, query):
         Z = query.index_xyz[-1]
         S,I,J = query.pixels_sij
-        print query.getatt('PATH')
-        fake_h5 = np.zeros([64,4096,16384],dtype=np.uint8)
-        return fake_h5[Z, J[0]:J[1]:S, I[0]:I[1]:S]
+        path = query.getatt('PATH')
+        with h5py.File(path) as fd:
+            volume = fd[fd.keys()[0]]
+            return volume[Z, J[0]:J[1]:S, I[0]:I[1]:S]
 
