@@ -4,73 +4,68 @@ import logging
 
 class DataQuery(Query):
 
-    def __init__(self,*args,**kwargs):
+    groups = []
 
-        # Add basic list of getters
-        self.X,self.Y,self.Z = self.SPACE_LIST[:3]
-        self.W,self.H,self.D,self.R = self.SPACE_LIST[3:]
-        self.make_getter('DATA_LIST', '')
-        self.make_getter('INFO_LIST', '')
-        self.make_getter('SPACE_LIST', -1)
-        self.make_getter('GROUP_LIST', '')
-        self.make_getter('SOURCE_LIST', '')
+    def __init__(self,*args,**keywords):
+        Query.__init__(self, **_keywords)
 
-        # Set all raw attributes
-        concat = lambda a,b: a+getattr(self,b)
-        keys = [[],'INFO_LIST','DATA_LIST','SPACE_LIST']
-        keys = keys + ['SOURCE_LIST','GROUP_LIST']
-        allkeys = reduce(concat, keys)
-        havekeys = set(kwargs.keys())
-        for key in set(allkeys) & havekeys:
-            self.raw[key] = kwargs[key]
+        positions = ['X','Y','Z','WIDTH','HEIGHT']
+        for key in positions:
+            self.set_key(self.INPUT,key)
 
-    def check(self):
-        needs = set(self.SPACE_LIST)
-        haves = set(self.raw.key())
-        lost_pos = list(needs - haves)
-        if self.is_data and len(lost_pos):
-            self.log('miss', lost=lost_pos, group='position')
+        image_list = ['VIEW','FORMAT']
+        for key in image_list:
+            self.set_key(self.INPUT.IMAGE,key)
+
+        self.OUTPUT.INFO.TYPE.VALUE = 'uint8'
+        self.RUNTIME.IMAGE.SOURCE.VALUE = 'hdf5'
+        self.RUNTIME.IMAGE.BLOCK.VALUE = [512,512]
+        self.set_key(self.INPUT.RESOLUTION,'XY')
+        self.set_key(self.OUTPUT.INFO,'PATH')
+
+        for g in self.INPUT.GROUP_LIST:
+            self.groups.append(keywords.get(g,''))
 
     @property
     def key(self):
-        return '_'.join(map(self.att,self.GROUP_LIST))
+        return '_'.join(self.groups)
 
     @property
     def is_zip(self):
-        return self.att(self.FORM) in ['zip']
+        return self.INPUT.IMAGE.FORMAT.VALUE in ['zip']
 
     @property
     def content_type(self):
         is_img = not self.is_zip
-        fmt = self.att(self.FORM)
+        fmt = self.INPUT.IMAGE.FORMAT.VALUE
         content_type = self.content_types[is_img]
         return content_type.replace('{fmt}', fmt)
 
     @property
     def blocksize(self):
-        blocksize = self.att(self.BLOCK)
-        if not len(blocksize):
-            return np.array([512,512],dtype=np.uint32)
+        blocksize = self.RUNTIME.IMAGE.BLOCK.VALUE
         return np.fromstring(blocksize,dtype=np.uint32)
 
     @property
     def dtype(self):
-        dtype = self.att(self.TYPE)
+        dtype = self.OUTPUT.INFO.TYPE.VALUE
         return getattr(np,dtype,np.uint8)
 
     @property
     def bounds(self):
-        x0y0 = np.array(map(self.getatt,'XY'))
-        x1y1 = x0y0 + map(self.getatt,'WH')
+        get_val = lambda k: getattr(self.INPUT,k).VALUE
+        x0y0 = np.array(map(get_val,'XY'))
+        x1y1 = x0y0 + self.shape
         return [x0y0, x1y1]
 
     @property
     def shape(self):
-        return map(self.getatt,'WH')
+        get_val = lambda k: getattr(self.INPUT,k).VALUE
+        return map(get_val,['WIDTH','HEIGHT'])
 
     @property
     def scale(self):
-        return float(2 ** self.att(self.R))
+        return float(2 ** self.INPUT.RESOLUTION.XY)
 
     @property
     def scaled_bounds(self):

@@ -49,7 +49,8 @@ class Core(object):
         return tile
 
     def write_image(self, query, vol):
-        fmt = query.getatt('FORM')
+
+        fmt = query.INPUT.IMAGE.FORMAT.VALUE
 
         if fmt in ['zip']:
             output = StringIO.StringIO()

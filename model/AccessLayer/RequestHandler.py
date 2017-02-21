@@ -7,14 +7,15 @@ from concurrent.futures import ThreadPoolExecutor
 
 class RequestHandler(web.RequestHandler):
 
-    INPUT = INPUT
+    INPUT = INPUT()
+    OUTPUT = OUTPUT()
+    RUNTIME = RUNTIME()
+    BFLY_CONFIG = BFLY_CONFIG
 
     def initialize(self, _core):
         self._ex = ThreadPoolExecutor(max_workers=10)
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header('Access-Control-Allow-Methods', 'GET')
-        for pos in POSITION:
-            setattr(RequestHandler, pos, pos)
         self._core = _core
 
     # Each Handler must define

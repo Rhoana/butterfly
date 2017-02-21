@@ -6,7 +6,10 @@ from urllib2 import HTTPError
 class API(RequestHandler):
 
     def parse(self, *args):
-        command = str(args[0])
+        meth = str(args[0])
+        meths = self.INPUT.METHODS.ALL_LIST
+        command = self._check_list('method',meth,meths)
+
         if command in self.INPUT.METHODS.INFO_LIST:
             return self._get_list(command)
         if command in self.INPUT.METHODS.GROUP_LIST:
@@ -14,33 +17,35 @@ class API(RequestHandler):
         if command in self.INPUT.METHODS.IMAGE_LIST:
             return self.get_data(command)
 
-        all_meth = ', '.join(self.ALL_METH_LIST)
-        return self._match_condition(command, False, {
-            'check' : 'one of ['+all_meth+']',
-            'term' : 'command'
-        })
+        return 'Unsupported Request Category'
 
-    def _get_ask(self, _term, _list):
-        return self._get_list_query_argument(_term,_list,'')
+    def _add_info_terms(self, _terms):
+        list_name = self.OUTPUT.INFO.LIST.NAME
+        _terms[list_name] = ['not yet']
+        return _terms
 
-    def _find_terms(self, _raw_terms):
-        if _raw_terms[self.METH] in [self.FEATUREMETHOD]:
-            _raw_terms[self.LIST] = ['not yet']
-        return _raw_terms
+    def _find_terms(self, _terms):
+        method = _terms[self.INPUT.METHODS.NAME]
+        info_methods = self.INPUT.METHODS.INFO_LIST
+        if method == info_methods[1]:
+            _terms = self._add_info_terms(_terms)
+        return _terms
 
     def _get_list(self, _method):
-        output = self._get_list_query_argument(*self.TEXT_FORMAT_LIST)
+        format_list = self.INPUT.INFO.FORMAT
+        output = self._get_list_query(format_list)
         raw_terms = {
-            self.METH: _method,
-            self.FORM: output
+            self.INPUT.METHODS.NAME: _method,
+            self.OUTPUT.INFO.SIZE.NAME: [0,0,0],
+            format_list.NAME: output
         }
-        need_term = self.GROUP_LIST
-        need_meth = self.GROUP_METH_LIST
-        features = self.ROOT_FEATURE.copy()
-        get_name = lambda g: g.get(self.NAME,'')
+        features = self.BFLY_CONFIG
+        need_term = self.INPUT.GROUP_LIST
+        need_meth = self.INPUT.METHODS.GROUP_LIST
+        get_name = lambda g: g.get(self.OUTPUT.INFO.NAME.NAME,'')
         # List needed methods to find asked _method
-        if _method in self.GROUP_METH_LIST:
-            n_meth = self.GROUP_METH_LIST.index(_method)
+        if _method in need_meth:
+            n_meth = need_meth.index(_method)
             need_meth = need_meth[:n_meth]
             need_term = need_term[:n_meth]
         # Find all needed groups as asked
@@ -48,14 +53,15 @@ class API(RequestHandler):
             # Find the value of method needed
             grouplist = features.get(nmeth,[])
             groupnames = map(get_name, grouplist)
-            ask = self._get_ask(nterm, groupnames)
+            ask = self._check_list('group', nterm, groupnames)
             raw_terms[nterm] = ask
             # Find group matching name in list of groups 
             features = grouplist[groupnames.index(ask)]
         # Get list of method groups from parent features group
         raw_terms.update(features)
         result_list = features.get(_method, [])
-        raw_terms[self.LIST] = map(get_name, result_list)
+        list_name = self.OUTPUT.INFO.LIST.NAME
+        raw_terms[list_name] = map(get_name, result_list)
         terms = self._find_terms(raw_terms)
         return InfoQuery(**terms)
 
@@ -81,12 +87,18 @@ class API(RequestHandler):
             'term' : qparam
         })
 
-    def _get_list_query_argument(self, qparam, whitelist, _default):
-        result = self.get_query_argument(qparam, _default)
-        return self._match_condition(result, result in whitelist, {
-            'check' : 'one of ['+', '.join(whitelist)+']',
-            'term' : qparam
+    def _check_list(self,name,v,vlist):
+        return self._match_condition(v, v in vlist, {
+            'check' : 'one of ['+', '.join(vlist)+']',
+            'term' : name
         })
+
+    def _get_list_query(self, _query_list):
+        q_name = _query_list.NAME
+        default = _query_list.DEFAULT
+        whitelist = _query_list.LIST
+        result = self.get_query_argument(q_name, default)
+        return self._check_list(q_name,result,whitelist)
 
     def _get_necessary_param(self, qparam):
         result = self.get_query_argument(qparam, default=None)
@@ -104,19 +116,24 @@ class API(RequestHandler):
 
     def get_data(self, method):
         # First validate group terms in query
-        info_query = self._get_list(self.METADATA)
-        resolution = self._get_int_query_argument(self.R)
-        form = self._get_list_query_argument(*self.FORMAT_LIST)
-        view = self._get_list_query_argument(*self.VIEW_LIST)
+        info_methods = self.INPUT.METHODS.INFO_LIST
+        info_query = self._get_list(info_methods[0])
+        all_res = self.INPUT.RESOLUTION.XY.NAME
+        resolution = self._get_int_query_argument(all_res)
+        form = self._get_list_query(self.INPUT.IMAGE.FORMAT)
+        view = self._get_list_query(self.INPUT.IMAGE.VIEW)
         terms = {
-            self.R: resolution,
-            self.METH: method,
-            self.FORM: form,
-            self.VIEW: view
+            all_res: resolution,
+            self.INPUT.METHODS.NAME: method,
+            self.INPUT.IMAGE.FORMAT.NAME: form,
+            self.INPUT.IMAGE.VIEW.NAME: view
         }
-        for k in self.GROUP_LIST+[self.PATH]:
-            terms[k] = info_query.att(k)
-        for k in self.XYZWH_LIST:
+        path_name = self.OUTPUT.INFO.PATH.NAME
+        terms[path_name] = info_query.OUTPUT.INFO.PATH.VALUE
+
+        for k in self.INPUT.ORIGIN_LIST:
+            terms[k] = self._get_int_necessary_param(k)
+        for k in self.INPUT.SHAPE_LIST:
             terms[k] = self._get_int_necessary_param(k)
 
         return DataQuery(**terms)

@@ -7,48 +7,25 @@ class Query():
         'application/{fmt}',
         'image/{fmt}'
     ]
-    READ_LIST = DATASOURCES
-    METADATA = INFOMETHODS[0]
-    IMAGE_METH_LIST = DATAMETHODS
-    GROUP_METH_LIST = GROUPMETHODS
-    TEXT_FORMAT_LIST = TEXT_FORMAT_LIST
-    SOURCE_LIST = SOURCETERMS
-    GROUP_LIST = GROUPTERMS
-    TILE_LIST = TILETERMS
-    DATA_LIST = DATATERMS
-    INFO_LIST = INFOTERMS
-    SPACE_LIST = POSITION
-    FORM = SOURCETERMS[0]
-    VIEW = SOURCETERMS[1]
-    PATH = SOURCETERMS[2]
-    DISK = SOURCETERMS[3]
-    TYPE = DATATERMS[0]
-    BLOCK = DATATERMS[1]
-    NAME = INFOTERMS[0]
-    METH = INFOTERMS[1]
-    LIST = INFOTERMS[2]
-    raw = {}
+    INPUT = INPUT()
+    RUNTIME = RUNTIME()
+    OUTPUT = OUTPUT()
 
-    def __init__(self,*args,**kwargs):
+    def __init__(self,*args,**keywords):
+        command = keywords[self.INPUT.METHODS.NAME]
+        self.INPUT.METHODS.VALUE = command
+        self.keywords = keywords
         pass
 
-    def get_getter(self, _pos, _default):
-        return lambda self: self.raw.get(_pos,_default)
-
-    def make_getter(self, _list, _default):
-        for pos in getattr(self, _list, []):
-            getter = self.get_getter(pos, _default)
-            setattr(Query, pos, property(getter))
-
-    def att(self,k):
-        return getattr(self,k)
-
-    def getatt(self,k):
-        return self.att(self.att(k))
+    def set_key(self,struct,key):
+        field = getattr(struct, key)
+        val = self.keywords.get(field.NAME,'')
+        setattr(field.VALUE, key, val)
 
     @property
     def is_data(self):
-        return self.att(self.METH) in self.IMAGE_METH_LIST
+        image_methods = self.INPUT.METHODS.IMAGE_LIST
+        return self.INPUT.METHODS.VALUE in image_methods
 
     def log(self,action,**kwargs):
         statuses = {

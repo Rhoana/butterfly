@@ -18,8 +18,12 @@ ALLOWED_PATHS = BFLY_CONFIG.get("allowed-paths", [os.sep])
 # FOR ALL NAMELESS KEYWORDS
 class _nameless():
     def __init__(self,**_keywords):
+        self.ALL_LIST = []
         for key in _keywords:
-            setattr(self,key,_keywords[key])
+            keyval = _keywords[key]
+            setattr(self,key,keyval)
+            more = keyval if type(keyval) is list else []
+            self.ALL_LIST = self.ALL_LIST + more
 
 # FOR ALL KEYWORDS WITH NAMES AND VALUES
 class _name_value(_nameless):
@@ -27,6 +31,7 @@ class _name_value(_nameless):
         _nameless.__init__(self, **_keywords)
         self.NAME = _name
         self.VALUE = 0
+
 
 # Query params for grouping
 _experiments = "experiments"

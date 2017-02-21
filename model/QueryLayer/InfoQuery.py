@@ -6,52 +6,49 @@ import yaml
 
 class InfoQuery(Query):
 
-    def __init__(self,*args,**kwargs):
+    groups = []
 
-        # Add basic list of getters
-        self.X,self.Y,self.Z = self.SPACE_LIST[:3]
-        self.make_getter('DATA_LIST', '')
-        self.make_getter('INFO_LIST', '')
-        self.make_getter('SPACE_LIST', -1)
-        self.make_getter('GROUP_LIST', '')
-        self.make_getter('SOURCE_LIST', '')
+    def __init__(self,*args,**keywords):
 
-        # Set all raw attributes
-        concat = lambda a,b: a+getattr(self,b)
-        keys = [[],'INFO_LIST','DATA_LIST','SPACE_LIST']
-        keys = keys + ['SOURCE_LIST','GROUP_LIST']
-        allkeys = reduce(concat, keys)
-        havekeys = set(kwargs.keys())
-        for key in set(allkeys) & havekeys:
-            self.raw[key] = kwargs[key]
+        Query.__init__(self, **_keywords)
+
+        metadata_list = ['LIST','PATH','NAME']
+        for key in metadata_list:
+            self.set_key(self.OUTPUT.INFO,key)
+
+        self.set_key(self.INPUT.INFO,'FORMAT')
+        self.set_key(self.INPUT.INFO,'SIZE')
+
+        for g in self.INPUT.GROUP_LIST:
+            self.groups.append(keywords.get(g,''))
 
         # Text format terms given explicitly
-        self.JSON, self.YAML = self.TEXT_FORMAT_LIST[1][:2]
+        json_name, yaml_name = self.INPUT.INFO.FORMAT.LIST[:2]
+
         self.formats = {
-            self.JSON: {
+            json_name: {
                 'terms': {
                     'indent': 4
                 },
                 'writer': json.dumps,
-                'content': self.JSON
+                'content': json_name
             },
-            self.YAML: {
+            yaml_name: {
                 'terms': {
                     'default_flow_style': False
                 },
                 'writer': yaml.dump,
-                'content': self.JSON
+                'content': yaml_name
             }
         }
 
     @property
     def key(self):
-        return '_'.join(map(self.att,self.GROUP_LIST))
+        return '_'.join(self.groups)
 
     @property
     def get_format(self):
-        fmt = self.att(self.FORM)
-        fmt = fmt if fmt in self.formats else self.JSON
+        fmt = self.INPUT.INFO.FORMAT.VALUE
         return self.formats[fmt]
 
     @property
@@ -62,20 +59,23 @@ class InfoQuery(Query):
 
     @property
     def result(self):
-        if self.att(self.METH) in self.GROUP_METH_LIST:
-            return self.att(self.LIST)
-        if self.att(self.METH) in [self.METADATA]:
+        info_out = self.OUTPUT.INFO
+        methods = self.INPUT.METHODS
+        if methods.VALUE in methods.GROUP_LIST:
+            return info_out.LIST.VALUE
+        if methods.VALUE == methods.INFO_LIST[0]:
+            v_x,v_y,v_z = info_out.SIZE.VALUE
             return {
-                self.PATH: self.att(self.PATH),
-                self.TYPE: self.att(self.TYPE),
-                'dimensions': {
-                    self.X: self.att(self.X),
-                    self.Y: self.att(self.Y),
-                    self.Z: self.att(self.Z)
+                info_out.PATH.NAME: info_out.PATH.VALUE,
+                info_out.TYPE.NAME: info_out.TYPE.VALUE,
+                info_out.SIZE.NAME: {
+                    info_out.SIZE.X.NAME: v_x,
+                    info_out.SIZE.Y.NAME: v_y,
+                    info_out.SIZE.Z.NAME: v_z
                 },
-                self.NAME: self.att(self.NAME)
+                info_out.NAME.NAME: info_out.NAME.VALUE
             }
-        return self.att(self.LIST)
+        return info_out.LIST.VALUE
 
     @property
     def dump(self):

@@ -3,53 +3,52 @@ from Query import Query
 
 class TileQuery(Query):
 
-    HDF5 = HDF5()
-    MOJO = Mojo()
-    SPECS = TileSpecs()
-    STACK = ImageStack()
-
     def __init__(self, *args, **kwargs):
 
-        self.SOURCES = {
-            self.READ_LIST[0]: self.HDF5,
-            self.READ_LIST[1]: self.SPECS,
-            self.READ_LIST[2]: self.MOJO,
-            self.READ_LIST[3]: self.STACK
-        }
+        Query.__init__(self, **_keywords)
+        query, xy_index, start, end = args
+        source_list = self.RUNTIME.SOURCE.LIST
 
-        query,xy_index,start,end = args
-        self.S,self.I,self.J = self.TILE_LIST[:3]
-        self.X,self.Y,self.Z = self.SPACE_LIST[:3]
-        self.make_getter('TILE_LIST', -1)
-        self.make_getter('SPACE_LIST', -1)
-        self.make_getter('SOURCE_LIST', '')
-        self.raw = {
-            self.X: xy_index[1],
-            self.Y: xy_index[0],
-            self.I: [start[0],end[0]],
-            self.J: [start[1],end[1]],
-            self.S: int(query.scale)
+        self.SOURCES = {
+            source_list[0]: HDF5,
+            source_list[1]: TileSpecs,
+            source_list[2]: Mojo,
+            source_list[3]: ImageStack
         }
-        for k in ['PATH','DISK','Z']:
-            term = getattr(self,k)
-            self.raw[term] = getattr(query,term)
+        run_tile = self.RUNTIME.TILE
+
+        self.RUNTIXE.X.VALUE = xy_index[1]
+        self.RUNTIME.Y.VALUE = xy_index[0]
+        run_tile.I.VALUE = [start[0],end[0]]
+        run_tile.J.VALUE = [start[1],end[1]]
+        run_tile.SI.VALUE = query.scale
+        run_tile.SJ.VALUE = query.scale
+        run_tile.SK.VALUE = query.scaled_shape
+
+        self.set_key(self.OUTPUT.INFO,'PATH')
+        self.set_key(self.RUNTIME.IMAGE,'SOURCE')
+        self.set_key(self.RUNTIME,'Z')
 
     @property
     def key(self):
-        sijxyz = map(self.getatt,'SIJXYZ')
-        return '_'.join(map(str,sijxyz))
+        sij_xyz = self.pixels_sij + self.index_xyz
+        return '_'.join(map(str,sij_xyz))
 
     @property
     def source_class(self):
-        disk_fmt = self.att(self.DISK)
-        return self.SOURCES.get(disk_fmt,self.HDF5)
+        disk_fmt = self.RUNTIME.IMAGE.SOURCE.VALUE
+        return self.SOURCES.get(disk_fmt, HDF5)
 
     @property
     def pixels_sij(self):
-        return map(self.getatt,'SIJ')
+        run_tile = self.RUNTIME.TILE
+        get_val = lambda k: getattr(run_tile,k).VALUE
+        return map(get_val,['SI','I','J'])
 
     @property
     def index_xyz(self):
-        return map(self.getatt,'XYZ')
+        runtime = self.RUNTIME
+        get_val = lambda k: getattr(runtime,k).VALUE
+        return map(get_val,'XYZ')
 
 
