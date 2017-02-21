@@ -96,7 +96,7 @@ class API(RequestHandler):
 
     def _get_list_query(self, _query_list):
         q_name = _query_list.NAME
-        default = _query_list.DEFAULT
+        default = _query_list.VALUE
         whitelist = _query_list.LIST
         result = self.get_query_argument(q_name, default)
         return self._check_list(q_name,result,whitelist)

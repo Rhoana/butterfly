@@ -2,21 +2,22 @@ import cv2
 import os
 
 # FOR ALL NAMELESS KEYWORDS
-class _nameless():
+class _nameless_struct():
+    VALUE = 0
+    ALL_LIST = []
     def __init__(self,**_keywords):
-        self.ALL_LIST = []
         for key in _keywords:
             keyval = _keywords[key]
             setattr(self,key,keyval)
+            # PUT ALL LISTS INTO ALL_LIST
             more = keyval if type(keyval) is list else []
             self.ALL_LIST = self.ALL_LIST + more
 
-# FOR ALL KEYWORDS WITH NAMES AND VALUES
-class _name_value(_nameless):
+# FOR ALL KEYWORDS WITH NAMES
+class _named_struct(_nameless_struct):
     def __init__(self,_name,**_keywords):
-        _nameless.__init__(self, **_keywords)
         self.NAME = _name
-        self.VALUE = 0
+        _nameless_struct.__init__(self, **_keywords)
 
 
 # Query params for grouping
@@ -33,14 +34,14 @@ _groupings = {
 }
 
 # ALL THE METHOD NAMES
-_all_methods = _name_value( 'method',
+_all_methods = _named_struct( 'method',
     GROUP_LIST = [_experiments, _samples, _datasets, _channels],
     INFO_LIST = ['channel_metadata', 'entity_feature'],
     IMAGE_LIST = ['data', 'mask']
 )
 
 # AL FEATURES FOR ENTITY METHOD
-_all_features = _name_value( 'feature',
+_all_features = _named_struct( 'feature',
     POINT_LIST = ['synapse_keypoint','neuron_keypoint'],
     LINK_LIST = ['synapse_parent','neuron_children'],
     LABEL_LIST = ['synapse_ids','neuron_ids'],
@@ -58,7 +59,7 @@ _scale_input = ['resolution','x-res','y-res','z-res']
 _info_input = ['format','id']
 _image_input = ['format','view']
 
-# INPUT WHITELISTS AND DEFAULTS
+# INPUT WHITELISTS AND VALUES
 _info_formats = ['json','yaml']
 _image_views = ['grayscale','colormap','rgb']
 _image_formats = ['png', 'jpg', 'tif', 'bmp', 'zip']
@@ -95,36 +96,36 @@ class INPUT():
     GROUP_LIST = _group_input
     def __init__(self):
         # ALL THE ORIGIN / SHAPE INPUTS
-        self.X = _name_value(_image_origin[0])
-        self.Y = _name_value(_image_origin[1])
-        self.Z = _name_value(_image_origin[2])
-        self.WIDTH = _name_value(_image_shape[0])
-        self.HEIGHT = _name_value(_image_shape[1])
-        self.DEPTH = _name_value(_image_shape[2])
+        self.X = _named_struct(_image_origin[0])
+        self.Y = _named_struct(_image_origin[1])
+        self.Z = _named_struct(_image_origin[2])
+        self.WIDTH = _named_struct(_image_shape[0])
+        self.HEIGHT = _named_struct(_image_shape[1])
+        self.DEPTH = _named_struct(_image_shape[2])
         # ALL THE RESOLUTION INPUTS
-        self.RESOLUTION = _nameless(
-            XY = _name_value(_scale_input[0]),
-            X = _name_value(_scale_input[1]),
-            Y = _name_value(_scale_input[2]),
-            Z = _name_value(_scale_input[3])
+        self.RESOLUTION = _nameless_struct(
+            XY = _named_struct(_scale_input[0]),
+            X = _named_struct(_scale_input[1]),
+            Y = _named_struct(_scale_input[2]),
+            Z = _named_struct(_scale_input[3])
         )
         # ALL THE INFO / FEATURE INPUTS
-        self.INFO = _nameless(
-            FORMAT = _name_value(_info_input[0],
+        self.INFO = _nameless_struct(
+            FORMAT = _named_struct(_info_input[0],
                 LIST = _info_formats,
-                DEFAULT = _info_default
+                VALUE = _info_default
             ),
-            ID = _name_value(_info_input[1])
+            ID = _named_struct(_info_input[1])
         )
         # ALL THE IMAGE INPUTS
-        self.IMAGE = _nameless(
-            FORMAT = _name_value(_image_input[0],
+        self.IMAGE = _nameless_struct(
+            FORMAT = _named_struct(_image_input[0],
                 LIST = _image_formats,
-                DEFAULT = _image_default
+                VALUE = _image_default
             ),
-            VIEW = _name_value(_image_input[1],
+            VIEW = _named_struct(_image_input[1],
                 LIST = _image_views,
-                DEFAULT = _view_default
+                VALUE = _view_default
             )
         )
 
@@ -140,29 +141,29 @@ class RUNTIME():
     IMAGE_LIST = _image_runtime
     def __init__(self):
         # ALL THE ORIGIN / SHAPE INPUTS
-        self.X = _name_value(_image_origin[0])
-        self.Y = _name_value(_image_origin[1])
-        self.Z = _name_value(_image_origin[2])
-        self.WIDTH = _name_value(_image_shape[0])
-        self.HEIGHT = _name_value(_image_shape[1])
-        self.DEPTH = _name_value(_image_shape[2])
+        self.X = _named_struct(_image_origin[0])
+        self.Y = _named_struct(_image_origin[1])
+        self.Z = _named_struct(_image_origin[2])
+        self.WIDTH = _named_struct(_image_shape[0])
+        self.HEIGHT = _named_struct(_image_shape[1])
+        self.DEPTH = _named_struct(_image_shape[2])
         # ALL THE TILE RUNTIME TERMS
-        self.TILE = _nameless(
-            I = _name_value(_pixels_runtime[0]),
-            J = _name_value(_pixels_runtime[1]),
-            K = _name_value(_pixels_runtime[2]),
-            SI = _name_value(_scale_runtime[0]),
-            SJ = _name_value(_scale_runtime[1]),
-            SK = _name_value(_scale_runtime[2])
+        self.TILE = _nameless_struct(
+            I = _named_struct(_pixels_runtime[0]),
+            J = _named_struct(_pixels_runtime[1]),
+            K = _named_struct(_pixels_runtime[2]),
+            SI = _named_struct(_scale_runtime[0]),
+            SJ = _named_struct(_scale_runtime[1]),
+            SK = _named_struct(_scale_runtime[2])
         )
         # ALL THE IMAGE RUNTIME TERMS
-        self.IMAGE = _nameless(
-            SOURCE = _name_value(_image_runtime[0],
+        self.IMAGE = _nameless_struct(
+            SOURCE = _named_struct(_image_runtime[0],
                 LIST = _source_formats,
-                DEFAULT = _source_default
+                VALUE = _source_default
             ),
-            BLOCK = _name_value(_image_runtime[1]),
-            PATH = _name_value(_image_runtime[2])
+            BLOCK = _named_struct(_image_runtime[1]),
+            PATH = _named_struct(_image_runtime[2])
         )
 
 '''
@@ -174,15 +175,15 @@ class OUTPUT():
     IMAGE_LIST = _image_output
     def __init__(self):
         # ALL THE INFO OUTPUT TERMS
-        self.INFO = _nameless(
-            NAME = _name_value(_info_output[0]),
-            LIST  = _name_value(_info_output[1]),
-            PATH  = _name_value(_info_output[2]),
-            TYPE = _name_value(_image_output[0]),
-            SIZE  = _name_value(_image_output[1],
-                X = _name_value(_image_origin[0]),
-                Y = _name_value(_image_origin[1]),
-                Z = _name_value(_image_origin[2])
+        self.INFO = _nameless_struct(
+            NAME = _named_struct(_info_output[0]),
+            LIST  = _named_struct(_info_output[1]),
+            PATH  = _named_struct(_info_output[2]),
+            TYPE = _named_struct(_image_output[0]),
+            SIZE  = _named_struct(_image_output[1],
+                X = _named_struct(_image_origin[0]),
+                Y = _named_struct(_image_origin[1]),
+                Z = _named_struct(_image_origin[2])
             )
         )
 
