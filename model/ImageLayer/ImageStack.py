@@ -3,5 +3,5 @@ from Datasource import Datasource
 class ImageStack(Datasource):
     pass
 
-    def load_tile(self, id):
+    def load_tile(query):
         return None

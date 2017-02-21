@@ -10,14 +10,14 @@ class InfoQuery(Query):
 
     def __init__(self,*args,**keywords):
 
-        Query.__init__(self, **_keywords)
+        Query.__init__(self, **keywords)
 
         metadata_list = ['LIST','PATH','NAME']
         for key in metadata_list:
             self.set_key(self.OUTPUT.INFO,key)
 
         self.set_key(self.INPUT.INFO,'FORMAT')
-        self.set_key(self.INPUT.INFO,'SIZE')
+        self.set_key(self.OUTPUT.INFO,'SIZE')
 
         for g in self.INPUT.GROUP_LIST:
             self.groups.append(keywords.get(g,''))
@@ -64,15 +64,10 @@ class InfoQuery(Query):
         if methods.VALUE in methods.GROUP_LIST:
             return info_out.LIST.VALUE
         if methods.VALUE == methods.INFO_LIST[0]:
-            v_x,v_y,v_z = info_out.SIZE.VALUE
             return {
                 info_out.PATH.NAME: info_out.PATH.VALUE,
                 info_out.TYPE.NAME: info_out.TYPE.VALUE,
-                info_out.SIZE.NAME: {
-                    info_out.SIZE.X.NAME: v_x,
-                    info_out.SIZE.Y.NAME: v_y,
-                    info_out.SIZE.Z.NAME: v_z
-                },
+                info_out.SIZE.NAME: info_out.SIZE.VALUE,
                 info_out.NAME.NAME: info_out.NAME.VALUE
             }
         return info_out.LIST.VALUE

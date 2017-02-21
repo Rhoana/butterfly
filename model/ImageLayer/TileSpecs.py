@@ -3,6 +3,6 @@ from Datasource import Datasource
 class TileSpecs(Datasource):
     pass
 
-    def load_tile(self, id):
+    def load_tile(query):
         return None
 

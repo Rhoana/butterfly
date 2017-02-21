@@ -20,7 +20,7 @@ class Query():
     def set_key(self,struct,key):
         field = getattr(struct, key)
         val = self.keywords.get(field.NAME,'')
-        setattr(field.VALUE, key, val)
+        setattr(field, 'VALUE', val)
 
     @property
     def is_data(self):

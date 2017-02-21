@@ -36,7 +36,7 @@ class API(RequestHandler):
         output = self._get_list_query(format_list)
         raw_terms = {
             self.INPUT.METHODS.NAME: _method,
-            self.OUTPUT.INFO.SIZE.NAME: [0,0,0],
+            self.OUTPUT.INFO.SIZE.NAME: {},
             format_list.NAME: output
         }
         features = self.BFLY_CONFIG
@@ -53,7 +53,8 @@ class API(RequestHandler):
             # Find the value of method needed
             grouplist = features.get(nmeth,[])
             groupnames = map(get_name, grouplist)
-            ask = self._check_list('group', nterm, groupnames)
+            ask = self.get_query_argument(nterm, '')
+            ask = self._check_list(nterm,ask,groupnames)
             raw_terms[nterm] = ask
             # Find group matching name in list of groups 
             features = grouplist[groupnames.index(ask)]

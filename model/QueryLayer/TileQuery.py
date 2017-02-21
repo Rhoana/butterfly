@@ -3,11 +3,10 @@ from Query import Query
 
 class TileQuery(Query):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **keywords):
 
-        Query.__init__(self, **_keywords)
         query, xy_index, start, end = args
-        source_list = self.RUNTIME.SOURCE.LIST
+        source_list = self.RUNTIME.IMAGE.SOURCE.LIST
 
         self.SOURCES = {
             source_list[0]: HDF5,
@@ -17,17 +16,21 @@ class TileQuery(Query):
         }
         run_tile = self.RUNTIME.TILE
 
-        self.RUNTIXE.X.VALUE = xy_index[1]
+        self.RUNTIME.X.VALUE = xy_index[1]
         self.RUNTIME.Y.VALUE = xy_index[0]
         run_tile.I.VALUE = [start[0],end[0]]
         run_tile.J.VALUE = [start[1],end[1]]
-        run_tile.SI.VALUE = query.scale
-        run_tile.SJ.VALUE = query.scale
-        run_tile.SK.VALUE = query.scaled_shape
+        run_tile.SI.VALUE = int(query.scale)
+        run_tile.SJ.VALUE = int(query.scale)
+        run_tile.SK.VALUE = int(query.scale)
 
-        self.set_key(self.OUTPUT.INFO,'PATH')
-        self.set_key(self.RUNTIME.IMAGE,'SOURCE')
-        self.set_key(self.RUNTIME,'Z')
+        q_path = query.OUTPUT.INFO.PATH.VALUE
+        q_source = query.RUNTIME.IMAGE.SOURCE.VALUE
+        q_z = query.RUNTIME.Z.VALUE
+
+        self.OUTPUT.INFO.PATH.VALUE = q_path
+        self.RUNTIME.IMAGE.SOURCE.VALUE = q_source
+        self.RUNTIME.Z.VALUE = q_z
 
     @property
     def key(self):

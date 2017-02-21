@@ -1,6 +1,5 @@
 class Datasource(object):
-    def __init__(self):
-        pass
-    def load_tile(self, id):
+    @classmethod
+    def load_tile(ds,query):
         return None
 

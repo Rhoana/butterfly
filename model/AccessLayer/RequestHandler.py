@@ -36,7 +36,7 @@ class RequestHandler(web.RequestHandler):
         return _query
 
     def handle(self, _query):
-        this_method = _query.method
+        this_method = _query.INPUT.METHODS.VALUE
         self.log('start', id=this_method)
         self.set_header('Content-Type',_query.content_type)
         if _query.is_data:

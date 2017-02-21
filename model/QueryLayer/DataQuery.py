@@ -7,7 +7,7 @@ class DataQuery(Query):
     groups = []
 
     def __init__(self,*args,**keywords):
-        Query.__init__(self, **_keywords)
+        Query.__init__(self, **keywords)
 
         positions = ['X','Y','Z','WIDTH','HEIGHT']
         for key in positions:
@@ -44,7 +44,7 @@ class DataQuery(Query):
     @property
     def blocksize(self):
         blocksize = self.RUNTIME.IMAGE.BLOCK.VALUE
-        return np.fromstring(blocksize,dtype=np.uint32)
+        return np.array(blocksize,dtype=np.uint32)
 
     @property
     def dtype(self):
@@ -65,7 +65,7 @@ class DataQuery(Query):
 
     @property
     def scale(self):
-        return float(2 ** self.INPUT.RESOLUTION.XY)
+        return float(2 ** self.INPUT.RESOLUTION.XY.VALUE)
 
     @property
     def scaled_bounds(self):
