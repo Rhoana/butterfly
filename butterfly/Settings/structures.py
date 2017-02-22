@@ -129,21 +129,22 @@ THIS HELPS LOAD TILES
 '''
 class RUNTIME():
     def __init__(self):
-        # ALL THE ORIGIN / SHAPE INPUTS
-        self.X = _named_struct(_image_origin[0])
-        self.Y = _named_struct(_image_origin[1])
-        self.Z = _named_struct(_image_origin[2])
-        self.WIDTH = _named_struct(_image_shape[0])
-        self.HEIGHT = _named_struct(_image_shape[1])
-        self.DEPTH = _named_struct(_image_shape[2])
         # ALL THE TILE RUNTIME TERMS
         self.TILE = _nameless_struct(
-            I = _named_struct(_pixels_runtime[0]),
-            J = _named_struct(_pixels_runtime[1]),
-            K = _named_struct(_pixels_runtime[2]),
-            SI = _named_struct(_scale_runtime[0]),
-            SJ = _named_struct(_scale_runtime[1]),
-            SK = _named_struct(_scale_runtime[2])
+            INSIDE = _nameless_struct(
+                I = _named_struct(_pixels_runtime[0]),
+                J = _named_struct(_pixels_runtime[1]),
+                K = _named_struct(_pixels_runtime[2]),
+                SI = _named_struct(_scale_runtime[0]),
+                SJ = _named_struct(_scale_runtime[1]),
+                SK = _named_struct(_scale_runtime[2])
+            ),
+            OUTSIDE = _nameless_struct(
+                # ALL THE ORIGIN / SHAPE INPUTS
+                X = _named_struct(_image_origin[0]),
+                Y = _named_struct(_image_origin[1]),
+                Z = _named_struct(_image_origin[2])
+            )
         )
         # ALL THE IMAGE RUNTIME TERMS
         self.IMAGE = _nameless_struct(

@@ -14,10 +14,11 @@ class TileQuery(Query):
             source_list[2]: Mojo,
             source_list[3]: ImageStack
         }
-        run_tile = self.RUNTIME.TILE
+        run_tile = self.RUNTIME.TILE.INSIDE
+        out_tile = self.RUNTIME.TILE.OUTSIDE
 
-        self.RUNTIME.X.VALUE = xy_index[1]
-        self.RUNTIME.Y.VALUE = xy_index[0]
+        out_tile.Y.VALUE = xy_index[0]
+        out_tile.X.VALUE = xy_index[1]
         run_tile.I.VALUE = [start[0],end[0]]
         run_tile.J.VALUE = [start[1],end[1]]
         run_tile.SI.VALUE = int(query.scale)
@@ -26,11 +27,11 @@ class TileQuery(Query):
 
         q_path = query.OUTPUT.INFO.PATH.VALUE
         q_source = query.RUNTIME.IMAGE.SOURCE.VALUE
-        q_z = query.RUNTIME.Z.VALUE
+        q_z = query.RUNTIME.TILE.OUTSIDE.Z.VALUE
 
         self.OUTPUT.INFO.PATH.VALUE = q_path
         self.RUNTIME.IMAGE.SOURCE.VALUE = q_source
-        self.RUNTIME.Z.VALUE = q_z
+        self.RUNTIME.TILE.OUTSIDE.Z.VALUE = q_z
 
     @property
     def key(self):
@@ -44,13 +45,13 @@ class TileQuery(Query):
 
     @property
     def pixels_sij(self):
-        run_tile = self.RUNTIME.TILE
+        run_tile = self.RUNTIME.TILE.INSIDE
         get_val = lambda k: getattr(run_tile,k).VALUE
         return map(get_val,['SI','I','J'])
 
     @property
     def index_xyz(self):
-        runtime = self.RUNTIME
+        runtime = self.RUNTIME.TILE.OUTSIDE
         get_val = lambda k: getattr(runtime,k).VALUE
         return map(get_val,'XYZ')
 
