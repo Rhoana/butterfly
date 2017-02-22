@@ -103,7 +103,9 @@ class INPUT():
                 VALUE = 'png'
             ),
             VIEW = _named_struct('view',
-                LIST = ['grayscale','colormap','rgb'],
+                GRAY = _named_struct('grayscale'),
+                COLOR = _named_struct('colormap'),
+                RGB = _named_struct('rgb'),
                 VALUE = 'grayscale'
             )
         )

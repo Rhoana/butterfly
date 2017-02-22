@@ -47,11 +47,17 @@ INPUT:                       | RUNTIME:                     | OUTPUT:
     - view                   |         NAME: z              |                             
     - format                 |                              |                             
     VIEW:                    |                              |                             
+      COLOR:                 |                              |                             
+        NAME: colormap       |                              |                             
+      GRAY:                  |                              |                             
+        NAME: grayscale      |                              |                             
       LIST:                  |                              |                             
-      - grayscale            |                              |                             
       - colormap             |                              |                             
+      - grayscale            |                              |                             
       - rgb                  |                              |                             
       NAME: view             |                              |                             
+      RGB:                   |                              |                             
+        NAME: rgb            |                              |                             
       VALUE: grayscale       |                              |                             
   INFO:                      |                              |                             
     FORMAT:                  |                              |                             
