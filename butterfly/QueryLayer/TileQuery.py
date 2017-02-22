@@ -19,8 +19,8 @@ class TileQuery(Query):
 
         out_tile.Y.VALUE = xy_index[0]
         out_tile.X.VALUE = xy_index[1]
-        run_tile.I.VALUE = [start[0],end[0]]
-        run_tile.J.VALUE = [start[1],end[1]]
+        run_tile.J.VALUE = [start[0],end[0]]
+        run_tile.I.VALUE = [start[1],end[1]]
         run_tile.SI.VALUE = int(query.scale)
         run_tile.SJ.VALUE = int(query.scale)
         run_tile.SK.VALUE = int(query.scale)

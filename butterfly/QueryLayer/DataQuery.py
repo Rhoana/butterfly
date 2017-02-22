@@ -55,14 +55,14 @@ class DataQuery(Query):
     @property
     def bounds(self):
         get_val = lambda k: getattr(self.INPUT.POSITION,k).VALUE
-        x0y0 = np.array(map(get_val,'XY'))
-        x1y1 = x0y0 + self.shape
-        return [x0y0, x1y1]
+        y0x0 = np.array(map(get_val,'YX'))
+        y1x1 = y0x0 + self.shape
+        return [y0x0, y1x1]
 
     @property
     def shape(self):
         get_val = lambda k: getattr(self.INPUT.POSITION,k).VALUE
-        return map(get_val,['WIDTH','HEIGHT'])
+        return map(get_val,['HEIGHT','WIDTH'])
 
     @property
     def scale(self):
@@ -76,8 +76,10 @@ class DataQuery(Query):
     @property
     def tiled_bounds(self):
         raw_bounds = self.scaled_bounds
-        raw_start = raw_bounds[0] / self.blocksize
-        raw_end = raw_bounds[1] / self.blocksize
+        float_block = self.blocksize.astype(np.float32)
+        raw_start = raw_bounds[0] / float_block
+        raw_end = raw_bounds[1] / float_block
+
         bounds_start = np.floor(raw_start).astype(np.uint32)
         bounds_end = np.ceil(raw_end).astype(np.uint32)
         return [bounds_start, bounds_end]
