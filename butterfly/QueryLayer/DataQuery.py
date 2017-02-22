@@ -23,7 +23,7 @@ class DataQuery(Query):
         self.set_key(self.INPUT.RESOLUTION,'XY')
         self.set_key(self.OUTPUT.INFO,'PATH')
 
-        for g in self.INPUT.GROUP_LIST:
+        for g in self.INPUT.GROUP.LIST:
             self.groups.append(keywords.get(g,''))
 
     @property

@@ -79,7 +79,9 @@ class INPUT():
             INFO_LIST = ['channel_metadata', 'entity_feature'],
             IMAGE_LIST = ['data', 'mask']
         )
-        self.GROUP_LIST = map(_groupings.get, self.METHODS.GROUP_LIST)
+        self.GROUP = _nameless_struct(
+            LIST = map(_groupings.get, self.METHODS.GROUP_LIST)
+        )
         # ALL THE FEATURE NAMES
         self.FEATURES = _named_struct( 'feature',
             POINT_LIST = ['synapse_keypoint','neuron_keypoint'],

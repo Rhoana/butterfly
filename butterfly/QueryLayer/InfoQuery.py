@@ -19,7 +19,7 @@ class InfoQuery(Query):
         self.set_key(self.INPUT.INFO,'FORMAT')
         self.set_key(self.OUTPUT.INFO,'SIZE')
 
-        for g in self.INPUT.GROUP_LIST:
+        for g in self.INPUT.GROUP.LIST:
             self.groups.append(keywords.get(g,''))
 
         # Text format terms given explicitly
