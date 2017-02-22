@@ -12,7 +12,7 @@ class InfoQuery(Query):
 
         Query.__init__(self, **keywords)
 
-        metadata_list = ['NAMES','PATH','SOURCE']
+        metadata_list = ['NAMES','PATH','CHANNEL']
         for key in metadata_list:
             self.set_key(self.OUTPUT.INFO,key)
 
@@ -68,7 +68,7 @@ class InfoQuery(Query):
                 info_out.PATH.NAME: info_out.PATH.VALUE,
                 info_out.TYPE.NAME: info_out.TYPE.VALUE,
                 info_out.SIZE.NAME: info_out.SIZE.VALUE,
-                info_out.SOURCE.NAME: info_out.SOURCE.VALUE
+                info_out.CHANNEL.NAME: info_out.CHANNEL.VALUE
             }
         return info_out.NAMES.VALUE
 

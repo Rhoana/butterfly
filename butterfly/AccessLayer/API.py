@@ -42,7 +42,8 @@ class API(RequestHandler):
         features = self.BFLY_CONFIG
         need_term = self.INPUT.GROUP_LIST
         need_meth = self.INPUT.METHODS.GROUP_LIST
-        get_name = lambda g: g.get(self.OUTPUT.INFO.SOURCE.NAME,'')
+        name_name = self.OUTPUT.INFO.CHANNEL.NAME
+        get_name = lambda g: g.get(name_name,'')
         # List needed methods to find asked _method
         if _method in need_meth:
             n_meth = need_meth.index(_method)

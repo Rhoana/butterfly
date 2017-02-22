@@ -1,29 +1,29 @@
 INPUT:                    | RUNTIME:                  | OUTPUT:                  
   DEPTH:                  |   DEPTH:                  |   INFO:                  
-    NAME: depth           |     NAME: depth           |     LIST:                
-  HEIGHT:                 |   HEIGHT:                 |     - path               
-    NAME: height          |     NAME: height          |     - dimensions         
-  IMAGE:                  |   IMAGE:                  |     - data-type          
-    FORMAT:               |     BLOCK:                |     - list               
-      LIST:               |       NAME: block-size    |     - name               
-      - png               |     LIST:                 |     NAMES:               
-      - jpg               |     - source-type         |       NAME: list         
-      - tif               |     - block-size          |     PATH:                
-      - bmp               |     SOURCE:               |       NAME: path         
-      - zip               |       LIST:               |     SIZE:                
-      NAME: format        |       - hdf5              |       LIST:              
-      VALUE: png          |       - tilespecs         |       - y                
-    LIST:                 |       - mojo              |       - x                
-    - view                |       - regularimagestack |       - z                
-    - format              |       NAME: source-type   |       NAME: dimensions   
-    VIEW:                 |       VALUE: hdf5         |       X:                 
-      LIST:               |   TILE:                   |         NAME: x          
-      - grayscale         |     I:                    |       Y:                 
-      - colormap          |       NAME: i             |         NAME: y          
-      - rgb               |     J:                    |       Z:                 
-      NAME: view          |       NAME: j             |         NAME: z          
-      VALUE: grayscale    |     K:                    |     SOURCE:              
-  INFO:                   |       NAME: k             |       NAME: name         
+    NAME: depth           |     NAME: depth           |     CHANNEL:             
+  HEIGHT:                 |   HEIGHT:                 |       NAME: name         
+    NAME: height          |     NAME: height          |     LIST:                
+  IMAGE:                  |   IMAGE:                  |     - path               
+    FORMAT:               |     BLOCK:                |     - data-type          
+      LIST:               |       NAME: block-size    |     - list               
+      - png               |     LIST:                 |     - name               
+      - jpg               |     - source-type         |     - dimensions         
+      - tif               |     - block-size          |     NAMES:               
+      - bmp               |     SOURCE:               |       NAME: list         
+      - zip               |       LIST:               |     PATH:                
+      NAME: format        |       - hdf5              |       NAME: path         
+      VALUE: png          |       - tilespecs         |     SIZE:                
+    LIST:                 |       - mojo              |       LIST:              
+    - view                |       - regularimagestack |       - y                
+    - format              |       NAME: source-type   |       - x                
+    VIEW:                 |       VALUE: hdf5         |       - z                
+      LIST:               |   TILE:                   |       NAME: dimensions   
+      - grayscale         |     I:                    |       X:                 
+      - colormap          |       NAME: i             |         NAME: x          
+      - rgb               |     J:                    |       Y:                 
+      NAME: view          |       NAME: j             |         NAME: y          
+      VALUE: grayscale    |     K:                    |       Z:                 
+  INFO:                   |       NAME: k             |         NAME: z          
     FORMAT:               |     LIST:                 |     TYPE:                
       LIST:               |     - i                   |       NAME: data-type    
       - json              |     - k                   |                          

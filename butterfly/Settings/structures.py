@@ -171,7 +171,7 @@ class OUTPUT():
     def __init__(self):
         # ALL THE INFO OUTPUT TERMS
         self.INFO = _nameless_struct(
-            SOURCE = _named_struct(_info_output[0]),
+            CHANNEL = _named_struct(_info_output[0]),
             NAMES  = _named_struct(_info_output[1]),
             PATH  = _named_struct(_info_output[2]),
             TYPE = _named_struct(_image_output[0]),
