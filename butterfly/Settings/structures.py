@@ -6,7 +6,7 @@ class _nameless_struct():
     VALUE = 0
     def __init__(self,**_keywords):
 
-        all_list = []
+        alls = []
         for key in _keywords:
             keyval = _keywords[key]
             setattr(self,key,keyval)
@@ -15,9 +15,9 @@ class _nameless_struct():
             # PUT ALL TERM NAMES INTO LIST
             if hasattr(keyval, 'NAME'):
                 more = [keyval.NAME]
-            all_list += more
-        if len(all_list):
-            self.LIST = all_list
+            alls += more
+        if len(alls):
+            self.LIST = sorted(set(alls),key=alls.index)
 
     @property
     def name_value_list(self):

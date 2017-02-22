@@ -88,6 +88,7 @@ INPUT:                    | RUNTIME:                  | OUTPUT:
   POSITION:               |                           |                          
     DEPTH:                |                           |                          
       NAME: depth         |                           |                          
+      VALUE: 1            |                           |                          
     HEIGHT:               |                           |                          
       NAME: height        |                           |                          
     LIST:                 |                           |                          
