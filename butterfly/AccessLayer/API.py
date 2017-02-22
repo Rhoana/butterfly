@@ -26,8 +26,7 @@ class API(RequestHandler):
 
     def _find_terms(self, _terms):
         method = _terms[self.INPUT.METHODS.NAME]
-        info_methods = self.INPUT.METHODS.INFO_LIST
-        if method == info_methods[1]:
+        if method == self.INPUT.METHODS.FEAT.NAME:
             _terms = self._add_info_terms(_terms)
         return _terms
 
@@ -116,8 +115,7 @@ class API(RequestHandler):
 
     def get_data(self, method):
         # First validate group terms in query
-        info_methods = self.INPUT.METHODS.INFO_LIST
-        info_query = self._get_list(info_methods[0])
+        info_query = self._get_list(self.INPUT.METHODS.META)
         form = self._get_list_query(self.INPUT.IMAGE.FORMAT)
         view = self._get_list_query(self.INPUT.IMAGE.VIEW)
         terms = {

@@ -50,8 +50,12 @@ class INPUT():
     def __init__(self):
         # ALL THE METHOD NAMES
         self.METHODS = _named_struct( 'method',
-            GROUP_LIST = [_experiments, _samples, _datasets, _channels],
+            GROUP_LIST = [
+                _experiments, _samples, _datasets, _channels
+            ],
             INFO_LIST = ['channel_metadata', 'entity_feature'],
+            META = _named_struct('channel_metadata'),
+            FEAT = _named_struct('entity_feature'),
             IMAGE_LIST = ['data', 'mask']
         )
         self.GROUP = _nameless_struct(
