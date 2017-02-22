@@ -95,37 +95,32 @@ class API(RequestHandler):
             'term' : name
         })
 
-    def _get_list_query(self, _query_list):
-        q_name = _query_list.NAME
-        default = _query_list.VALUE
-        whitelist = _query_list.LIST
-        result = self.get_query_argument(q_name, default)
-        return self._check_list(q_name,result,whitelist)
-
-    def _get_necessary_param(self, qparam):
+    def _get_needed_query(self, qparam):
         result = self.get_query_argument(qparam, default=None)
         return self._match_condition(result, result is not None, {
             'term': qparam
         })
 
-    def _get_int_necessary_param(self, qparam):
-        result = self._get_necessary_param(qparam)
-        return self._try_typecast_int(qparam, result)
+    def _get_list_query(self, _query_term):
+        q_name, default, whitelist = _query_term.name_value_list
+        result = self.get_query_argument(q_name, default)
+        return self._check_list(q_name,result,whitelist)
 
-    def _get_int_query_argument(self, qparam):
-        result = self.get_query_argument(qparam, 0)
-        return self._try_typecast_int(qparam, result)
+    def _get_int_query(self, _query_term):
+        q_name, default = _query_term.name_value_list[:2]
+        if default is False:
+            result = self._get_needed_query(q_name)
+        else:
+            result = self.get_query_argument(q_name, default)
+        return self._try_typecast_int(q_name, result)
 
     def get_data(self, method):
         # First validate group terms in query
         info_methods = self.INPUT.METHODS.INFO_LIST
         info_query = self._get_list(info_methods[0])
-        all_res = self.INPUT.RESOLUTION.XY.NAME
-        resolution = self._get_int_query_argument(all_res)
         form = self._get_list_query(self.INPUT.IMAGE.FORMAT)
         view = self._get_list_query(self.INPUT.IMAGE.VIEW)
         terms = {
-            all_res: resolution,
             self.INPUT.METHODS.NAME: method,
             self.INPUT.IMAGE.FORMAT.NAME: form,
             self.INPUT.IMAGE.VIEW.NAME: view
@@ -133,8 +128,14 @@ class API(RequestHandler):
         path_name = self.OUTPUT.INFO.PATH.NAME
         terms[path_name] = info_query.OUTPUT.INFO.PATH.VALUE
 
-        for k in self.INPUT.POSITION.LIST:
-            terms[k] = self._get_int_necessary_param(k)
+        # POSITION
+        for key in ['X','Y','Z','WIDTH','HEIGHT','DEPTH']:
+            term = getattr(self.INPUT.POSITION, key)
+            terms[term.NAME] = self._get_int_query(term)
+
+        # RESOLUTION
+        term = getattr(self.INPUT.RESOLUTION, 'XY')
+        terms[term.NAME] = self._get_int_query(term)
 
         return DataQuery(**terms)
 

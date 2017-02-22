@@ -19,6 +19,11 @@ class _nameless_struct():
         if len(all_list):
             self.LIST = all_list
 
+    @property
+    def name_value_list(self):
+        get_nvl = lambda s: getattr(self, s, False)
+        return map(get_nvl, ['NAME', 'VALUE', 'LIST'])
+
 # FOR ALL KEYWORDS WITH NAMES
 class _named_struct(_nameless_struct):
     def __init__(self,_name,**_keywords):
@@ -67,7 +72,9 @@ class INPUT():
             Z = _named_struct('z'),
             WIDTH = _named_struct('width'),
             HEIGHT = _named_struct('height'),
-            DEPTH = _named_struct('depth')
+            DEPTH = _named_struct('depth',
+                VALUE = 1
+            )
         )
         # ALL THE RESOLUTION INPUTS
         self.RESOLUTION = _nameless_struct(
