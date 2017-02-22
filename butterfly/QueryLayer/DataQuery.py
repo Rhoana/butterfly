@@ -99,14 +99,14 @@ class DataQuery(Query):
         return [tile_start, tile_end]
 
     def some_in_all(self, t_index):
-        a_b = self.scaled_bounds
-        s_b = self.scale_bounds(t_index)
-        some_to_all = lambda s: np.clip(s-a_b[0],*a_b)
-        return map(some_to_all, s_b)
+        shape = self.scaled_shape
+        origin = self.scaled_bounds[0]
+        clip_off = lambda s: np.clip(s-origin,0,shape)
+        return map(clip_off, self.scale_bounds(t_index))
 
     def all_in_some(self, t_index):
-        a_b = self.scaled_bounds
-        s_b = self.scale_bounds(t_index)
-        all_to_some = lambda a: np.clip(a-s_b[0],*s_b)
-        return map(all_to_some, a_b)
+        shape = self.blocksize
+        origin = self.scale_bounds(t_index)[0]
+        clip_off = lambda s: np.clip(s-origin,0,shape)
+        return map(clip_off, self.scaled_bounds)
 
