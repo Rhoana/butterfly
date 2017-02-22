@@ -32,7 +32,8 @@ class DataQuery(Query):
 
     @property
     def is_zip(self):
-        return self.INPUT.IMAGE.FORMAT.VALUE in ['zip']
+        fmt = self.INPUT.IMAGE.FORMAT.VALUE
+        return fmt in self.INPUT.IMAGE.FORMAT.ZIP_LIST
 
     @property
     def content_type(self):

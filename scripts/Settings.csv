@@ -34,17 +34,19 @@ INPUT:                       | RUNTIME:                     | OUTPUT:
   IMAGE:                     |         NAME: sj             |                             
     FORMAT:                  |       SK:                    |                             
       LIST:                  |         NAME: sk             |                             
-      - png                  |     OUTSIDE:                 |                             
-      - jpg                  |       LIST:                  |                             
-      - tif                  |       - y                    |                             
-      - bmp                  |       - x                    |                             
-      - zip                  |       - z                    |                             
+      - zip                  |     OUTSIDE:                 |                             
+      - png                  |       LIST:                  |                             
+      - jpg                  |       - y                    |                             
+      - tif                  |       - x                    |                             
+      - bmp                  |       - z                    |                             
       NAME: format           |       X:                     |                             
       VALUE: png             |         NAME: x              |                             
-    LIST:                    |       Y:                     |                             
-    - view                   |         NAME: y              |                             
-    - format                 |       Z:                     |                             
-    VIEW:                    |         NAME: z              |                             
+      ZIP_LIST:              |       Y:                     |                             
+      - zip                  |         NAME: y              |                             
+    LIST:                    |       Z:                     |                             
+    - view                   |         NAME: z              |                             
+    - format                 |                              |                             
+    VIEW:                    |                              |                             
       LIST:                  |                              |                             
       - grayscale            |                              |                             
       - colormap             |                              |                             

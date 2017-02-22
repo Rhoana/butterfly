@@ -99,6 +99,7 @@ class INPUT():
         self.IMAGE = _nameless_struct(
             FORMAT = _named_struct('format',
                 LIST = ['png', 'jpg', 'tif', 'bmp', 'zip'],
+                ZIP_LIST = ['zip'],
                 VALUE = 'png'
             ),
             VIEW = _named_struct('view',
@@ -132,7 +133,12 @@ class RUNTIME():
         # ALL THE IMAGE RUNTIME TERMS
         self.IMAGE = _nameless_struct(
             SOURCE = _named_struct('source-type',
-                LIST = ['hdf5', 'tilespecs', 'mojo', 'regularimagestack'],
+                LIST = [
+                    'hdf5',
+                    'tilespecs',
+                    'mojo',
+                    'regularimagestack'
+                ],
                 VALUE = 'hdf5'
             ),
             BLOCK = _named_struct('block-size')
