@@ -25,26 +25,27 @@ INPUT:                    | RUNTIME:                  | OUTPUT:
     - neuron_keypoint     |       - i                 |       Z:                 
     VOXEL_LIST:           |       - k                 |         NAME: z          
     - voxel_list          |       - j                 |     TYPE:                
-  GROUP_LIST:             |       - sk                |       NAME: data-type    
-  - experiment            |       - sj                |                          
-  - sample                |       - si                |                          
-  - dataset               |       SI:                 |                          
-  - channel               |         NAME: si          |                          
-  IMAGE:                  |       SJ:                 |                          
-    FORMAT:               |         NAME: sj          |                          
-      LIST:               |       SK:                 |                          
-      - png               |         NAME: sk          |                          
-      - jpg               |     OUTSIDE:              |                          
-      - tif               |       LIST:               |                          
-      - bmp               |       - y                 |                          
-      - zip               |       - x                 |                          
-      NAME: format        |       - z                 |                          
-      VALUE: png          |       X:                  |                          
-    LIST:                 |         NAME: x           |                          
-    - view                |       Y:                  |                          
-    - format              |         NAME: y           |                          
-    VIEW:                 |       Z:                  |                          
-      LIST:               |         NAME: z           |                          
+  GROUP:                  |       - sk                |       NAME: data-type    
+    LIST:                 |       - sj                |                          
+    - experiment          |       - si                |                          
+    - sample              |       SI:                 |                          
+    - dataset             |         NAME: si          |                          
+    - channel             |       SJ:                 |                          
+  IMAGE:                  |         NAME: sj          |                          
+    FORMAT:               |       SK:                 |                          
+      LIST:               |         NAME: sk          |                          
+      - png               |     OUTSIDE:              |                          
+      - jpg               |       LIST:               |                          
+      - tif               |       - y                 |                          
+      - bmp               |       - x                 |                          
+      - zip               |       - z                 |                          
+      NAME: format        |       X:                  |                          
+      VALUE: png          |         NAME: x           |                          
+    LIST:                 |       Y:                  |                          
+    - view                |         NAME: y           |                          
+    - format              |       Z:                  |                          
+    VIEW:                 |         NAME: z           |                          
+      LIST:               |                           |                          
       - grayscale         |                           |                          
       - colormap          |                           |                          
       - rgb               |                           |                          
