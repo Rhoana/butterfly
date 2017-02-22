@@ -7,7 +7,7 @@ class API(RequestHandler):
 
     def parse(self, *args):
         meth = str(args[0])
-        meths = self.INPUT.METHODS.ALL_LIST
+        meths = self.INPUT.METHODS.LIST
         command = self._check_list('method',meth,meths)
 
         if command in self.INPUT.METHODS.INFO_LIST:
@@ -20,7 +20,7 @@ class API(RequestHandler):
         return 'Unsupported Request Category'
 
     def _add_info_terms(self, _terms):
-        list_name = self.OUTPUT.INFO.LIST.NAME
+        list_name = self.OUTPUT.INFO.NAMES.NAME
         _terms[list_name] = ['not yet']
         return _terms
 
@@ -42,7 +42,7 @@ class API(RequestHandler):
         features = self.BFLY_CONFIG
         need_term = self.INPUT.GROUP_LIST
         need_meth = self.INPUT.METHODS.GROUP_LIST
-        get_name = lambda g: g.get(self.OUTPUT.INFO.NAME.NAME,'')
+        get_name = lambda g: g.get(self.OUTPUT.INFO.SOURCE.NAME,'')
         # List needed methods to find asked _method
         if _method in need_meth:
             n_meth = need_meth.index(_method)
@@ -61,7 +61,7 @@ class API(RequestHandler):
         # Get list of method groups from parent features group
         raw_terms.update(features)
         result_list = features.get(_method, [])
-        list_name = self.OUTPUT.INFO.LIST.NAME
+        list_name = self.OUTPUT.INFO.NAMES.NAME
         raw_terms[list_name] = map(get_name, result_list)
         terms = self._find_terms(raw_terms)
         return InfoQuery(**terms)

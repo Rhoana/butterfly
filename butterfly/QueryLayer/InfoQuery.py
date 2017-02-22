@@ -12,7 +12,7 @@ class InfoQuery(Query):
 
         Query.__init__(self, **keywords)
 
-        metadata_list = ['LIST','PATH','NAME']
+        metadata_list = ['NAMES','PATH','SOURCE']
         for key in metadata_list:
             self.set_key(self.OUTPUT.INFO,key)
 
@@ -62,15 +62,15 @@ class InfoQuery(Query):
         info_out = self.OUTPUT.INFO
         methods = self.INPUT.METHODS
         if methods.VALUE in methods.GROUP_LIST:
-            return info_out.LIST.VALUE
+            return info_out.NAMES.VALUE
         if methods.VALUE == methods.INFO_LIST[0]:
             return {
                 info_out.PATH.NAME: info_out.PATH.VALUE,
                 info_out.TYPE.NAME: info_out.TYPE.VALUE,
                 info_out.SIZE.NAME: info_out.SIZE.VALUE,
-                info_out.NAME.NAME: info_out.NAME.VALUE
+                info_out.SOURCE.NAME: info_out.SOURCE.VALUE
             }
-        return info_out.LIST.VALUE
+        return info_out.NAMES.VALUE
 
     @property
     def dump(self):

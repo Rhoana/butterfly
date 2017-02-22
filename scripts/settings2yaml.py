@@ -12,8 +12,8 @@ np_setup = {
 }
 
 def class2yaml(it):
-    classy = [INPUT,OUTPUT,RUNTIME][int(it)]
-    classn = ['INPUT','OUTPUT','RUNTIME'][int(it)]
+    classy = [INPUT,RUNTIME,OUTPUT][int(it)]
+    classn = ['INPUT','RUNTIME','OUTPUT'][int(it)]
     unclean = yaml.dump({classn:classy()}, **yaml_setup)
     clean = re.sub('!!python.+\n','\n',unclean)
     return clean.split('\n')

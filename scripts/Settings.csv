@@ -1,63 +1,50 @@
-INPUT:                    | OUTPUT:                   | RUNTIME:                 
-  DEPTH:                  |   INFO:                   |   DEPTH:                 
-    NAME: depth           |     ALL_LIST:             |     NAME: depth          
-  HEIGHT:                 |     - path                |   HEIGHT:                
-    NAME: height          |     - dimensions          |     NAME: height         
-  IMAGE:                  |     - list                |   IMAGE:                 
-    ALL_LIST:             |     - name                |     ALL_LIST:            
-    - view                |     - data-type           |     - source-type        
-    - format              |     LIST:                 |     - block-size         
-    FORMAT:               |       NAME: list          |     BLOCK:               
-      ALL_LIST:           |     NAME:                 |       NAME: block-size   
-      - png               |       NAME: name          |     SOURCE:              
-      - jpg               |     PATH:                 |       ALL_LIST:          
-      - tif               |       NAME: path          |       - hdf5             
-      - bmp               |     SIZE:                 |       - tilespecs        
-      - zip               |       ALL_LIST:           |       - mojo             
-      LIST:               |       - y                 |       - regularimagestack
-      - png               |       - x                 |       LIST:              
-      - jpg               |       - z                 |       - hdf5             
-      - tif               |       NAME: dimensions    |       - tilespecs        
-      - bmp               |       X:                  |       - mojo             
-      - zip               |         NAME: x           |       - regularimagestack
-      NAME: format        |       Y:                  |       NAME: source-type  
-      VALUE: png          |         NAME: y           |       VALUE: hdf5        
-    VIEW:                 |       Z:                  |   TILE:                  
-      ALL_LIST:           |         NAME: z           |     ALL_LIST:            
-      - grayscale         |     TYPE:                 |     - i                  
-      - colormap          |       NAME: data-type     |     - k                  
-      - rgb               |                           |     - j                  
-      LIST:               |                           |     - sk                 
-      - grayscale         |                           |     - sj                 
-      - colormap          |                           |     - si                 
-      - rgb               |                           |     I:                   
-      NAME: view          |                           |       NAME: i            
-      VALUE: grayscale    |                           |     J:                   
-  INFO:                   |                           |       NAME: j            
-    ALL_LIST:             |                           |     K:                   
-    - id                  |                           |       NAME: k            
-    - format              |                           |     SI:                  
-    FORMAT:               |                           |       NAME: si           
-      ALL_LIST:           |                           |     SJ:                  
-      - json              |                           |       NAME: sj           
-      - yaml              |                           |     SK:                  
-      LIST:               |                           |       NAME: sk           
-      - json              |                           |   WIDTH:                 
-      - yaml              |                           |     NAME: width          
-      NAME: format        |                           |   X:                     
-      VALUE: json         |                           |     NAME: x              
-    ID:                   |                           |   Y:                     
-      NAME: id            |                           |     NAME: y              
-  RESOLUTION:             |                           |   Z:                     
-    ALL_LIST:             |                           |     NAME: z              
-    - y-res               |                           |                          
-    - x-res               |                           |                          
-    - z-res               |                           |                          
-    - resolution          |                           |                          
-    X:                    |                           |                          
-      NAME: x-res         |                           |                          
-    XY:                   |                           |                          
-      NAME: resolution    |                           |                          
+INPUT:                    | RUNTIME:                  | OUTPUT:                  
+  DEPTH:                  |   DEPTH:                  |   INFO:                  
+    NAME: depth           |     NAME: depth           |     LIST:                
+  HEIGHT:                 |   HEIGHT:                 |     - path               
+    NAME: height          |     NAME: height          |     - dimensions         
+  IMAGE:                  |   IMAGE:                  |     - data-type          
+    FORMAT:               |     BLOCK:                |     - list               
+      LIST:               |       NAME: block-size    |     - name               
+      - png               |     LIST:                 |     NAMES:               
+      - jpg               |     - source-type         |       NAME: list         
+      - tif               |     - block-size          |     PATH:                
+      - bmp               |     SOURCE:               |       NAME: path         
+      - zip               |       LIST:               |     SIZE:                
+      NAME: format        |       - hdf5              |       LIST:              
+      VALUE: png          |       - tilespecs         |       - y                
+    LIST:                 |       - mojo              |       - x                
+    - view                |       - regularimagestack |       - z                
+    - format              |       NAME: source-type   |       NAME: dimensions   
+    VIEW:                 |       VALUE: hdf5         |       X:                 
+      LIST:               |   TILE:                   |         NAME: x          
+      - grayscale         |     I:                    |       Y:                 
+      - colormap          |       NAME: i             |         NAME: y          
+      - rgb               |     J:                    |       Z:                 
+      NAME: view          |       NAME: j             |         NAME: z          
+      VALUE: grayscale    |     K:                    |     SOURCE:              
+  INFO:                   |       NAME: k             |       NAME: name         
+    FORMAT:               |     LIST:                 |     TYPE:                
+      LIST:               |     - i                   |       NAME: data-type    
+      - json              |     - k                   |                          
+      - yaml              |     - j                   |                          
+      NAME: format        |     - sk                  |                          
+      VALUE: json         |     - sj                  |                          
+    ID:                   |     - si                  |                          
+      NAME: id            |     SI:                   |                          
+    LIST:                 |       NAME: si            |                          
+    - id                  |     SJ:                   |                          
+    - format              |       NAME: sj            |                          
+  RESOLUTION:             |     SK:                   |                          
+    LIST:                 |       NAME: sk            |                          
+    - y-res               |   WIDTH:                  |                          
+    - x-res               |     NAME: width           |                          
+    - z-res               |   X:                      |                          
+    - resolution          |     NAME: x               |                          
+    X:                    |   Y:                      |                          
+      NAME: x-res         |     NAME: y               |                          
+    XY:                   |   Z:                      |                          
+      NAME: resolution    |     NAME: z               |                          
     Y:                    |                           |                          
       NAME: y-res         |                           |                          
     Z:                    |                           |                          

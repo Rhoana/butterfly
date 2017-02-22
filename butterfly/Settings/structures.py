@@ -10,14 +10,14 @@ class _nameless_struct():
         for key in _keywords:
             keyval = _keywords[key]
             setattr(self,key,keyval)
-            # PUT ALL LISTS INTO ALL_LIST
+            # PUT ALL LISTS INTO LIST
             more = keyval if type(keyval) is list else []
-            # PUT ALL TERM NAMES INTO ALL_LIST
+            # PUT ALL TERM NAMES INTO LIST
             if hasattr(keyval, 'NAME'):
                 more = [keyval.NAME]
             all_list += more
         if len(all_list):
-            self.ALL_LIST = all_list
+            self.LIST = all_list
 
 # FOR ALL KEYWORDS WITH NAMES
 class _named_struct(_nameless_struct):
@@ -171,8 +171,8 @@ class OUTPUT():
     def __init__(self):
         # ALL THE INFO OUTPUT TERMS
         self.INFO = _nameless_struct(
-            NAME = _named_struct(_info_output[0]),
-            LIST  = _named_struct(_info_output[1]),
+            SOURCE = _named_struct(_info_output[0]),
+            NAMES  = _named_struct(_info_output[1]),
             PATH  = _named_struct(_info_output[2]),
             TYPE = _named_struct(_image_output[0]),
             SIZE  = _named_struct(_image_output[1],
