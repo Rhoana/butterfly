@@ -11,7 +11,7 @@ class DataQuery(Query):
 
         positions = ['X','Y','Z','WIDTH','HEIGHT']
         for key in positions:
-            self.set_key(self.INPUT,key)
+            self.set_key(self.INPUT.POSITION,key)
 
         image_list = ['VIEW','FORMAT']
         for key in image_list:
@@ -53,14 +53,14 @@ class DataQuery(Query):
 
     @property
     def bounds(self):
-        get_val = lambda k: getattr(self.INPUT,k).VALUE
+        get_val = lambda k: getattr(self.INPUT.POSITION,k).VALUE
         x0y0 = np.array(map(get_val,'XY'))
         x1y1 = x0y0 + self.shape
         return [x0y0, x1y1]
 
     @property
     def shape(self):
-        get_val = lambda k: getattr(self.INPUT,k).VALUE
+        get_val = lambda k: getattr(self.INPUT.POSITION,k).VALUE
         return map(get_val,['WIDTH','HEIGHT'])
 
     @property

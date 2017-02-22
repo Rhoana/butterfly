@@ -133,9 +133,7 @@ class API(RequestHandler):
         path_name = self.OUTPUT.INFO.PATH.NAME
         terms[path_name] = info_query.OUTPUT.INFO.PATH.VALUE
 
-        for k in self.INPUT.ORIGIN_LIST:
-            terms[k] = self._get_int_necessary_param(k)
-        for k in self.INPUT.SHAPE_LIST:
+        for k in self.INPUT.POSITION.LIST:
             terms[k] = self._get_int_necessary_param(k)
 
         return DataQuery(**terms)
