@@ -33,18 +33,26 @@ INPUT:                       | RUNTIME:                     | OUTPUT:
     - channel                |       SJ:                    |                             
   IMAGE:                     |         NAME: sj             |                             
     FORMAT:                  |       SK:                    |                             
-      LIST:                  |         NAME: sk             |                             
-      - zip                  |     OUTSIDE:                 |                             
-      - png                  |       LIST:                  |                             
-      - jpg                  |       - y                    |                             
-      - tif                  |       - x                    |                             
-      - bmp                  |       - z                    |                             
-      NAME: format           |       X:                     |                             
-      VALUE: png             |         NAME: x              |                             
-      ZIP_LIST:              |       Y:                     |                             
-      - zip                  |         NAME: y              |                             
-    LIST:                    |       Z:                     |                             
-    - view                   |         NAME: z              |                             
+      COLOR_LIST:            |         NAME: sk             |                             
+      - png                  |     OUTSIDE:                 |                             
+      - jpg                  |       LIST:                  |                             
+      - bmp                  |       - y                    |                             
+      GRAY_LIST:             |       - x                    |                             
+      - tif                  |       - z                    |                             
+      - tiff                 |       X:                     |                             
+      LIST:                  |         NAME: x              |                             
+      - zip                  |       Y:                     |                             
+      - tif                  |         NAME: y              |                             
+      - tiff                 |       Z:                     |                             
+      - png                  |         NAME: z              |                             
+      - jpg                  |                              |                             
+      - bmp                  |                              |                             
+      NAME: format           |                              |                             
+      VALUE: png             |                              |                             
+      ZIP_LIST:              |                              |                             
+      - zip                  |                              |                             
+    LIST:                    |                              |                             
+    - view                   |                              |                             
     - format                 |                              |                             
     VIEW:                    |                              |                             
       COLOR:                 |                              |                             
