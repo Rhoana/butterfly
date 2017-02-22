@@ -157,7 +157,11 @@ class OUTPUT():
             CHANNEL = _named_struct('name'),
             NAMES  = _named_struct('list'),
             PATH  = _named_struct('path'),
-            TYPE = _named_struct('data-type'),
+            TYPE = _named_struct('data-type',
+                VALUE = 'uint8',
+                RAW_LIST = ['uint8','float32'],
+                ID_LIST = ['uint16','uint32']
+            ),
             SIZE  = _named_struct('dimensions',
                 X = _named_struct('x'),
                 Y = _named_struct('y'),

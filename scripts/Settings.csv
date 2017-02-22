@@ -25,19 +25,19 @@ INPUT:                       | RUNTIME:                     | OUTPUT:
     - neuron_keypoint        |       - i                    |       Z:                    
     VOXEL_LIST:              |       - k                    |         NAME: z             
     - voxel_list             |       - j                    |     TYPE:                   
-  GROUP:                     |       - sk                   |       NAME: data-type       
-    LIST:                    |       - sj                   |                             
-    - experiment             |       - si                   |                             
-    - sample                 |       SI:                    |                             
-    - dataset                |         NAME: si             |                             
-    - channel                |       SJ:                    |                             
-  IMAGE:                     |         NAME: sj             |                             
-    FORMAT:                  |       SK:                    |                             
-      COLOR_LIST:            |         NAME: sk             |                             
-      - png                  |     OUTSIDE:                 |                             
-      - jpg                  |       LIST:                  |                             
-      - bmp                  |       - y                    |                             
-      GRAY_LIST:             |       - x                    |                             
+  GROUP:                     |       - sk                   |       ID_LIST:              
+    LIST:                    |       - sj                   |       - uint16              
+    - experiment             |       - si                   |       - uint32              
+    - sample                 |       SI:                    |       LIST:                 
+    - dataset                |         NAME: si             |       - uint16              
+    - channel                |       SJ:                    |       - uint32              
+  IMAGE:                     |         NAME: sj             |       - uint8               
+    FORMAT:                  |       SK:                    |       - float32             
+      COLOR_LIST:            |         NAME: sk             |       NAME: data-type       
+      - png                  |     OUTSIDE:                 |       RAW_LIST:             
+      - jpg                  |       LIST:                  |       - uint8               
+      - bmp                  |       - y                    |       - float32             
+      GRAY_LIST:             |       - x                    |       VALUE: uint8          
       - tif                  |       - z                    |                             
       - tiff                 |       X:                     |                             
       LIST:                  |         NAME: x              |                             
