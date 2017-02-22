@@ -4,20 +4,26 @@ import os
 # FOR ALL NAMELESS KEYWORDS
 class _nameless_struct():
     VALUE = 0
-    ALL_LIST = []
     def __init__(self,**_keywords):
+
+        all_list = []
         for key in _keywords:
             keyval = _keywords[key]
             setattr(self,key,keyval)
             # PUT ALL LISTS INTO ALL_LIST
             more = keyval if type(keyval) is list else []
-            self.ALL_LIST = self.ALL_LIST + more
+            # PUT ALL TERM NAMES INTO ALL_LIST
+            if hasattr(keyval, 'NAME'):
+                more = [keyval.NAME]
+            all_list += more
+        if len(all_list):
+            self.ALL_LIST = all_list
 
 # FOR ALL KEYWORDS WITH NAMES
 class _named_struct(_nameless_struct):
     def __init__(self,_name,**_keywords):
-        self.NAME = _name
         _nameless_struct.__init__(self, **_keywords)
+        self.NAME = _name
 
 
 # Query params for grouping
@@ -30,7 +36,7 @@ _groupings = {
     _experiments: 'experiment',
     _samples: 'sample',
     _datasets: 'dataset',
-    _channels: 'channel',
+    _channels: 'channel'
 }
 
 # ALL THE METHOD NAMES
@@ -64,7 +70,7 @@ _info_formats = ['json','yaml']
 _image_views = ['grayscale','colormap','rgb']
 _image_formats = ['png', 'jpg', 'tif', 'bmp', 'zip']
 _source_formats = ['hdf5', 'tilespecs', 'mojo']
-_source_formats.append('regularimagestack')
+_source_formats += ['regularimagestack']
 _info_default = 'json'
 _view_default = 'grayscale'
 _source_default = 'hdf5'
@@ -90,7 +96,6 @@ class INPUT():
     # ALL THE LISTS OF INPUT NAMES
     ORIGIN_LIST = _image_origin
     SHAPE_LIST = _image_shape
-    SCALE_LIST = _scale_input
     INFO_LIST = _info_input
     IMAGE_LIST = _image_input
     GROUP_LIST = _group_input
@@ -133,12 +138,6 @@ class INPUT():
 THIS HELPS LOAD TILES
 '''
 class RUNTIME():
-    #ALL THE LISTS OF RUNTIME NAMES
-    ORIGIN_LIST = _image_origin
-    SHAPE_LIST = _image_shape
-    PIXEL_LIST = _pixels_runtime
-    SCALE_LIST = _scale_runtime
-    IMAGE_LIST = _image_runtime
     def __init__(self):
         # ALL THE ORIGIN / SHAPE INPUTS
         self.X = _named_struct(_image_origin[0])
@@ -162,17 +161,13 @@ class RUNTIME():
                 LIST = _source_formats,
                 VALUE = _source_default
             ),
-            BLOCK = _named_struct(_image_runtime[1]),
-            PATH = _named_struct(_image_runtime[2])
+            BLOCK = _named_struct(_image_runtime[1])
         )
 
 '''
 THIS HELPS RETURN TEXT
 '''
 class OUTPUT():
-    #ALL THE LISTS OF VALUE NAMES
-    INFO_LIST = _info_output
-    IMAGE_LIST = _image_output
     def __init__(self):
         # ALL THE INFO OUTPUT TERMS
         self.INFO = _nameless_struct(
