@@ -19,7 +19,8 @@ class Query():
 
     def set_key(self,struct,key):
         field = getattr(struct, key)
-        val = self.keywords.get(field.NAME,'')
+        default = getattr(field,'VALUE','')
+        val = self.keywords.get(field.NAME,default)
         setattr(field, 'VALUE', val)
 
     @property
