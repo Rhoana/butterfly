@@ -72,17 +72,13 @@ class TileQuery(Query):
         return self.RUNTIME.IMAGE.BLOCK.VALUE
 
     @property
-    def tilesize(self):
-        Sk,Sj,Si = self.all_scales
-        by,bx = self.blocksize
-        bz = 1
-        return [Sk*bz,Sj*by,Si*bx]
-
-    @property
     def full_coords(self):
         Z,Y,X = self.index_zyx
         K,J,I = self.pixels_kji
-        sbz, sby, sbx = self.tilesize
-        return [Z*sbz +K, Y*sby +J, X*sbx + I]
+        by, bx = self.blocksize
+        bz = 1
+        sk, sj, si = self.all_scales
+        tz, ty, tx = [Z*bz +K, Y*by +J, X*bx + I]
+        return [tz*sk, ty*sj, tx*si]
 
 

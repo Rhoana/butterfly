@@ -23,9 +23,9 @@ class Core(object):
 
     def find_tiles(self, query):
         q_type = query.dtype
-        first_tile_index = query.tiled_bounds[0]
-        all_tiles = np.argwhere(np.ones(query.tiled_shape))
-        cutout = np.zeros(query.scaled_shape, dtype=q_type)
+        first_tile_index = query.tile_bounds[0]
+        all_tiles = np.argwhere(np.ones(query.tile_shape))
+        cutout = np.zeros(query.target_shape, dtype=q_type)
         tiles_needed = first_tile_index + all_tiles
 
         for t_index in tiles_needed:
