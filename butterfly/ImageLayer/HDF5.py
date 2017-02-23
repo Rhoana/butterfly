@@ -6,11 +6,11 @@ class HDF5(Datasource):
     pass
     @classmethod
     def load_tile(ds, query):
+        Sk,Sj,Si = query.all_scales
         path = query.OUTPUT.INFO.PATH.VALUE
-        Z = query.index_xyz[-1]
-        S,I,J = query.pixels_sij
+        (Zk0,Zk1),(Yj0,Yj1),(Xi0,Xi1) = query.full_coords
 
         with h5py.File(path) as fd:
-            volume = fd[fd.keys()[0]]
-            return volume[Z, J[0]:J[1]:S, I[0]:I[1]:S]
+            vol = fd[fd.keys()[0]]
+            return vol[Zk0:Zk1:Sk,Yj0:Yj1:Sj,Xi0:Xi1:Si]
 

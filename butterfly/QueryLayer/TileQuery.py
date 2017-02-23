@@ -1,5 +1,6 @@
 from ImageLayer import *
 from Query import Query
+import numpy as np
 
 class TileQuery(Query):
 
@@ -19,24 +20,29 @@ class TileQuery(Query):
 
         out_tile.Y.VALUE = xy_index[0]
         out_tile.X.VALUE = xy_index[1]
-        run_tile.J.VALUE = [start[0],end[0]]
-        run_tile.I.VALUE = [start[1],end[1]]
+        run_tile.K.VALUE = np.array([0,1])
+        run_tile.J.VALUE = np.array([start[0],end[0]])
+        run_tile.I.VALUE = np.array([start[1],end[1]])
         run_tile.SI.VALUE = int(query.scale)
         run_tile.SJ.VALUE = int(query.scale)
-        run_tile.SK.VALUE = int(query.scale)
+        run_tile.SK.VALUE = int(1)
 
-        q_path = query.OUTPUT.INFO.PATH.VALUE
         q_source = query.RUNTIME.IMAGE.SOURCE.VALUE
+        q_block = query.RUNTIME.IMAGE.BLOCK.VALUE
         q_z = query.RUNTIME.TILE.OUTSIDE.Z.VALUE
+        q_path = query.OUTPUT.INFO.PATH.VALUE
 
-        self.OUTPUT.INFO.PATH.VALUE = q_path
         self.RUNTIME.IMAGE.SOURCE.VALUE = q_source
+        self.RUNTIME.IMAGE.BLOCK.VALUE = q_block
         self.RUNTIME.TILE.OUTSIDE.Z.VALUE = q_z
+        self.OUTPUT.INFO.PATH.VALUE = q_path
 
     @property
     def key(self):
-        sij_xyz = self.pixels_sij + self.index_xyz
-        return '_'.join(map(str,sij_xyz))
+        all_keys = self.full_coords
+        all_keys.append(self.all_scales)
+        coord = np.concatenate(all_keys)
+        return '_'.join(map(str,coord))
 
     @property
     def source_class(self):
@@ -44,15 +50,39 @@ class TileQuery(Query):
         return self.SOURCES.get(disk_fmt, HDF5)
 
     @property
-    def pixels_sij(self):
+    def all_scales(self):
         run_tile = self.RUNTIME.TILE.INSIDE
         get_val = lambda k: getattr(run_tile,k).VALUE
-        return map(get_val,['SI','I','J'])
+        return map(get_val,['SK','SJ','SI'])
 
     @property
-    def index_xyz(self):
+    def pixels_kji(self):
+        run_tile = self.RUNTIME.TILE.INSIDE
+        get_val = lambda k: getattr(run_tile,k).VALUE
+        return map(get_val,'KJI')
+
+    @property
+    def index_zyx(self):
         runtime = self.RUNTIME.TILE.OUTSIDE
         get_val = lambda k: getattr(runtime,k).VALUE
-        return map(get_val,'XYZ')
+        return map(get_val,'ZYX')
+
+    @property
+    def blocksize(self):
+        return self.RUNTIME.IMAGE.BLOCK.VALUE
+
+    @property
+    def tilesize(self):
+        Sk,Sj,Si = self.all_scales
+        by,bx = self.blocksize
+        bz = 1
+        return [Sk*bz,Sj*by,Si*bx]
+
+    @property
+    def full_coords(self):
+        Z,Y,X = self.index_zyx
+        K,J,I = self.pixels_kji
+        sbz, sby, sbx = self.tilesize
+        return [Z*sbz +K, Y*sby +J, X*sbx + I]
 
 
