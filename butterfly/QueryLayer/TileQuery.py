@@ -76,8 +76,7 @@ class TileQuery(Query):
     def full_coords(self):
         Z,Y,X = self.index_zyx
         K,J,I = self.pixels_kji
-        by, bx = self.blocksize
-        bz = 1
+        bz, by, bx = self.blocksize
         sk, sj, si = self.all_scales
         tz, ty, tx = [Z*bz +K, Y*by +J, X*bx + I]
         return [tz*sk, ty*sj, tx*si]

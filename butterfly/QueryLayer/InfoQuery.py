@@ -32,7 +32,7 @@ class InfoQuery(Query):
 
     @property
     def content_type(self):
-        content = self.INPUT.INFO.FORMAT.NAME
+        content = self.INPUT.INFO.FORMAT.VALUE
         content = 'json' if content == 'yaml' else content
         return self.content_types[0].replace('{fmt}', content)
 

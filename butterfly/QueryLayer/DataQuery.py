@@ -72,7 +72,7 @@ class DataQuery(Query):
     @property
     def tile_bounds(self):
         target_bounds = self.target_bounds
-        float_block = np.float32(self.blocksize)
+        float_block = np.float32(self.blocksize[1:])
         start = target_bounds[0] / float_block
         end = target_bounds[1] / float_block
 
@@ -85,8 +85,8 @@ class DataQuery(Query):
         return -np.subtract(*self.tile_bounds)
 
     def tile2target(self, tile_index):
-        tile_start = self.blocksize * tile_index
-        tile_end = self.blocksize * (tile_index+1)
+        tile_start = self.blocksize[1:] * tile_index
+        tile_end = self.blocksize[1:] * (tile_index+1)
         return [tile_start, tile_end]
 
     def some_in_all(self, t_index, t_shape):
@@ -96,7 +96,7 @@ class DataQuery(Query):
         return [start, start+t_shape[1:]]
 
     def all_in_some(self, t_index):
-        some_shape = self.blocksize
+        some_shape = self.blocksize[1:]
         all_in = self.target_bounds
         origin = self.tile2target(t_index)[0]
         clip_off = lambda i: np.clip(i-origin,0,some_shape)
