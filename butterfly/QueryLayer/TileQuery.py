@@ -6,7 +6,7 @@ class TileQuery(Query):
 
     def __init__(self, *args, **keywords):
 
-        query, xy_index, start, end = args
+        query, zyx_index, start, end = args
         source_list = self.RUNTIME.IMAGE.SOURCE.LIST
 
         self.SOURCES = {
@@ -18,18 +18,15 @@ class TileQuery(Query):
         run_tile = self.RUNTIME.TILE.INSIDE
         out_tile = self.RUNTIME.TILE.OUTSIDE
 
-        out_tile.Y.VALUE = xy_index[0]
-        out_tile.X.VALUE = xy_index[1]
-        run_tile.K.VALUE = np.array([0,1])
-        run_tile.J.VALUE = np.array([start[0],end[0]])
-        run_tile.I.VALUE = np.array([start[1],end[1]])
-        run_tile.SI.VALUE = int(query.scale)
-        run_tile.SJ.VALUE = int(query.scale)
+        out_tile.Z.VALUE = zyx_index[0]
+        out_tile.Y.VALUE = zyx_index[1]
+        out_tile.X.VALUE = zyx_index[2]
+        run_tile.K.VALUE = np.array([start[0],end[0]])
+        run_tile.J.VALUE = np.array([start[1],end[1]])
+        run_tile.I.VALUE = np.array([start[2],end[2]])
         run_tile.SK.VALUE = int(1)
-
-
-        q_z = query.INPUT.POSITION.Z.VALUE
-        self.RUNTIME.TILE.OUTSIDE.Z.VALUE = q_z
+        run_tile.SJ.VALUE = int(query.scale)
+        run_tile.SI.VALUE = int(query.scale)
 
         q_source = query.RUNTIME.IMAGE.SOURCE.VALUE
         q_block = query.RUNTIME.IMAGE.BLOCK.VALUE
