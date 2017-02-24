@@ -18,7 +18,6 @@ class TileQuery(Query):
         run_tile = self.RUNTIME.TILE.INSIDE
         out_tile = self.RUNTIME.TILE.OUTSIDE
 
-        out_tile.Z.VALUE = int(0)
         out_tile.Y.VALUE = xy_index[0]
         out_tile.X.VALUE = xy_index[1]
         run_tile.K.VALUE = np.array([0,1])
@@ -28,14 +27,16 @@ class TileQuery(Query):
         run_tile.SJ.VALUE = int(query.scale)
         run_tile.SK.VALUE = int(1)
 
+
+        q_z = query.INPUT.POSITION.Z.VALUE
+        self.RUNTIME.TILE.OUTSIDE.Z.VALUE = q_z
+
         q_source = query.RUNTIME.IMAGE.SOURCE.VALUE
         q_block = query.RUNTIME.IMAGE.BLOCK.VALUE
-        q_z = query.RUNTIME.TILE.OUTSIDE.Z.VALUE
         q_path = query.OUTPUT.INFO.PATH.VALUE
 
         self.RUNTIME.IMAGE.SOURCE.VALUE = q_source
         self.RUNTIME.IMAGE.BLOCK.VALUE = q_block
-        self.RUNTIME.TILE.OUTSIDE.Z.VALUE = q_z
         self.OUTPUT.INFO.PATH.VALUE = q_path
 
     @property
