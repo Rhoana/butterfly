@@ -58,7 +58,7 @@ class INPUT():
             FEAT = _named_struct('entity_feature'),
             IMAGE_LIST = ['data', 'mask']
         )
-        self.GROUP = _nameless_struct(
+        self.GROUP = _named_struct( 'name',
             LIST = map(_groupings.get, self.METHODS.GROUP_LIST)
         )
         # ALL THE FEATURE NAMES

@@ -63,7 +63,7 @@ class InfoQuery(Query):
         methods = self.INPUT.METHODS
         if methods.VALUE in methods.GROUP_LIST:
             return info_out.NAMES.VALUE
-        if methods.VALUE == methods.INFO_LIST[0]:
+        if methods.VALUE == methods.META.NAME:
             return {
                 info_out.PATH.NAME: info_out.PATH.VALUE,
                 info_out.TYPE.NAME: info_out.TYPE.VALUE,

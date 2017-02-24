@@ -10,61 +10,124 @@ class API(RequestHandler):
         meths = self.INPUT.METHODS.LIST
         command = self._check_list('method',meth,meths)
 
-        if command in self.INPUT.METHODS.INFO_LIST:
-            return self._get_list(command)
+        if command == self.INPUT.METHODS.META.NAME:
+            return self._get_meta_info()
+        if command == self.INPUT.METHODS.FEAT.NAME:
+            return self._get_feature_info()
+        # Handle all methods the same if in same list
         if command in self.INPUT.METHODS.GROUP_LIST:
-            return self._get_list(command)
+            return self._get_group(command)
         if command in self.INPUT.METHODS.IMAGE_LIST:
             return self.get_data(command)
 
         return 'Unsupported Request Category'
 
-    def _add_info_terms(self, _terms):
-        list_name = self.OUTPUT.INFO.NAMES.NAME
-        _terms[list_name] = ['not yet']
-        return _terms
+    '''
+    Loads dictionary for info methods
+    '''
 
-    def _find_terms(self, _terms):
-        method = _terms[self.INPUT.METHODS.NAME]
-        if method == self.INPUT.METHODS.FEAT.NAME:
-            _terms = self._add_info_terms(_terms)
-        return _terms
+    def _get_meta_info(self):
+        # Get needed metadata
+        info = self.OUTPUT.INFO
+        meta_info = self._get_group_dict('')
 
-    def _get_list(self, _method):
-        format_list = self.INPUT.INFO.FORMAT
-        output = self._get_list_query(format_list)
-        raw_terms = {
+        # Get requested query parameters
+        out_format = self._get_list_query(self.INPUT.INFO.FORMAT)
+
+        return InfoQuery(**{
+            self.INPUT.METHODS.NAME: self.INPUT.METHODS.META.NAME,
+            info.CHANNEL.NAME: meta_info[info.CHANNEL.NAME],
+            info.TYPE.NAME: meta_info[info.TYPE.NAME],
+            info.PATH.NAME: meta_info[info.PATH.NAME],
+            info.SIZE.NAME: meta_info[info.SIZE.NAME],
+            self.INPUT.INFO.FORMAT.NAME: out_format
+        })
+
+    def _get_feature_info(self):
+        # Get needed metadata
+        info = self.OUTPUT.INFO
+        # meta_info = self._get_group_dict('')
+
+        # Get requested query parameters
+        out_format = self._get_list_query(self.INPUT.INFO.FORMAT)
+
+        return InfoQuery(**{
+            self.OUTPUT.INFO.NAMES.NAME: ['not yet'],
+            self.INPUT.METHODS.NAME: self.INPUT.METHODS.FEAT.NAME
+        })
+
+    '''
+    Lists values from config for group methods
+    '''
+
+    def get_value(self, g):
+        return g.get(self.INPUT.GROUP.NAME,'')
+
+    def _find_all_groups(self, _method):
+        group_methods = self.INPUT.METHODS.GROUP_LIST
+        group_queries = self.INPUT.GROUP.LIST
+        # List all parent methods of _method
+        if _method in group_methods:
+            group_index = group_methods.index(_method)
+            group_methods = group_methods[:group_index]
+            group_queries = group_queries[:group_index]
+
+        return zip(group_methods, group_queries)
+
+    def _get_group_dict(self, _method):
+        configured = self.BFLY_CONFIG
+        # validate each query value in each configured level
+        for method, query in self._find_all_groups(_method):
+            valid_groups = configured.get(method)
+            valid_values = map(self.get_value, valid_groups)
+            # Check query value against all valid query values
+            query_value = self.get_query_argument(query,'')
+            self._check_list(query, query_value, valid_values)
+            # Continue matching query_value from list of valid groups
+            configured = valid_groups[valid_values.index(query_value)]
+        return configured
+
+    def _get_group(self, _method):
+        out_format = self._get_list_query(self.INPUT.INFO.FORMAT)
+        group_list = self._get_group_dict(_method).get(_method,[])
+        group_values = map(self.get_value, group_list)
+
+        # Return an empty query
+        return InfoQuery(**{
             self.INPUT.METHODS.NAME: _method,
-            self.OUTPUT.INFO.SIZE.NAME: {},
-            format_list.NAME: output
-        }
-        features = self.BFLY_CONFIG
-        need_term = self.INPUT.GROUP.LIST
-        need_meth = self.INPUT.METHODS.GROUP_LIST
-        name_name = self.OUTPUT.INFO.CHANNEL.NAME
-        get_name = lambda g: g.get(name_name,'')
-        # List needed methods to find asked _method
-        if _method in need_meth:
-            n_meth = need_meth.index(_method)
-            need_meth = need_meth[:n_meth]
-            need_term = need_term[:n_meth]
-        # Find all needed groups as asked
-        for nmeth,nterm in zip(need_meth,need_term):
-            # Find the value of method needed
-            grouplist = features.get(nmeth,[])
-            groupnames = map(get_name, grouplist)
-            ask = self.get_query_argument(nterm, '')
-            ask = self._check_list(nterm,ask,groupnames)
-            raw_terms[nterm] = ask
-            # Find group matching name in list of groups 
-            features = grouplist[groupnames.index(ask)]
-        # Get list of method groups from parent features group
-        raw_terms.update(features)
-        result_list = features.get(_method, [])
-        list_name = self.OUTPUT.INFO.NAMES.NAME
-        raw_terms[list_name] = map(get_name, result_list)
-        terms = self._find_terms(raw_terms)
-        return InfoQuery(**terms)
+            self.INPUT.INFO.FORMAT.NAME: out_format,
+            self.OUTPUT.INFO.NAMES.NAME: group_values
+        })
+
+    '''
+    Loads data from tiles for image methods
+    '''
+
+    def get_data(self, _method):
+        # Get needed metadata
+        info = self._get_meta_info().OUTPUT.INFO
+        terms[self.INPUT.METHODS.NAME] = _method
+        terms[info.PATH.NAME] = info.PATH.VALUE
+
+        # get terms from IMAGE
+        for key in ['VIEW','FORMAT']:
+            term = getattr(self.INPUT.IMAGE, key)
+            terms[term.NAME] = self._get_list_query(term)
+
+        # get integers from POSITION
+        for key in ['X','Y','Z','WIDTH','HEIGHT','DEPTH']:
+            term = getattr(self.INPUT.POSITION, key)
+            terms[term.NAME] = self._get_int_query(term)
+
+        # get integers from RESOLUTION
+        term = getattr(self.INPUT.RESOLUTION, 'XY')
+        terms[term.NAME] = self._get_int_query(term)
+
+        return DataQuery(**terms)
+
+    '''
+    Handles Logs and Exceptions
+    '''
 
     def _except(self,result,kwargs):
         action = 'exist'
@@ -113,31 +176,4 @@ class API(RequestHandler):
             result = self.get_query_argument(q_name, default)
         return self._try_typecast_int(q_name, result)
 
-    def get_data(self, method):
-        # First validate group terms in query
-        info_query = self._get_list(self.INPUT.METHODS.META)
-        form = self._get_list_query(self.INPUT.IMAGE.FORMAT)
-        view = self._get_list_query(self.INPUT.IMAGE.VIEW)
-        terms = {
-            self.INPUT.METHODS.NAME: method,
-            self.INPUT.IMAGE.FORMAT.NAME: form,
-            self.INPUT.IMAGE.VIEW.NAME: view
-        }
-        path_name = self.OUTPUT.INFO.PATH.NAME
-        terms[path_name] = info_query.OUTPUT.INFO.PATH.VALUE
 
-        # POSITION
-        for key in ['X','Y','Z','WIDTH','HEIGHT','DEPTH']:
-            term = getattr(self.INPUT.POSITION, key)
-            terms[term.NAME] = self._get_int_query(term)
-
-        # RESOLUTION
-        term = getattr(self.INPUT.RESOLUTION, 'XY')
-        terms[term.NAME] = self._get_int_query(term)
-
-        return DataQuery(**terms)
-
-    def get_mask(self):
-        # TODO: implement this
-        msg ="The server does not yet support /api/mask requests"
-        raise HTTPError(self.request.uri, 501, msg, [], None)
