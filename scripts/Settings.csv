@@ -1,57 +1,57 @@
 INPUT:                       | RUNTIME:                     | OUTPUT:                     
   FEATURES:                  |   IMAGE:                     |   INFO:                     
     BOOL_LIST:               |     BLOCK:                   |     CHANNEL:                
-    - is_synapse             |       NAME: block-size       |       NAME: name            
-    - is_neuron              |     LIST:                    |     LIST:                   
-    LABEL_LIST:              |     - source-type            |     - path                  
-    - synapse_ids            |     - block-size             |     - data-type             
-    - neuron_ids             |     SOURCE:                  |     - list                  
-    LINK_LIST:               |       LIST:                  |     - name                  
-    - synapse_parent         |       - hdf5                 |     - dimensions            
-    - neuron_children        |       - tilespecs            |     NAMES:                  
-    LIST:                    |       - mojo                 |       NAME: list            
-    - synapse_ids            |       - regularimagestack    |     PATH:                   
-    - neuron_ids             |       NAME: source-type      |       NAME: path            
-    - is_synapse             |       VALUE: hdf5            |     SIZE:                   
-    - is_neuron              |   TILE:                      |       LIST:                 
-    - synapse_keypoint       |     INSIDE:                  |       - y                   
-    - neuron_keypoint        |       I:                     |       - x                   
-    - synapse_parent         |         NAME: i              |       - z                   
-    - neuron_children        |       J:                     |       NAME: dimensions      
-    - voxel_list             |         NAME: j              |       X:                    
-    NAME: feature            |       K:                     |         NAME: x             
-    POINT_LIST:              |         NAME: k              |       Y:                    
-    - synapse_keypoint       |       LIST:                  |         NAME: y             
-    - neuron_keypoint        |       - i                    |       Z:                    
-    VOXEL_LIST:              |       - k                    |         NAME: z             
-    - voxel_list             |       - j                    |     TYPE:                   
-  GROUP:                     |       - sk                   |       ID_LIST:              
-    LIST:                    |       - sj                   |       - uint16              
-    - experiment             |       - si                   |       - uint32              
-    - sample                 |       SI:                    |       LIST:                 
-    - dataset                |         NAME: si             |       - uint16              
-    - channel                |       SJ:                    |       - uint32              
-    NAME: name               |         NAME: sj             |       - uint8               
-  IMAGE:                     |       SK:                    |       - float32             
-    FORMAT:                  |         NAME: sk             |       NAME: data-type       
-      COLOR_LIST:            |     OUTSIDE:                 |       RAW_LIST:             
-      - png                  |       LIST:                  |       - uint8               
-      - jpg                  |       - y                    |       - float32             
-      - bmp                  |       - x                    |       VALUE: uint8          
-      LIST:                  |       - z                    |                             
-      - zip                  |       X:                     |                             
-      - png                  |         NAME: x              |                             
-      - jpg                  |       Y:                     |                             
-      - bmp                  |         NAME: y              |                             
-      - tif                  |       Z:                     |                             
-      - tiff                 |         NAME: z              |                             
-      NAME: format           |                              |                             
-      TIF_LIST:              |                              |                             
-      - tif                  |                              |                             
-      - tiff                 |                              |                             
-      VALUE: png             |                              |                             
-      ZIP_LIST:              |                              |                             
-      - zip                  |                              |                             
+    - is_synapse             |       LIST:                  |       NAME: name            
+    - is_neuron              |       - 1                    |     LIST:                   
+    LABEL_LIST:              |       - 512                  |     - path                  
+    - synapse_ids            |       NAME: block-size       |     - data-type             
+    - neuron_ids             |       VALUE:                 |     - list                  
+    LINK_LIST:               |       - 1                    |     - name                  
+    - synapse_parent         |       - 512                  |     - dimensions            
+    - neuron_children        |       - 512                  |     NAMES:                  
+    LIST:                    |     LIST:                    |       NAME: list            
+    - synapse_ids            |     - source-type            |     PATH:                   
+    - neuron_ids             |     - block-size             |       NAME: path            
+    - is_synapse             |     SOURCE:                  |     SIZE:                   
+    - is_neuron              |       LIST:                  |       LIST:                 
+    - synapse_keypoint       |       - hdf5                 |       - y                   
+    - neuron_keypoint        |       - tilespecs            |       - x                   
+    - synapse_parent         |       - mojo                 |       - z                   
+    - neuron_children        |       - regularimagestack    |       NAME: dimensions      
+    - voxel_list             |       NAME: source-type      |       X:                    
+    NAME: feature            |       VALUE: hdf5            |         NAME: x             
+    POINT_LIST:              |   TILE:                      |       Y:                    
+    - synapse_keypoint       |     INSIDE:                  |         NAME: y             
+    - neuron_keypoint        |       I:                     |       Z:                    
+    VOXEL_LIST:              |         NAME: i              |         NAME: z             
+    - voxel_list             |       J:                     |     TYPE:                   
+  GROUP:                     |         NAME: j              |       ID_LIST:              
+    LIST:                    |       K:                     |       - uint16              
+    - experiment             |         NAME: k              |       - uint32              
+    - sample                 |       LIST:                  |       LIST:                 
+    - dataset                |       - i                    |       - uint16              
+    - channel                |       - k                    |       - uint32              
+    NAME: name               |       - j                    |       - uint8               
+  IMAGE:                     |       - sk                   |       - float32             
+    FORMAT:                  |       - sj                   |       NAME: data-type       
+      COLOR_LIST:            |       - si                   |       RAW_LIST:             
+      - png                  |       SI:                    |       - uint8               
+      - jpg                  |         NAME: si             |       - float32             
+      - bmp                  |       SJ:                    |       VALUE: uint8          
+      LIST:                  |         NAME: sj             |                             
+      - zip                  |       SK:                    |                             
+      - png                  |         NAME: sk             |                             
+      - jpg                  |     OUTSIDE:                 |                             
+      - bmp                  |       LIST:                  |                             
+      - tif                  |       - y                    |                             
+      - tiff                 |       - x                    |                             
+      NAME: format           |       - z                    |                             
+      TIF_LIST:              |       X:                     |                             
+      - tif                  |         NAME: x              |                             
+      - tiff                 |       Y:                     |                             
+      VALUE: png             |         NAME: y              |                             
+      ZIP_LIST:              |       Z:                     |                             
+      - zip                  |         NAME: z              |                             
     LIST:                    |                              |                             
     - view                   |                              |                             
     - format                 |                              |                             

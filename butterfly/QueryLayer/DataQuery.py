@@ -7,19 +7,19 @@ class DataQuery(Query):
     def __init__(self,*args,**keywords):
         Query.__init__(self, **keywords)
 
-        positions = ['X','Y','Z','WIDTH','HEIGHT']
-        for key in positions:
+        for key in ['X','Y','Z','WIDTH','HEIGHT']:
             self.set_key(self.INPUT.POSITION,key)
 
-        image_list = ['VIEW','FORMAT']
-        for key in image_list:
+        for key in ['VIEW','FORMAT']:
             self.set_key(self.INPUT.IMAGE,key)
 
-        self.OUTPUT.INFO.TYPE.VALUE = 'uint8'
-        self.RUNTIME.IMAGE.SOURCE.VALUE = 'hdf5'
-        self.RUNTIME.IMAGE.BLOCK.VALUE = [512,512]
-        self.set_key(self.INPUT.RESOLUTION,'XY')
-        self.set_key(self.OUTPUT.INFO,'PATH')
+        for key in ['SOURCE','BLOCK']:
+            self.set_key(self.RUNTIME.IMAGE, key)
+
+        for key in ['TYPE','PATH']:
+            self.set_key(self.OUTPUT.INFO, key)
+
+        self.set_key(self.INPUT.RESOLUTION, 'XY')
 
     @property
     def key(self):

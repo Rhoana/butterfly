@@ -143,7 +143,9 @@ class RUNTIME():
                 ],
                 VALUE = 'hdf5'
             ),
-            BLOCK = _named_struct('block-size')
+            BLOCK = _named_struct('block-size',
+                VALUE = [1, 512, 512]
+            )
         )
 
 '''

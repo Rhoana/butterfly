@@ -6,56 +6,35 @@ import yaml
 
 class InfoQuery(Query):
 
-    groups = []
+    form = [
+       { 'indent': 4 },
+       { 'default_flow_style': False }
+    ]
+    write = [json.dumps, yaml.dump]
 
     def __init__(self,*args,**keywords):
 
         Query.__init__(self, **keywords)
 
-        metadata_list = ['NAMES','PATH','CHANNEL']
-        for key in metadata_list:
+        for key in ['NAMES','PATH','SIZE','CHANNEL']:
             self.set_key(self.OUTPUT.INFO,key)
 
         self.set_key(self.INPUT.INFO,'FORMAT')
-        self.set_key(self.OUTPUT.INFO,'SIZE')
-
-        for g in self.INPUT.GROUP.LIST:
-            self.groups.append(keywords.get(g,''))
-
-        # Text format terms given explicitly
-        json_name, yaml_name = self.INPUT.INFO.FORMAT.LIST[:2]
-
-        self.formats = {
-            json_name: {
-                'terms': {
-                    'indent': 4
-                },
-                'writer': json.dumps,
-                'content': json_name
-            },
-            yaml_name: {
-                'terms': {
-                    'default_flow_style': False
-                },
-                'writer': yaml.dump,
-                'content': yaml_name
-            }
-        }
 
     @property
     def key(self):
-        return '_'.join(self.groups)
+        return self.OUTPUT.INFO.PATH.VALUE
 
     @property
     def get_format(self):
-        fmt = self.INPUT.INFO.FORMAT.VALUE
-        return self.formats[fmt]
+        fmt_val = self.INPUT.INFO.FORMAT.VALUE
+        return self.INPUT.INFO.FORMAT.LIST.index(fmt_val)
 
     @property
     def content_type(self):
-        content = self.get_format['content']
-        content_type = self.content_types[0]
-        return content_type.replace('{fmt}', content)
+        content = self.INPUT.INFO.FORMAT.NAME
+        content = 'json' if content == 'yaml' else content
+        return self.content_types[0].replace('{fmt}', content)
 
     @property
     def result(self):
@@ -76,5 +55,5 @@ class InfoQuery(Query):
     def dump(self):
         out = self.get_format
         raw_output = self.result
-        return out['writer'](raw_output,**out['terms'])
+        return self.write[out](raw_output,**self.form[out])
 
