@@ -4,8 +4,6 @@ import logging
 
 class DataQuery(Query):
 
-    groups = []
-
     def __init__(self,*args,**keywords):
         Query.__init__(self, **keywords)
 
@@ -23,12 +21,9 @@ class DataQuery(Query):
         self.set_key(self.INPUT.RESOLUTION,'XY')
         self.set_key(self.OUTPUT.INFO,'PATH')
 
-        for g in self.INPUT.GROUP.LIST:
-            self.groups.append(keywords.get(g,''))
-
     @property
     def key(self):
-        return '_'.join(self.groups)
+        return self.OUTPUT.INFO.PATH.VALUE
 
     @property
     def is_zip(self):
@@ -106,13 +101,13 @@ class DataQuery(Query):
         all_shape = self.target_shape
         origin = self.target_bounds[0]
         some_in = self.tile2target(t_index)
-        clip_off = lambda i,s: np.clip(i-origin,0,s)
-        return map(clip_off, some_in, all_shape)
+        clip_off = lambda i: np.clip(i-origin,0,all_shape)
+        return map(clip_off, some_in)
 
     def all_in_some(self, t_index):
         some_shape = self.blocksize
         all_in = self.target_bounds
         origin = self.tile2target(t_index)[0]
-        clip_off = lambda i,s: np.clip(i-origin,0,s)
-        return map(clip_off, all_in, some_shape)
+        clip_off = lambda i: np.clip(i-origin,0,some_shape)
+        return map(clip_off, all_in)
 
