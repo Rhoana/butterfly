@@ -105,6 +105,7 @@ class API(RequestHandler):
 
     def get_data(self, _method):
         # Get needed metadata
+        terms = {}
         info = self._get_meta_info().OUTPUT.INFO
         terms[self.INPUT.METHODS.NAME] = _method
         terms[info.PATH.NAME] = info.PATH.VALUE
@@ -163,17 +164,14 @@ class API(RequestHandler):
             'term': qparam
         })
 
-    def _get_list_query(self, _query_term):
-        q_name, default, whitelist = _query_term.name_value_list
-        result = self.get_query_argument(q_name, default)
-        return self._check_list(q_name,result,whitelist)
+    def _get_list_query(self, _query):
+        result = self.get_query_argument(_query.NAME, _query.VALUE)
+        return self._check_list(_query.NAME,result,_query.LIST)
 
-    def _get_int_query(self, _query_term):
-        q_name, default = _query_term.name_value_list[:2]
-        if default is False:
-            result = self._get_needed_query(q_name)
+    def _get_int_query(self, _query):
+        if _query.VALUE is False:
+            result = self._get_needed_query(_query.NAME)
         else:
-            result = self.get_query_argument(q_name, default)
-        return self._try_typecast_int(q_name, result)
-
+            result = self.get_query_argument(_query.NAME, _query.VALUE)
+        return self._try_typecast_int(_query.NAME, result)
 

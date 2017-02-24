@@ -3,7 +3,8 @@ import os
 
 # FOR ALL NAMELESS KEYWORDS
 class _nameless_struct():
-    VALUE = 0
+    LIST = False
+    VALUE = False
     def __init__(self,**_keywords):
 
         alls = []
@@ -19,13 +20,9 @@ class _nameless_struct():
         if len(alls):
             self.LIST = sorted(set(alls),key=alls.index)
 
-    @property
-    def name_value_list(self):
-        get_nvl = lambda s: getattr(self, s, False)
-        return map(get_nvl, ['NAME', 'VALUE', 'LIST'])
-
 # FOR ALL KEYWORDS WITH NAMES
 class _named_struct(_nameless_struct):
+    NAME = False
     def __init__(self,_name,**_keywords):
         _nameless_struct.__init__(self, **_keywords)
         self.NAME = _name
