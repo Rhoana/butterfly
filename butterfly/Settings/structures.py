@@ -79,7 +79,9 @@ class INPUT():
         )
         # ALL THE RESOLUTION INPUTS
         self.RESOLUTION = _nameless_struct(
-            XY = _named_struct('resolution'),
+            XY = _named_struct('resolution',
+                VALUE = 0
+            ),
             X = _named_struct('x-res'),
             Y = _named_struct('y-res'),
             Z = _named_struct('z-res')
