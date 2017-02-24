@@ -38,17 +38,17 @@ INPUT:                       | RUNTIME:                     | OUTPUT:
       - png                  |       LIST:                  |       - uint8               
       - jpg                  |       - y                    |       - float32             
       - bmp                  |       - x                    |       VALUE: uint8          
-      GRAY_LIST:             |       - z                    |                             
-      - tif                  |       X:                     |                             
-      - tiff                 |         NAME: x              |                             
-      LIST:                  |       Y:                     |                             
-      - zip                  |         NAME: y              |                             
+      LIST:                  |       - z                    |                             
+      - zip                  |       X:                     |                             
+      - png                  |         NAME: x              |                             
+      - jpg                  |       Y:                     |                             
+      - bmp                  |         NAME: y              |                             
       - tif                  |       Z:                     |                             
       - tiff                 |         NAME: z              |                             
-      - png                  |                              |                             
-      - jpg                  |                              |                             
-      - bmp                  |                              |                             
       NAME: format           |                              |                             
+      TIF_LIST:              |                              |                             
+      - tif                  |                              |                             
+      - tiff                 |                              |                             
       VALUE: png             |                              |                             
       ZIP_LIST:              |                              |                             
       - zip                  |                              |                             
@@ -137,6 +137,7 @@ INPUT:                       | RUNTIME:                     | OUTPUT:
       NAME: x-res            |                              |                             
     XY:                      |                              |                             
       NAME: resolution       |                              |                             
+      VALUE: 0               |                              |                             
     Y:                       |                              |                             
       NAME: y-res            |                              |                             
     Z:                       |                              |                             

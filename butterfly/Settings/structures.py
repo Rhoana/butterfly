@@ -98,7 +98,7 @@ class INPUT():
         self.IMAGE = _nameless_struct(
             FORMAT = _named_struct('format',
                 COLOR_LIST = ['png','jpg','bmp'],
-                GRAY_LIST = ['tif', 'tiff'],
+                TIF_LIST = ['tif', 'tiff'],
                 ZIP_LIST = ['zip'],
                 VALUE = 'png'
             ),
