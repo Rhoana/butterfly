@@ -26,21 +26,16 @@ class DataQuery(Query):
         return self.OUTPUT.INFO.PATH.VALUE
 
     @property
-    def is_zip(self):
-        fmt = self.INPUT.IMAGE.FORMAT.VALUE
-        return fmt in self.INPUT.IMAGE.FORMAT.ZIP_LIST
-
-    @property
     def dtype(self):
         dtype = self.OUTPUT.INFO.TYPE.VALUE
-        return getattr(np,dtype,np.uint8)
+        return getattr(np,dtype, np.uint8)
 
     @property
     def content_type(self):
-        is_img = not self.is_zip
-        fmt = self.INPUT.IMAGE.FORMAT.VALUE
+        img_format = self.INPUT.IMAGE.FORMAT
+        is_img = img_format.VALUE not in img_format.ZIP_LIST
         content_type = self.content_types[is_img]
-        return content_type.replace('{fmt}', fmt)
+        return content_type.replace('{fmt}', img_format.VALUE)
 
     @property
     def scale(self):
@@ -48,32 +43,29 @@ class DataQuery(Query):
 
     @property
     def blocksize(self):
-        target_block = self.RUNTIME.IMAGE.BLOCK.VALUE
-        return np.array(target_block, dtype=np.uint32)
+        return np.uint32(self.RUNTIME.IMAGE.BLOCK.VALUE)
 
     @property
     def target_shape(self):
         get_val = lambda k: getattr(self.INPUT.POSITION,k).VALUE
-        return map(get_val,['HEIGHT','WIDTH'])
+        return np.uint32(map(get_val,['HEIGHT','WIDTH']))
 
     @property
     def source_shape(self):
-        upscale = lambda s: np.uint32(s * self.scale)
-        return map(upscale, self.target_shape)
+        return np.uint32(self.target_shape * self.scale)
 
     @property
     def target_origin(self):
-        downscale = lambda s: np.uint32(s / self.scale)
-        return map(downscale, self.source_origin)
+        return np.uint32(self.source_origin / self.scale)
 
     @property
     def source_origin(self):
         get_val = lambda k: getattr(self.INPUT.POSITION,k).VALUE
-        return map(get_val,'YX')
+        return np.uint32(map(get_val,'YX'))
 
     @property
     def target_bounds(self):
-        y0x0 = np.array(self.target_origin)
+        y0x0 = self.target_origin
         y1x1 = y0x0 + self.target_shape
         return [y0x0, y1x1]
 

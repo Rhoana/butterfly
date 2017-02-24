@@ -51,21 +51,22 @@ class Core(object):
 
     def write_image(self, query, vol):
 
-        fmt = query.INPUT.IMAGE.FORMAT.VALUE
+        img_format = query.INPUT.IMAGE.FORMAT
 
-        if fmt in ['zip']:
+        if img_format.VALUE in img_format.ZIP_LIST:
             output = StringIO.StringIO()
             volstring = vol[:,:,0].T.tostring('F')
             output.write(zlib.compress(volstring))
             return output.getvalue()
 
-        if fmt in ['tif','tiff']:
+        if img_format.VALUE in img_format.TIF_LIST:
             output = StringIO.StringIO()
             tiffvol = vol[:,:,0]
             tifffile.imsave(output, tiffvol)
             return output.getvalue()
 
-        return cv2.imencode("." + fmt, vol)[1].tostring()
+        image = cv2.imencode("." + img_format.VALUE, vol)
+        return image[1].tostring()
 
     def get_info(self,query):
         return query.dump
