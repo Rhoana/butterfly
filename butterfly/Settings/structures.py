@@ -3,8 +3,8 @@ import os
 
 # FOR ALL NAMELESS KEYWORDS
 class _nameless_struct():
-    LIST = False
-    VALUE = False
+    LIST = None
+    VALUE = None
     def __init__(self,**_keywords):
 
         alls = []
@@ -22,7 +22,7 @@ class _nameless_struct():
 
 # FOR ALL KEYWORDS WITH NAMES
 class _named_struct(_nameless_struct):
-    NAME = False
+    NAME = None
     def __init__(self,_name,**_keywords):
         _nameless_struct.__init__(self, **_keywords)
         self.NAME = _name

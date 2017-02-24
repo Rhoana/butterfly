@@ -18,6 +18,7 @@ class TileQuery(Query):
         run_tile = self.RUNTIME.TILE.INSIDE
         out_tile = self.RUNTIME.TILE.OUTSIDE
 
+        out_tile.Z.VALUE = int(0)
         out_tile.Y.VALUE = xy_index[0]
         out_tile.X.VALUE = xy_index[1]
         run_tile.K.VALUE = np.array([0,1])

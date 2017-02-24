@@ -2,13 +2,14 @@ from RequestHandler import RequestHandler
 from QueryLayer import InfoQuery
 from QueryLayer import DataQuery
 from urllib2 import HTTPError
+import numpy as np
 
 class API(RequestHandler):
 
     def parse(self, *args):
         meth = str(args[0])
         meths = self.INPUT.METHODS.LIST
-        command = self._check_list('method',meth,meths)
+        command = self._match_list('method',meth,meths)
 
         if command == self.INPUT.METHODS.META.NAME:
             return self._get_meta_info()
@@ -82,7 +83,7 @@ class API(RequestHandler):
             valid_values = map(self.get_value, valid_groups)
             # Check query value against all valid query values
             query_value = self.get_query_argument(query,'')
-            self._check_list(query, query_value, valid_values)
+            self._match_list(query, query_value, valid_values)
             # Continue matching query_value from list of valid groups
             configured = valid_groups[valid_values.index(query_value)]
         return configured
@@ -147,31 +148,22 @@ class API(RequestHandler):
         except: self._except(result, kwargs)
 
     def _try_typecast_int(self,qparam,result):
-        return self._try_condition(result, int, {
+        return self._try_condition(result, np.uint32, {
             'check' : 'a number',
             'term' : qparam
         })
 
-    def _check_list(self,name,v,vlist):
+    def _match_list(self,name,v,vlist):
         return self._match_condition(v, v in vlist, {
             'check' : 'one of ['+', '.join(vlist)+']',
             'term' : name
         })
 
-    def _get_needed_query(self, qparam):
-        result = self.get_query_argument(qparam, default=None)
-        return self._match_condition(result, result is not None, {
-            'term': qparam
-        })
-
     def _get_list_query(self, _query):
         result = self.get_query_argument(_query.NAME, _query.VALUE)
-        return self._check_list(_query.NAME,result,_query.LIST)
+        return self._match_list(_query.NAME,result,_query.LIST)
 
     def _get_int_query(self, _query):
-        if _query.VALUE is False:
-            result = self._get_needed_query(_query.NAME)
-        else:
-            result = self.get_query_argument(_query.NAME, _query.VALUE)
+        result = self.get_query_argument(_query.NAME, _query.VALUE)
         return self._try_typecast_int(_query.NAME, result)
 
