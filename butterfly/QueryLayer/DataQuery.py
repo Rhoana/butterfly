@@ -97,17 +97,16 @@ class DataQuery(Query):
         tile_end = self.blocksize * (tile_index+1)
         return [tile_start, tile_end]
 
-    def some_in_all(self, t_index):
-        all_shape = self.target_shape
-        origin = self.target_bounds[0]
-        some_in = self.tile2target(t_index)
-        clip_off = lambda i: np.clip(i-origin,0,all_shape)
-        return map(clip_off, some_in)
+    def some_in_all(self, t_index, t_shape):
+        target_origin = self.target_bounds[0]
+        tile_origin = self.tile2target(t_index)[0]
+        start = tile_origin - target_origin
+        return [start, start+t_shape[1:]]
 
     def all_in_some(self, t_index):
         some_shape = self.blocksize
         all_in = self.target_bounds
         origin = self.tile2target(t_index)[0]
         clip_off = lambda i: np.clip(i-origin,0,some_shape)
-        return map(clip_off, all_in)
+        return [t_index] + map(clip_off, all_in)
 
