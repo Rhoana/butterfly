@@ -23,7 +23,10 @@ class CacheSource(object):
 
     def get_tile(self, query, t_query):
         src = self.get_source(query)
-        return src.get_tile(t_query) if src else []
+        tile = src.get_tile(t_query) if src else []
+        if len(tile):
+            self.log('get_tile', src=query.key, id=t_query.key)
+        return tile
 
     def lose_old_tiles(self):
         return []
@@ -31,11 +34,13 @@ class CacheSource(object):
     def log(self, action, **kwargs):
         statuses = {
             'add_source': 'info',
-            'add_tile': 'info'
+            'add_tile': 'info',
+            'get_tile': 'info'
         }
         actions = {
             'add_source': 'Starting {src} cache',
-            'add_tile': 'Adding {id} to {src} cache'
+            'add_tile': 'Adding {id} to {src} cache',
+            'get_tile': 'Loading {id} from {src} cache'
         }
         status = statuses[action]
         message = actions[action].format(**kwargs)

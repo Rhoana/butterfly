@@ -86,7 +86,8 @@ class DataQuery(Query):
 
     def some_in_all(self, t_origin, t_shape):
         tile_bounds = t_origin + np.outer([0,1],t_shape)
-        return tile_bounds - self.target_origin
+        some_in = tile_bounds - self.target_origin
+        return np.clip(some_in, 0, self.target_shape)
 
     def all_in_some(self, t_index):
         tile_origin = self.blocksize * t_index

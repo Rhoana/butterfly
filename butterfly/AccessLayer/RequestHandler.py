@@ -37,28 +37,23 @@ class RequestHandler(web.RequestHandler):
 
     def handle(self, _query):
         this_method = _query.INPUT.METHODS.VALUE
-        self.log('start', id=this_method)
         self.set_header('Content-Type',_query.content_type)
         if _query.is_data:
             content = self._core.get_data(_query)
         else:
             content = self._core.get_info(_query)
-        self.log('done', id=this_method)
         self.write(content)
         return content
 
     def log(self, action, **kwargs):
         statuses = {
-            'start': 'info',
             'exist': 'error',
-            'check' : 'error',
-            'done': 'info'
+            'check' : 'error'
         }
         actions = {
             'start': 'Starting {id}',
             'exist': 'Missing {term} parameter',
-            'check' : 'The {term} \'{val}\' is not {check}',
-            'done': 'Done with {id}\n'+'-'*40
+            'check' : 'The {term} \'{val}\' is not {check}'
         }
         status = statuses[action]
         message = actions[action].format(**kwargs)
