@@ -51,7 +51,6 @@ class RequestHandler(web.RequestHandler):
             'check' : 'error'
         }
         actions = {
-            'start': 'Starting {id}',
             'exist': 'Missing {term} parameter',
             'check' : 'The {term} \'{val}\' is not {check}'
         }

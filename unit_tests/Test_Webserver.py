@@ -1,39 +1,36 @@
-from Webserver import Webserver
-import sys, argparse
+import os
 import logging
+from butterfly import Webserver
+import sys, argparse
 
-class Butterfly():
+class Test_Webserver():
     '''
     Butterfly 2.0
     EM Data server
     2017 VCG + Lichtman Lab
     '''
     log_info = {
-        'filename': 'bfly.log',
+        'filename': os.path.join('logs','Webserver.log'),
         'level': logging.INFO
     }
     def __init__(self,_argv):
 
         args = self.parseArgv(_argv)
         port = args['port']
-
         logging.basicConfig(**self.log_info)
         self._server = Webserver().start(port)
+        return self._bfly.start()
 
     def parseArgv(self, argv):
         sys.argv = argv
 
         help = {
-            'bfly': 'Host a butterfly server!',
-            'folder': 'relative, absolute, or user path/of/all/experiments',
-            'save': 'path of output yaml file indexing experiments',
+            'test': 'Test Webserver unit in butterfly!',
             'port': 'port >1024 for hosting this server'
         }
 
-        parser = argparse.ArgumentParser(description=help['bfly'])
-        parser.add_argument('port', type=int, nargs='?', default=2001, help=help['port'])
-        parser.add_argument('-e','--exp', metavar='exp', help= help['folder'])
-        parser.add_argument('-o','--out', metavar='out', help= help['save'])
+        parser = argparse.ArgumentParser(description=help['test'])
+        parser.add_argument('port', nargs='?', default=2001, help=help['port'])
         return vars(parser.parse_args())
 
 # Allow Common Command Line / Module Interface
@@ -47,7 +44,7 @@ def toArgv(*args, **flags):
     return ['main'] + list(map(str,args)) + kargv
 
 def main(*_args, **_flags):
-    return Butterfly(toArgv(*_args, **_flags))
+    return Test_Webserver(toArgv(*_args, **_flags))
 
 if __name__ == "__main__":
-    Butterfly(sys.argv)
+    Test_Webserver(sys.argv)
