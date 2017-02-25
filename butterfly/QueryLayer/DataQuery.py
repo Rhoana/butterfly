@@ -67,39 +67,36 @@ class DataQuery(Query):
     def target_bounds(self):
         z0y0x0 = self.target_origin
         z1y1x1 = z0y0x0 + self.target_shape
-        return [z0y0x0, z1y1x1]
+        return np.c_[z0y0x0, z1y1x1].T
 
     @property
     def tile_bounds(self):
         target_bounds = self.target_bounds
         float_block = np.float32(self.blocksize)
-        start = target_bounds[0] / float_block
-        end = target_bounds[1] / float_block
-
-        bounds_start = np.floor(start).astype(np.uint32)
-        bounds_end = np.ceil(end).astype(np.uint32)
-        return [bounds_start, bounds_end]
+        float_bounds = target_bounds / float_block
+        # Find lowest tile index and highest tile index
+        bounds_start = np.uint32(np.floor(float_bounds[0]))
+        bounds_end = np.uint32(np.ceil(float_bounds[1]))
+        return np.c_[bounds_start, bounds_end].T
 
     @property
     def tile_shape(self):
-        return -np.subtract(*self.tile_bounds)
+        return np.diff(self.tile_bounds,axis=0)[0]
 
     def tile2target(self, tile_index):
         tile_start = self.blocksize * tile_index
         tile_end = self.blocksize * (tile_index+1)
-        return [tile_start, tile_end]
+        return np.c_[tile_start, tile_end].T
 
     def some_in_all(self, t_index, t_shape, offset):
-        tile_origin = self.tile2target(t_index)[0]
-        target_origin = self.target_bounds[0]
+        tile_origin = self.blocksize * t_index
+        target_origin = self.target_origin
         some_origin = tile_origin + offset
         start = some_origin - target_origin
-        return [start, start + t_shape]
+        return np.c_[start, start + t_shape].T
 
     def all_in_some(self, t_index):
-        some_shape = self.blocksize
-        all_in = self.target_bounds
-        origin = self.tile2target(t_index)[0]
-        clip_off = lambda i: np.clip(i-origin,0,some_shape)
-        return map(clip_off, all_in)
+        origin = self.blocksize * t_index
+        all_in = self.target_bounds - origin
+        return np.clip(all_in, 0, self.blocksize)
 
