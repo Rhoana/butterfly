@@ -30,10 +30,10 @@ class Core(object):
 
         for t_index in tiles_needed:
             tile_crop = query.all_in_some(t_index)
-            one_tile = TileQuery(query, t_index, tile_crop)
-            tile = self.load_tile(query, one_tile)
+            t_query = TileQuery(query, t_index, tile_crop)
+            tile = self.load_tile(query, t_query)
             # Fill the tile into the full cutout
-            to_cut = [one_tile.target_origin, tile.shape]
+            to_cut = [t_query.target_origin, tile.shape]
             [Z0,Y0,X0],[Z1,Y1,X1] = query.some_in_all(*to_cut)
             cutout[Z0:Z1,Y0:Y1,X0:X1] = tile
 
