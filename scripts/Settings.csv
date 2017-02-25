@@ -21,37 +21,37 @@ INPUT:                       | RUNTIME:                     | OUTPUT:
     - voxel_list             |       NAME: source-type      |       X:                    
     NAME: feature            |       VALUE: hdf5            |         NAME: x             
     POINT_LIST:              |   TILE:                      |       Y:                    
-    - synapse_keypoint       |     INSIDE:                  |         NAME: y             
-    - neuron_keypoint        |       I:                     |       Z:                    
-    VOXEL_LIST:              |         NAME: i              |         NAME: z             
-    - voxel_list             |       J:                     |     TYPE:                   
-  GROUP:                     |         NAME: j              |       ID_LIST:              
-    LIST:                    |       K:                     |       - uint16              
-    - experiment             |         NAME: k              |       - uint32              
-    - sample                 |       LIST:                  |       LIST:                 
-    - dataset                |       - i                    |       - uint16              
-    - channel                |       - k                    |       - uint32              
-    NAME: name               |       - j                    |       - uint8               
-  IMAGE:                     |       - sk                   |       - float32             
-    FORMAT:                  |       - sj                   |       NAME: data-type       
-      COLOR_LIST:            |       - si                   |       RAW_LIST:             
-      - png                  |       SI:                    |       - uint8               
-      - jpg                  |         NAME: si             |       - float32             
-      - bmp                  |       SJ:                    |       VALUE: uint8          
-      LIST:                  |         NAME: sj             |                             
-      - zip                  |       SK:                    |                             
-      - png                  |         NAME: sk             |                             
-      - jpg                  |     OUTSIDE:                 |                             
-      - bmp                  |       LIST:                  |                             
-      - tif                  |       - y                    |                             
-      - tiff                 |       - x                    |                             
-      NAME: format           |       - z                    |                             
-      TIF_LIST:              |       X:                     |                             
-      - tif                  |         NAME: x              |                             
-      - tiff                 |       Y:                     |                             
-      VALUE: png             |         NAME: y              |                             
-      ZIP_LIST:              |       Z:                     |                             
-      - zip                  |         NAME: z              |                             
+    - synapse_keypoint       |     KJI:                     |         NAME: y             
+    - neuron_keypoint        |       NAME: kji              |       Z:                    
+    VOXEL_LIST:              |     LIST:                    |         NAME: z             
+    - voxel_list             |     - kji                    |     TYPE:                   
+  GROUP:                     |     - zyx                    |       ID_LIST:              
+    LIST:                    |     - scales                 |       - uint16              
+    - experiment             |     SCALES:                  |       - uint32              
+    - sample                 |       NAME: scales           |       LIST:                 
+    - dataset                |     ZYX:                     |       - uint16              
+    - channel                |       NAME: zyx              |       - uint32              
+    NAME: name               |                              |       - uint8               
+  IMAGE:                     |                              |       - float32             
+    FORMAT:                  |                              |       NAME: data-type       
+      COLOR_LIST:            |                              |       RAW_LIST:             
+      - png                  |                              |       - uint8               
+      - jpg                  |                              |       - float32             
+      - bmp                  |                              |       VALUE: uint8          
+      LIST:                  |                              |                             
+      - zip                  |                              |                             
+      - png                  |                              |                             
+      - jpg                  |                              |                             
+      - bmp                  |                              |                             
+      - tif                  |                              |                             
+      - tiff                 |                              |                             
+      NAME: format           |                              |                             
+      TIF_LIST:              |                              |                             
+      - tif                  |                              |                             
+      - tiff                 |                              |                             
+      VALUE: png             |                              |                             
+      ZIP_LIST:              |                              |                             
+      - zip                  |                              |                             
     LIST:                    |                              |                             
     - view                   |                              |                             
     - format                 |                              |                             

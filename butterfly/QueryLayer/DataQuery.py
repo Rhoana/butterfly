@@ -38,8 +38,9 @@ class DataQuery(Query):
         return content_type.replace('{fmt}', img_format.VALUE)
 
     @property
-    def scale(self):
-        return np.float32(2 ** self.INPUT.RESOLUTION.XY.VALUE)
+    def scales(self):
+        Sxy = 2 ** self.INPUT.RESOLUTION.XY.VALUE
+        return np.float32([1,Sxy,Sxy])
 
     @property
     def blocksize(self):
@@ -52,11 +53,11 @@ class DataQuery(Query):
 
     @property
     def source_shape(self):
-        return np.uint32(self.target_shape * self.scale)
+        return np.uint32(self.target_shape * self.scales)
 
     @property
     def target_origin(self):
-        return np.uint32(self.source_origin / self.scale)
+        return np.uint32(self.source_origin / self.scales)
 
     @property
     def source_origin(self):
@@ -83,20 +84,12 @@ class DataQuery(Query):
     def tile_shape(self):
         return np.diff(self.tile_bounds,axis=0)[0]
 
-    def tile2target(self, tile_index):
-        tile_start = self.blocksize * tile_index
-        tile_end = self.blocksize * (tile_index+1)
-        return np.c_[tile_start, tile_end].T
-
-    def some_in_all(self, t_index, t_shape, offset):
-        tile_origin = self.blocksize * t_index
-        target_origin = self.target_origin
-        some_origin = tile_origin + offset
-        start = some_origin - target_origin
-        return np.c_[start, start + t_shape].T
+    def some_in_all(self, t_origin, t_shape):
+        tile_bounds = t_origin + np.outer([0,1],t_shape)
+        return tile_bounds - self.target_origin
 
     def all_in_some(self, t_index):
-        origin = self.blocksize * t_index
-        all_in = self.target_bounds - origin
+        tile_origin = self.blocksize * t_index
+        all_in = self.target_bounds - tile_origin
         return np.clip(all_in, 0, self.blocksize)
 

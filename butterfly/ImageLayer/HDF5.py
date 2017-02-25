@@ -8,9 +8,9 @@ class HDF5(Datasource):
     def load_tile(ds, query):
         Sk,Sj,Si = query.all_scales
         path = query.OUTPUT.INFO.PATH.VALUE
-        (Zk0,Zk1),(Yj0,Yj1),(Xi0,Xi1) = query.full_coords
+        (K0,J0,I0),(K1,J1,I1) = query.source_bounds
 
         with h5py.File(path) as fd:
             vol = fd[fd.keys()[0]]
-            return vol[Zk0:Zk1:Sk,Yj0:Yj1:Sj,Xi0:Xi1:Si]
+            return vol[K0:K1:Sk,J0:J1:Sj,I0:I1:Si]
 

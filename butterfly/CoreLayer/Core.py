@@ -29,12 +29,12 @@ class Core(object):
         tiles_needed = first_tile_index + all_tiles
 
         for t_index in tiles_needed:
-            tile_start, tile_end = query.all_in_some(t_index)
-            one_tile = TileQuery(query, t_index, tile_start, tile_end)
+            tile_crop = query.all_in_some(t_index)
+            one_tile = TileQuery(query, t_index, tile_crop)
             tile = self.load_tile(query, one_tile)
             # Fill the tile into the full cutout
-            crop_tile = [t_index, tile.shape, tile_start]
-            [Z0,Y0,X0],[Z1,Y1,X1] = query.some_in_all(*crop_tile)
+            to_cut = [one_tile.target_origin, tile.shape]
+            [Z0,Y0,X0],[Z1,Y1,X1] = query.some_in_all(*to_cut)
             cutout[Z0:Z1,Y0:Y1,X0:X1] = tile
 
         return np.moveaxis(cutout,0,-1)

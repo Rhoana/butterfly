@@ -117,20 +117,9 @@ class RUNTIME():
     def __init__(self):
         # ALL THE TILE RUNTIME TERMS
         self.TILE = _nameless_struct(
-            INSIDE = _nameless_struct(
-                I = _named_struct('i'),
-                J = _named_struct('j'),
-                K = _named_struct('k'),
-                SI = _named_struct('si'),
-                SJ = _named_struct('sj'),
-                SK = _named_struct('sk')
-            ),
-            OUTSIDE = _nameless_struct(
-                # ALL THE ORIGIN / SHAPE INPUTS
-                X = _named_struct('x'),
-                Y = _named_struct('y'),
-                Z = _named_struct('z')
-            )
+            KJI = _named_struct('kji'),
+            SCALES = _named_struct('scales'),
+            ZYX = _named_struct('zyx')
         )
         # ALL THE IMAGE RUNTIME TERMS
         self.IMAGE = _nameless_struct(
