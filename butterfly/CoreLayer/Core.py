@@ -29,10 +29,9 @@ class Core(object):
         tiles_needed = first_tile_index + all_tiles
 
         for t_index in tiles_needed:
-            tile_crop = query.all_in_some(t_index)
-            t_query = TileQuery(query, t_index, tile_crop)
+            # Make a query for the given tile
+            t_query = self.make_tile_query(query, t_index)
             tile = self.load_tile(query, t_query)
-
             # Fill the tile into the full cutout
             to_cut = [t_query.target_origin, tile.shape]
             [Z0,Y0,X0],[Z1,Y1,X1] = query.some_in_all(*to_cut)
@@ -40,9 +39,14 @@ class Core(object):
 
         return cutout
 
+    def make_tile_query(self, query, t_index):
+        tile_crop = query.all_in_some(t_index)
+        return TileQuery(query, t_index, tile_crop)
+
     def load_tile(self, query, t_query):
         # grab request size for query
-        (K0,J0,I0),(K1,J1,I1) = t_query.target_bounds-t_query.target_origin
+        t_bounds = t_query.target_bounds
+        (K0,J0,I0),(K1,J1,I1) = t_bounds-t_bounds[0]
 
         # Load from cache or from disk if needed
         cache_tile = self._cache.get_tile(query,t_query)

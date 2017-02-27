@@ -22,8 +22,10 @@ class Cache(object):
         return source.add_tile(t_query, content)
 
     def get_tile(self, query, t_query):
+        tile = []
         src = self.get_source(query)
-        tile = src.get_tile(t_query) if src else []
+        if src:
+            tile = src.get_tile(t_query)
         if len(tile):
             self.log('get_tile', src=query.key, id=t_query.key)
         return tile
