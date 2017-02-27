@@ -38,6 +38,10 @@ class TileQuery(Query):
         return np.array2string(all_keys)
 
     @property
+    def tile(self):
+        return self.source_class.load_tile(self)
+
+    @property
     def source_class(self):
         disk_fmt = self.RUNTIME.IMAGE.SOURCE.VALUE
         return self.SOURCES.get(disk_fmt, HDF5)

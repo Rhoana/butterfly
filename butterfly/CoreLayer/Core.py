@@ -48,10 +48,9 @@ class Core(object):
         cache_tile = self._cache.get_tile(query,t_query)
         if len(cache_tile):
             return cache_tile[K0:K1,J0:J1,I0:I1]
-        # Load from disk using source class
-        source_class = t_query.source_class
+        # Load from disk 
+        tile = t_query.tile
 
-        tile = source_class.load_tile(t_query)
         self._cache.add_tile(query,t_query,tile)
 
         return tile[K0:K1,J0:J1,I0:I1]
@@ -62,17 +61,18 @@ class Core(object):
 
         if img_format.VALUE in img_format.ZIP_LIST:
             output = StringIO.StringIO()
-            volstring = vol[0,:,:].T.tostring('F')
+            volstring = vol[0].T.tostring('F')
             output.write(zlib.compress(volstring))
             return output.getvalue()
 
         if img_format.VALUE in img_format.TIF_LIST:
             output = StringIO.StringIO()
-            tiffvol = vol[0,:,:]
+            tiffvol = vol[0]
             tifffile.imsave(output, tiffvol)
             return output.getvalue()
 
-        image = cv2.imencode("." + img_format.VALUE, vol)
+        filetype = "." + img_format.VALUE
+        image = cv2.imencode(filetype, vol[0])
         return image[1].tostring()
 
     def get_info(self,query):
