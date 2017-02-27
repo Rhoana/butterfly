@@ -12,5 +12,5 @@ class HDF5(Datasource):
 
         with h5py.File(path) as fd:
             vol = fd[fd.keys()[0]]
-            return vol[K0:K1:Sk,J0:J1:Sj,I0:I1:Si]
+            return vol[::Sk,::Sj,::Si]
 

@@ -40,15 +40,19 @@ class Core(object):
         return np.moveaxis(cutout,0,-1)
 
     def load_tile(self, query, t_query):
+        # grab request size for query
+        (K0,J0,I0),(K1,J1,I1) = t_query.target_bounds
+
         # Load from cache or from disk if needed
         cache_tile = self._cache.get_tile(query,t_query)
         if len(cache_tile):
-            return cache_tile
+            return cache_tile[K0:K1,J0:J1,I0:I1]
         # Load from disk using source class
         source_class = t_query.source_class
+
         tile = source_class.load_tile(t_query)
         self._cache.add_tile(query,t_query,tile)
-        return tile
+        return tile[K0:K1,J0:J1,I0:I1]
 
     def write_image(self, query, vol):
 
