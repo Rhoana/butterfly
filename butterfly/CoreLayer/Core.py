@@ -1,4 +1,4 @@
-from CacheSource import CacheSource
+from Cache import Cache
 from QueryLayer import TileQuery
 from DatabaseLayer import *
 import numpy as np
@@ -12,7 +12,7 @@ class Core(object):
 
     def __init__(self, dname):
         self._database = self.start_db(dname)
-        self._cache = CacheSource()
+        self._cache = Cache()
 
     def start_db(self, dname):
         return self.DB_CLASS()

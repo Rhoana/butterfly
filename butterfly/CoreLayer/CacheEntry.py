@@ -1,4 +1,4 @@
-class CacheTile(object):
+class CacheEntry(object):
     def __init__(self, query):
         self._tiles = {}
         self.query = query

@@ -1,7 +1,7 @@
 import logging
-from CacheTile import CacheTile
+from CacheEntry import CacheEntry
 
-class CacheSource(object):
+class Cache(object):
     def __init__(self):
         self._sources = {}
         self.max_size = 0
@@ -11,7 +11,7 @@ class CacheSource(object):
 
     def add_source(self, query):
         if not self.get_source(query):
-            self._sources[query.key] = CacheTile(query)
+            self._sources[query.key] = CacheEntry(query)
             self.log('add_source',src=query.key)
         return self.get_source(query)
 
