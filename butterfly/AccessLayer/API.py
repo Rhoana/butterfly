@@ -80,7 +80,6 @@ class API(RequestHandler):
         # validate each query value in each configured level
         for method, query in self._find_all_groups(_method):
             valid_groups = configured.get(method,[])
-            print valid_groups
             valid_values = map(self.get_value, valid_groups)
             # Check query value against all valid query values
             query_value = self.get_query_argument(query,'')
