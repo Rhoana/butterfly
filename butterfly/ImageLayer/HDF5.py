@@ -3,7 +3,7 @@ import numpy as np
 import h5py
 
 class HDF5(Datasource):
-    
+
     @staticmethod
     def load_tile(query):
 
@@ -19,3 +19,14 @@ class HDF5(Datasource):
             vol = fd[fd.keys()[0]]
             return vol[z0:z1:Sk,y0:y1:Sj,x0:x1:Si]
 
+    @staticmethod
+    def preload_source(query):
+
+        # call superclass
+        Datasource.preload_source(query)
+        # Load information about full hdf5
+        path = query.OUTPUT.INFO.PATH.VALUE
+        with h5py.File(path) as fd:
+            vol = fd[fd.keys()[0]]
+            block = (1,)+vol.shape[1:]
+            return [np.uint32(block),str(vol.dtype)]

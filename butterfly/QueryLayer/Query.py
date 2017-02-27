@@ -30,10 +30,14 @@ class Query():
 
     def log(self,action,**kwargs):
         statuses = {
-            'miss': 'info'
+            'miss': 'info',
+            'update': 'info'
         }
         actions ={
-            'miss': 'Missing {lost} from {group}'
+            'miss': 'Missing {lost} from {group}',
+            'update': '''Update {path}
+            datatype to {dtype} and blocksize to {block}
+            '''
         }
         status = statuses[action]
         message = actions[action].format(**kwargs)
