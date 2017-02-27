@@ -1,8 +1,11 @@
 from Datasource import Datasource
 
 class TileSpecs(Datasource):
-    pass
 
+    @staticmethod
     def load_tile(query):
-        return None
 
+        # call superclass
+        Datasource.load_tile(query)
+
+        return None

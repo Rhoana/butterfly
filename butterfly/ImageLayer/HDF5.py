@@ -3,9 +3,13 @@ import numpy as np
 import h5py
 
 class HDF5(Datasource):
-    pass
-    @classmethod
-    def load_tile(ds, query):
+    
+    @staticmethod
+    def load_tile(query):
+
+        # call superclass
+        Datasource.load_tile(query)
+
         Sk,Sj,Si = query.all_scales
         path = query.OUTPUT.INFO.PATH.VALUE
         z0,y0,x0 = query.index_zyx*query.blocksize

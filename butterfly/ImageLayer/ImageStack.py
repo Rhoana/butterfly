@@ -1,7 +1,11 @@
 from Datasource import Datasource
 
 class ImageStack(Datasource):
-    pass
 
+    @staticmethod
     def load_tile(query):
+
+        # call superclass
+        Datasource.load_tile(query)
+
         return None
