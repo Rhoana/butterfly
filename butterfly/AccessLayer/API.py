@@ -105,11 +105,13 @@ class API(RequestHandler):
     '''
 
     def get_data(self, _method):
-        # Get needed metadata
-        terms = {}
-        info = self._get_meta_info().OUTPUT.INFO
+        # Parse all the group terms
+        meta_dict = self._get_group_dict('')
+        path_key = self.OUTPUT.INFO.PATH.NAME
+
+        # Begin building needed keywords
+        terms = {path_key: meta_dict[path_key]}
         terms[self.INPUT.METHODS.NAME] = _method
-        terms[info.PATH.NAME] = info.PATH.VALUE
 
         # get terms from IMAGE
         for key in ['VIEW','FORMAT']:
