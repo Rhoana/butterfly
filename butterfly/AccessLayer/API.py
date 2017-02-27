@@ -6,10 +6,12 @@ import numpy as np
 
 class API(RequestHandler):
 
-    def parse(self, *args):
-        meth = str(args[0])
+    def parse(self, request):
+
+        super(API, self).parse(request)
+
         meths = self.INPUT.METHODS.LIST
-        command = self._match_list('method',meth,meths)
+        command = self._match_list('method',request,meths)
 
         if command == self.INPUT.METHODS.META.NAME:
             return self._get_meta_info()

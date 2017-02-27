@@ -6,6 +6,8 @@ class TileQuery(Query):
 
     def __init__(self, *args, **keywords):
 
+        Query.__init__(self, **keywords)
+
         query, zyx_index, kji_pixels = args
         source_list = self.RUNTIME.IMAGE.SOURCE.LIST
 

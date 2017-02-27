@@ -12,7 +12,7 @@ class Query():
     OUTPUT = OUTPUT()
 
     def __init__(self,*args,**keywords):
-        command = keywords[self.INPUT.METHODS.NAME]
+        command = keywords.get(self.INPUT.METHODS.NAME,'')
         self.INPUT.METHODS.VALUE = command
         self.keywords = keywords
         pass
