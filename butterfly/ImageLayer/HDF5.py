@@ -35,5 +35,9 @@ class HDF5(Datasource):
             return {
                 output.TYPE.NAME: str(vol.dtype),
                 runtime.BLOCK.NAME: np.uint32(block),
-                output.SIZE.NAME: np.uint32(vol.shape)
+                output.SIZE.NAME: {
+                    output.SIZE.Z.NAME: vol.shape[0],
+                    output.SIZE.Y.NAME: vol.shape[1],
+                    output.SIZE.X.NAME: vol.shape[2]
+                }
             }
