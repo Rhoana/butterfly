@@ -101,14 +101,14 @@ class Core(object):
 
 
     def id_to_color(self, vol):
-        colors = np.uint8((3,)+vol.shape)
+        colors = np.zeros((3,)+vol.shape).astype(np.uint8)
         colors[0] = np.mod(107*vol,700).astype(np.uint8)
         colors[1] = np.mod(509*vol,900).astype(np.uint8)
         colors[2] = np.mod(200*vol,777).astype(np.uint8)
         return np.moveaxis(colors,0,-1)
 
     def view_volume(self, view, vol):
-        if view.VALUE == view.COLOR:
+        if view.VALUE == view.COLOR.NAME:
             return self.id_to_color(vol)
         return vol
 
@@ -116,14 +116,15 @@ class Core(object):
 
         img_format = query.INPUT.IMAGE.FORMAT
         img_view = query.INPUT.IMAGE.VIEW
+        img_type = query.OUTPUT.INFO.TYPE
 
         # Only if grayscale view is set
-        if img_view.VALUE == img_view.GRAY:
+        if img_view.VALUE == img_view.GRAY.NAME:
             # set the view based on the format
-            is_big_int = output.TYPE.VALUE in output.TYPE.ID_LIST
+            is_big_int = img_type.VALUE in img_type.ID_LIST
             no_big_int_gray = img_format.VALUE in img_format.COLOR_LIST
             # If big integers must not be grayscale, try colormap
-            if is_big_int and no_big_int:
+            if is_big_int and no_big_int_gray:
                 img_view.VALUE = img_view.COLOR.NAME
 
         # Use colormap / RGB style encoding of ID data
