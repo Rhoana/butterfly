@@ -22,13 +22,14 @@ class TileQuery(Query):
         self.RUNTIME.TILE.KJI.VALUE = kji_pixels
         self.RUNTIME.TILE.SCALES.VALUE = query.scales
 
-        q_source = query.RUNTIME.IMAGE.SOURCE.VALUE
-        q_block = query.RUNTIME.IMAGE.BLOCK.VALUE
         q_path = query.OUTPUT.INFO.PATH.VALUE
-
-        self.RUNTIME.IMAGE.SOURCE.VALUE = q_source
-        self.RUNTIME.IMAGE.BLOCK.VALUE = q_block
         self.OUTPUT.INFO.PATH.VALUE = q_path
+
+        q_view = query.INPUT.IMAGE.VIEW.VALUE
+        self.INPUT.IMAGE.VIEW.VALUE = q_view
+
+        q_format = query.INPUT.IMAGE.FORMAT.VALUE
+        self.INPUT.IMAGE.FORMAT.VALUE = q_format
 
     @property
     def key(self):
@@ -79,10 +80,14 @@ class TileQuery(Query):
     @property
     def preload_source(self):
         loader = self.source_class
+        # Take named keywords
         runtime = self.RUNTIME.IMAGE
+        output = self.OUTPUT.INFO
+
+        # Preload the metadata from the source
         keywords = loader.preload_source(self)
         # Set one of the keywords to self
         runtime.BLOCK.VALUE = keywords[runtime.BLOCK.NAME]
+        output.TYPE.VALUE = keywords[output.TYPE.NAME]
+        # All preloaded data
         return keywords
-
-

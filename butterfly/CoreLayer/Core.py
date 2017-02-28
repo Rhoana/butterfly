@@ -99,9 +99,35 @@ class Core(object):
 
         return tile[K0:K1,J0:J1,I0:I1]
 
-    def write_image(self, query, vol):
+
+    def id_to_color(self, vol):
+        colors = np.uint8((3,)+vol.shape)
+        colors[0] = np.mod(107*vol,700).astype(np.uint8)
+        colors[1] = np.mod(509*vol,900).astype(np.uint8)
+        colors[2] = np.mod(200*vol,777).astype(np.uint8)
+        return np.moveaxis(colors,0,-1)
+
+    def view_volume(self, view, vol):
+        if view.VALUE == view.COLOR:
+            return self.id_to_color(vol)
+        return vol
+
+    def write_image(self, query, volume):
 
         img_format = query.INPUT.IMAGE.FORMAT
+        img_view = query.INPUT.IMAGE.VIEW
+
+        # Only if grayscale view is set
+        if img_view.VALUE == img_view.GRAY:
+            # set the view based on the format
+            is_big_int = output.TYPE.VALUE in output.TYPE.ID_LIST
+            no_big_int_gray = img_format.VALUE in img_format.COLOR_LIST
+            # If big integers must not be grayscale, try colormap
+            if is_big_int and no_big_int:
+                img_view.VALUE = img_view.COLOR.NAME
+
+        # Use colormap / RGB style encoding of ID data
+        vol = self.view_volume(img_view, volume)
 
         if img_format.VALUE in img_format.ZIP_LIST:
             output = StringIO.StringIO()
