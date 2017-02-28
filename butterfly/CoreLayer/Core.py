@@ -18,6 +18,22 @@ class Core(object):
     def start_db(self, dname):
         return self.DB_CLASS()
 
+    def update_feature(self, query, volume):
+        return 0
+
+    def read_feature(self, query):
+        return ""
+
+    '''
+    All methods to load data
+    '''
+
+    def get_info(self, i_query):
+        d_query = self.make_data_query(i_query)
+        keywords = self.update_query(d_query)
+        i_query.update_source(keywords)
+        return i_query.dump
+
     def get_data(self, query):
         self.update_query(query)
         image = self.find_tiles(query)
@@ -42,13 +58,11 @@ class Core(object):
 
     def make_data_query(self, i_query):
         # Begin building needed keywords
-        path_name = i_query.OUTPUT.INFO.PATH.NAME
-        path_value = i_query.OUTPUT.INFO.PATH.VALUE
-        methods_name = i_query.INPUT.METHODS.NAME
+        i_path = i_query.OUTPUT.INFO.PATH
 
         return DataQuery(**{
-            methods_name: 'data',
-            path_name: path_value
+            i_query.INPUT.METHODS.NAME: 'data',
+            i_path.NAME: i_path.VALUE
         })
 
     def make_tile_query(self, query, t_index):
@@ -104,14 +118,3 @@ class Core(object):
         filetype = "." + img_format.VALUE
         image = cv2.imencode(filetype, vol[0])
         return image[1].tostring()
-
-    def get_info(self, i_query):
-        d_query = self.make_data_query(i_query)
-        keywords = self.update_query(d_query)
-        i_query.update_source(keywords)
-        return i_query.dump
-
-    def update_feature(self, query, volume):
-        return 0
-    def read_feature(self, query):
-        return ""
