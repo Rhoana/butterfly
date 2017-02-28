@@ -103,6 +103,7 @@ class DataQuery(Query):
         runtime = self.RUNTIME.IMAGE
         # set named keywords to self
         runtime.BLOCK.VALUE = keywords[runtime.BLOCK.NAME]
+        output.SIZE.VALUE = keywords[output.SIZE.NAME]
         output.TYPE.VALUE = keywords[output.TYPE.NAME]
         self.log('update',
             path = output.PATH.VALUE,

@@ -38,6 +38,14 @@ class Core(object):
 
         return cutout
 
+    def make_data_query(self, i_query):
+        # Begin building needed keywords
+        info_path = i_query.OUTPUT.INFO.PATH
+        return DataQuery(**{
+            i_query.INPUT.METHODS.NAME: 'data',
+            info_path.NAME: info_path.VALUE
+        })
+
     def make_tile_query(self, query, t_index):
         tile_crop = query.all_in_some(t_index)
         return TileQuery(query, t_index, tile_crop)
@@ -89,8 +97,19 @@ class Core(object):
         image = cv2.imencode(filetype, vol[0])
         return image[1].tostring()
 
-    def get_info(self,query):
-        return query.dump
+    def get_info(self, i_query):
+        if not self._cache.get_source(i_query):
+            t0_index = np.uint32([0,0,0])
+            # Create a preporatory data_query
+            d_query = self.make_data_query(i_query)
+            # Create a preporatory tile_query
+            t0_query = self.make_tile_query(d_query, t0_index)
+            update_keywords = t0_query.preload_source
+            # Update both queries and add to the cache
+            i_query.update_source(update_keywords)
+            self._cache.add_source(i_query)
+            return i_query.dump
+        return i_query.dump
 
     def update_feature(self, query, volume):
         return 0
