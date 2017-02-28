@@ -22,10 +22,9 @@ class Core(object):
         return self.write_image(query, image)
 
     def find_tiles(self, query):
-        q_type = query.dtype
+        cutout = self.load_cutout(query)
         first_tile_index = query.tile_bounds[0]
         all_tiles = np.argwhere(np.ones(query.tile_shape))
-        cutout = np.zeros(query.target_shape, dtype=q_type)
         tiles_needed = first_tile_index + all_tiles
 
         for t_index in tiles_needed:
@@ -42,6 +41,17 @@ class Core(object):
     def make_tile_query(self, query, t_index):
         tile_crop = query.all_in_some(t_index)
         return TileQuery(query, t_index, tile_crop)
+
+    def load_cutout(self, query):
+        if not self._cache.get_source(query):
+            # Create a preporatory tile_query
+            t0_index = np.uint32([0,0,0])
+            t0_query = self.make_tile_query(query, t0_index)
+            query.update_source(*t0_query.preload_source)
+        # Return a cutout
+        q_type = query.dtype
+        q_shape = query.target_shape
+        return np.zeros(q_shape, dtype=q_type)
 
     def load_tile(self, query, t_query):
         # grab request size for query

@@ -76,3 +76,11 @@ class TileQuery(Query):
     def source_bounds(self):
         return self.all_scales * self.target_bounds
 
+    @property
+    def preload_source(self):
+        loader = self.source_class
+        block, dtype = loader.preload_source(self)
+        self.RUNTIME.IMAGE.BLOCK.VALUE = block
+        return [block, dtype]
+
+
