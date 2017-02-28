@@ -17,9 +17,10 @@ class Query():
         self.keywords = keywords
         pass
 
-    def set_key(self,struct,key,default=''):
+    def set_key(self,struct,key,empty=''):
         field = getattr(struct, key)
-        default = getattr(field, 'VALUE', default)
+        default = getattr(field, 'VALUE')
+        default = empty if default is None else default
         val = self.keywords.get(field.NAME, default)
         setattr(field, 'VALUE', val)
 

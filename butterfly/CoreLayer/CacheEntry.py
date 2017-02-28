@@ -16,3 +16,11 @@ class CacheEntry(object):
     def lose_all(self):
         return []
 
+    def loaded_source(self):
+        output = self.query.OUTPUT.INFO
+        runtime = self.query.RUNTIME.IMAGE
+        return {
+            output.TYPE.NAME: output.TYPE.VALUE,
+            runtime.BLOCK.NAME: runtime.BLOCK.VALUE,
+            output.SIZE.NAME: output.SIZE.VALUE
+        }

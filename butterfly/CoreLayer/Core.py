@@ -1,5 +1,6 @@
 from Cache import Cache
 from QueryLayer import TileQuery
+from QueryLayer import DataQuery
 from DatabaseLayer import *
 import numpy as np
 import tifffile
@@ -18,13 +19,14 @@ class Core(object):
         return self.DB_CLASS()
 
     def get_data(self, query):
+        self.update_query(query)
         image = self.find_tiles(query)
         return self.write_image(query, image)
 
     def find_tiles(self, query):
-        cutout = self.load_cutout(query)
         first_tile_index = query.tile_bounds[0]
         all_tiles = np.argwhere(np.ones(query.tile_shape))
+        cutout = np.zeros(query.target_shape, query.dtype)
         tiles_needed = first_tile_index + all_tiles
 
         for t_index in tiles_needed:
@@ -40,26 +42,35 @@ class Core(object):
 
     def make_data_query(self, i_query):
         # Begin building needed keywords
-        info_path = i_query.OUTPUT.INFO.PATH
-        return DataQuery(**{
-            i_query.INPUT.METHODS.NAME: 'data',
-            info_path.NAME: info_path.VALUE
+        path_name = i_query.OUTPUT.INFO.PATH.NAME
+        path_value = i_query.OUTPUT.INFO.PATH.VALUE
+        methods_name = i_query.INPUT.METHODS.NAME
+        a_query = i_query
+        print path_value
+        import ipdb; ipdb.set_trace()
+        d_q= DataQuery(**{
+            methods_name: 'data',
+            path_name: path_value
         })
+        return d_q
 
     def make_tile_query(self, query, t_index):
         tile_crop = query.all_in_some(t_index)
         return TileQuery(query, t_index, tile_crop)
 
-    def load_cutout(self, query):
-        if not self._cache.get_source(query):
+    def update_query(self, query):
+        cache_entry = self._cache.get_source(query)
+        if not cache_entry:
             # Create a preporatory tile_query
             t0_index = np.uint32([0,0,0])
             t0_query = self.make_tile_query(query, t0_index)
-            query.update_source(t0_query.preload_source)
-        # Return a cutout
-        q_type = query.dtype
-        q_shape = query.target_shape
-        return np.zeros(q_shape, dtype=q_type)
+            keywords = t0_query.preload_source
+        else:
+            keywords = cache_entry.loaded_source
+        # Update current query with preloaded terms
+        query.update_source(keywords)
+        self._cache.add_source(query)
+        return keywords
 
     def load_tile(self, query, t_query):
         # grab request size for query
@@ -98,17 +109,9 @@ class Core(object):
         return image[1].tostring()
 
     def get_info(self, i_query):
-        if not self._cache.get_source(i_query):
-            t0_index = np.uint32([0,0,0])
-            # Create a preporatory data_query
-            d_query = self.make_data_query(i_query)
-            # Create a preporatory tile_query
-            t0_query = self.make_tile_query(d_query, t0_index)
-            update_keywords = t0_query.preload_source
-            # Update both queries and add to the cache
-            i_query.update_source(update_keywords)
-            self._cache.add_source(i_query)
-            return i_query.dump
+        d_query = self.make_data_query(i_query)
+        keywords = self.update_query(d_query)
+        i_query.update_source(keywords)
         return i_query.dump
 
     def update_feature(self, query, volume):
