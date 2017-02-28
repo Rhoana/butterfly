@@ -7,11 +7,12 @@ class Query():
         'application/{fmt}',
         'image/{fmt}'
     ]
-    INPUT = INPUT()
-    RUNTIME = RUNTIME()
-    OUTPUT = OUTPUT()
 
     def __init__(self,*args,**keywords):
+        self.INPUT = INPUT()
+        self.RUNTIME = RUNTIME()
+        self.OUTPUT = OUTPUT()
+
         command = keywords.get(self.INPUT.METHODS.NAME,'')
         self.INPUT.METHODS.VALUE = command
         self.keywords = keywords

@@ -45,14 +45,11 @@ class Core(object):
         path_name = i_query.OUTPUT.INFO.PATH.NAME
         path_value = i_query.OUTPUT.INFO.PATH.VALUE
         methods_name = i_query.INPUT.METHODS.NAME
-        a_query = i_query
-        print path_value
-        import ipdb; ipdb.set_trace()
-        d_q= DataQuery(**{
+
+        return DataQuery(**{
             methods_name: 'data',
             path_name: path_value
         })
-        return d_q
 
     def make_tile_query(self, query, t_index):
         tile_crop = query.all_in_some(t_index)
