@@ -7,8 +7,11 @@ class DataQuery(Query):
     def __init__(self,*args,**keywords):
         Query.__init__(self, **keywords)
 
-        for key in ['X','Y','Z','WIDTH','HEIGHT']:
-            self.set_key(self.INPUT.POSITION,key)
+        for key in ['Z','Y','X']:
+            self.set_key(self.INPUT.POSITION,key,0)
+
+        for key in ['DEPTH','HEIGHT','WIDTH']:
+            self.set_key(self.INPUT.POSITION,key,1)
 
         for key in ['VIEW','FORMAT']:
             self.set_key(self.INPUT.IMAGE,key)
@@ -19,7 +22,7 @@ class DataQuery(Query):
         for key in ['TYPE','PATH']:
             self.set_key(self.OUTPUT.INFO, key)
 
-        self.set_key(self.INPUT.RESOLUTION, 'XY')
+        self.set_key(self.INPUT.RESOLUTION, 'XY', 0)
 
     @property
     def key(self):
