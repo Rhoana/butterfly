@@ -16,6 +16,7 @@ class CacheEntry(object):
     def lose_all(self):
         return []
 
+    @property
     def loaded_source(self):
         output = self.query.OUTPUT.INFO
         runtime = self.query.RUNTIME.IMAGE
