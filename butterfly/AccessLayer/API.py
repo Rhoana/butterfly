@@ -40,9 +40,7 @@ class API(RequestHandler):
         return InfoQuery(**{
             self.INPUT.METHODS.NAME: self.INPUT.METHODS.META.NAME,
             info.CHANNEL.NAME: meta_info[info.CHANNEL.NAME],
-            info.TYPE.NAME: meta_info[info.TYPE.NAME],
             info.PATH.NAME: meta_info[info.PATH.NAME],
-            info.SIZE.NAME: meta_info[info.SIZE.NAME],
             self.INPUT.INFO.FORMAT.NAME: out_format
         })
 
