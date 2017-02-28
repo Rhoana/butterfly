@@ -16,12 +16,7 @@ class DataQuery(Query):
         for key in ['VIEW','FORMAT']:
             self.set_key(self.INPUT.IMAGE,key)
 
-        for key in ['SOURCE','BLOCK']:
-            self.set_key(self.RUNTIME.IMAGE, key)
-
-        for key in ['TYPE','PATH']:
-            self.set_key(self.OUTPUT.INFO, key)
-
+        self.set_key(self.OUTPUT.INFO, 'PATH')
         self.set_key(self.INPUT.RESOLUTION, 'XY', 0)
 
     @property
