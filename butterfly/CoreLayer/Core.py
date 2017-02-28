@@ -47,7 +47,7 @@ class Core(object):
             # Create a preporatory tile_query
             t0_index = np.uint32([0,0,0])
             t0_query = self.make_tile_query(query, t0_index)
-            query.update_source(*t0_query.preload_source)
+            query.update_source(t0_query.preload_source)
         # Return a cutout
         q_type = query.dtype
         q_shape = query.target_shape

@@ -94,11 +94,15 @@ class DataQuery(Query):
         all_in = self.target_bounds - tile_origin
         return np.clip(all_in, 0, self.blocksize)
 
-    def update_source(self, block, dtype):
-        self.RUNTIME.IMAGE.BLOCK.VALUE = block
-        self.OUTPUT.INFO.TYPE.VALUE = dtype
+    def update_source(self, keywords):
+        # take named keywords
+        output = self.OUTPUT.INFO
+        runtime = self.RUNTIME.IMAGE
+        # set named keywords to self
+        runtime.BLOCK.VALUE = keywords[runtime.BLOCK.NAME]
+        output.TYPE.VALUE = keywords[output.TYPE.NAME]
         self.log('update',
-            path = self.OUTPUT.INFO.PATH.VALUE,
-            block =  block,
-            dtype = dtype)
+            path = output.PATH.VALUE,
+            block =  runtime.BLOCK.VALUE,
+            dtype = output.TYPE.VALUE)
 

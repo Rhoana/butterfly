@@ -29,4 +29,11 @@ class HDF5(Datasource):
         with h5py.File(path) as fd:
             vol = fd[fd.keys()[0]]
             block = (1,)+vol.shape[1:]
-            return [np.uint32(block),str(vol.dtype)]
+            # return named keywords
+            output = query.OUTPUT.INFO
+            runtime = query.RUNTIME.IMAGE
+            return {
+                output.TYPE.NAME: str(vol.dtype),
+                runtime.BLOCK.NAME: np.uint32(block),
+                output.SIZE.NAME: np.uint32(vol.shape)
+            }

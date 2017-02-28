@@ -79,8 +79,10 @@ class TileQuery(Query):
     @property
     def preload_source(self):
         loader = self.source_class
-        block, dtype = loader.preload_source(self)
-        self.RUNTIME.IMAGE.BLOCK.VALUE = block
-        return [block, dtype]
+        runtime = self.RUNTIME.IMAGE
+        keywords = loader.preload_source(self)
+        # Set one of the keywords to self
+        runtime.BLOCK.VALUE = keywords[runtime.BLOCK.NAME]
+        return keywords
 
 
