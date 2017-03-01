@@ -1,10 +1,15 @@
 import logging
+from pylru import lrucache
+from Settings import MAX_CACHE_ENTRY
+from Settings import MAX_CACHE_SIZE
 from CacheEntry import CacheEntry
 
 class Cache(object):
+    max_size = MAX_CACHE_SIZE
+    max_entry = MAX_CACHE_ENTRY
+
     def __init__(self):
-        self._sources = {}
-        self.max_size = 0
+        self._sources = lrucache(self.max_entry)
 
     def get_source(self, query):
         return self._sources.get(query.key, 0)
