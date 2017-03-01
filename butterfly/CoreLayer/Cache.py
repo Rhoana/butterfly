@@ -30,9 +30,6 @@ class Cache(object):
             self.log('get_tile', src=query.key, id=t_query.key)
         return tile
 
-    def lose_old_tiles(self):
-        return []
-
     def log(self, action, **kwargs):
         statuses = {
             'add_source': 'info',
