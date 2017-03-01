@@ -86,7 +86,8 @@ class Core(object):
     def load_tile(self, query, t_query):
         # grab request size for query
         t_bounds = t_query.target_bounds
-        (K0,J0,I0),(K1,J1,I1) = t_bounds-t_bounds[0]
+        t_origin = t_query.tile_origin
+        (K0,J0,I0),(K1,J1,I1) = t_bounds-t_origin
 
         # Load from cache or from disk if needed
         cache_tile = self._cache.get_tile(query,t_query)

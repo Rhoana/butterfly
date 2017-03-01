@@ -61,14 +61,16 @@ class TileQuery(Query):
         return np.uint32(self.RUNTIME.IMAGE.BLOCK.VALUE)
 
     @property
-    def target_bounds(self):
-        tile_origin = self.blocksize*self.index_zyx
-        return  self.pixels_kji + tile_origin
+    def tile_origin(self):
+        return self.blocksize*self.index_zyx
 
     @property
     def target_origin(self):
-        tile_origin = self.blocksize*self.index_zyx
-        return  self.pixels_kji[0] + tile_origin
+        return  self.pixels_kji[0] + self.tile_origin
+
+    @property
+    def target_bounds(self):
+        return  self.pixels_kji + self.tile_origin
 
     @property
     def source_bounds(self):

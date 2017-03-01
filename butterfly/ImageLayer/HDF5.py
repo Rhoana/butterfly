@@ -12,8 +12,8 @@ class HDF5(Datasource):
 
         Sk,Sj,Si = query.all_scales
         path = query.OUTPUT.INFO.PATH.VALUE
-        z0,y0,x0 = query.index_zyx*query.blocksize
-        z1,y1,x1 = query.index_zyx*query.blocksize + query.blocksize
+        z0,y0,x0 = query.tile_origin
+        z1,y1,x1 = query.tile_origin + query.blocksize
 
         with h5py.File(path) as fd:
             vol = fd[fd.keys()[0]]
