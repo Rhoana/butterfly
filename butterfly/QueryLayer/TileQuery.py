@@ -22,17 +22,11 @@ class TileQuery(Query):
         self.RUNTIME.TILE.KJI.VALUE = kji_pixels
         self.RUNTIME.TILE.SCALES.VALUE = query.scales
 
-        q_path = query.RUNTIME.IMAGE.BLOCK.VALUE
-        self.RUNTIME.IMAGE.BLOCK.VALUE = q_path
+        q_block = query.RUNTIME.IMAGE.BLOCK.VALUE
+        self.RUNTIME.IMAGE.BLOCK.VALUE = q_block
 
         q_path = query.OUTPUT.INFO.PATH.VALUE
         self.OUTPUT.INFO.PATH.VALUE = q_path
-
-        q_view = query.INPUT.IMAGE.VIEW.VALUE
-        self.INPUT.IMAGE.VIEW.VALUE = q_view
-
-        q_format = query.INPUT.IMAGE.FORMAT.VALUE
-        self.INPUT.IMAGE.FORMAT.VALUE = q_format
 
     @property
     def key(self):
