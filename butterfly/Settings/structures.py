@@ -1,3 +1,4 @@
+from settings import MAX_CACHE_SIZE
 import cv2
 import os
 
@@ -140,6 +141,9 @@ class RUNTIME():
         self.CACHE = _nameless_struct(
             META = _named_struct('meta-size',
                 VALUE = 567
+            ),
+            MAX = _named_struct('max-cache-size',
+                VALUE = MAX_CACHE_SIZE
             )
         )
 

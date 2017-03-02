@@ -4,11 +4,11 @@ import collections
 from Settings import *
 
 class Cache(object):
-    max_memory = MAX_CACHE_SIZE
     RUNTIME = RUNTIME()
 
     def __init__(self):
         self._cache = collections.OrderedDict()
+        self._max_memory = self.RUNTIME.CACHE.MAX.VALUE
         self._now_memory = 0
 
     def get(self, key):
@@ -26,7 +26,7 @@ class Cache(object):
         try:
             self._cache.pop(key)
         except KeyError:
-            while self._now_memory >= self.max_memory:
+            while self._now_memory >= self._max_memory:
                 # Remove old item from cache and memory count
                 old_value = self._cache.popitem(last=False)[1]
                 self._now_memory -= self.value_size(old_value)
