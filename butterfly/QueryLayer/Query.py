@@ -40,9 +40,9 @@ class Query():
         runtime.BLOCK.VALUE = keywords[runtime.BLOCK.NAME]
         output.TYPE.VALUE = keywords[output.TYPE.NAME]
         output.SIZE.VALUE = {
-            output.SIZE.Z.NAME: Z,
-            output.SIZE.Y.NAME: Y,
-            output.SIZE.X.NAME: X
+            output.SIZE.Z.NAME: int(Z),
+            output.SIZE.Y.NAME: int(Y),
+            output.SIZE.X.NAME: int(X)
         }
 
     def log(self,action,**kwargs):
