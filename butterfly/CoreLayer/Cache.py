@@ -21,8 +21,13 @@ class Cache(object):
             return []
 
     def set(self, key, value):
+        value_memory = self.value_size(value)
+        # Do not cache if value more than total memory
+        if value_memory > self._max_memory:
+            self.log('too_big',key=key,size=value_memory)
+            return -1
         # Add new item to cache memory count
-        self._now_memory += self.value_size(value)
+        self._now_memory += value_memory
         try:
             self._cache.pop(key)
         except KeyError:
@@ -33,6 +38,7 @@ class Cache(object):
         # Add new item to the cache
         self.log('add_query',key=key,size=self._now_memory)
         self._cache[key] = value
+        return 0
 
     def value_size(self, value):
         if isinstance(value,dict):
@@ -42,10 +48,12 @@ class Cache(object):
 
     def log(self, action, **kwargs):
         statuses = {
-            'add_query': 'info'
+            'add_query': 'info',
+            'too_big': 'warning'
         }
         actions = {
             'add_query': 'Adding {key} to cache. Cache now {size} bytes',
+            'too_big': 'Cannot cache {key}. {size} bytes is too big.'
         }
         status = statuses[action]
         message = actions[action].format(**kwargs)
