@@ -7,3 +7,7 @@ class Datasource(object):
     @staticmethod
     def preload_source(query):
         return None
+
+    @staticmethod
+    def valid_path(query):
+        return False

@@ -37,3 +37,9 @@ class HDF5(Datasource):
                 runtime.BLOCK.NAME: np.uint32(block),
                 output.SIZE.NAME: np.uint32(vol.shape)
             }
+
+    @staticmethod
+    def valid_path(query):
+        # call superclass
+        Datasource.valid_path(query)
+        return True
