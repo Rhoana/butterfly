@@ -1,5 +1,4 @@
-__all__ = ["Cache", "Core", "CacheEntry"]
+__all__ = ["Cache", "Core"]
 
 from .Core import Core
 from .Cache import Cache
-from .CacheEntry import CacheEntry

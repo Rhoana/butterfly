@@ -70,17 +70,15 @@ class Core(object):
         return TileQuery(query, t_index, tile_crop)
 
     def update_query(self, query):
-        cache_entry = self._cache.get_source(query)
-        if not cache_entry:
+        keywords = self._cache.get(query.key)
+        if not keywords:
             # Create a preporatory tile_query
             t0_index = np.uint32([0,0,0])
             t0_query = self.make_tile_query(query, t0_index)
             keywords = t0_query.preload_source
-        else:
-            keywords = cache_entry.loaded_source
         # Update current query with preloaded terms
+        self._cache.set(query.key, keywords)
         query.update_source(keywords)
-        self._cache.add_source(query)
         return keywords
 
     def load_tile(self, query, t_query):
@@ -90,13 +88,13 @@ class Core(object):
         (K0,J0,I0),(K1,J1,I1) = t_bounds-t_origin
 
         # Load from cache or from disk if needed
-        cache_tile = self._cache.get_tile(query,t_query)
+        cache_tile = self._cache.get(t_query.key)
         if len(cache_tile):
             return cache_tile[K0:K1,J0:J1,I0:I1]
         # Load from disk 
         tile = t_query.tile
 
-        self._cache.add_tile(query,t_query,tile)
+        self._cache.set(t_query.key, tile)
 
         return tile[K0:K1,J0:J1,I0:I1]
 
