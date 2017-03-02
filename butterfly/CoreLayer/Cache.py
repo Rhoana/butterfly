@@ -1,10 +1,11 @@
 import sys
 import logging
 import collections
-from Settings import MAX_CACHE_SIZE
+from Settings import *
 
 class Cache(object):
     max_memory = MAX_CACHE_SIZE
+    RUNTIME = RUNTIME()
 
     def __init__(self):
         self._cache = collections.OrderedDict()
@@ -21,17 +22,23 @@ class Cache(object):
 
     def set(self, key, value):
         # Add new item to cache memory count
-        self._now_memory += sys.getsizeof(value)
+        self._now_memory += self.value_size(value)
         try:
             self._cache.pop(key)
         except KeyError:
             while self._now_memory >= self.max_memory:
                 # Remove old item from cache and memory count
                 old_value = self._cache.popitem(last=False)[1]
-                self._now_memory -= sys.getsizeof(old_value)
+                self._now_memory -= self.value_size(old_value)
         # Add new item to the cache
         self.log('add_query',key=key,size=self._now_memory)
         self._cache[key] = value
+
+    def value_size(self, value):
+        if isinstance(value,dict):
+            cache_meta = self.RUNTIME.CACHE.META.NAME
+            return int(value[cache_meta])
+        return sys.getsizeof(value)
 
     def log(self, action, **kwargs):
         statuses = {
