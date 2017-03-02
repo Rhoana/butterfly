@@ -32,8 +32,9 @@ class TileQuery(Query):
     def key(self):
         origin = self.index_zyx
         scales = self.all_scales
-        all_keys = np.r_[scales,origin]
-        return np.array2string(all_keys)
+        tile_values = np.r_[scales,origin]
+        tile_key =  np.array2string(tile_values)
+        return self.OUTPUT.INFO.PATH.VALUE + tile_key
 
     @property
     def tile(self):
