@@ -136,6 +136,12 @@ class RUNTIME():
                 VALUE = [1, 512, 512]
             )
         )
+        # ALL THE CACHE RUNTIME TERMS
+        self.CACHE = _nameless_struct(
+            META = _named_struct('meta-size',
+                VALUE = 567
+            )
+        )
 
 '''
 THIS HELPS RETURN TEXT

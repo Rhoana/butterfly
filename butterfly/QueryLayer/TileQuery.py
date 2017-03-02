@@ -1,6 +1,7 @@
 from ImageLayer import *
 from Query import Query
 import numpy as np
+import sys
 
 class TileQuery(Query):
 
@@ -79,5 +80,14 @@ class TileQuery(Query):
 
     @property
     def preload_source(self):
+        cache_meta = self.RUNTIME.CACHE.META
         # Preload the metadata from the source
-        return self.source_class.preload_source(self)
+        keywords = self.source_class.preload_source(self)
+        # Get the size of this dicitonary for the cache
+        keywords[cache_meta.NAME] = np.uint32(sys.getsizeof({}))
+        # calculate the size
+        for key in keywords.keys():
+            n_bytes = sys.getsizeof(keywords[key])
+            keywords[cache_meta.NAME] += n_bytes
+        # Return keywords for cache and dataQuery
+        return keywords
