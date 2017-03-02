@@ -27,7 +27,7 @@ class Cache(object):
         except KeyError:
             while self._now_memory >= self.max_memory:
                 # Remove old item from cache and memory count
-                old_value = self._cache.popitem(last=False)[0]
+                old_value = self._cache.popitem(last=False)[1]
                 self._now_memory -= sys.getsizeof(old_value)
         # Add new item to the cache
         self.log('add_query',key=key,size=self._now_memory)
