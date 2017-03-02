@@ -30,6 +30,21 @@ class Query():
         image_methods = self.INPUT.METHODS.IMAGE_LIST
         return self.INPUT.METHODS.VALUE in image_methods
 
+    def update_source(self, keywords):
+        # take named keywords
+        output = self.OUTPUT.INFO
+        runtime = self.RUNTIME.IMAGE
+        # Unpack numpy dimensions
+        Z,Y,X = keywords[output.SIZE.NAME]
+        # set named keywords to self
+        runtime.BLOCK.VALUE = keywords[runtime.BLOCK.NAME]
+        output.TYPE.VALUE = keywords[output.TYPE.NAME]
+        output.SIZE.VALUE = {
+            output.SIZE.Z.NAME: Z,
+            output.SIZE.Y.NAME: Y,
+            output.SIZE.X.NAME: X
+        }
+
     def log(self,action,**kwargs):
         statuses = {
             'miss': 'info',
