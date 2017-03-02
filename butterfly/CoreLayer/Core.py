@@ -71,13 +71,14 @@ class Core(object):
 
     def update_query(self, query):
         keywords = self._cache.get(query.key)
-        if not keywords:
+        if not len(keywords):
             # Create a preporatory tile_query
             t0_index = np.uint32([0,0,0])
             t0_query = self.make_tile_query(query, t0_index)
+            # Update keywords and set the cache
             keywords = t0_query.preload_source
+            self._cache.set(query.key, keywords)
         # Update current query with preloaded terms
-        self._cache.set(query.key, keywords)
         query.update_source(keywords)
         return keywords
 
