@@ -4,5 +4,4 @@ tifffile>=0.11.1
 tornado>=4.4.2
 futures>=3.0.5
 pyaml>=16.12.2
-pylru>=1.0.9
 h5py>=2.6.0
