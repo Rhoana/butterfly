@@ -1,62 +1,59 @@
+import sys
 import logging
-from pylru import lrucache
-from Settings import MAX_CACHE_ENTRY
-from CacheEntry import CacheEntry
+import collections
+from Settings import *
 
 class Cache(object):
-    max_entry = MAX_CACHE_ENTRY
+    RUNTIME = RUNTIME()
 
     def __init__(self):
-        self.n_entry = 0
-        self._sources = lrucache(self.max_entry)
+        self._cache = collections.OrderedDict()
+        self._max_memory = self.RUNTIME.CACHE.MAX.VALUE
+        self._now_memory = 0
 
-    def update_size(self,key):
-        entry = self._sources.peek(key)
-        # update the max entries for the entry
-        max_entry = entry.update_size(self.n_entry)
-        self.log('update', key=key, n=max_entry)
+    def get(self, key):
+        try:
+            # Get the value from the cache. Add to top.
+            value = self._cache.pop(key)
+            self._cache[key] = value
+            return value
+        except KeyError:
+            return []
 
-    def get_source(self, query):
-        return self._sources.get(query.key, 0)
+    def set(self, key, value):
+        value_memory = self.value_size(value)
+        # Do not cache if value more than total memory
+        if value_memory > self._max_memory:
+            self.log('too_big',key=key,size=value_memory)
+            return -1
+        # Add new item to cache memory count
+        self._now_memory += value_memory
+        try:
+            self._cache.pop(key)
+        except KeyError:
+            while self._now_memory >= self._max_memory:
+                # Remove old item from cache and memory count
+                old_value = self._cache.popitem(last=False)[1]
+                self._now_memory -= self.value_size(old_value)
+        # Add new item to the cache
+        self.log('add_query',key=key,size=self._now_memory)
+        self._cache[key] = value
+        return 0
 
-    def add_source(self, query):
-        if not self.get_source(query):
-            self.n_entry = min(self.n_entry+1, self.max_entry)
-            new_entry = CacheEntry(query, self.n_entry)
-            # Add a new entry to the cache entries
-            self._sources[query.key] = new_entry
-            self.log('add_source',src=query.key)
-            if self.n_entry < self.max_entry:
-                # Lower the max size for each cache added
-                self.log('n_entry', n_entry=self.n_entry)
-                map(self.update_size, self._sources)
-        return self.get_source(query)
-
-    def add_tile(self, query, t_query, content):
-        src = self.get_source(query)
-        source = src if src else self.add_source(query)
-        self.log('add_tile', src=query.key, id=t_query.key)
-        return source.add_tile(t_query, content)
-
-    def get_tile(self, query, t_query):
-        tile = []
-        src = self.get_source(query)
-        if src:
-            tile = src.get_tile(t_query)
-        return tile
+    def value_size(self, value):
+        if isinstance(value,dict):
+            cache_meta = self.RUNTIME.CACHE.META.NAME
+            return int(value[cache_meta])
+        return sys.getsizeof(value)
 
     def log(self, action, **kwargs):
         statuses = {
-            'add_source': 'info',
-            'add_tile': 'info',
-            'n_entry': 'info',
-            'update': 'info'
+            'add_query': 'info',
+            'too_big': 'warning'
         }
         actions = {
-            'add_source': 'Starting {src} cache',
-            'add_tile': 'Adding {id} to {src} cache',
-            'n_entry': 'Total {n_entry} entries in cache',
-            'update': 'Entry {key} can have {n} entries'
+            'add_query': 'Adding {key} to cache. Cache now {size} bytes',
+            'too_big': 'Cannot cache {key}. {size} bytes is too big.'
         }
         status = statuses[action]
         message = actions[action].format(**kwargs)
