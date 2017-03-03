@@ -144,6 +144,9 @@ class RUNTIME():
             ),
             MAX = _named_struct('max-cache-size',
                 VALUE = MAX_CACHE_SIZE
+            ),
+            SOURCE = _named_struct('source',
+                VALUE = self.IMAGE.SOURCE.VALUE
             )
         )
 

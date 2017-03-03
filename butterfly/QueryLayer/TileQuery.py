@@ -85,8 +85,11 @@ class TileQuery(Query):
     @property
     def preload_source(self):
         cache_meta = self.RUNTIME.CACHE.META
+        cache_source = self.RUNTIME.CACHE.SOURCE
         # Preload the metadata from the source
-        keywords = self.valid_source().preload_source(self)
+        source, source_name = self.valid_source
+        keywords = source.preload_source(self)
+        keywords[cache_source.NAME] = source_name
         # Get the size of this dicitonary for the cache
         keywords[cache_meta.NAME] = np.uint32(sys.getsizeof({}))
         # calculate the size
@@ -106,7 +109,7 @@ class TileQuery(Query):
             if source.valid_path(self):
                 # Set my source to the one that works
                 my_source.VALUE = name
-                return source
+                return source, name
 
     def get_source(self,name):
         return self.SOURCES.get(name, HDF5)
