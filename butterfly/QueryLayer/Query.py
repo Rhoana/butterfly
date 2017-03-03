@@ -34,21 +34,33 @@ class Query():
         # take named keywords
         output = self.OUTPUT.INFO
         runtime = self.RUNTIME.IMAGE
-        # Unpack numpy dimensions
-        Z,Y,X = keywords[output.SIZE.NAME]
         # Get the right kind of datsource
-        runtime.SOURCE.VALUE = keywords[runtime.SOURCE.NAME]
+        runtime.SOURCE.VALUE = keywords.get(runtime.SOURCE.NAME,None)
         # set named keywords to self
-        runtime.BLOCK.VALUE = keywords[runtime.BLOCK.NAME]
-        output.TYPE.VALUE = keywords[output.TYPE.NAME]
+        is_size = lambda(b): isinstance(b,np.ndarray) and len(b) == 3
+        runtime.BLOCK.VALUE = keywords.get(runtime.BLOCK.NAME,None)
+        output.TYPE.VALUE = keywords.get(output.TYPE.NAME,None)
+        # Unpack numpy dimensions
+        full_size = keywords.get(output.SIZE.NAME, None)
         output.SIZE.VALUE = {
-            output.SIZE.Z.NAME: int(Z),
-            output.SIZE.Y.NAME: int(Y),
-            output.SIZE.X.NAME: int(X)
+            output.SIZE.Z.NAME: int(full_size[0]),
+            output.SIZE.Y.NAME: int(full_size[1]),
+            output.SIZE.X.NAME: int(full_size[2])
         }
+        if not runtime.SOURCE.VALUE:
+            return -1
+        if not output.TYPE.VALUE:
+            return -2
+        if not is_size(runtime.BLOCK.VALUE):
+            return -3
+        if not is_size(full_size):
+            return -4
+
         # Optional keywords by source
-        inH5 = runtime.SOURCE.HDF5.INNER
-        optional_fields = [inH5, output.PATH]
+        inner_path = runtime.SOURCE.HDF5.INNER
+        optional_fields = [inner_path, output.PATH]
         # Assign all optional keywords
         for op in optional_fields:
             op.VALUE = keywords.get(op.NAME,op.VALUE)
+        # Success
+        return 0

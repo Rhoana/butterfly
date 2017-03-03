@@ -121,8 +121,8 @@ class TileQuery(Query):
                 # Set valid source
                 keywords[my_source.NAME] = name
                 return keywords
-        # return empty source keyword
-        return {my_source.NAME: None}
+        # return empty
+        return {}
 
     def get_source(self,name):
         return self.SOURCES.get(name, HDF5)

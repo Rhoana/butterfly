@@ -29,15 +29,18 @@ class Core(object):
     '''
 
     def get_info(self, i_query):
-        d_query = self.make_data_query(i_query)
-        keywords = self.update_query(d_query)
-        i_query.update_source(keywords)
-        return i_query.dump
+        status = self.update_query(i_query)
+        if status != 0:
+            return {'error': status}
+        return {'result': i_query.dump}
 
     def get_data(self, query):
-        self.update_query(query)
+        status = self.update_query(query)
+        if status != 0:
+            return {'error': status}
         image = self.find_tiles(query)
-        return self.write_image(query, image)
+        data = self.write_image(query, image)
+        return {'result': data}
 
     def find_tiles(self, query):
         first_tile_index = query.tile_bounds[0]
@@ -72,15 +75,20 @@ class Core(object):
     def update_query(self, query):
         keywords = self._cache.get(query.key)
         if not len(keywords):
+            d_query = query
+            # Create a preporatory data_query
+            if not isinstance(query, DataQuery):
+                d_query = self.make_data_query(query)
             # Create a preporatory tile_query
             t0_index = np.uint32([0,0,0])
-            t0_query = self.make_tile_query(query, t0_index)
+            t0_query = self.make_tile_query(d_query, t0_index)
             # Update keywords and set the cache
             keywords = t0_query.preload_source
             self._cache.set(query.key, keywords)
         # Update current query with preloaded terms
-        query.update_source(keywords)
-        return keywords
+        status = query.update_source(keywords)
+        # Handle Errors
+        return status
 
     def load_tile(self, query, t_query):
         # grab request size for query
