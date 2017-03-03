@@ -44,6 +44,13 @@ class Query():
             output.SIZE.Y.NAME: int(Y),
             output.SIZE.X.NAME: int(X)
         }
+        runtime.SOURCE.VALUE = keywords[runtime.SOURCE.NAME]
+        # Optional keywords by source
+        inH5 = runtime.SOURCE.HDF5.INNER
+        optional_fields = [inH5, output.PATH]
+        # Assign all optional keywords
+        for op in optional_fields:
+            op.VALUE = keywords.get(op.NAME,op.VALUE)
 
     def log(self,action,**kwargs):
         statuses = {

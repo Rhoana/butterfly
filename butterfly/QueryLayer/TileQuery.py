@@ -29,6 +29,12 @@ class TileQuery(Query):
         q_path = query.OUTPUT.INFO.PATH.VALUE
         self.OUTPUT.INFO.PATH.VALUE = q_path
 
+        # Only applies to HDF5 datasource
+        query_H5 = query.RUNTIME.IMAGE.SOURCE.HDF5.INNER
+        self_H5 = self.RUNTIME.IMAGE.SOURCE.HDF5.INNER
+        self_H5.VALUE = query_H5.VALUE
+
+
     @property
     def key(self):
         origin = self.index_zyx
@@ -85,13 +91,12 @@ class TileQuery(Query):
     @property
     def preload_source(self):
         cache_meta = self.RUNTIME.CACHE.META
-        cache_source = self.RUNTIME.CACHE.SOURCE
         # Preload the metadata from the source
-        source, source_name = self.valid_source
-        keywords = source.preload_source(self)
-        keywords[cache_source.NAME] = source_name
+        keywords = self.valid_source
+
         # Get the size of this dicitonary for the cache
-        keywords[cache_meta.NAME] = np.uint32(sys.getsizeof({}))
+        dict_size = np.uint32(sys.getsizeof({}))
+        keywords[cache_meta.NAME] = dict_size
         # calculate the size
         for key in keywords.keys():
             n_bytes = sys.getsizeof(keywords[key])
@@ -105,11 +110,14 @@ class TileQuery(Query):
         # Validate the source of self.path
         for name in self.source_list:
             source = self.get_source(name)
-            # Ask is source can load self path
-            if source.valid_path(self):
-                # Set my source to the one that works
-                my_source.VALUE = name
-                return source, name
+            # Ask if source can load self path
+            keywords = source.preload_source(self)
+            if keywords:
+                # Set valid source
+                keywords[my_source.NAME] = name
+                return keywords
+        # return empty source keyword
+        return {my_source.NAME: None}
 
     def get_source(self,name):
         return self.SOURCES.get(name, HDF5)

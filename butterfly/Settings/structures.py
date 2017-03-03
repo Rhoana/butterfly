@@ -131,6 +131,12 @@ class RUNTIME():
                     'mojo',
                     'regularimagestack'
                 ],
+                HDF5 = _named_struct('hdf5',
+                    OUTER = _named_struct('filename'),
+                    INNER = _named_struct('dataset-path',
+                        VALUE = 'main'
+                    )
+                ),
                 VALUE = 'hdf5'
             ),
             BLOCK = _named_struct('block-size',
@@ -144,9 +150,6 @@ class RUNTIME():
             ),
             MAX = _named_struct('max-cache-size',
                 VALUE = MAX_CACHE_SIZE
-            ),
-            SOURCE = _named_struct('source',
-                VALUE = self.IMAGE.SOURCE.VALUE
             )
         )
 
