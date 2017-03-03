@@ -42,8 +42,13 @@ class RequestHandler(web.RequestHandler):
             content = self._core.get_data(_query)
         else:
             content = self._core.get_info(_query)
-        self.write(content)
-        return content
+        # Log error
+        if 'error' in content:
+            print content
+            return content['error']
+        # Return content
+        self.write(content['result'])
+        return content['result']
 
     def log(self, action, **kwargs):
         statuses = {

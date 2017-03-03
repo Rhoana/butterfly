@@ -10,13 +10,13 @@ class TileQuery(Query):
         Query.__init__(self, **keywords)
 
         query, zyx_index, kji_pixels = args
-        source_list = self.RUNTIME.IMAGE.SOURCE.LIST
+        self.source_list = self.RUNTIME.IMAGE.SOURCE.LIST
 
         self.SOURCES = {
-            source_list[0]: HDF5,
-            source_list[1]: TileSpecs,
-            source_list[2]: Mojo,
-            source_list[3]: ImageStack
+            self.source_list[0]: HDF5,
+            self.source_list[1]: TileSpecs,
+            self.source_list[2]: Mojo,
+            self.source_list[3]: ImageStack
         }
 
         self.RUNTIME.TILE.ZYX.VALUE = zyx_index
@@ -29,22 +29,37 @@ class TileQuery(Query):
         q_path = query.OUTPUT.INFO.PATH.VALUE
         self.OUTPUT.INFO.PATH.VALUE = q_path
 
+        # Very important to get the right datasource
+        query_source = query.RUNTIME.IMAGE.SOURCE
+        self_source = self.RUNTIME.IMAGE.SOURCE
+        self_source.VALUE = query_source.VALUE
+
+        # Only applies to HDF5 datasource
+        query_H5 = query.RUNTIME.IMAGE.SOURCE.HDF5.INNER
+        self_H5 = self.RUNTIME.IMAGE.SOURCE.HDF5.INNER
+        self_H5.VALUE = query_H5.VALUE
+
+
     @property
     def key(self):
         origin = self.index_zyx
         scales = self.all_scales
         tile_values = np.r_[scales,origin]
         tile_key =  np.array2string(tile_values)
-        return self.OUTPUT.INFO.PATH.VALUE + tile_key
+        return self.path + tile_key
 
     @property
     def tile(self):
-        return self.source_class.load_tile(self)
+        return self.my_source.load_tile(self)
 
     @property
-    def source_class(self):
-        disk_fmt = self.RUNTIME.IMAGE.SOURCE.VALUE
-        return self.SOURCES.get(disk_fmt, HDF5)
+    def path(self):
+        return self.OUTPUT.INFO.PATH.VALUE
+
+    @property
+    def my_source(self):
+        my_source = self.RUNTIME.IMAGE.SOURCE.VALUE
+        return self.get_source(my_source)
 
     @property
     def all_scales(self):
@@ -82,12 +97,32 @@ class TileQuery(Query):
     def preload_source(self):
         cache_meta = self.RUNTIME.CACHE.META
         # Preload the metadata from the source
-        keywords = self.source_class.preload_source(self)
+        keywords = self.valid_source
+
         # Get the size of this dicitonary for the cache
-        keywords[cache_meta.NAME] = np.uint32(sys.getsizeof({}))
+        dict_size = np.uint32(sys.getsizeof({}))
+        keywords[cache_meta.NAME] = dict_size
         # calculate the size
         for key in keywords.keys():
             n_bytes = sys.getsizeof(keywords[key])
             keywords[cache_meta.NAME] += n_bytes
         # Return keywords for cache and dataQuery
         return keywords
+
+    @property
+    def valid_source(self):
+        my_source = self.RUNTIME.IMAGE.SOURCE
+        # Validate the source of self.path
+        for name in self.source_list:
+            source = self.get_source(name)
+            # Ask if source can load self path
+            keywords = source.preload_source(self)
+            if len(keywords):
+                # Set valid source
+                keywords[my_source.NAME] = name
+                return keywords
+        # return empty
+        return {}
+
+    def get_source(self,name):
+        return self.SOURCES.get(name, HDF5)

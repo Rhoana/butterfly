@@ -131,7 +131,13 @@ class RUNTIME():
                     'mojo',
                     'regularimagestack'
                 ],
-                VALUE = 'hdf5'
+                HDF5 = _named_struct('hdf5',
+                    OUTER = _named_struct('filename'),
+                    INNER = _named_struct('dataset-path',
+                        VALUE = 'main'
+                    )
+                ),
+                VALUE = 'regularimagestack'
             ),
             BLOCK = _named_struct('block-size',
                 VALUE = [1, 512, 512]

@@ -6,4 +6,4 @@ class Datasource(object):
 
     @staticmethod
     def preload_source(query):
-        return None
+        return {}
