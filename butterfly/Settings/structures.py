@@ -137,7 +137,7 @@ class RUNTIME():
                         VALUE = 'main'
                     )
                 ),
-                VALUE = 'hdf5'
+                VALUE = 'regularimagestack'
             ),
             BLOCK = _named_struct('block-size',
                 VALUE = [1, 512, 512]

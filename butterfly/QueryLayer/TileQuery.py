@@ -29,6 +29,11 @@ class TileQuery(Query):
         q_path = query.OUTPUT.INFO.PATH.VALUE
         self.OUTPUT.INFO.PATH.VALUE = q_path
 
+        # Very important to get the right datasource
+        query_source = query.RUNTIME.IMAGE.SOURCE
+        self_source = self.RUNTIME.IMAGE.SOURCE
+        self_source.VALUE = query_source.VALUE
+
         # Only applies to HDF5 datasource
         query_H5 = query.RUNTIME.IMAGE.SOURCE.HDF5.INNER
         self_H5 = self.RUNTIME.IMAGE.SOURCE.HDF5.INNER

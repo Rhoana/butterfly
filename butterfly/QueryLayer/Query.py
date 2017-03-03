@@ -44,6 +44,7 @@ class Query():
             output.SIZE.Y.NAME: int(Y),
             output.SIZE.X.NAME: int(X)
         }
+        # Get the right kind of datsource
         runtime.SOURCE.VALUE = keywords[runtime.SOURCE.NAME]
         # Optional keywords by source
         inH5 = runtime.SOURCE.HDF5.INNER
