@@ -7,6 +7,8 @@ BFLY_CONFIG = config.get("bfly", {})
 
 #HTTP port for server
 PORT = int(BFLY_CONFIG.get("port", 2001))
+#Path to database
+DB_PATH = BFLY_CONFIG.get("db-path", "bfly.db")
 
 #Maximum size of the cache in MiB: 1 GiB by default
 _max_cache = BFLY_CONFIG.get("max-cache-size", 1024)
