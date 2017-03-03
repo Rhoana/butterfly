@@ -44,7 +44,7 @@ class HDF5(Datasource):
         # Check if path is valid
         keywords = HDF5.valid_path(query)
         if not keywords:
-            return False
+            return {}
         # Get validated name and dataset
         filename = keywords[output.PATH.NAME]
         dataset = keywords[inner.NAME]

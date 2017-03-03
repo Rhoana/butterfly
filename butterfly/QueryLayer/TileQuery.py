@@ -117,7 +117,7 @@ class TileQuery(Query):
             source = self.get_source(name)
             # Ask if source can load self path
             keywords = source.preload_source(self)
-            if keywords:
+            if len(keywords):
                 # Set valid source
                 keywords[my_source.NAME] = name
                 return keywords

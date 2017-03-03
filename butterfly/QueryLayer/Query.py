@@ -36,6 +36,8 @@ class Query():
         runtime = self.RUNTIME.IMAGE
         # Unpack numpy dimensions
         Z,Y,X = keywords[output.SIZE.NAME]
+        # Get the right kind of datsource
+        runtime.SOURCE.VALUE = keywords[runtime.SOURCE.NAME]
         # set named keywords to self
         runtime.BLOCK.VALUE = keywords[runtime.BLOCK.NAME]
         output.TYPE.VALUE = keywords[output.TYPE.NAME]
@@ -44,27 +46,9 @@ class Query():
             output.SIZE.Y.NAME: int(Y),
             output.SIZE.X.NAME: int(X)
         }
-        # Get the right kind of datsource
-        runtime.SOURCE.VALUE = keywords[runtime.SOURCE.NAME]
         # Optional keywords by source
         inH5 = runtime.SOURCE.HDF5.INNER
         optional_fields = [inH5, output.PATH]
         # Assign all optional keywords
         for op in optional_fields:
             op.VALUE = keywords.get(op.NAME,op.VALUE)
-
-    def log(self,action,**kwargs):
-        statuses = {
-            'miss': 'info',
-            'update': 'info'
-        }
-        actions ={
-            'miss': 'Missing {lost} from {group}',
-            'update': '''Update {path}
-            datatype to {dtype} and blocksize to {block}
-            '''
-        }
-        status = statuses[action]
-        message = actions[action].format(**kwargs)
-        getattr(logging, status)(message)
-        return message
