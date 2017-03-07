@@ -156,7 +156,7 @@ class RUNTIME():
         self.ERROR = _nameless_struct(
             TERM = _named_struct('term'),
             OUT = _named_struct('value'),
-            LIST = _named_struct('list')
+            CHECK = _named_struct('check')
         )
 
 '''

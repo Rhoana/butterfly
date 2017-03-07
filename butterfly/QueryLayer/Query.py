@@ -46,7 +46,7 @@ class Query():
 
         # Get error keywords
         errors = self.RUNTIME.ERROR
-        k_list = errors.LIST.NAME
+        k_check = errors.CHECK.NAME
         k_term = errors.TERM.NAME
         k_out = errors.OUT.NAME
 
@@ -82,19 +82,19 @@ class Query():
 
     def check_any(self,is_good,message,value,term):
         errors = self.RUNTIME.ERROR
-        k_list = errors.LIST.NAME
+        k_check = errors.CHECK.NAME
         k_term = errors.TERM.NAME
         k_out = errors.OUT.NAME
 
         if not is_good:
             self.raise_error('bad_check',{
-                k_list = message,
-                k_out = str(value),
-                k_term = term
+                k_check: message,
+                k_out: str(value),
+                k_term: term
             })
 
     def check_list(self,whitelist,value,term):
-        in_list = value in whiteist:
+        in_list = value in whiteist
         msg = 'in {}'.format(whitelist)
         self.check_any(in_list,msg,value,term)
 

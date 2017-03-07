@@ -30,9 +30,9 @@ class RequestHandler(web.RequestHandler):
         except URLError, u_error:
             # Get error information
             details = u_error.args[0]
-            self.set_status(details.get('http',500))
+            self.set_status(int(details.get('http',500)))
             self.set_header('Content-Type', "text/plain")
-            self.write(self.log(details['error']))
+            self.write(self.log(details))
 
     def check(self, _query):
         return _query
@@ -51,7 +51,7 @@ class RequestHandler(web.RequestHandler):
     def log(self, detail):
         errors = self.RUNTIME.ERROR
         # Get some global strings
-        k_list = errors.LIST.NAME
+        k_check = errors.CHECK.NAME
         k_term = errors.TERM.NAME
         k_out = errors.OUT.NAME
         statuses = {
@@ -59,7 +59,7 @@ class RequestHandler(web.RequestHandler):
         }
         actions = {
             'bad_check': '''The {{{}}} {{{}}} is not {{{}}}
-            '''.format(k_term, k_out, k_list)
+            '''.format(k_term, k_out, k_check)
         }
         # Get error info and type
         keys = detail.get('keys',{})

@@ -152,17 +152,17 @@ class API(RequestHandler):
 
     def _try_typecast_int(self,qparam,result):
         k_term = self.RUNTIME.ERROR.TERM.NAME
-        k_list = self.RUNTIME.ERROR.LIST.NAME
+        k_check = self.RUNTIME.ERROR.CHECK.NAME
         return self._try_condition(result, np.uint32, {
-            k_list : 'a number',
+            k_check : 'a number',
             k_term : qparam
         })
 
     def _match_list(self,name,v,vlist):
         k_term = self.RUNTIME.ERROR.TERM.NAME
-        k_list = self.RUNTIME.ERROR.LIST.NAME
+        k_check = self.RUNTIME.ERROR.CHECK.NAME
         return self._match_condition(v, v in vlist, {
-            k_list : 'one of {}'.format(vlist),
+            k_check : 'one of {}'.format(vlist),
             k_term : name
         })
 

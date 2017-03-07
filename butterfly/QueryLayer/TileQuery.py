@@ -2,6 +2,7 @@ from ImageLayer import *
 from Query import Query
 import numpy as np
 import sys
+import os
 
 class TileQuery(Query):
 
@@ -95,6 +96,7 @@ class TileQuery(Query):
 
     @property
     def preload_source(self):
+        # Get all the metadata needed for the cache
         cache_meta = self.RUNTIME.CACHE.META
         # Preload the metadata from the source
         keywords = self.valid_source
@@ -111,6 +113,14 @@ class TileQuery(Query):
 
     @property
     def valid_source(self):
+        # Get the path key and value
+        k_path = self.OUTPUT.INFO.PATH.NAME
+        v_path = self.OUTPUT.INFO.PATH.VALUE
+        # Make sure we have a valid pathname
+        is_path = os.path.exists(v_path)
+        msg = 'a valid path for butterfly'
+        self.check_any(is_path,msg,v_path,k_path)
+        # Get the default source
         my_source = self.RUNTIME.IMAGE.SOURCE
         # Validate the source of self.path
         for name in self.source_list:
