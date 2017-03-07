@@ -9,7 +9,7 @@ import zlib
 import cv2
 
 class Core(object):
-    DB_CLASS = Mongo
+    DB_CLASS = Unqlite
 
     def __init__(self, dname):
         self._database = self.start_db(dname)

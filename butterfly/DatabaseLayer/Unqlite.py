@@ -1,6 +1,6 @@
 from Database import Database
 
-class Mongo(Database):
+class Unqlite(Database):
     pass
     def update(self, content):
         return 0
