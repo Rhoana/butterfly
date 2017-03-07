@@ -152,6 +152,12 @@ class RUNTIME():
                 VALUE = MAX_CACHE_SIZE
             )
         )
+        # ALL THE ERROR RUNTIME TERMS
+        self.ERROR = _nameless_struct(
+            TERM = _named_struct('term'),
+            OUT = _named_struct('value'),
+            CHECK = _named_struct('check')
+        )
 
 '''
 THIS HELPS RETURN TEXT
