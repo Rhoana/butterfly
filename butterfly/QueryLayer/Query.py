@@ -94,7 +94,7 @@ class Query():
             })
 
     def check_list(self,whitelist,value,term):
-        in_list = value in whiteist
+        in_list = value in whitelist
         msg = 'in {}'.format(whitelist)
         self.check_any(in_list,msg,value,term)
 

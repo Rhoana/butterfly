@@ -90,7 +90,7 @@ class HDF5(Datasource):
             # Read the metainfo file
             order = HDF5.meta_files.index(ending)
             with open(filename) as infile:
-                info = HDF5.read[order](infile,'r')
+                info = HDF5.read[order](infile)
                 # Get the inner dataset and the new path
                 filename = info[h5_info.OUTER.NAME]
                 dataset = info[h5_info.INNER.NAME]
