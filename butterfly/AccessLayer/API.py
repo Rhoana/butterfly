@@ -1,7 +1,7 @@
 from RequestHandler import RequestHandler
 from QueryLayer import InfoQuery
 from QueryLayer import DataQuery
-from urllib2 import HTTPError
+from urllib2 import URLError
 import numpy as np
 
 class API(RequestHandler):
@@ -133,13 +133,14 @@ class API(RequestHandler):
     Handles Logs and Exceptions
     '''
 
-    def _except(self,result,kwargs):
-        action = 'exist'
-        if 'check' in kwargs:
-            kwargs['val'] = result
-            action = 'check'
-        message = self.log(action, **kwargs)
-        raise HTTPError(self.request.uri, 400, message, [], None)
+    def _except(self,result,detail):
+        k_out = self.RUNTIME.ERROR.OUT.NAME
+        detail[k_out] = result
+        raise URLError({
+            'error': 'bad_check',
+            'keys': detail,
+            'http': '400'
+        })
 
     def _match_condition(self,result,checked,kwargs):
         if not checked: self._except(result, kwargs)
@@ -150,15 +151,19 @@ class API(RequestHandler):
         except: self._except(result, kwargs)
 
     def _try_typecast_int(self,qparam,result):
+        k_term = self.RUNTIME.ERROR.TERM.NAME
+        k_list = self.RUNTIME.ERROR.LIST.NAME
         return self._try_condition(result, np.uint32, {
-            'check' : 'a number',
-            'term' : qparam
+            k_list : 'a number',
+            k_term : qparam
         })
 
     def _match_list(self,name,v,vlist):
+        k_term = self.RUNTIME.ERROR.TERM.NAME
+        k_list = self.RUNTIME.ERROR.LIST.NAME
         return self._match_condition(v, v in vlist, {
-            'check' : 'one of ['+', '.join(vlist)+']',
-            'term' : name
+            k_list : 'one of {}'.format(vlist),
+            k_term : name
         })
 
     def _get_list_query(self, _query):

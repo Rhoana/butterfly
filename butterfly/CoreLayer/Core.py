@@ -30,34 +30,12 @@ class Core(object):
 
     def get_info(self, i_query):
         status = self.update_query(i_query)
-        if status != 0:
-            return {'error': status}
-        return {'result': i_query.dump}
+        return i_query.dump
 
     def get_data(self, query):
         status = self.update_query(query)
-        if status != 0:
-            return {'error': status}
         image = self.find_tiles(query)
-        data = self.write_image(query, image)
-        return {'result': data}
-
-    def find_tiles(self, query):
-        first_tile_index = query.tile_bounds[0]
-        all_tiles = np.argwhere(np.ones(query.tile_shape))
-        cutout = np.zeros(query.target_shape, query.dtype)
-        tiles_needed = first_tile_index + all_tiles
-
-        for t_index in tiles_needed:
-            # Make a query for the given tile
-            t_query = self.make_tile_query(query, t_index)
-            tile = self.load_tile(query, t_query)
-            # Fill the tile into the full cutout
-            to_cut = [t_query.target_origin, tile.shape]
-            [Z0,Y0,X0],[Z1,Y1,X1] = query.some_in_all(*to_cut)
-            cutout[Z0:Z1,Y0:Y1,X0:X1] = tile
-
-        return cutout
+        return self.write_image(query, image)
 
     def make_data_query(self, i_query):
         # Begin building needed keywords
@@ -90,6 +68,28 @@ class Core(object):
         # Handle Errors
         return status
 
+    '''
+    Image Specific Methods
+    '''
+
+    def find_tiles(self, query):
+        first_tile_index = query.tile_bounds[0]
+        all_tiles = np.argwhere(np.ones(query.tile_shape))
+        cutout = np.zeros(query.target_shape, query.dtype)
+        tiles_needed = first_tile_index + all_tiles
+
+        for t_index in tiles_needed:
+            # Make a query for the given tile
+            t_query = self.make_tile_query(query, t_index)
+            tile = self.load_tile(query, t_query)
+            # Fill the tile into the full cutout
+            to_cut = [t_query.target_origin, tile.shape]
+            [Z0,Y0,X0],[Z1,Y1,X1] = query.some_in_all(*to_cut)
+            cutout[Z0:Z1,Y0:Y1,X0:X1] = tile
+
+        return cutout
+
+
     def load_tile(self, query, t_query):
         # grab request size for query
         t_bounds = t_query.target_bounds
@@ -106,7 +106,6 @@ class Core(object):
         self._cache.set(t_query.key, tile)
 
         return tile[K0:K1,J0:J1,I0:I1]
-
 
     def id_to_color(self, vol):
         colors = np.zeros((3,)+vol.shape).astype(np.uint8)

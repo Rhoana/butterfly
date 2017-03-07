@@ -1,3 +1,4 @@
+from urllib2 import URLError
 from Settings import *
 import numpy as np
 import logging
@@ -34,27 +35,43 @@ class Query():
         # take named keywords
         output = self.OUTPUT.INFO
         runtime = self.RUNTIME.IMAGE
-        # Get the right kind of datsource
-        runtime.SOURCE.VALUE = keywords.get(runtime.SOURCE.NAME,None)
-        # set named keywords to self
-        is_size = lambda(b): isinstance(b,np.ndarray) and len(b) == 3
-        runtime.BLOCK.VALUE = keywords.get(runtime.BLOCK.NAME,None)
-        output.TYPE.VALUE = keywords.get(output.TYPE.NAME,None)
-        # Unpack numpy dimensions
-        full_size = keywords.get(output.SIZE.NAME, None)
+        # Get the right kind of datsource and datatype
+        source_val = keywords.get(runtime.SOURCE.NAME,None)
+        type_val = keywords.get(output.TYPE.NAME,None)
+        # Get the right blocksize
+        block = keywords.get(runtime.BLOCK.NAME,None)
+        # Unpack dimensions for full volume
+        full_size = keywords.get(output.SIZE.NAME, [0,0,0])
+
+
+        # Get error keywords
+        errors = self.RUNTIME.ERROR
+        k_list = errors.LIST.NAME
+        k_term = errors.TERM.NAME
+        k_out = errors.OUT.NAME
+
+        # Make sure the source and type are valid
+        self.check_list(runtime.SOURCE.LIST, source_val, 'source')
+        self.check_list(runtime.TYPE.LIST, type_val, 'type')
+        # Make sure the blocksize and size have len 3
+        self.check_length(3, block, 'blocksize')
+        self.check_length(3, full_size, 'full size')
+        # Make sure size is bigger than blocksize
+        msg = 'bigger than {}'.format(block_size)
+        within = np.all(np.uint32(block_size) < full_size)
+        self.check_any(within, msg, full_size, 'full size')
+
+        # Set all the clean values
+        output.TYPE.VALUE = type_val
+        runtime.SOURCE.VALUE = source_val
+        runtime.BLOCK.VALUE = np.uint32(block)
+
+        # Set the output size
         output.SIZE.VALUE = {
             output.SIZE.Z.NAME: int(full_size[0]),
             output.SIZE.Y.NAME: int(full_size[1]),
             output.SIZE.X.NAME: int(full_size[2])
         }
-        if not runtime.SOURCE.VALUE:
-            return -1
-        if not output.TYPE.VALUE:
-            return -2
-        if not is_size(runtime.BLOCK.VALUE):
-            return -3
-        if not is_size(full_size):
-            return -4
 
         # Optional keywords by source
         inner_path = runtime.SOURCE.HDF5.INNER
@@ -62,5 +79,37 @@ class Query():
         # Assign all optional keywords
         for op in optional_fields:
             op.VALUE = keywords.get(op.NAME,op.VALUE)
-        # Success
-        return 0
+
+    def check_any(self,is_good,message,value,term):
+        errors = self.RUNTIME.ERROR
+        k_list = errors.LIST.NAME
+        k_term = errors.TERM.NAME
+        k_out = errors.OUT.NAME
+
+        if not is_good:
+            self.raise_error('bad_check',{
+                k_list = message,
+                k_out = str(value),
+                k_term = term
+            })
+
+    def check_list(self,whitelist,value,term):
+        in_list = value in whiteist:
+        msg = 'in {}'.format(whitelist)
+        self.check_any(in_list,msg,value,term)
+
+    def check_length(self,length,value,term):
+        msg0 = 'a list or array'
+        has_len = hasattr(value, '__len__')
+        self.check_any(has_len,msg0,value,term)
+
+        msg1 = 'of length three'
+        is_length = len(value) == length
+        self.check_any(is_length,msg1,value,term)
+
+    def raise_error(self,status,detail):
+        raise URLError({
+            'error': status,
+            'keys': detail,
+            'http': 503
+        })

@@ -2,7 +2,7 @@ import logging
 from Settings import *
 from tornado import web
 from tornado import gen
-from urllib2 import HTTPError
+from urllib2 import URLError
 from concurrent.futures import ThreadPoolExecutor
 
 class RequestHandler(web.RequestHandler):
@@ -27,10 +27,12 @@ class RequestHandler(web.RequestHandler):
         try:
             query = self.parse(*args)
             yield self._ex.submit(self.handle, query)
-        except HTTPError, http_error:
-            self.set_status(http_error.code)
+        except URLError, u_error:
+            # Get error information
+            details = u_error.args[0]
+            self.set_status(details.get('http',500))
             self.set_header('Content-Type', "text/plain")
-            self.write(http_error.msg)
+            self.write(details['error'])
 
     def check(self, _query):
         return _query
@@ -42,25 +44,34 @@ class RequestHandler(web.RequestHandler):
             content = self._core.get_data(_query)
         else:
             content = self._core.get_info(_query)
-        # Log error
-        if 'error' in content:
-            print content
-            return content['error']
         # Return content
         self.write(content['result'])
         return content['result']
 
-    def log(self, action, **kwargs):
+    def log(self, detail):
+        errors = self.RUNTIME.ERROR
+        # Get some global strings
+        k_list = errors.LIST.NAME
+        k_term = errors.TERM.NAME
+        k_out = errors.OUT.NAME
         statuses = {
-            'exist': 'error',
-            'check' : 'error'
+            'bad_check': 'info'
         }
         actions = {
-            'start': 'Starting {id}',
-            'exist': 'Missing {term} parameter',
-            'check' : 'The {term} \'{val}\' is not {check}'
+            'bad_check': '''The {{{}}} {{{}}} is not {{{}}}
+            '''.format(k_term, k_out, k_list)
         }
-        status = statuses[action]
-        message = actions[action].format(**kwargs)
+        # Get error info and type
+        keys = detail.get('keys',{})
+        action = detail.get('error','')
+        # Get the log status and template
+        status = statuses.get(action,'error')
+        template = actions.get(action,'New error')
+        # Try to format the sting
+        try:
+            message = template.format(**keys)
+        except KeyError:
+            message = template
+        # Log the message with a status
         getattr(logging, status)(message)
         return message
