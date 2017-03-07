@@ -32,7 +32,7 @@ class RequestHandler(web.RequestHandler):
             details = u_error.args[0]
             self.set_status(details.get('http',500))
             self.set_header('Content-Type', "text/plain")
-            self.write(details['error'])
+            self.write(self.log(details['error']))
 
     def check(self, _query):
         return _query
