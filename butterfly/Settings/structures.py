@@ -154,9 +154,9 @@ class RUNTIME():
         )
         # ALL THE ERROR RUNTIME TERMS
         self.ERROR = _nameless_struct(
-            TERM = _nameless_struct('term'),
-            OUT = _nameless_struct('value'),
-            LIST = _nameless_struct('list')
+            TERM = _named_struct('term'),
+            OUT = _named_struct('value'),
+            LIST = _named_struct('list')
         )
 
 '''
