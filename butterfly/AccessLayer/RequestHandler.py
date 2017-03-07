@@ -45,8 +45,8 @@ class RequestHandler(web.RequestHandler):
         else:
             content = self._core.get_info(_query)
         # Return content
-        self.write(content['result'])
-        return content['result']
+        self.write(content)
+        return content
 
     def log(self, detail):
         errors = self.RUNTIME.ERROR

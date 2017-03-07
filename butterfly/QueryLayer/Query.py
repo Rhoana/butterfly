@@ -52,13 +52,13 @@ class Query():
 
         # Make sure the source and type are valid
         self.check_list(runtime.SOURCE.LIST, source_val, 'source')
-        self.check_list(runtime.TYPE.LIST, type_val, 'type')
+        self.check_list(output.TYPE.LIST, type_val, 'type')
         # Make sure the blocksize and size have len 3
         self.check_length(3, block, 'blocksize')
         self.check_length(3, full_size, 'full size')
         # Make sure size is bigger than blocksize
-        msg = 'bigger than {}'.format(block_size)
-        within = np.all(np.uint32(block_size) < full_size)
+        msg = 'bigger than {}'.format(block)
+        within = np.all(np.uint32(block) <= full_size)
         self.check_any(within, msg, full_size, 'full size')
 
         # Set all the clean values
