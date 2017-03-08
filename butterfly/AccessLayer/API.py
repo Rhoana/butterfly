@@ -32,29 +32,43 @@ class API(RequestHandler):
     def _get_meta_info(self):
         # Get needed metadata
         info = self.OUTPUT.INFO
+        in_info = self.INPUT.INFO
+        methods = self.INPUT.METHODS
+        # Get all the channel info
         meta_info = self._get_group_dict('')
 
-        # Get requested query parameters
-        out_format = self._get_list_query(self.INPUT.INFO.FORMAT)
+        # The input format becomes the output format
+        out_format = self._get_list_query(in_info.FORMAT)
 
         return InfoQuery(**{
-            self.INPUT.METHODS.NAME: self.INPUT.METHODS.META.NAME,
             info.CHANNEL.NAME: meta_info[info.CHANNEL.NAME],
             info.PATH.NAME: meta_info[info.PATH.NAME],
-            self.INPUT.INFO.FORMAT.NAME: out_format
+            methods.NAME: methods.META.NAME,
+            in_info.FORMAT.NAME: out_format
         })
 
     def _get_feature_info(self):
         # Get needed metadata
         info = self.OUTPUT.INFO
-        # meta_info = self._get_group_dict('')
+        in_info = self.INPUT.INFO
+        methods = self.INPUT.METHODS
+        features = self.INPUT.FEATURES
+        # Get all the channel info
+        meta_info = self._get_group_dict('')
 
-        # Get requested query parameters
-        out_format = self._get_list_query(self.INPUT.INFO.FORMAT)
+        # The input format becomes the output format
+        out_format = self._get_list_query(in_info.FORMAT)
+        # Get the name of the feature to load from db
+        feature_key = self._get_list_query(features)
+
+        # Make an empty output list
+        output_list = [feature_key]
 
         return InfoQuery(**{
-            self.OUTPUT.INFO.NAMES.NAME: ['not yet'],
-            self.INPUT.METHODS.NAME: self.INPUT.METHODS.FEAT.NAME
+            info.PATH.NAME: meta_info[info.PATH.NAME],
+            methods.NAME: methods.FEAT.NAME,
+            in_info.FORMAT.NAME: out_format,
+            info.NAMES.NAME: output_list
         })
 
     '''

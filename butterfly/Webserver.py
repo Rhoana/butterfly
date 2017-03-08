@@ -9,9 +9,11 @@ class Webserver(object):
     def __init__(self, db, **kwargs):
         # Create a core with a database
         self._core = Core(db)
+        self._db = db
 
         app_in = {
-            '_core': self._core
+            '_core': self._core,
+            '_db': self._db
         }
         app_set = {
             'autoreload': True

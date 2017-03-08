@@ -12,11 +12,12 @@ class RequestHandler(web.RequestHandler):
     RUNTIME = RUNTIME()
     BFLY_CONFIG = BFLY_CONFIG
 
-    def initialize(self, _core):
+    def initialize(self, _core, _db):
         self._ex = ThreadPoolExecutor(max_workers=10)
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header('Access-Control-Allow-Methods', 'GET')
         self._core = _core
+        self._db = _db
 
     # Each Handler must define
     def parse(self, _request):
