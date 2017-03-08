@@ -65,7 +65,7 @@ class Unqlite(Database):
         Database.get_entry(self, table, path, key, **keywords)
         # Filter by keywords if keywords
         if len(keywords):
-            check = make_filter(**keywords)
+            check = self.make_filter(**keywords)
             return self.get_by_function(table, path, check)
         # Filter by filter function if callable
         if callable(key):

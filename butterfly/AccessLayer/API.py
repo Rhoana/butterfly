@@ -52,24 +52,67 @@ class API(RequestHandler):
         info = self.OUTPUT.INFO
         in_info = self.INPUT.INFO
         methods = self.INPUT.METHODS
-        features = self.INPUT.FEATURES
+        feats = self.INPUT.FEATURES
+
         # Get all the channel info
         meta_info = self._get_group_dict('')
-
         # The input format becomes the output format
         out_format = self._get_list_query(in_info.FORMAT)
         # Get the name of the feature to load from db
-        feature_key = self._get_list_query(features)
+        feat = self._get_list_query(feats)
+        # Check for all features that take an id
+        need_id = feats.LINK_LIST + feats.POINT_LIST + feats.BOOL_LIST
+        id_key = self._get_int_query(in_info.ID) if need_id else None
+        # Check requests for neurons or synapses
+        feat_checks = enumerate(['NEURON', 'SYNAPSE'])
+        check_in = lambda l: feat in getattr(feats,l+'_LIST')
+        in_list =  [i for i,l in feat_checks if check_in(l)]
+        # Get the channel pathname
+        channel_path = meta_info[info.PATH.NAME]
+        # Get ready to get features
+        fargs = [feat, id_key, in_list, channel_path]
 
-        # Make an empty output list
-        output_list = [feature_key]
-
+        # Return an infoquery
         return InfoQuery(**{
-            info.PATH.NAME: meta_info[info.PATH.NAME],
+            info.NAMES.NAME: self._get_feature_list(*fargs),
             methods.NAME: methods.FEAT.NAME,
             in_info.FORMAT.NAME: out_format,
-            info.NAMES.NAME: output_list
+            info.PATH.NAME: channel_path
         })
+
+    def _get_feature_list(self,feat,id_key,in_list,c_path):
+        # Get input keyword arguments
+        feats = self.INPUT.FEATURES
+        # Get metadata for database
+        tables = self.RUNTIME.DB.TABLE
+        files = self.RUNTIME.DB.FILE
+
+        # The database tables will not be needed
+        if not len(in_list):
+            return ['Voxel List not Supported yet']
+        # We'll need the dataset path and table
+        d_path = self._db.get_path(c_path)
+        table_id = tables.JOIN_LIST[in_list[0]]
+
+        # Create database arguments
+        d_args = [table_id,d_path]
+        d_keys = dict()
+        # Check if the request just checks an ID
+        if feat in feats.BOOL_LIST:
+            if table_id == tables.NEURON.NAME:
+                # filter database by keywords
+                d_keys[files.NEURON.ID.NAME] = id_key
+            else:
+                d_args.append(id_key)
+            # Get the result from the database
+            result = self._db.get_entry(*d_args,**d_keys)
+            # Return first result if filtered
+            if len(d_keys) and len(result):
+                result = result[0]
+            return not not result
+
+        # Otherwise just inform the table needed
+        return [table_id]
 
     '''
     Lists values from config for group methods
