@@ -86,6 +86,7 @@ class API(RequestHandler):
         # Get metadata for database
         files = self.RUNTIME.DB.FILE
         tables = self.RUNTIME.DB.TABLE
+        k_nodes = files.SYNAPSE.NEURON_LIST
         get_point = lambda p: getattr(files.POINT,p)
         k_z,k_y,k_x = map(get_point, 'ZYX')
 
@@ -98,13 +99,23 @@ class API(RequestHandler):
 
         # Create database arguments
         d_args = [table_id,d_path]
-        d_keys = dict()
 
         # Check if the request needs an id
         if id_key is not None:
-            # Get the feature by the id
-            fargs = [id_key, d_args, d_keys]
-            result = self._get_feature_id(*fargs)
+
+            # Find all synapses where neuron is parent
+            if feat == feats.NEURON_CHILDREN.NAME:
+                result = self._get_db(d_args, **{
+                    k_nodes[0]: id_key
+                })
+                return result
+
+            # Default to get feature by the id
+            result = self._get_db(d_args, id_key)
+
+            # All below use the only or first result
+            if isinstance(result, list) and len(result):
+                result = result[0]
 
             # If the request just checks an ID
             if feat in feats.BOOL_LIST:
@@ -121,22 +132,24 @@ class API(RequestHandler):
         # Otherwise just inform the table needed
         return [table_id]
 
-    def _get_feature_id(self,id_key,d_args,d_keys):
+    def _get_db(self,d_args,id_key=None,**d_keys):
         # Get metadata for database
         files = self.RUNTIME.DB.FILE
         tables = self.RUNTIME.DB.TABLE
-        # Check if using the neuron table
-        if d_args[0] == tables.NEURON.NAME:
-            # filter database by keywords
-            d_keys[files.NEURON.ID.NAME] = id_key
-        else:
-            # filter by database key
-            d_args.append(id_key)
+        # Use the id if no filter specified
+        if not len(d_keys):
+            # If no id specified, get all data
+            if id_key is None:
+                return self._db.get_table(*d_args).all()
+            # Check if using the neuron table
+            if d_args[0] == tables.NEURON.NAME:
+                # filter database by keywords
+                d_keys[files.NEURON.ID.NAME] = id_key
+            else:
+                # get by database key
+                d_args.append(id_key)
         # Get the result from the database
         result = self._db.get_entry(*d_args,**d_keys)
-        # Return first result if filtered
-        if len(d_keys) and len(result):
-            return result[0]
         return result
 
     '''

@@ -63,16 +63,17 @@ class INPUT():
         self.FEATURES = _named_struct( 'feature',
             NEURON_LIST = [
                 'neuron_keypoint',
-                'neuron_children',
                 'neuron_ids',
                 'is_neuron'
             ],
             SYNAPSE_LIST = [
                 'synapse_keypoint',
+                'neuron_children',
                 'synapse_parent',
                 'synapse_ids',
                 'is_synapse'
             ],
+            NEURON_CHILDREN = _named_struct('neuron_children'),
             POINT_LIST = ['synapse_keypoint','neuron_keypoint'],
             LINK_LIST = ['synapse_parent','neuron_children'],
             LABEL_LIST = ['synapse_ids','neuron_ids'],
