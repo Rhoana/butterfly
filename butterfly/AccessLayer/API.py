@@ -86,6 +86,8 @@ class API(RequestHandler):
         # Get metadata for database
         files = self.RUNTIME.DB.FILE
         tables = self.RUNTIME.DB.TABLE
+        get_point = lambda p: getattr(files.POINT,p)
+        k_z,k_y,k_x = map(get_point, 'ZYX')
 
         # The database tables will not be needed
         if not len(in_list):
@@ -111,9 +113,9 @@ class API(RequestHandler):
             # If the request gets a keypoint    
             if feat in feats.POINT_LIST:
                 return {
-                    files.POINT.Z.NAME: result[files.POINT.Z.NAME],
-                    files.POINT.Y.NAME: result[files.POINT.Y.NAME],
-                    files.POINT.X.NAME: result[files.POINT.X.NAME]
+                    k_z.NAME: result[k_z.NAME],
+                    k_y.NAME: result[k_y.NAME],
+                    k_x.NAME: result[k_x.NAME]
                 }
 
         # Otherwise just inform the table needed
