@@ -4,9 +4,8 @@ import unqlite
 class Unqlite(Database):
 
     def __init__(self,path):
-        Database.__init__(self, path)
         # Create or load the database
-        self.db = unqlite.UnQLite(DBPATH)
+        self.db = unqlite.UnQLite(path)
 
     def get_by_function(self,function):
         Database.get_by_function(function)

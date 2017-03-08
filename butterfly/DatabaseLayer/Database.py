@@ -1,4 +1,4 @@
-class Database(object):
+class Database():
 
     def add_entry(self,dataset,entry):
         return ''

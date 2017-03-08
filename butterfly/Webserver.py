@@ -6,9 +6,9 @@ from tornado.ioloop import IOLoop
 
 class Webserver(object):
     maxbuffer = 1024 * 1024 * 150000
-    def __init__(self, **kwargs):
-        database = kwargs.get('dname','mongo')
-        self._core = Core(database)
+    def __init__(self, db, **kwargs):
+        # Create a core with a database
+        self._core = Core(db)
 
         app_in = {
             '_core': self._core

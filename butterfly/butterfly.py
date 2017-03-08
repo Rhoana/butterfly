@@ -1,5 +1,7 @@
 from Webserver import Webserver
 from toArgv import toArgv
+from Settings import *
+import DatabaseLayer
 import sys, argparse
 import logging
 
@@ -19,7 +21,13 @@ class Butterfly():
         port = args['port']
 
         logging.basicConfig(**self.log_info)
-        Webserver().start(port)
+
+        # Create a database of DB_TYPE at DB_PATH
+        db_class = getattr(DatabaseLayer,DB_TYPE)
+        db = db_class(DB_PATH)
+
+        # Start a webserver on given port
+        Webserver(db).start(port)
 
     def parseArgv(self, argv):
         sys.argv = argv
@@ -32,7 +40,7 @@ class Butterfly():
         }
 
         parser = argparse.ArgumentParser(description=help['bfly'])
-        parser.add_argument('port', type=int, nargs='?', default=2001, help=help['port'])
+        parser.add_argument('port', type=int, nargs='?', default=PORT, help=help['port'])
         parser.add_argument('-e','--exp', metavar='exp', help= help['folder'])
         parser.add_argument('-o','--out', metavar='out', help= help['save'])
         return vars(parser.parse_args())

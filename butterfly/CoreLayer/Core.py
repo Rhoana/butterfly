@@ -9,11 +9,10 @@ import zlib
 import cv2
 
 class Core(object):
-    DB_CLASS = Unqlite
 
-    def __init__(self, dname):
-        self._database = self.start_db(dname)
+    def __init__(self, db):
         self._cache = Cache()
+        self._db = db
 
     def start_db(self, dname):
         return self.DB_CLASS()
