@@ -19,6 +19,7 @@ class Butterfly():
 
         # keyword arguments
         self.INPUT = INPUT()
+        self.RUNTIME = RUNTIME()
         self.OUTPUT = OUTPUT()
 
         # Get the port
@@ -39,26 +40,37 @@ class Butterfly():
         # Create or open the database
         db_class = getattr(DatabaseLayer,DB_TYPE)
         db = db_class(DB_PATH)
-        # Open data in the BFLY_CONFIG
+        # Get keywords for the BFLY_CONFIG
         k_list = self.INPUT.METHODS.GROUP_LIST
         k_path = self.OUTPUT.INFO.PATH.NAME
         '''
-        Make a dictionary with
-            keys given by dataset path
-            values as lists of channel paths
+        Make a dictionary mapping channel paths to dataset paths
         '''
-        get_path = lambda l: l.get(k_path,'')
-        all_path = lambda l: map(get_path, l[k_list[3]])
-        new_dict = lambda l,p: {p: all_path(l)} if p else {}
-        join_dict = lambda a,l,p: dict(a, **new_dict(l, p))
-        get_L2 = lambda a,l: join_dict(a, l, l.get(k_path,''))
-        get_L1 = lambda a,l: reduce(get_L2, l[k_list[2]], a)
-        get_L0 = lambda a,l: reduce(get_L1, l[k_list[1]], a)
-        all_paths = reduce(get_L0, BFLY_CONFIG[k_list[0]], {})
-        print all_paths
+        pather = lambda l: l.get(k_path,'')
+        lister = lambda l,n: l.get(k_list[n],[])
+        mapper  = lambda l,p: {c:p for c in map(pather,l)}
+        join = lambda l,p,a: dict(mapper(l,p),**a) if p else a
+        get_L2 = lambda a,l: join(lister(l,3), pather(l), a)
+        get_L1 = lambda a,l: reduce(get_L2, lister(l,2), a)
+        get_L0 = lambda a,l: reduce(get_L1, lister(l,1), a)
+        all_paths = reduce(get_L0, lister(BFLY_CONFIG,0), {})
+
+        # Fill the database with content
+        return self.completeDB(db, all_paths)
+
+    # Add all colections and content to the database
+    def completeDB(self, db, all_paths):
+        # Get keywords for the database
+        k_path = self.RUNTIME.DB.TABLE.PATH.NAME
+
+        # Add paths to database
+        db.add_paths(all_paths)
+        # Add all needed tables to the database
+        db.add_tables(set(all_paths.values()))
+
+        # Begin adding neurons and synapses to database
+
         return db
-
-
 
     def parseArgv(self, argv):
         sys.argv = argv

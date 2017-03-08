@@ -164,6 +164,16 @@ class RUNTIME():
                 VALUE = MAX_CACHE_SIZE
             )
         )
+        # ALL THE DATABASE RUNTIME TERMS
+        self.DB = _nameless_struct(
+            TABLE = _nameless_struct(
+                NEURON = _named_struct('neuron'),
+                SYNAPSE = _named_struct('synapse'),
+                JOIN_LIST = ['neuron','synapse'],
+                PATH = _named_struct('path')
+            ),
+            JOIN = _named_struct('{}://{}')
+        )
         # ALL THE ERROR RUNTIME TERMS
         self.ERROR = _nameless_struct(
             TERM = _named_struct('term'),
