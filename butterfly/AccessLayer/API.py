@@ -85,7 +85,6 @@ class API(RequestHandler):
         feats = self.INPUT.FEATURES
         # Get metadata for database
         tables = self.RUNTIME.DB.TABLE
-        files = self.RUNTIME.DB.FILE
 
         # The database tables will not be needed
         if not len(in_list):
@@ -97,22 +96,37 @@ class API(RequestHandler):
         # Create database arguments
         d_args = [table_id,d_path]
         d_keys = dict()
-        # Check if the request just checks an ID
-        if feat in feats.BOOL_LIST:
-            if table_id == tables.NEURON.NAME:
-                # filter database by keywords
-                d_keys[files.NEURON.ID.NAME] = id_key
-            else:
-                d_args.append(id_key)
-            # Get the result from the database
-            result = self._db.get_entry(*d_args,**d_keys)
-            # Return first result if filtered
-            if len(d_keys) and len(result):
-                result = result[0]
-            return not not result
+
+        # Check if the request needs an id
+        if id_key is not None:
+            # Get the feature by the id
+            fargs = [id_key, d_args, d_keys]
+            result = self._get_feature_id(*fargs)
+
+            # If the request just checks an ID
+            if feat in feats.BOOL_LIST:
+                return not not result
 
         # Otherwise just inform the table needed
         return [table_id]
+
+    def _get_feature_id(self,id_key,d_args,d_keys):
+        # Get metadata for database
+        files = self.RUNTIME.DB.FILE
+        tables = self.RUNTIME.DB.TABLE
+        # Check if using the neuron table
+        if d_args[0] == tables.NEURON.NAME:
+            # filter database by keywords
+            d_keys[files.NEURON.ID.NAME] = id_key
+        else:
+            # filter by database key
+            d_args.append(id_key)
+        # Get the result from the database
+        result = self._db.get_entry(*d_args,**d_keys)
+        # Return first result if filtered
+        if len(d_keys) and len(result):
+            return result[0]
+        return result
 
     '''
     Lists values from config for group methods
