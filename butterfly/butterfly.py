@@ -77,9 +77,9 @@ class Butterfly():
     def addSynapseDB(self,dataset_path):
         # Get keywords for the database
         k_file = self.RUNTIME.DB.FILE.SYNAPSE.NAME
+        k_points = self.RUNTIME.DB.FILE.POINT.LIST
+        k_point = self.RUNTIME.DB.FILE.POINT.NAME
         k_nodes = self.RUNTIME.DB.FILE.SYNAPSE.NEURON_LIST
-        k_points = self.RUNTIME.DB.FILE.SYNAPSE.POINT.LIST
-        k_point = self.RUNTIME.DB.FILE.SYNAPSE.POINT.NAME
         k_synapse = self.RUNTIME.DB.TABLE.SYNAPSE.NAME
         # Get the full path to the synapse file
         full_path = os.path.join(dataset_path, k_file)
@@ -112,7 +112,7 @@ class Butterfly():
         # Get keywords for the database
         k_id = self.RUNTIME.DB.FILE.NEURON.ID.NAME
         k_nodes = self.RUNTIME.DB.FILE.SYNAPSE.NEURON_LIST
-        k_points = self.RUNTIME.DB.FILE.NEURON.POINT.LIST
+        k_points = self.RUNTIME.DB.FILE.POINT.LIST
         k_neuron = self.RUNTIME.DB.TABLE.NEURON.NAME
         # Get constant for id and first/second neurons
         k_id = self.RUNTIME.DB.TABLE.NEURON.NAME

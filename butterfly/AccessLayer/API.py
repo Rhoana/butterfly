@@ -84,6 +84,7 @@ class API(RequestHandler):
         # Get input keyword arguments
         feats = self.INPUT.FEATURES
         # Get metadata for database
+        files = self.RUNTIME.DB.FILE
         tables = self.RUNTIME.DB.TABLE
 
         # The database tables will not be needed
@@ -106,6 +107,14 @@ class API(RequestHandler):
             # If the request just checks an ID
             if feat in feats.BOOL_LIST:
                 return not not result
+
+            # If the request gets a keypoint    
+            if feat in feats.POINT_LIST:
+                return {
+                    files.POINT.Z.NAME: result[files.POINT.Z.NAME],
+                    files.POINT.Y.NAME: result[files.POINT.Y.NAME],
+                    files.POINT.X.NAME: result[files.POINT.X.NAME]
+                }
 
         # Otherwise just inform the table needed
         return [table_id]
