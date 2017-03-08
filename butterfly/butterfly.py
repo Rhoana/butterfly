@@ -19,20 +19,6 @@ Started Butterfly on port {port}
     begin_log = begin.replace('{port}',str(port))
     logging.info(begin_log)
 
-    # discovery for image data
-        ## Make an rh-config
-
-    ## connect to database
-
-    # discovery for database
-        ## From BFLY_CONFIG we look only into datasets.path for json files
-
-        ## check if new data is in file system
-        ## for this we need to check in the database for the dataset.path as keys
-
-    
-
-
     server = Webserver(port)
     return 0
 
