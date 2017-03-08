@@ -14,7 +14,7 @@ class Database():
         for key,value in all_paths.iteritems():
             self.add_one_path(key, value)
         # Save to disk
-        self.save_all()
+        self.commit()
         return ''
 
     # Must be overwritten
@@ -29,7 +29,7 @@ class Database():
         # Add all tables joined to paths
         map(self.add_each_table, paths)
         # Save to disk
-        self.save_all()
+        self.commit()
         return ''
 
     def add_each_table(self, path):
@@ -56,7 +56,7 @@ class Database():
             if isinstance(entry, dict):
                 self.add_one_entry(table, path, entry)
         # Save to disk
-        self.save_all()
+        self.commit()
         return ''
 
     # Must be overwritten
@@ -86,6 +86,6 @@ class Database():
     Interface for saving to disk
     '''
     # Must be overwritten
-    def save_all(self):
+    def commit(self):
         return ''
 

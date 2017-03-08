@@ -76,6 +76,6 @@ class Unqlite(Database):
     '''
     Overwrite saving interface
     '''
-    def save_all(self):
+    def commit(self):
         self.db.commit()
         return ''
