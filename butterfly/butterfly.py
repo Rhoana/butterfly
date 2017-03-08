@@ -17,17 +17,48 @@ class Butterfly():
     }
     def __init__(self,_argv):
 
+        # keyword arguments
+        self.INPUT = INPUT()
+        self.OUTPUT = OUTPUT()
+
+        # Get the port
         args = self.parseArgv(_argv)
         port = args['port']
 
+        # Start to write to log files
         logging.basicConfig(**self.log_info)
 
-        # Create a database of DB_TYPE at DB_PATH
-        db_class = getattr(DatabaseLayer,DB_TYPE)
-        db = db_class(DB_PATH)
+        # Populate the database
+        db = self.updateDB()
 
         # Start a webserver on given port
         Webserver(db).start(port)
+
+    # Update the database from the config file
+    def updateDB(self):
+        # Create or open the database
+        db_class = getattr(DatabaseLayer,DB_TYPE)
+        db = db_class(DB_PATH)
+        # Open data in the BFLY_CONFIG
+        k_list = self.INPUT.METHODS.GROUP_LIST
+        k_path = self.OUTPUT.INFO.PATH.NAME
+        '''
+        Make a dictionary with
+            keys given by dataset path
+            values as lists of channel paths
+        '''
+        get_path = lambda l: l.get(k_path,'')
+        all_path = lambda l: map(get_path, l[k_list[3]])
+        new_dict = lambda l,p: {p: all_path(l)} if p else {}
+        join_dict = lambda a,l,p: dict(a, **new_dict(l, p))
+        get_L2 = lambda a,l: join_dict(a, l, l.get(k_path,''))
+        get_L1 = lambda a,l: reduce(get_L2, l[k_list[2]], a)
+        get_L0 = lambda a,l: reduce(get_L1, l[k_list[1]], a)
+        all_paths = reduce(get_L0, BFLY_CONFIG[k_list[0]], {})
+        print all_paths
+        return db
+
+
 
     def parseArgv(self, argv):
         sys.argv = argv
