@@ -2,10 +2,11 @@ from itertools import ifilter
 
 # For all nameless keywords
 class _nameless_struct(object):
-    LIST = None
     VALUE = None
     def __init__(self,**_keywords):
-        all_list = []
+        # Begin making the list
+        all_list = _keywords.get('LIST',[])
+        # Add other keywords to list
         for key in _keywords:
             keyval = _keywords[key]
             setattr(self,key,keyval)

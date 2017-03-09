@@ -143,11 +143,15 @@ class RUNTIME():
         # ALL THE DATABASE RUNTIME TERMS
         self.DB = _nameless_struct(
             TABLE = _nameless_struct(
+                LIST = ['neuron', 'synapse'],
                 NEURON = _named_struct('neuron',
-                    KEY = _named_struct('neuron')
+                    KEY = _named_struct('neuron'),
+                    KEY_LIST = ['neuron']
                 ),
                 SYNAPSE = _named_struct('synapse',
-                    KEY = _named_struct('__id')
+                    KEY = _named_struct('__id'),
+                    NEURON_LIST = ['n1','n2'],
+                    KEY_LIST = ['n1','n2']
                 )
             ),
             FILE = _nameless_struct(

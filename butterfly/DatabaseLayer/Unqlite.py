@@ -25,11 +25,13 @@ class Unqlite(Database):
         return ''
 
     def add_one_entry(self, table, path, entry):
+        # Get constant keywords
+        k_table = self.RUNTIME.DB.TABLE[table].KEY_LIST
         Database.add_one_entry(self, table, path, entry)
         # Get the collection
         collect = self.get_table(table, path)
         # Check if not unique in collection
-        find_entry = {k: entry[k] for k in self._keys[table]}
+        find_entry = {k: entry[k] for k in k_table}
         already = self.get_entry(table,path,**find_entry)
         # Update value if already exists
         if len(already):

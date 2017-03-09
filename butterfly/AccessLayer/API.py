@@ -92,14 +92,14 @@ class API(RequestHandler):
         # Get metadata for database
         files = self.RUNTIME.DB.FILE
         tables = self.RUNTIME.DB.TABLE
-        k_nodes = files.SYNAPSE.NEURON_LIST
+        k_nodes = tables.SYNAPSE.NEURON_LIST
         # Get abreviatons for database variables
         get_point = lambda p: getattr(files.POINT,p)
         k_z,k_y,k_x = map(get_point, 'ZYX')
 
         # Check requests for neurons or synapses
         feat_checks = enumerate(['NEURON', 'SYNAPSE'])
-        check_in = lambda l: feat in getattr(feats,l+'_LIST')
+        check_in = lambda l: feat in feats[l+'_LIST']
         in_list =  [i for i,l in feat_checks if check_in(l)]
 
         # Need new table

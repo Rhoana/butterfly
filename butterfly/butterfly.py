@@ -79,12 +79,13 @@ class Butterfly():
         k_file = self.RUNTIME.DB.FILE.SYNAPSE.NAME
         k_points = self.RUNTIME.DB.FILE.POINT.LIST
         k_point = self.RUNTIME.DB.FILE.POINT.NAME
-        k_nodes = self.RUNTIME.DB.FILE.SYNAPSE.NEURON_LIST
+        k_nodes_in = self.RUNTIME.DB.FILE.SYNAPSE.NEURON_LIST
+        k_nodes_out = self.RUNTIME.DB.TABLE.SYNAPSE.NEURON_LIST
         k_synapse = self.RUNTIME.DB.TABLE.SYNAPSE.NAME
         # Get the full path to the synapse file
         full_path = os.path.join(dataset_path, k_file)
         # List all the syapse database keys
-        k_keys = k_nodes+k_points
+        k_keys = k_nodes_out + k_points
         # For output file
         synapes_dicts = []
 
@@ -96,7 +97,7 @@ class Butterfly():
             get_point = lambda p: all_json[k_point][p]
             # Transpose the list of all synapses
             center = map(get_point, k_points)
-            link0, link1 = map(get_node, k_nodes)
+            link0, link1 = map(get_node, k_nodes_in)
             synapse_list = zip(link0,link1, *center)
             # Get a list of dictionaries for all synapses
             get_dict = lambda s: dict(zip(k_keys,s))
@@ -110,8 +111,8 @@ class Butterfly():
 
     def addNeuronDB(self,dataset_path,synapse_dicts):
         # Get keywords for the database
-        k_id = self.RUNTIME.DB.FILE.NEURON.ID.NAME
-        k_nodes = self.RUNTIME.DB.FILE.SYNAPSE.NEURON_LIST
+        k_id = self.RUNTIME.DB.TABLE.NEURON.KEY.NAME
+        k_nodes = self.RUNTIME.DB.TABLE.SYNAPSE.NEURON_LIST
         k_points = self.RUNTIME.DB.FILE.POINT.LIST
         k_neuron = self.RUNTIME.DB.TABLE.NEURON.NAME
         # Get constant for id and first/second neurons

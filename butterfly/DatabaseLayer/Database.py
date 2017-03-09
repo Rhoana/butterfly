@@ -5,13 +5,6 @@ class Database():
     def __init__(self, path):
         # Get the database keywords
         self.RUNTIME = RUNTIME()
-        files = self.RUNTIME.DB.FILE
-        tables = self.RUNTIME.DB.TABLE
-        # Set some unique keys
-        self._keys = {
-            tables.NEURON.NAME: files.NEURON.LIST,
-            tables.SYNAPSE.NAME: files.SYNAPSE.NEURON_LIST
-        }
 
     '''
     Interface for adding paths
@@ -87,7 +80,6 @@ class Database():
 
     def get_entry(self, table, path, key=None, **keywords):
         # Get the necessary keywords
-        files = self.RUNTIME.DB.FILE
         tables = self.RUNTIME.DB.TABLE
         # Use key if no keywords
         if not len(keywords):
