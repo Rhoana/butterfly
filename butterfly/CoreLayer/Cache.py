@@ -1,7 +1,7 @@
 import sys
 import logging
 import collections
-from Settings import *
+from UtilityLayer import *
 
 class Cache(object):
     RUNTIME = RUNTIME()

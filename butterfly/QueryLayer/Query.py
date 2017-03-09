@@ -1,6 +1,6 @@
 from mimetypes import types_map
 from urllib2 import URLError
-from Settings import *
+from UtilityLayer import *
 import numpy as np
 import logging
 

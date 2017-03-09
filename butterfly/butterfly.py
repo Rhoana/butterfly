@@ -1,6 +1,5 @@
+from UtilityLayer import *
 from Webserver import Webserver
-from toArgv import toArgv
-from Settings import *
 import DatabaseLayer
 import sys, argparse
 import logging

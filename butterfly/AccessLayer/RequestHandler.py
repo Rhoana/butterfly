@@ -1,8 +1,8 @@
 import logging
-from Settings import *
 from tornado import web
 from tornado import gen
 from urllib2 import URLError
+from UtilityLayer import *
 from concurrent.futures import ThreadPoolExecutor
 
 class RequestHandler(web.RequestHandler):
