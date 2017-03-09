@@ -238,7 +238,9 @@ class RestAPIHandler(RequestHandler):
             tifffile.imsave(output, tiffvol)
             content = output.getvalue()
         else:
-            content = cv2.imencode("." + fmt, vol)[1].tostring()
+            if vol.dtype.itemsize == 4:
+                vol = vol.view(np.uint8).reshape(vol.shape[0], vol.shape[1], 4)
+            content = cv2.imencode(  "." + fmt, vol)[1].tostring()
 
         self.write(content)
 
