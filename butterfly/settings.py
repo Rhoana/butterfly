@@ -25,7 +25,8 @@ IMAGE_RESIZE_METHOD = \
     cv2.INTER_LINEAR
 
 # Output settings
-DEFAULT_OUTPUT = '.png'
+DEFAULT_OUTPUT = 'png'
+DEFAULT_VIEW = 'grayscale'
 # Using cv2 - please check if supported before adding!
 SUPPORTED_IMAGE_FORMATS = ('png', 'jpg', 'jpeg', 'tiff', 'tif', 'bmp', 'zip')
 SUPPORTED_IMAGE_VIEWS = ('grayscale','colormap','rgb')

@@ -31,6 +31,7 @@ setup(
         "h5py>=2.6.0",
         "tornado>=4.3",
         "scipy>=0.16.0",
+        "tifffile>=0.10.0",
         "rh_logger>=2.0.0",
         "rh_config>=1.0.0"
     ],

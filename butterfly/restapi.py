@@ -1,9 +1,10 @@
 from tornado.web import RequestHandler
 from urllib2 import HTTPError
+import tifffile
 import numpy as np
 import StringIO
-import json
 import zlib
+import json
 import cv2
 
 import rh_logger
@@ -185,8 +186,8 @@ class RestAPIHandler(RequestHandler):
             'msg' : "Missing %s parameter" % qparam
         })
 
-    def _get_list_query_argument(self, qparam, whitelist):
-        result = self.get_query_argument(qparam, whitelist[0])
+    def _get_list_query_argument(self, qparam, default, whitelist):
+        result = self.get_query_argument(qparam, default)
         return self._match_condition(result, {
             'condition': result not in whitelist,
             'msg': "The %s must be one of %s." % (qparam, whitelist)
@@ -202,24 +203,39 @@ class RestAPIHandler(RequestHandler):
 
     def get_data(self):
         channel = self._get_channel_config()
+        dtype = channel[self.DATA_TYPE]
+
+        defaultFormat = settings.DEFAULT_OUTPUT
+        defaultView = settings.DEFAULT_VIEW
+        views = settings.SUPPORTED_IMAGE_VIEWS
+        formats = settings.SUPPORTED_IMAGE_FORMATS
+
+        fmt = self._get_list_query_argument(self.Q_FORMAT, defaultFormat, formats)
+        if 'float' not in dtype and 'uint8' not in dtype:
+            if fmt in ['png']:
+                defaultView = 'colormap'
+
         x = self._get_int_necessary_param(self.Q_X)
         y = self._get_int_necessary_param(self.Q_Y)
         z = self._get_int_necessary_param(self.Q_Z)
         width = self._get_int_necessary_param(self.Q_WIDTH)
         height = self._get_int_necessary_param(self.Q_HEIGHT)
         resolution = self._get_int_query_argument(self.Q_RESOLUTION)
-        fmt = self._get_list_query_argument(self.Q_FORMAT, settings.SUPPORTED_IMAGE_FORMATS)
-        view = self._get_list_query_argument(self.Q_VIEW, settings.SUPPORTED_IMAGE_VIEWS)
+        view = self._get_list_query_argument(self.Q_VIEW, defaultView, views)
 
-        dtype = getattr(np, channel[self.DATA_TYPE])
         slice_define = [channel[self.PATH], [x, y, z], [width, height, 1]]
         rh_logger.logger.report_event("Encoding image as dtype %s" % repr(dtype))
-        vol = self.core.get(*slice_define, w=resolution, dtype=dtype, view=view)
+        vol = self.core.get(*slice_define, w=resolution, view=view)
         self.set_header("Content-Type", "image/"+fmt)
         if fmt in ['zip']:
             output = StringIO.StringIO()
-            volstring = vol.transpose(1,0,2).astype(np.uint32).tostring('F')
+            volstring = vol[:,:,0].T.astype(np.uint32).tostring('F')
             output.write(zlib.compress(volstring))
+            content = output.getvalue()
+        elif fmt in ['tif','tiff']:
+            output = StringIO.StringIO()
+            tiffvol = vol[:,:,0].astype(np.uint32)
+            tifffile.imsave(output, tiffvol)
             content = output.getvalue()
         else:
             if vol.dtype.itemsize == 4:
@@ -230,6 +246,4 @@ class RestAPIHandler(RequestHandler):
 
     def get_mask(self):
         # TODO: implement this
-        raise HTTPError(self.request.uri, 501,
-                        "The server does not yet support /api/mask requests",
-                        [], None)
+        raise HTTPError(self.request.uri, 501, "The server does not yet support /api/mask requests", [], None)

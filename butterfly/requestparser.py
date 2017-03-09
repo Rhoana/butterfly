@@ -13,7 +13,7 @@ class RequestParser(object):
 
         # Optional queries
         self.optional_queries = {}
-        self.optional_query_list = ('segmentation', 'segcolor', 'fit', 'synapse')
+        self.optional_query_list = ('segcolor', 'fit')
         self.assent_list = settings.ASSENT_LIST
 
         # Set these to false in case we use OCP format or some other format
@@ -57,7 +57,7 @@ class RequestParser(object):
                 if self.output_format == 'xy':
                     # Match OCP's image cutout service, use default image
                     # format
-                    self.output_format = '.png'
+                    self.output_format = 'png'
             except IndexError:
                 # Convert index errors in OCP format to key errors of the
                 # standard query
