@@ -73,6 +73,7 @@ class INPUT():
                 'synapse_ids',
                 'is_synapse'
             ],
+            SYNAPSE_LINKS = _named_struct('synapse_parent'),
             NEURON_CHILDREN = _named_struct('neuron_children'),
             POINT_LIST = ['synapse_keypoint','neuron_keypoint'],
             LINK_LIST = ['synapse_parent','neuron_children'],
@@ -171,6 +172,7 @@ class RUNTIME():
                 NEURON = _named_struct('neuron'),
                 SYNAPSE = _named_struct('synapse'),
                 JOIN_LIST = ['neuron','synapse'],
+                KEY_LIST = ['neuron','__id'],
                 PATH = _named_struct('path')
             ),
             FILE = _nameless_struct(
@@ -178,7 +180,8 @@ class RUNTIME():
                     ID = _named_struct('neuron')
                 ),
                 SYNAPSE = _named_struct('synapse-connections.json',
-                    NEURON_LIST = ['neuron_1','neuron_2']
+                    NEURON_LIST = ['neuron_1','neuron_2'],
+                    ID = _named_struct('__id')
                 ),
                 POINT  = _named_struct('synapse_center',
                     X = _named_struct('x'),

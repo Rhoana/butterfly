@@ -9,12 +9,12 @@ class Unqlite(Database):
         Database.__init__(self, path)
 
     '''
-    Overwirting interface Setters
+    Overwriting interface Setters
     '''
 
-    def add_one_path(self,key,value):
-        Database.add_one_path(self, key, value)
-        self.db[key] = value
+    def add_one_path(self,c_path,d_path):
+        Database.add_one_path(self, c_path, d_path)
+        self.db[c_path] = d_path
         return ''
 
     def add_one_table(self, table, path):
@@ -32,50 +32,34 @@ class Unqlite(Database):
         return ''
 
     '''
-    Custom Getters for Unqlite
-    '''
-
-    def get_by_key(self, table, path, key):
-        # Get the entry from the collection
-        collect = self.get_table(table, path)
-        return collect.fetch(int(key))
-
-    def get_by_function(self, table, path, function):
-        # Get the entry from the collection
-        collect = self.get_table(table, path)
-        return collect.filter(function)
-
-    def make_filter(self, **keys):
-        values = lambda e: map(e.get, keys.keys())
-        return lambda e: values(e) == keys.values()
-
-    '''
     Override interface Getters
     '''
-
-    def get_path(self,key):
-        Database.get_path(self, key)
-        return self.db[key]
+    def get_path(self, path):
+        Database.get_path(self, path)
+        return self.db[path] if path in self.db else path
 
     def get_table(self, table, path):
         table_path = Database.get_table(self, table, path)
         return self.db.collection(table_path)
 
-    def get_entry(self, table, path, key='', **keywords):
-        Database.get_entry(self, table, path, key, **keywords)
-        # Filter by keywords if keywords
-        if len(keywords):
-            check = self.make_filter(**keywords)
-            return self.get_by_function(table, path, check)
-        # Filter by filter function if callable
-        if callable(key):
-            return self.get_by_function(table, path, key)
-        # Assume key can convert to integer
-        return self.get_by_key(table, path, key)
+    def get_all(self, table, path):
+        collect = Database.get_all(self, table, path)
+        return collect.all()
+
+    def get_by_key(self, table, path, key):
+        collect = Database.get_by_key(self, table, path, key)
+        # Get the entry from the collection
+        return collect.fetch(int(key))
+
+    def get_by_fun(self, table, path, fun):
+        collect = Database.get_by_fun(self, table, path, fun)
+        # Get the entry from the collection
+        return collect.filter(fun)
 
     '''
     Overwrite saving interface
     '''
     def commit(self):
+        Database.commit(self)
         self.db.commit()
         return ''

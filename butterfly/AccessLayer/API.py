@@ -53,6 +53,9 @@ class API(RequestHandler):
         in_info = self.INPUT.INFO
         methods = self.INPUT.METHODS
         feats = self.INPUT.FEATURES
+        # Create empty parameters
+        id_key = None
+        bounds = []
 
         # Get all the channel info
         meta_info = self._get_group_dict('')
@@ -60,66 +63,76 @@ class API(RequestHandler):
         out_format = self._get_list_query(in_info.FORMAT)
         # Get the name of the feature to load from db
         feat = self._get_list_query(feats)
-        # Check for all features that take an id
-        need_id = feats.LINK_LIST + feats.POINT_LIST + feats.BOOL_LIST
-        id_key = self._get_int_query(in_info.ID) if need_id else None
-        # Check requests for neurons or synapses
-        feat_checks = enumerate(['NEURON', 'SYNAPSE'])
-        check_in = lambda l: feat in getattr(feats,l+'_LIST')
-        in_list =  [i for i,l in feat_checks if check_in(l)]
         # Get the channel pathname
-        channel_path = meta_info[info.PATH.NAME]
-        # Get ready to get features
-        fargs = [feat, id_key, in_list, channel_path]
+        path = meta_info[info.PATH.NAME]
+        # Check for all features that take an id
+        if feat not in feats.LABEL_LIST:
+            id_key = self._get_int_query(in_info.ID)
+        # Check for all features that need bounds
+        if feat in feats.VOXEL_LIST + feats.LABEL_LIST:
+            # get integers from POSITION
+            for key in ['X','Y','Z','WIDTH','HEIGHT','DEPTH']:
+                term = getattr(self.INPUT.POSITION, key)
+                bounds.append(self._get_int_query(term))
+
+        # Get all the information based on feature parameter
+        feature_list = self._get_feature_list(feat, id_key, bounds, path)
 
         # Return an infoquery
         return InfoQuery(**{
-            info.NAMES.NAME: self._get_feature_list(*fargs),
             methods.NAME: methods.FEAT.NAME,
             in_info.FORMAT.NAME: out_format,
-            info.PATH.NAME: channel_path
+            info.NAMES.NAME: feature_list,
+            info.PATH.NAME: path
         })
 
-    def _get_feature_list(self,feat,id_key,in_list,c_path):
+    def _get_feature_list(self, feat, id_key, bounds, path):
         # Get input keyword arguments
         feats = self.INPUT.FEATURES
         # Get metadata for database
         files = self.RUNTIME.DB.FILE
         tables = self.RUNTIME.DB.TABLE
         k_nodes = files.SYNAPSE.NEURON_LIST
+        # Get abreviatons for database variables
         get_point = lambda p: getattr(files.POINT,p)
         k_z,k_y,k_x = map(get_point, 'ZYX')
 
-        # The database tables will not be needed
+        # Check requests for neurons or synapses
+        feat_checks = enumerate(['NEURON', 'SYNAPSE'])
+        check_in = lambda l: feat in getattr(feats,l+'_LIST')
+        in_list =  [i for i,l in feat_checks if check_in(l)]
+
+        # Need new table
         if not len(in_list):
             return ['Voxel List not Supported yet']
         # We'll need the dataset path and table
-        d_path = self._db.get_path(c_path)
-        table_id = tables.JOIN_LIST[in_list[0]]
+        table = tables.JOIN_LIST[in_list[0]]
+        # Let's find the primary key as well
+        main_key = tables.KEY_LIST[in_list[0]]
+        get_main = lambda s: s[main_key]
 
-        # Create database arguments
-        d_args = [table_id,d_path]
-
-        # Check if the request needs an id
+        # Features requiring ID
         if id_key is not None:
 
             # Find all synapses where neuron is parent
             if feat == feats.NEURON_CHILDREN.NAME:
-                result = self._get_db(d_args, **{
+                result = self._db.get_entry(table, path, **{
                     k_nodes[0]: id_key
                 })
-                return result
+                return map(get_main, result)
 
-            # Default to get feature by the id
-            result = self._get_db(d_args, id_key)
-
-            # All below use the only or first result
+            # The next features use the same single result
+            result = self._db.get_entry(table, path, id_key)
             if isinstance(result, list) and len(result):
                 result = result[0]
 
             # If the request just checks an ID
             if feat in feats.BOOL_LIST:
                 return not not result
+
+            # The next features return if not result
+            if not result:
+                return {}
 
             # If the request gets a keypoint    
             if feat in feats.POINT_LIST:
@@ -129,28 +142,27 @@ class API(RequestHandler):
                     k_x.NAME: result[k_x.NAME]
                 }
 
-        # Otherwise just inform the table needed
-        return [table_id]
+            # If the request asks for all links
+            if feat == feats.SYNAPSE_LINKS.NAME:
+                return {
+                    main_key: result[main_key],
+                    k_nodes[0]: result[k_nodes[0]],
+                    k_nodes[1]: result[k_nodes[1]]
+                }
 
-    def _get_db(self,d_args,id_key=None,**d_keys):
-        # Get metadata for database
-        files = self.RUNTIME.DB.FILE
-        tables = self.RUNTIME.DB.TABLE
-        # Use the id if no filter specified
-        if not len(d_keys):
-            # If no id specified, get all data
-            if id_key is None:
-                return self._db.get_table(*d_args).all()
-            # Check if using the neuron table
-            if d_args[0] == tables.NEURON.NAME:
-                # filter database by keywords
-                d_keys[files.NEURON.ID.NAME] = id_key
-            else:
-                # get by database key
-                d_args.append(id_key)
-        # Get the result from the database
-        result = self._db.get_entry(*d_args,**d_keys)
-        return result
+        # Find labels in bounds
+        if feat in feats.LABEL_LIST and len(bounds):
+            start = np.uint32(bounds[:3])
+            end = start + bounds[3:]
+            # Find the centerpoints within the bounds
+            inbounds = lambda c: all(c>start) and all(c<end)
+            center = lambda s: map(s.get, files.POINT.LIST)
+            center_bound = lambda s: inbounds(center(s))
+            result = self._db.get_entry(table, path, center_bound)
+            return map(get_main, result)
+
+        # Features not yet supported
+        return [table]
 
     '''
     Lists values from config for group methods

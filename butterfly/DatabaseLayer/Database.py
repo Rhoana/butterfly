@@ -11,14 +11,14 @@ class Database():
     '''
 
     def add_paths(self, all_paths):
-        for key,value in all_paths.iteritems():
-            self.add_one_path(key, value)
+        for c_path,d_path in all_paths.iteritems():
+            self.add_one_path(c_path, d_path)
         # Save to disk
         self.commit()
         return ''
 
     # Must be overwritten
-    def add_one_path(self, key, value):
+    def add_one_path(self, c_path, d_path):
         return ''
 
     '''
@@ -69,18 +69,52 @@ class Database():
     '''
 
     # Must be overwritten
-    def get_path(self, key):
-        return ''
+    def get_path(self, path):
+        return path
 
     # Must be overwritten
     def get_table(self, table, path):
+        real_path = self.get_path(path)
         k_join = self.RUNTIME.DB.JOIN.NAME
-        return k_join.format(table, path)
+        return k_join.format(table, real_path)
+
+    def get_entry(self, table, path, key=None, **keywords):
+        # Get the necessary keywords
+        files = self.RUNTIME.DB.FILE
+        tables = self.RUNTIME.DB.TABLE
+        # Use key if no keywords
+        if not len(keywords):
+            # Return all if no key
+            if key is None:
+                return self.get_all(table, path)
+            # Filter by filter fun if callable
+            if callable(key):
+                return self.get_by_fun(table, path, key)
+            # Filter by a secondary key
+            if table == tables.NEURON.NAME:
+                keywords[files.NEURON.ID.NAME] = key
+            # Treat the key as the primary key
+            else:
+                return self.get_by_key(table, path, key)
+        # Filter the database by keywords
+        return self.get_by_keywords(table, path, **keywords)
 
     # Must be overwritten
-    def get_entry(self, table, path, key, **keywords):
-        k_join = self.RUNTIME.DB.JOIN.NAME
-        return k_join.format(table, path)
+    def get_all(self, table, path):
+        return self.get_table(table, path)
+
+    # Must be overwritten
+    def get_by_key(self, table, path, key):
+        return  self.get_table(table, path)
+
+    # Must be overwritten
+    def get_by_fun(self, table, path, fun):
+        return  self.get_table(table, path)
+
+    def get_by_keywords(self, table, path, **keys):
+        values = lambda e: map(e.get, keys.keys())
+        getter = lambda e: values(e) == keys.values()
+        return self.get_by_fun(table, path, getter)
 
     '''
     Interface for saving to disk
