@@ -1,13 +1,12 @@
+from mimetypes import types_map
 from urllib2 import URLError
 from Settings import *
 import numpy as np
 import logging
 
 class Query():
-    content_types = [
-        'application/{fmt}',
-        'image/{fmt}'
-    ]
+
+    basic_mime = 'text/plain'
 
     def __init__(self,*args,**keywords):
         self.INPUT = INPUT()
@@ -30,6 +29,12 @@ class Query():
     def is_data(self):
         image_methods = self.INPUT.METHODS.IMAGE_LIST
         return self.INPUT.METHODS.VALUE in image_methods
+
+    @property
+    def mime_type(self):
+        file_type = self.INPUT.INFO.FORMAT.VALUE
+        basic_mime = self.basic_mime.format(file_type)
+        return types_map.get('.'+file_type, basic_mime)
 
     def update_source(self, keywords):
         # take named keywords

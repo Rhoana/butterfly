@@ -31,12 +31,6 @@ class InfoQuery(Query):
         return self.INPUT.INFO.FORMAT.LIST.index(fmt_val)
 
     @property
-    def content_type(self):
-        content = self.INPUT.INFO.FORMAT.VALUE
-        content = 'json' if content == 'yaml' else content
-        return self.content_types[0].replace('{fmt}', content)
-
-    @property
     def result(self):
         info_out = self.OUTPUT.INFO
         methods = self.INPUT.METHODS

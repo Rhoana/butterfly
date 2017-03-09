@@ -4,6 +4,8 @@ import logging
 
 class DataQuery(Query):
 
+    basic_mime = 'image/{}'
+
     def __init__(self,*args,**keywords):
         Query.__init__(self, **keywords)
 
@@ -27,13 +29,6 @@ class DataQuery(Query):
     def dtype(self):
         dtype = self.OUTPUT.INFO.TYPE.VALUE
         return getattr(np,dtype, np.uint8)
-
-    @property
-    def content_type(self):
-        img_format = self.INPUT.IMAGE.FORMAT
-        is_img = img_format.VALUE not in img_format.ZIP_LIST
-        content_type = self.content_types[is_img]
-        return content_type.replace('{fmt}', img_format.VALUE)
 
     @property
     def scales(self):

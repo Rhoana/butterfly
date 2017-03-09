@@ -32,7 +32,7 @@ class RequestHandler(web.RequestHandler):
             # Get error information
             details = u_error.args[0]
             self.set_status(int(details.get('http',500)))
-            self.set_header('Content-Type', "text/plain")
+            self.set_header('Content-Type', 'text/plain')
             self.write(self.log(details))
 
     def check(self, _query):
@@ -40,7 +40,7 @@ class RequestHandler(web.RequestHandler):
 
     def handle(self, _query):
         this_method = _query.INPUT.METHODS.VALUE
-        self.set_header('Content-Type',_query.content_type)
+        self.set_header('Content-Type',_query.mime_type)
         if _query.is_data:
             content = self._core.get_data(_query)
         else:
