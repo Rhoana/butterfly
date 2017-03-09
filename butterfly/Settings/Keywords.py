@@ -151,12 +151,8 @@ class RUNTIME():
                 )
             ),
             FILE = _nameless_struct(
-                NEURON = _nameless_struct(
-                    ID = _named_struct('neuron')
-                ),
                 SYNAPSE = _named_struct('synapse-connections.json',
                     NEURON_LIST = ['neuron_1','neuron_2'],
-                    ID = _named_struct('__id')
                 ),
                 POINT  = _named_struct('synapse_center',
                     X = _named_struct('x'),

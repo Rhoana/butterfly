@@ -34,6 +34,6 @@ def pad_lists(lists):
 line_lists = map(class2yaml, '012')
 char_ar = pad_lists(line_lists)
 
-with open('Settings.csv', 'w') as outfile:
+with open('Keywords.txt', 'w') as outfile:
     padded_lists = char_ar.ljust(char_ar.itemsize, ' ')
     np.savetxt(outfile, padded_lists, **np_setup)

@@ -99,7 +99,7 @@ class Database():
                 return self.get_by_fun(table, path, key)
             # Filter by a secondary key
             if table == tables.NEURON.NAME:
-                keywords[files.NEURON.ID.NAME] = key
+                keywords[tables.NEURON.KEY.NAME] = key
             # Treat the key as the primary key
             else:
                 return self.get_by_key(table, path, key)
