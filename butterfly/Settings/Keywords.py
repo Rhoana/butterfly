@@ -1,32 +1,6 @@
-from settings import MAX_CACHE_SIZE
-import cv2
-import os
-
-# FOR ALL NAMELESS KEYWORDS
-class _nameless_struct():
-    LIST = None
-    VALUE = None
-    def __init__(self,**_keywords):
-
-        alls = []
-        for key in _keywords:
-            keyval = _keywords[key]
-            setattr(self,key,keyval)
-            # PUT ALL LISTS INTO LIST
-            more = keyval if type(keyval) is list else []
-            # PUT ALL TERM NAMES INTO LIST
-            if hasattr(keyval, 'NAME'):
-                more = [keyval.NAME]
-            alls += more
-        if len(alls):
-            self.LIST = sorted(set(alls),key=alls.index)
-
-# FOR ALL KEYWORDS WITH NAMES
-class _named_struct(_nameless_struct):
-    NAME = None
-    def __init__(self,_name,**_keywords):
-        _nameless_struct.__init__(self, **_keywords)
-        self.NAME = _name
+from Settings import MAX_CACHE_SIZE
+from Structures import _nameless_struct
+from Structures import _named_struct
 
 # Query params for grouping
 _experiments = 'experiments'
@@ -61,6 +35,20 @@ class INPUT():
         )
         # ALL THE FEATURE NAMES
         self.FEATURES = _named_struct( 'feature',
+            NEURON_LIST = [
+                'neuron_keypoint',
+                'neuron_ids',
+                'is_neuron'
+            ],
+            SYNAPSE_LIST = [
+                'synapse_keypoint',
+                'neuron_children',
+                'synapse_parent',
+                'synapse_ids',
+                'is_synapse'
+            ],
+            SYNAPSE_LINKS = _named_struct('synapse_parent'),
+            NEURON_CHILDREN = _named_struct('neuron_children'),
             POINT_LIST = ['synapse_keypoint','neuron_keypoint'],
             LINK_LIST = ['synapse_parent','neuron_children'],
             LABEL_LIST = ['synapse_ids','neuron_ids'],
@@ -151,6 +139,32 @@ class RUNTIME():
             MAX = _named_struct('max-cache-size',
                 VALUE = MAX_CACHE_SIZE
             )
+        )
+        # ALL THE DATABASE RUNTIME TERMS
+        self.DB = _nameless_struct(
+            TABLE = _nameless_struct(
+                LIST = ['neuron', 'synapse'],
+                NEURON = _named_struct('neuron',
+                    KEY = _named_struct('neuron'),
+                    KEY_LIST = ['neuron']
+                ),
+                SYNAPSE = _named_struct('synapse',
+                    KEY = _named_struct('__id'),
+                    NEURON_LIST = ['n1','n2'],
+                    KEY_LIST = ['n1','n2']
+                )
+            ),
+            FILE = _nameless_struct(
+                SYNAPSE = _named_struct('synapse-connections.json',
+                    NEURON_LIST = ['neuron_1','neuron_2'],
+                ),
+                POINT  = _named_struct('synapse_center',
+                    X = _named_struct('x'),
+                    Y = _named_struct('y'),
+                    Z = _named_struct('z')
+                )
+            ),
+            JOIN = _named_struct('{}://{}')
         )
         # ALL THE ERROR RUNTIME TERMS
         self.ERROR = _nameless_struct(
