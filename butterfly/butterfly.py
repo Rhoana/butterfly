@@ -75,17 +75,19 @@ class Butterfly():
         return self._db
 
     def addSynapseDB(self,dataset_path):
-        # Get keywords for the database
+        # Get keywords for input file
         k_file = self.RUNTIME.DB.FILE.SYNAPSE.NAME
-        k_points = self.RUNTIME.DB.FILE.POINT.LIST
-        k_point = self.RUNTIME.DB.FILE.POINT.NAME
+        k_point = self.RUNTIME.DB.FILE.SYNAPSE.POINT.NAME
+        k_points_in = self.RUNTIME.DB.FILE.SYNAPSE.POINT.LIST
         k_nodes_in = self.RUNTIME.DB.FILE.SYNAPSE.NEURON_LIST
+        # Get keywords for the database
+        k_points_out = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
         k_nodes_out = self.RUNTIME.DB.TABLE.SYNAPSE.NEURON_LIST
         k_synapse = self.RUNTIME.DB.TABLE.SYNAPSE.NAME
         # Get the full path to the synapse file
         full_path = os.path.join(dataset_path, k_file)
         # List all the syapse database keys
-        k_keys = k_nodes_out + k_points
+        k_keys = k_nodes_out + k_points_out
         # For output file
         synapes_dicts = []
 
@@ -96,7 +98,7 @@ class Butterfly():
             get_node = lambda n: all_json[n]
             get_point = lambda p: all_json[k_point][p]
             # Transpose the list of all synapses
-            center = map(get_point, k_points)
+            center = map(get_point, k_points_in)
             link0, link1 = map(get_node, k_nodes_in)
             synapse_list = zip(link0,link1, *center)
             # Get a list of dictionaries for all synapses
@@ -111,12 +113,11 @@ class Butterfly():
 
     def addNeuronDB(self,dataset_path,synapse_dicts):
         # Get keywords for the database
-        k_id = self.RUNTIME.DB.TABLE.NEURON.KEY.NAME
         k_nodes = self.RUNTIME.DB.TABLE.SYNAPSE.NEURON_LIST
-        k_points = self.RUNTIME.DB.FILE.POINT.LIST
+        k_points = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
         k_neuron = self.RUNTIME.DB.TABLE.NEURON.NAME
         # Get constant for id and first/second neurons
-        k_id = self.RUNTIME.DB.TABLE.NEURON.NAME
+        k_id = self.RUNTIME.DB.TABLE.NEURON.KEY.NAME
 
         # Get neuron from synapse
         get_n = [

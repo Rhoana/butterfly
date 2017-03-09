@@ -152,16 +152,17 @@ class RUNTIME():
                     KEY = _named_struct('__id'),
                     NEURON_LIST = ['n1','n2'],
                     KEY_LIST = ['n1','n2']
+                ),
+                ALL = _nameless_struct(
+                    POINT_LIST = ['z','y','x']
                 )
             ),
             FILE = _nameless_struct(
                 SYNAPSE = _named_struct('synapse-connections.json',
                     NEURON_LIST = ['neuron_1','neuron_2'],
-                ),
-                POINT  = _named_struct('synapse_center',
-                    X = _named_struct('x'),
-                    Y = _named_struct('y'),
-                    Z = _named_struct('z')
+                    POINT  = _named_struct('synapse_center',
+                        LIST = ['z','y','x']
+                    )
                 )
             ),
             JOIN = _named_struct('{}://{}')

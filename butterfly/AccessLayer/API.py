@@ -71,7 +71,7 @@ class API(RequestHandler):
         # Check for all features that need bounds
         if feat in feats.VOXEL_LIST + feats.LABEL_LIST:
             # get integers from POSITION
-            for key in ['X','Y','Z','WIDTH','HEIGHT','DEPTH']:
+            for key in ['Z','Y','X','DEPTH','HEIGHT','WIDTH']:
                 term = getattr(self.INPUT.POSITION, key)
                 bounds.append(self._get_int_query(term))
 
@@ -90,12 +90,8 @@ class API(RequestHandler):
         # Get input keyword arguments
         feats = self.INPUT.FEATURES
         # Get metadata for database
-        files = self.RUNTIME.DB.FILE
         tables = self.RUNTIME.DB.TABLE
         k_nodes = tables.SYNAPSE.NEURON_LIST
-        # Get abreviatons for database variables
-        get_point = lambda p: getattr(files.POINT,p)
-        k_z,k_y,k_x = map(get_point, 'ZYX')
 
         # Check requests for neurons or synapses
         feat_checks = enumerate(['NEURON', 'SYNAPSE'])
@@ -110,6 +106,8 @@ class API(RequestHandler):
         # Let's find the primary key as well
         main_key = tables[table].KEY.NAME
         get_main = lambda s: s[main_key]
+        # Get abreviatons for database variables
+        k_z,k_y,k_x = tables.ALL.POINT_LIST
 
         # Features requiring ID
         if id_key is not None:
@@ -156,7 +154,7 @@ class API(RequestHandler):
             end = start + bounds[3:]
             # Find the centerpoints within the bounds
             inbounds = lambda c: all(c>start) and all(c<end)
-            center = lambda s: map(s.get, files.POINT.LIST)
+            center = lambda s: map(s.get, [k_z,k_y,k_x])
             center_bound = lambda s: inbounds(center(s))
             result = self._db.get_entry(table, path, center_bound)
             return map(get_main, result)
@@ -226,7 +224,7 @@ class API(RequestHandler):
             terms[term.NAME] = self._get_list_query(term)
 
         # get integers from POSITION
-        for key in ['X','Y','Z','WIDTH','HEIGHT','DEPTH']:
+        for key in ['Z','Y','X','DEPTH','HEIGHT','WIDTH']:
             term = getattr(self.INPUT.POSITION, key)
             terms[term.NAME] = self._get_int_query(term)
 
