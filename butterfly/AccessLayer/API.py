@@ -135,17 +135,17 @@ class API(RequestHandler):
             # If the request gets a keypoint    
             if feat in feats.POINT_LIST:
                 return {
-                    k_z.NAME: result[k_z.NAME],
-                    k_y.NAME: result[k_y.NAME],
-                    k_x.NAME: result[k_x.NAME]
+                    k_z: result[k_z],
+                    k_y: result[k_y],
+                    k_x: result[k_x]
                 }
 
             # If the request asks for all links
             if feat == feats.SYNAPSE_LINKS.NAME:
                 return {
-                    main_key: result[main_key],
-                    k_nodes[0]: result[k_nodes[0]],
-                    k_nodes[1]: result[k_nodes[1]]
+                    'synapse_id': result[main_key],
+                    'synapse_parent_pre': result[k_nodes[0]],
+                    'synapse_parent_post': result[k_nodes[1]]
                 }
 
         # Find labels in bounds
