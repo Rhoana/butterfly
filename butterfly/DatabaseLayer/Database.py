@@ -5,6 +5,13 @@ class Database():
     def __init__(self, path):
         # Get the database keywords
         self.RUNTIME = RUNTIME()
+        files = self.RUNTIME.DB.FILE
+        tables = self.RUNTIME.DB.TABLE
+        # Set some unique keys
+        self._keys = {
+            tables.NEURON.NAME: files.NEURON.LIST,
+            tables.SYNAPSE.NAME: files.SYNAPSE.NEURON_LIST
+        }
 
     '''
     Interface for adding paths

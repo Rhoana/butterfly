@@ -26,10 +26,16 @@ class Unqlite(Database):
 
     def add_one_entry(self, table, path, entry):
         Database.add_one_entry(self, table, path, entry)
-        # Add the entry to the collection
+        # Get the collection
         collect = self.get_table(table, path)
-        collect.store(entry)
-        return ''
+        # Check if not unique in collection
+        find_entry = {k: entry[k] for k in self._keys[table]}
+        already = self.get_entry(table,path,**find_entry)
+        # Update value if already exists
+        if len(already):
+            return collect.update(already[0]['__id'], entry)
+        # Add new value if not in collection
+        return collect.store(entry)
 
     '''
     Override interface Getters
