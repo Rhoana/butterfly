@@ -106,9 +106,9 @@ class API(RequestHandler):
         if not len(in_list):
             return ['Voxel List not Supported yet']
         # We'll need the dataset path and table
-        table = tables.JOIN_LIST[in_list[0]]
+        table = tables.LIST[in_list[0]]
         # Let's find the primary key as well
-        main_key = tables.KEY_LIST[in_list[0]]
+        main_key = tables[table].KEY.NAME
         get_main = lambda s: s[main_key]
 
         # Features requiring ID

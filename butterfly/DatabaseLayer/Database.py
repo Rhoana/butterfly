@@ -41,7 +41,7 @@ class Database():
 
     def add_each_table(self, path):
         # Get keywords for the database
-        k_list = self.RUNTIME.DB.TABLE.JOIN_LIST
+        k_list = self.RUNTIME.DB.TABLE.LIST
         # Create all tables for the path
         for k_table in k_list:
             # Make a table from path and table name

@@ -1,32 +1,6 @@
-from settings import MAX_CACHE_SIZE
-import cv2
-import os
-
-# FOR ALL NAMELESS KEYWORDS
-class _nameless_struct():
-    LIST = None
-    VALUE = None
-    def __init__(self,**_keywords):
-
-        alls = []
-        for key in _keywords:
-            keyval = _keywords[key]
-            setattr(self,key,keyval)
-            # PUT ALL LISTS INTO LIST
-            more = keyval if type(keyval) is list else []
-            # PUT ALL TERM NAMES INTO LIST
-            if hasattr(keyval, 'NAME'):
-                more = [keyval.NAME]
-            alls += more
-        if len(alls):
-            self.LIST = sorted(set(alls),key=alls.index)
-
-# FOR ALL KEYWORDS WITH NAMES
-class _named_struct(_nameless_struct):
-    NAME = None
-    def __init__(self,_name,**_keywords):
-        _nameless_struct.__init__(self, **_keywords)
-        self.NAME = _name
+from Settings import MAX_CACHE_SIZE
+from Structures import _nameless_struct
+from Structures import _named_struct
 
 # Query params for grouping
 _experiments = 'experiments'
@@ -169,11 +143,12 @@ class RUNTIME():
         # ALL THE DATABASE RUNTIME TERMS
         self.DB = _nameless_struct(
             TABLE = _nameless_struct(
-                NEURON = _named_struct('neuron'),
-                SYNAPSE = _named_struct('synapse'),
-                JOIN_LIST = ['neuron','synapse'],
-                KEY_LIST = ['neuron','__id'],
-                PATH = _named_struct('path')
+                NEURON = _named_struct('neuron',
+                    KEY = _named_struct('neuron')
+                ),
+                SYNAPSE = _named_struct('synapse',
+                    KEY = _named_struct('__id')
+                )
             ),
             FILE = _nameless_struct(
                 NEURON = _nameless_struct(
