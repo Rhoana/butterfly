@@ -31,6 +31,12 @@ class _nameless_struct(object):
     def __getitem__(self, key):
         return self.__dict__.get(key,self._n_get(key))
 
+    def __setitem__(self, key, value):
+        item = self.__getitem__(key)
+        # Set the VALUE of the item if is struct
+        if item and isinstance(item, _nameless_struct):
+            item.VALUE = value
+
     def __contains__(self, key):
         return None is self.__getitem__(key)
 
