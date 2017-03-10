@@ -3,13 +3,11 @@ from setuptools import setup, find_packages
 import os
 
 VERSION = 2.0
-import_bfly= os.path.join('butterfly', '__init__.py')
-execfile(import_blfy)
 
 setup(
     version=VERSION,
     name='butterfly',
-    packages=find_packages(),
+    packages=['butterfly'],
     author='Daniel Haehn',
     author_email='haehn@seas.harvard.edu',
     url="https://github.com/Rhoana/butterfly",
@@ -26,6 +24,6 @@ setup(
         'opencv-python>=3.2.0'
     ],
     entry_points=dict(console_scripts=[
-        'bfly = butterfly.butterfly'
+        'bfly = butterfly.butterfly:main'
     ])
 )

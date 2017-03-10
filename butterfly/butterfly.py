@@ -168,8 +168,8 @@ class Butterfly():
         parser.add_argument('-o','--out', metavar='out', help= help['save'])
         return vars(parser.parse_args())
 
-def main(*_args, **_flags):
-    return Butterfly(toArgv(*_args, **_flags))
+def main(args=None):
+    Butterfly(sys.argv)
 
 if __name__ == "__main__":
-    Butterfly(sys.argv)
+    main()
