@@ -20,8 +20,7 @@ setup(
         'tornado>=4.4.2',
         'futures>=3.0.5',
         'pyaml>=16.12.2',
-        'tifffile>=0.11.1',
-        'opencv-python>=3.2.0.6'
+        'tifffile>=0.11.1'
     ],
     entry_points=dict(console_scripts=[
         'bfly = butterfly.butterfly:main'
