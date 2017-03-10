@@ -1,4 +1,5 @@
 dependencies:
     pre:
       - pip install -U pip
+      - pip install cython
       - pip install opencv-python
