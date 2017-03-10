@@ -1,7 +1,6 @@
-from Cache import Cache
-from QueryLayer import TileQuery
-from QueryLayer import DataQuery
-from DatabaseLayer import *
+from .AccessLayer.QueryLayer import TileQuery
+from .AccessLayer.QueryLayer import DataQuery
+from .Cache import Cache
 import numpy as np
 import tifffile
 import StringIO
@@ -11,7 +10,8 @@ import cv2
 class Core(object):
 
     def __init__(self, db):
-        self._cache = Cache()
+        RUNTIME = db.RUNTIME
+        self._cache = Cache(RUNTIME)
         self._db = db
 
     def start_db(self, dname):

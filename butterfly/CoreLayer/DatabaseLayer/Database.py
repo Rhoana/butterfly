@@ -1,10 +1,8 @@
-from UtilityLayer import *
-
 class Database():
 
-    def __init__(self, path):
+    def __init__(self, path, _runtime):
         # Get the database keywords
-        self.RUNTIME = RUNTIME()
+        self.RUNTIME = _runtime
 
     '''
     Interface for adding paths

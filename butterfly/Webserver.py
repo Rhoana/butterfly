@@ -1,6 +1,4 @@
-from CoreLayer import Core
-from AccessLayer import API
-from AccessLayer import OCP
+from CoreLayer import Core, Access
 from tornado.web import Application
 from tornado.ioloop import IOLoop
 
@@ -19,8 +17,8 @@ class Webserver(object):
             'autoreload': True
         }
         self._webapp = Application([
-            (r'/api/(.*)', API, app_in),
-            (r'/ocp/(.*)', OCP, app_in)
+            (r'/api/(.*)', Access.API, app_in),
+            (r'/ocp/(.*)', Access.OCP, app_in)
         ], **app_set)
 
     def start(self,_port):

@@ -3,10 +3,10 @@ import unqlite
 
 class Unqlite(Database):
 
-    def __init__(self, path):
+    def __init__(self, path, _runtime):
         # Create or load the database
+        Database.__init__(self, path, _runtime)
         self.db = unqlite.UnQLite(path)
-        Database.__init__(self, path)
 
     '''
     Overwriting interface Setters

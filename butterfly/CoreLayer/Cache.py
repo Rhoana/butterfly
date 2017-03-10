@@ -1,14 +1,13 @@
 import sys
 import logging
 import collections
-from UtilityLayer import *
 
 class Cache(object):
-    RUNTIME = RUNTIME()
 
-    def __init__(self):
+    def __init__(self, _runtime):
+        self._max_memory = _runtime.CACHE.MAX.VALUE
+        self._cache_meta = _runtime.CACHE.META.NAME
         self._cache = collections.OrderedDict()
-        self._max_memory = self.RUNTIME.CACHE.MAX.VALUE
         self._now_memory = 0
 
     def get(self, key):
@@ -42,8 +41,7 @@ class Cache(object):
 
     def value_size(self, value):
         if isinstance(value,dict):
-            cache_meta = self.RUNTIME.CACHE.META.NAME
-            return int(value[cache_meta])
+            return int(value[self._cache_meta])
         return sys.getsizeof(value)
 
     def log(self, action, **kwargs):

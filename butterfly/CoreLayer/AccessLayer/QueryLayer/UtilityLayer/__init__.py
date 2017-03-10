@@ -4,4 +4,4 @@ __all__ = __all__ + ['BFLY_CONFIG','toArgv']
 
 from .Settings import *
 from .Keywords import *
-from .Argv import *
+from .Argv import toArgv

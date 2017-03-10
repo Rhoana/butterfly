@@ -2,7 +2,7 @@ import logging
 from tornado import web
 from tornado import gen
 from urllib2 import URLError
-from UtilityLayer import *
+from .QueryLayer.UtilityLayer import *
 from concurrent.futures import ThreadPoolExecutor
 
 class RequestHandler(web.RequestHandler):

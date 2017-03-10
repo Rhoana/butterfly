@@ -1,6 +1,6 @@
-from UtilityLayer import *
+from CoreLayer import Utility
+from CoreLayer import Database
 from Webserver import Webserver
-import DatabaseLayer
 import sys, argparse
 import logging
 import json
@@ -19,9 +19,9 @@ class Butterfly():
     def __init__(self,_argv):
 
         # keyword arguments
-        self.INPUT = INPUT()
-        self.RUNTIME = RUNTIME()
-        self.OUTPUT = OUTPUT()
+        self.INPUT = Utility.INPUT()
+        self.OUTPUT = Utility.OUTPUT()
+        self.RUNTIME = Utility.RUNTIME()
 
         # Get the port
         args = self.parseArgv(_argv)
@@ -38,15 +38,17 @@ class Butterfly():
 
     # Update the database from the config file
     def updateDB(self):
-        # Create or open the database
-        db_class = getattr(DatabaseLayer,DB_TYPE)
-        self._db = db_class(DB_PATH)
+        # Get the correct database class
+        db_class = getattr(Database, Utility.DB_TYPE)
+        # Create the database with RUNTIME constants
+        self._db = db_class(Utility.DB_PATH, self.RUNTIME)
         # Get keywords for the BFLY_CONFIG
         k_list = self.INPUT.METHODS.GROUP_LIST
         k_path = self.OUTPUT.INFO.PATH.NAME
         '''
         Make a dictionary mapping channel paths to dataset paths
         '''
+        L_0 = Utility.BFLY_CONFIG
         pather = lambda l: l.get(k_path,'')
         lister = lambda l,n: l.get(k_list[n],[])
         mapper  = lambda l,p: {c:p for c in map(pather,l)}
@@ -54,7 +56,7 @@ class Butterfly():
         get_L2 = lambda a,l: join(lister(l,3), pather(l), a)
         get_L1 = lambda a,l: reduce(get_L2, lister(l,2), a)
         get_L0 = lambda a,l: reduce(get_L1, lister(l,1), a)
-        all_paths = reduce(get_L0, lister(BFLY_CONFIG,0), {})
+        all_paths = reduce(get_L0, lister(L_0,0), {})
 
         # Fill the database with content
         return self.completeDB(all_paths)
@@ -156,7 +158,12 @@ class Butterfly():
         }
 
         parser = argparse.ArgumentParser(description=help['bfly'])
-        parser.add_argument('port', type=int, nargs='?', default=PORT, help=help['port'])
+        parser.add_argument('port', **{
+            'type': int,
+            'nargs': '?',
+            'default': Utility.PORT,
+            'help': help['port']
+        })
         parser.add_argument('-e','--exp', metavar='exp', help= help['folder'])
         parser.add_argument('-o','--out', metavar='out', help= help['save'])
         return vars(parser.parse_args())

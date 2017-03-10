@@ -1,51 +1,31 @@
 #!/usr/bin/env python
+from setuptools import setup, find_packages
 import os
 
-from setuptools import setup, find_packages
-
 VERSION = 2.0
-version = os.path.join('butterfly', '__init__.py')
-execfile(version)
-
-README = open('README.md').read()
-
-butterfly_package_data = [
-    os.path.join("static", filename)
-    for filename in os.listdir(os.path.join("butterfly", "static"))
-    if any([filename.endswith(ext) for ext in ".html", ".js"])] + [
-    os.path.join("static", "images", filename)
-    for filename in os.listdir(os.path.join("butterfly", "static", "images"))
-    if filename.endswith(".png")]
+import_bfly= os.path.join('butterfly', '__init__.py')
+execfile(import_blfy)
 
 setup(
-    name='butterfly',
     version=VERSION,
+    name='butterfly',
     packages=find_packages(),
     author='Daniel Haehn',
     author_email='haehn@seas.harvard.edu',
     url="https://github.com/Rhoana/butterfly",
-    description="butterfly",
-    long_description=README,
+    long_description=open('README.md').read(),
+    description="butterfly dense image server",
     install_requires=[
-        "numpy>=1.9.3",
-        "h5py>=2.6.0",
-        "tornado>=4.3",
-        "scipy>=0.16.0",
-        "tifffile>=0.10.0",
-        "rh_logger>=2.0.0",
-        "rh_config>=1.0.0"
-    ],
-    dependency_links=[
-        "https://github.com/Rhoana/pyrtree/archive/master.zip",
-        "https://github.com/Rhoana/rh_logger/tarball/master#egg=rh_logger-2.0.0",
-        "https://github.com/Rhoana/rh_config/tarball/master#egg=rh_config-1.0.0",
-        "https://github.com/Rhoana/dataspec/archive/1.1.1.tar.gz#egg=dataspec-1.1.1",
-        "https://github.com/Rhoana/rh_renderer/archive/master.zip#egg=rh_renderer-0.0.1"
+        'h5py>=2.6.0',
+        'numpy>=1.12.0',
+        'unqlite>=0.5.3',
+        'tornado>=4.4.2',
+        'futures>=3.0.5',
+        'pyaml>=16.12.2',
+        'tifffile>=0.11.1',
+        'opencv-python>=3.2.0'
     ],
     entry_points=dict(console_scripts=[
-        'bfly = butterfly.cli:main',
-        'bfly_query = butterfly.cli:query',
-    ]),
-    package_data=dict(butterfly=butterfly_package_data),
-    zip_safe=False
+        'bfly = butterfly.butterfly'
+    ])
 )
