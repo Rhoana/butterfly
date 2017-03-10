@@ -13,6 +13,7 @@ setup(
     url="https://github.com/Rhoana/butterfly",
     long_description=open('README.md').read(),
     description="butterfly dense image server",
+    # Installation instructions
     install_requires=[
         'h5py>=2.6.0',
         'numpy>=1.12.0',
@@ -22,6 +23,10 @@ setup(
         'pyaml>=16.12.2',
         'tifffile>=0.11.1'
     ],
+    # Testing instructions
+    test_suite='nose.collector',
+    tests_require=['nose'],
+    # Allows command line execution
     entry_points=dict(console_scripts=[
         'bfly = butterfly.butterfly:main'
     ])
