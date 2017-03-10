@@ -6,11 +6,11 @@
 ### Master:
 [![V1][V1.SVG]][V1.CI]
 
-[V2.SVG]: https://circleci.com/gh/thejohnhoffer/butterfly/tree/update_v2.svg?style=shield
-[V2.CI]: https://circleci.com/gh/thejohnhoffer/butterfly/tree/update_v2
+[V2.SVG]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2.svg?style=shield
+[V2.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2
 
-[V1.SVG]: https://circleci.com/gh/thejohnhoffer/butterfly/tree/master.svg?style=shield
-[V1.CI]: https://circleci.com/gh/thejohnhoffer/butterfly/tree/master
+[V1.SVG]: https://circleci.com/gh/Rhoana/butterfly/tree/master.svg?style=shield
+[V1.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/master
 
 
 ## Requirements
