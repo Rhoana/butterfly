@@ -3,3 +3,5 @@ dependencies:
       - pip install -U pip
       - pip install cython
       - pip install opencv-python
+    override:
+      - pip install -e .
