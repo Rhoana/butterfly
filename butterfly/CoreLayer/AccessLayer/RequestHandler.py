@@ -33,7 +33,7 @@ class RequestHandler(web.RequestHandler):
             '''.format(k_term, k_out, k_check)
         }
         # Create info logger
-        logger = Utility.toLog(statuses,actions)
+        logger = Utility.MakeLog(statuses,actions)
         self._logger = logger.logging
 
     # Each Handler must define

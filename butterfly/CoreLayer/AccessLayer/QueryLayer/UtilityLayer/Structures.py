@@ -1,7 +1,7 @@
 from itertools import ifilter
 
 # For all nameless keywords
-class _nameless_struct(object):
+class NamelessStruct(object):
     VALUE = None
     def __init__(self,**_keywords):
         # Begin making the list
@@ -24,7 +24,7 @@ class _nameless_struct(object):
     def _n_get(self, name):
         children = self.__dict__.values()
         same_name = lambda c: c.NAME == name
-        has_name = lambda c: isinstance(c,_named_struct)
+        has_name = lambda c: isinstance(c,NamedStruct)
         is_name = lambda c: has_name(c) and same_name(c)
         # Return None if no children have name
         return next(ifilter(is_name, children), None)
@@ -35,7 +35,7 @@ class _nameless_struct(object):
     def __setitem__(self, key, value):
         item = self.__getitem__(key)
         # Set the VALUE of the item if is struct
-        if item and isinstance(item, _nameless_struct):
+        if item and isinstance(item, NamelessStruct):
             item.VALUE = value
 
     def __contains__(self, key):
@@ -48,9 +48,9 @@ class _nameless_struct(object):
         return repr(self.__dict__)
 
 # For all keywords with names
-class _named_struct(_nameless_struct):
+class NamedStruct(NamelessStruct):
     NAME = None
     def __init__(self,_name,**_keywords):
-        _nameless_struct.__init__(self, **_keywords)
+        NamelessStruct.__init__(self, **_keywords)
         self.NAME = _name
 

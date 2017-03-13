@@ -1,6 +1,6 @@
 import logging
 
-class toLog(object):
+class MakeLog(object):
     # Make an interface to logging
     def __init__(self, statuses, actions):
         self.stats = statuses

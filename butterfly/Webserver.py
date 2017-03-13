@@ -32,7 +32,7 @@ class Webserver(object):
             'stop': 'Closed server on port {port}'
         }
         # Create info logger
-        logger = Utility.toLog(statuses,actions)
+        logger = Utility.MakeLog(statuses,actions)
         self._logger = logger.logging
 
     def start(self,_port):
