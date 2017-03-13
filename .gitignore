@@ -1,6 +1,9 @@
 # vim 
 *.swo
 *.swp
+
+# Testing
+.coverage
 *.log
 
 # Database
