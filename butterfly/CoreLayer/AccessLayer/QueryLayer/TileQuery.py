@@ -1,4 +1,7 @@
-from ImageLayer import *
+from ImageLayer import HDF5
+from ImageLayer import TileSpecs
+from ImageLayer import ImageStack
+from ImageLayer import Mojo
 from Query import Query
 import numpy as np
 import sys

@@ -1,6 +1,8 @@
 from mimetypes import types_map
 from urllib2 import URLError
-from UtilityLayer import *
+from UtilityLayer import INPUT
+from UtilityLayer import RUNTIME
+from UtilityLayer import OUTPUT
 import numpy as np
 import logging
 

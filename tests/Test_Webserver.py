@@ -22,18 +22,18 @@ class Test_Webserver(ut.TestCase):
     }
 
     @classmethod
-    def test_web(_test):
+    def test_web(cls):
 
         # Log to command line
-        logging.basicConfig(**_test.log_info)
+        logging.basicConfig(**cls.log_info)
 
         # Make a dummy database
-        db_class = getattr(bfly.Database, _test.DB_TYPE)
-        db = db_class(_test.DB_PATH, _test.RUNTIME)
+        db_class = getattr(bfly.Database, cls.DB_TYPE)
+        db = db_class(cls.DB_PATH, cls.RUNTIME)
 
         # Make a dummy webserver
         web = bfly.Webserver(db)
-        server = web.start(_test.PORT)
+        server = web.start(cls.PORT)
 
         # Stop the webserver after 1 second
         one_sec = datetime.timedelta(seconds=1)

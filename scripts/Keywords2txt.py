@@ -2,7 +2,10 @@ import os
 import re
 import yaml
 import numpy as np
-from UtilityLayer import *
+from UtilityLayer import INPUT
+from UtilityLayer import RUNTIME
+from UtilityLayer import OUTPUT
+
 yaml_setup = {
     'default_flow_style': False
 }
