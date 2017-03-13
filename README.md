@@ -6,13 +6,13 @@
 ### Master:
 [![V1][V1.IMAGE.CI]][V1.LINK.CI]
 
-[V2.IMAGE.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2.svg?style=shield
+[V2.IMAGE.CI]: https://img.shields.io/circleci/project/github/Rhoana/butterfly/update_v2.svg 
 [V2.LINK.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2
-[V2.IMAGE.COVER]: https://coveralls.io/repos/github/Rhoana/butterfly/badge.svg?branch=update_v2
+[V2.IMAGE.COVER]: https://img.shields.io/coveralls/Rhoana/butterfly/update_v2.svg
 [V2.LINK.COVER]: https://coveralls.io/github/Rhoana/butterfly?branch=update_v2
 
 
-[V1.IMAGE.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/master.svg?style=shield
+[V1.IMAGE.CI]: https://img.shields.io/circleci/project/github/Rhoana/butterfly/master.svg 
 [V1.LINK.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/master
 
 
