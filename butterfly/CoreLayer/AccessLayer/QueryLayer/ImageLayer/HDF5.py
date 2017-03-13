@@ -24,13 +24,13 @@ class HDF5(Datasource):
         path, inner = HDF5.h5_info(query)
 
         # Find the region to crop
-        Sk,Sj,Si = query.all_scales
+        sk,sj,si = query.all_scales
         z0,y0,x0 = query.tile_origin
         z1,y1,x1 = query.tile_origin + query.blocksize
 
         with h5py.File(path.VALUE) as fd:
             vol = fd[inner.VALUE]
-            return vol[z0:z1:Sk,y0:y1:Sj,x0:x1:Si]
+            return vol[z0:z1:sk,y0:y1:sj,x0:x1:si]
 
     @staticmethod
     def preload_source(query):

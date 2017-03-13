@@ -1,6 +1,6 @@
 __all__ = ['PORT','DB_TYPE','DB_PATH','ALLOWED_PATHS']
-__all__ = __all__ + ['BFLY_CONFIG','toArgv','MakeLog']
-__all__ = __all__ + ['INPUT','RUNTIME','OUTPUT']
+__all__ += ['BFLY_CONFIG','toArgv','MakeLog']
+__all__ += ['INPUT','RUNTIME','OUTPUT']
 
 from .Settings import BFLY_CONFIG
 from .Settings import MAX_CACHE_SIZE

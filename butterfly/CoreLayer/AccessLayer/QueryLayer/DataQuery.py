@@ -32,8 +32,8 @@ class DataQuery(Query):
 
     @property
     def scales(self):
-        Sxy = 2 ** self.INPUT.RESOLUTION.XY.VALUE
-        return np.float32([1,Sxy,Sxy])
+        s_xy = 2 ** self.INPUT.RESOLUTION.XY.VALUE
+        return np.float32([1,s_xy,s_xy])
 
     @property
     def blocksize(self):

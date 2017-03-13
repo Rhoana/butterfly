@@ -24,7 +24,7 @@ class Butterfly():
         self.RUNTIME = Utility.RUNTIME()
 
         # Get the port
-        args = self.parseArgv(_argv)
+        args = self.parse_argv(_argv)
         port = args['port']
 
         # Start to write to log files
@@ -49,15 +49,15 @@ class Butterfly():
         '''
         Make a dictionary mapping channel paths to dataset paths
         '''
-        L_0 = Utility.BFLY_CONFIG
+        layer0 = Utility.BFLY_CONFIG
         pather = lambda l: l.get(k_path,'')
         lister = lambda l,n: l.get(k_list[n],[])
         mapper  = lambda l,p: {c:p for c in map(pather,l)}
         join = lambda l,p,a: dict(mapper(l,p),**a) if p else a
-        get_L2 = lambda a,l: join(lister(l,3), pather(l), a)
-        get_L1 = lambda a,l: reduce(get_L2, lister(l,2), a)
-        get_L0 = lambda a,l: reduce(get_L1, lister(l,1), a)
-        all_paths = reduce(get_L0, lister(L_0,0), {})
+        get_layer2 = lambda a,l: join(lister(l,3), pather(l), a)
+        get_layer1 = lambda a,l: reduce(get_layer2, lister(l,2), a)
+        get_layer0 = lambda a,l: reduce(get_layer1, lister(l,1), a)
+        all_paths = reduce(get_layer0, lister(layer0,0), {})
 
         # Fill the database with content
         return self.complete_db(all_paths)
@@ -148,7 +148,7 @@ class Butterfly():
         entry_args = [k_neuron,dataset_path,all_dicts]
         self._db.add_entries(*entry_args)
 
-    def parseArgv(self, argv):
+    def parse_argv(self, argv):
         sys.argv = argv
 
         help = {
