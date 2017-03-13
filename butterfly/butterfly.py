@@ -31,14 +31,14 @@ class Butterfly():
         logging.basicConfig(**self.log_info)
 
         # Populate the database
-        db = self.updateDB()
+        db = self.update_db()
 
         # Start a webserver on given port
         server = Webserver(db).start(port)
         server.start()
 
     # Update the database from the config file
-    def updateDB(self):
+    def update_db(self):
         # Get the correct database class
         db_class = getattr(Database, Utility.DB_TYPE)
         # Create the database with RUNTIME constants
@@ -60,10 +60,10 @@ class Butterfly():
         all_paths = reduce(get_L0, lister(L_0,0), {})
 
         # Fill the database with content
-        return self.completeDB(all_paths)
+        return self.complete_db(all_paths)
 
     # Add all colections and content to the database
-    def completeDB(self, all_paths):
+    def complete_db(self, all_paths):
         # Add paths to database
         self._db.add_paths(all_paths)
         # Get all dataset paths from all channel paths
@@ -71,12 +71,12 @@ class Butterfly():
         # Add all needed tables to the database
         self._db.add_tables(dataset_paths)
         # Add synapses and neurons to database
-        map(self.addSynapseDB, dataset_paths)
+        map(self.add_synapse_db, dataset_paths)
 
         # Complete database
         return self._db
 
-    def addSynapseDB(self,dataset_path):
+    def add_synapse_db(self,dataset_path):
         # Get keywords for input file
         k_file = self.RUNTIME.DB.FILE.SYNAPSE.NAME
         k_point = self.RUNTIME.DB.FILE.SYNAPSE.POINT.NAME
@@ -111,9 +111,9 @@ class Butterfly():
         entry_args = [k_synapse,dataset_path,synapse_dicts]
         self._db.add_entries(*entry_args)
         # Add neurons to the database
-        self.addNeuronDB(dataset_path,synapse_dicts)
+        self.add_neuron_db(dataset_path,synapse_dicts)
 
-    def addNeuronDB(self,dataset_path,synapse_dicts):
+    def add_neuron_db(self,dataset_path,synapse_dicts):
         # Get keywords for the database
         k_nodes = self.RUNTIME.DB.TABLE.SYNAPSE.NEURON_LIST
         k_points = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
