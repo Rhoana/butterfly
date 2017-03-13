@@ -33,8 +33,7 @@ In your system shell, enter the below `code blocks` in order:
 
     ```
     pip install -U 
-    pip install cython
-    pip install opencv-python
+    pip install -r requirements.txt
     ```
 
 3. __Install__ `bfly` command

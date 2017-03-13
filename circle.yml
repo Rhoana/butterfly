@@ -1,8 +1,7 @@
 dependencies:
     pre:
       - pip install -U pip
-      - pip install cython
-      - pip install opencv-python
+      - pip install -r requirements.txt
     override:
       - pip install -e .
 
