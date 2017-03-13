@@ -34,7 +34,8 @@ class Butterfly():
         db = self.updateDB()
 
         # Start a webserver on given port
-        Webserver(db).start(port)
+        server = Webserver(db).start(port)
+        server.start()
 
     # Update the database from the config file
     def updateDB(self):

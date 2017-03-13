@@ -1,16 +1,15 @@
-import logging
 from tornado import web
 from tornado import gen
 from urllib2 import URLError
-from .QueryLayer.UtilityLayer import *
+from .QueryLayer import Utility
 from concurrent.futures import ThreadPoolExecutor
 
 class RequestHandler(web.RequestHandler):
 
-    INPUT = INPUT()
-    OUTPUT = OUTPUT()
-    RUNTIME = RUNTIME()
-    BFLY_CONFIG = BFLY_CONFIG
+    INPUT = Utility.INPUT()
+    OUTPUT = Utility.OUTPUT()
+    RUNTIME = Utility.RUNTIME()
+    BFLY_CONFIG = Utility.BFLY_CONFIG
 
     def initialize(self, _core, _db):
         self._ex = ThreadPoolExecutor(max_workers=10)
@@ -18,6 +17,24 @@ class RequestHandler(web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'GET')
         self._core = _core
         self._db = _db
+
+        # Get global error strings
+        errors = self.RUNTIME.ERROR
+        k_check = errors.CHECK.NAME
+        k_term = errors.TERM.NAME
+        k_out = errors.OUT.NAME
+
+        # Prepare info logging
+        statuses = {
+            'bad_check': 'info'
+        }
+        actions = {
+            'bad_check': '''The {{{}}} {{{}}} is not {{{}}}
+            '''.format(k_term, k_out, k_check)
+        }
+        # Create info logger
+        logger = Utility.toLog(statuses,actions)
+        self._logger = logger.logging
 
     # Each Handler must define
     def parse(self, _request):
@@ -50,29 +67,8 @@ class RequestHandler(web.RequestHandler):
         return content
 
     def log(self, detail):
-        errors = self.RUNTIME.ERROR
-        # Get some global strings
-        k_check = errors.CHECK.NAME
-        k_term = errors.TERM.NAME
-        k_out = errors.OUT.NAME
-        statuses = {
-            'bad_check': 'info'
-        }
-        actions = {
-            'bad_check': '''The {{{}}} {{{}}} is not {{{}}}
-            '''.format(k_term, k_out, k_check)
-        }
         # Get error info and type
         keys = detail.get('keys',{})
         action = detail.get('error','')
-        # Get the log status and template
-        status = statuses.get(action,'error')
-        template = actions.get(action,'New error')
-        # Try to format the sting
-        try:
-            message = template.format(**keys)
-        except KeyError:
-            message = template
-        # Log the message with a status
-        getattr(logging, status)(message)
-        return message
+        # Log error and return
+        return self._logger(action,keys)

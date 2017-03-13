@@ -25,7 +25,7 @@ setup(
     ],
     # Testing instructions
     test_suite='nose.collector',
-    tests_require=['nose'],
+    tests_require=['nose','covorage'],
     # Allows command line execution
     entry_points=dict(console_scripts=[
         'bfly = butterfly.butterfly:main'

@@ -1,3 +1,4 @@
+from CoreLayer import Utility
 from CoreLayer import Core, Access
 from tornado.web import Application
 from tornado.ioloop import IOLoop
@@ -21,26 +22,37 @@ class Webserver(object):
             (r'/ocp/(.*)', Access.OCP, app_in)
         ], **app_set)
 
+        # Prepare error logging
+        statuses = {
+            'start': 'info',
+            'stop': 'info'
+        }
+        actions = {
+            'start': 'Running server on port {port}',
+            'stop': 'Closed server on port {port}'
+        }
+        # Create info logger
+        logger = Utility.toLog(statuses,actions)
+        self._logger = logger.logging
+
     def start(self,_port):
         app_start = {
             'max_buffer_size': self.maxbuffer
         }
-
+        self._port = _port
+        # Begin to serve the web application
         self._webapp.listen(_port, **app_start)
-        IOLoop.instance().start()
-        return self.log('start')
+        self._server = IOLoop.instance()
+        self.log('start', port=_port)
+        # Return the webserver
+        return self._server
 
-    def log(self, action, **kwargs):
-        statuses = {
-            'start': 'info',
-            'end': 'info'
-        }
-        actions = {
-            'start': 'Running server on port {port}',
-            'end': 'Closed server on port {port}'
-        }
-        status = statuses[action]
-        kwargs['port'] = self._port
-        message = actions[action].format(**kwargs)
-        getattr(logging, status)(message)
-        return message
+    def stop(self):
+        # Ask tornado to stop
+        ioloop = self._server
+        ioloop.add_callback(ioloop.stop)
+        self.log('stop', port=self._port)
+
+    def log(self, action, **keys):
+        # Log error and return
+        return self._logger(action,keys)
