@@ -3,6 +3,15 @@ from setuptools import setup, find_packages
 import os
 
 VERSION = 2.0
+INSTALL_REQ = [
+    'h5py>=2.6.0',
+    'numpy>=1.12.0',
+    'unqlite>=0.5.3',
+    'tornado>=4.4.2',
+    'futures>=3.0.5',
+    'pyaml>=16.12.2',
+    'tifffile>=0.11.1'
+]
 
 setup(
     version=VERSION,
@@ -11,21 +20,9 @@ setup(
     author='Daniel Haehn',
     author_email='haehn@seas.harvard.edu',
     url="https://github.com/Rhoana/butterfly",
-    long_description=open('README.md').read(),
     description="butterfly dense image server",
-    # Installation instructions
-    install_requires=[
-        'h5py>=2.6.0',
-        'numpy>=1.12.0',
-        'unqlite>=0.5.3',
-        'tornado>=4.4.2',
-        'futures>=3.0.5',
-        'pyaml>=16.12.2',
-        'tifffile>=0.11.1'
-    ],
-    # Testing instructions
-    test_suite='nose.collector',
-    tests_require=['nose','coverage','tox'],
+    # Installation requirements
+    install_requires= INSTALL_REQ,
     # Allows command line execution
     entry_points=dict(console_scripts=[
         'bfly = butterfly.butterfly:main'

@@ -4,6 +4,8 @@
 
 # Testing
 .coverage
+.coveralls.yml
+.tox
 *.log
 
 # Database

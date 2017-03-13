@@ -1,0 +1,2 @@
+cython>=0.25.2
+opencv-python>=3.2.0.6

@@ -5,3 +5,8 @@ dependencies:
       - pip install opencv-python
     override:
       - pip install -e .
+
+test:
+  pre:
+    - pip install coverage
+    - pip install tox
