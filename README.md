@@ -1,134 +1,164 @@
 # butterfly
 
 ### Version 2:
-[![V2][V2.SVG.CI]][V2.LINK.CI][![V2][V2.SVG.COVER]][V2.LINK.COVER]
+[![V2][V2.IMAGE.CI]][V2.LINK.CI][![V2][V2.IMAGE.COVER]][V2.LINK.COVER]
 
 ### Master:
-[![V1][V1.SVG.CI]][V1.LINK.CI]
+[![V1][V1.IMAGE.CI]][V1.LINK.CI]
 
-[V2.SVG.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2.svg?style=shield
+[V2.IMAGE.CI]: https://img.shields.io/circleci/project/github/Rhoana/butterfly/update_v2.svg 
 [V2.LINK.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2
-[V2.SVG.COVER]: https://coveralls.io/repos/github/Rhoana/butterfly/badge.svg?branch=update_v2
+[V2.IMAGE.COVER]: https://img.shields.io/coveralls/Rhoana/butterfly/update_v2.svg
 [V2.LINK.COVER]: https://coveralls.io/github/Rhoana/butterfly?branch=update_v2
 
 
-[V1.SVG.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/master.svg?style=shield
+[V1.IMAGE.CI]: https://img.shields.io/circleci/project/github/Rhoana/butterfly/master.svg 
 [V1.LINK.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/master
 
 
-## Requirements
-- Requires OpenCV 2.4+
-- Python requirements in [requirements.txt](requirements.txt)
+## Butterfly Installation
 
-## Installation
-```bash
-$ git clone https://github.com/Rhoana/butterfly.git
-$ pip install --process-dependency-links  -e .
+In your system shell, enter the below `code blocks` in order:
+
+1. __Download__ and open the source code
+
+    ```
+    git clone https://github.com/Rhoana/butterfly.git
+    cd butterfly
+    ```
+
+    - _Developers:_ Make and Open a virtualenv
+
+2. __Prepare__ to install
+
+    ```
+    pip install -U 
+    pip install -r requirements.txt
+    ```
+
+3. __Install__ `bfly` command
+
+    ```
+    pip install -e .
+    ```
+
+Now, you should be able to run the `bfly` command!
+
+## Running Butterfly
+
+Make sure `bfly --help` shows the below
+
+```
+usage: bfly [-h] [-e exp] [-o out] [port]
+
+Butterfly Version 2.0
+
+positional arguments:
+  port               port >1024 for hosting this server (Default 2001)
+
+optional arguments:
+  -h, --help         show this help message and exit
+  -e exp, --exp exp  path to load config yaml or folder with all data 
+  -o out, --out out  path to save output yaml listing all --exp data
 ```
 
-## Usage
-NOTE: Default port is currently 2001
-```bash
-$ bfly [<port>]
+- If you simply run `bfly` without arguments,
+    - The data loads from paths in `~/.rh-config.yaml`
+    - The server starts on `http://localhost:2001`
+- If you run `bfly 2017`,
+    - The server starts on `http://localhost:2017`
+- If you run `bfly -e ~/my-config.yaml`
+    - The data loads from paths in `~/my-config.yaml`
+- If your run `bfly -e ~/data -o ~/.rh-config.yaml`
+    - The data loads from the `~/data` folder
+    - The data paths save to `~/.rh-config.yaml`
+
+## The RH Conifg (~/.rh-config.yaml)
+
+The default path to this file is `~/.rh-config.yaml`
+You can change this path by entering this to the shell:
+
+```
+export RH_CONFIG_FILENAME=~/my-config.yaml
 ```
 
-The butterfly client is the default document (in the default configuration,
-at http://localhost:2001). The following query parameters must be supplied:
+After that, running `bfly` works like `bfly -e ~/my-config.yaml`
 
-* **datapath**  the path on the server filesystem of the data source.
-* **height** the height for the display in pixels
-* **width** the width for the display in pixels
+### The RH config file structure:
 
-An example URL: http://localhost:2001/index.html?data_path=/home/leek/temp/poll_for_sections&width=200000&height=150000
 
-### Navigation
+The __default values__ are given here:
 
-You can go up and down through the z-stack using the "s" and "w" keys. The
-mouse wheel zooms in and out and you can pan by pressing the left mouse
-button down and dragging. The navigation controls in the upper left of
-the display include a home button that resets zoom and pan.
-
-### bfly configuration
-
-bfly uses rh_config which gets its configuration by default from
-~/.rh-config.yaml. You can change this by setting the environment variable,
-RH_CONFIG_FILENAME, to the name of the config file you want to use. bfly
-uses two configuration sections, "bfly" and "rh_logger" (rh_logger is
-documented here: https://github.com/rhoana/rh_logger). The bfly section
-has the following structure:
-
-    bfly:
-        # data sources to try in order of their appearance
-        #
-        datasource:
-            - comprimato
-            - multibeam
-            - mojo
-            - regularimagestack
-        # HTTP port to listen on
-        port: 2001
-        # size of the image cache to maintain in MB
-        max-cache-size: 1000
-        assent-list:
-            - yes
-            - y
-            - true
-        always-subsample: True
-        #
-        # Interpolation method - one of linear, area, nearest or cubic
-        #
-        image-resize-method: linear
-        # Paths to the section files must start with one of the following:
-        allowed-paths:
-            - /data
-        # Suppress tornado logging (was SUPPRESS_CONSOLE_OUTPUT)
-        suppress-tornado-logging: True
-        #
-        # For the near-term, the experiment / dataset / channel mapping
-        # to a filesystem path is done here:
-        #
-        experiments:
-            - name: microns
-              samples:
-                - name: mouse
-                    datasets:
-                        - name: sem
-                          channels:
-                              - name: raw
-                                path: /data/microns/sem/raw
-                                short-description: raw
-                                data-type: uint8
-                                dimensions:
-                                  x: 512
-                                  y: 512
-                                  z: 3
-                              - name: membrane-probability
-                                path: /data/microns/sem/mp
-                                short-description: probability-map
-                                data-type: uint8
-                                dimensions:
-                                  x: 512
-                                  y: 512
-                                  z: 3
-
-## P3 Args
-TODO: document P3 args (maybe?):
 ```
---filename %(z)04d_Tile_r1-c1_W02_sec%(z)03d_tr%(y)d-tc%(x)d_.png
---folderpaths %(z)04d_Tile_r1-c1_W02_sec%(z)03d
---x_ind 1-3
---y_ind 1-4
---z_ind 1-3
---blocksize 16384 16384
+bfly:
+    # HTTP port to listen on
+    port: 2001
+    # Max size of the image cache in MB
+    max-cache-size: 1024
+    # Serve only files under a list of paths
+    allowed-paths:
+        - /
 ```
 
-## AC3 Args
-TODO: document ac3 args (maybe?):
+Let's say the user `username` has these folders in `~/data`:
+
+- dense
+    - excellent
+        - synapse-segmentation.h5
+        - neuron-segmentation.h5
+    - synapse-training.h5
+    - neuron-training.h5
+    - raw-image.h5
+
+This __must__ be mapped to a system _butterfly understands:_
+
+- __experiment__ root
+    - __sample__ data
+        - __dataset__ excellent
+            - __channel__ synapse-segmentation.h5
+            - __channel__ neuron-segmentation.h5
+        - __dataset__ dense
+            - __channel__ synapse-training.h5
+            - __channel__ neuron-training.h5
+            - __channel__ raw-image.h5
+
+The user `username` can save this mapping to `~/my-config.yaml` with this command:
+
 ```
---filename y=%(y)08d,x=%(x)08d.tif
---folderpaths z=%(z)08d
---x_ind 0 1
---y_ind 0 1
---z_ind 0-74
---blocksize 512 512
+bfly -e ~/data -o ~/my-config.yaml
+```
+
+Then, the user can edit `~/my-config.yaml` by hand to make `bfly` serve on port `2017` with up to 2 GiB of RAM used to cache images. The resulting `~/my-config.yaml` would then look like this:
+
+```
+bfly:
+    port: 2001
+    max-cache-size: 2048
+    experiments:
+        - name: root
+          samples:
+            - name: data
+                datasets:
+                    - name: dense
+                      channels:
+                          - name: neuron-training.h5
+                            path: /home/username/data/dense/neuron-training.h5
+                          - name: raw-image.h5
+                            path: /home/username/data/dense/raw-image.h5
+                          - name: synapse-training.h5
+                            path: /home/username/data/dense/synapse-training.h5
+                    - path: /home/username/data/dense
+                    - name: excellent
+                      channels:
+                          - name: neuron-segmentation.h5
+                            path: /home/username/data/dense/excellent/neuron-segmentation.h5
+                          - name: synapse-segmentation.h5
+                            path: /home/username/data/dense/excellent/synapse-segmentation.h5
+                    - path: /home/username/data/dense/excellent
+```
+
+Finally, this file at `/home/username/my-config.yaml` will be used by default whenever the `bfly` command is run so long as `username` remembers to type this in their shell:
+
+```
+export RH_CONFIG_FILENAME=~/my-config.yaml
 ```
