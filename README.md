@@ -1,16 +1,19 @@
 # butterfly
 
 ### Version 2:
-[![V2][V2.SVG]][V2.CI]
+[![V2][V2.SVG.CI]][V2.LINK.CI][![V2][V2.SVG.COVER]][V2.LINK.COVER]
 
 ### Master:
-[![V1][V1.SVG]][V1.CI]
+[![V1][V1.SVG.CI]][V1.LINK.CI]
 
-[V2.SVG]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2.svg?style=shield
-[V2.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2
+[V2.SVG.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2.svg?style=shield
+[V2.LINK.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2
+[V2.SVG.COVER]: https://coveralls.io/repos/github/Rhoana/butterfly/badge.svg?branch=update_v2
+[V2.LINK.COVER]: https://coveralls.io/github/Rhoana/butterfly?branch=update_v2
 
-[V1.SVG]: https://circleci.com/gh/Rhoana/butterfly/tree/master.svg?style=shield
-[V1.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/master
+
+[V1.SVG.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/master.svg?style=shield
+[V1.LINK.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/master
 
 
 ## Butterfly Installation
