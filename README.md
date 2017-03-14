@@ -2,6 +2,7 @@
 
 ### Version 2:
 [![V2][V2.IMAGE.CI]][V2.LINK.CI][![V2][V2.IMAGE.COVER]][V2.LINK.COVER]
+[1[V2][V2.IMAGE.QC]][V2.LINK.QC]
 
 ### Master:
 [![V1][V1.IMAGE.CI]][V1.LINK.CI]
@@ -10,6 +11,8 @@
 [V2.LINK.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2
 [V2.IMAGE.COVER]: https://img.shields.io/coveralls/Rhoana/butterfly/update_v2.svg
 [V2.LINK.COVER]: https://coveralls.io/github/Rhoana/butterfly?branch=update_v2
+[V2.IMAGE.QC]: https://www.quantifiedcode.com/api/v1/project/2ec68224940e403ab129befc98da67b0/snapshot/origin:update_v2:HEAD/badge.svg
+[V2.LINK.QC]: https://www.quantifiedcode.com/app/project/2ec68224940e403ab129befc98da67b0?branch=origin%2Fupdate_v2
 
 
 [V1.IMAGE.CI]: https://img.shields.io/circleci/project/github/Rhoana/butterfly/master.svg 
