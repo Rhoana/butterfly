@@ -5,7 +5,7 @@ import datetime
 import logging
 import sys
 
-class TestWebserver(ut.TestCase):
+class Webserver(ut.TestCase):
     '''
     Butterfly 2.0
     Test the EM Data server

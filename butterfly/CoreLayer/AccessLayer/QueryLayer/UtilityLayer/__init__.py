@@ -12,4 +12,5 @@ from .Keywords import INPUT
 from .Keywords import RUNTIME
 from .Keywords import OUTPUT
 from .MakeLog import MakeLog
-from .Argv import toArgv
+from .Argv import Argv
+toArgv = Argv.toArgv
