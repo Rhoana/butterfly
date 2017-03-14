@@ -2,7 +2,7 @@
 
 ### Version 2:
 [![V2][V2.IMAGE.CI]][V2.LINK.CI][![V2][V2.IMAGE.COVER]][V2.LINK.COVER]
-[1[V2][V2.IMAGE.QC]][V2.LINK.QC]
+[![V2][V2.IMAGE.QC]][V2.LINK.QC]
 
 ### Master:
 [![V1][V1.IMAGE.CI]][V1.LINK.CI]
