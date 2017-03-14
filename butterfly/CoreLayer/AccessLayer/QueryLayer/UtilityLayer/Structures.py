@@ -23,9 +23,10 @@ class NamelessStruct(object):
 
     def _n_get(self, name):
         children = self.__dict__.values()
-        same_name = lambda c: c.NAME == name
-        has_name = lambda c: isinstance(c,NamedStruct)
-        is_name = lambda c: has_name(c) and same_name(c)
+        # Make sure name is the same
+        def is_name(c):
+            has_name = hasattr(c,'NAME')
+            return has_name and c.NAME == name
         # Return None if no children have name
         return next(ifilter(is_name, children), None)
 
