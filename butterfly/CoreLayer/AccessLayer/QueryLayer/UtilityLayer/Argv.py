@@ -4,7 +4,7 @@ class Argv(object):
 
     @staticmethod
     # Python args to argv list
-    def toArgv(*args, **flags):
+    def to_argv(*args, **flags):
         # Get positional and keyword arguments
         ordered = ['main'] + map(str, args)
         keyed = flags.items()

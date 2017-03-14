@@ -1,5 +1,5 @@
 __all__ = ['PORT','DB_TYPE','DB_PATH','ALLOWED_PATHS']
-__all__ += ['BFLY_CONFIG','toArgv','MakeLog']
+__all__ += ['BFLY_CONFIG','to_argv','MakeLog']
 __all__ += ['INPUT','RUNTIME','OUTPUT']
 
 from .Settings import BFLY_CONFIG
@@ -13,4 +13,4 @@ from .Keywords import RUNTIME
 from .Keywords import OUTPUT
 from .MakeLog import MakeLog
 from .Argv import Argv
-toArgv = Argv.toArgv
+to_argv = Argv.to_argv

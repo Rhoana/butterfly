@@ -3,7 +3,7 @@ import unittest as ut
 import logging
 import sys
 
-class Argv(ut.TestCase):
+class TestArgv(ut.TestCase):
     '''
     Butterfly 2.0
     Test Argument Flattening
@@ -48,7 +48,7 @@ class Argv(ut.TestCase):
         }
     ]
 
-    def test_arg(self):
+    def test_argv(self):
 
         # Log to command line
         logging.basicConfig(**self.log_info)
@@ -83,8 +83,8 @@ Output item #{} is {}, but it should be {}
         # Test with Argv
         def test_one(test):
             args, keys = test['IN']
-            # Send args and keys to toArgv
-            output = bfly.Utility.toArgv(*args,**keys)
+            # Send args and keys to to_argv
+            output = bfly.Utility.to_argv(*args,**keys)
             # Check if the same length
             same_length(output, test['OUT'])
             # Check if the same list
