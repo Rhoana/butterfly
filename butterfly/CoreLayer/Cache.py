@@ -1,6 +1,7 @@
 import sys
 import logging
 import collections
+from .AccessLayer.QueryLayer import Utility
 
 class Cache(object):
 
@@ -9,6 +10,13 @@ class Cache(object):
         self._cache_meta = _runtime.CACHE.META.NAME
         self._cache = collections.OrderedDict()
         self._now_memory = 0
+
+        # Get MakeLog Keyword Arguments
+        self.k_size = _runtime.ERROR.SIZE.NAME
+        self.k_val = _runtime.ERROR.OUT.NAME
+        # Create info logger
+        log_list = _runtime.ERROR.CACHE
+        self.log = Utility.MakeLog(log_list).logging
 
     def get(self, key):
         try:
@@ -23,7 +31,11 @@ class Cache(object):
         value_memory = self.value_size(value)
         # Do not cache if value more than total memory
         if value_memory > self._max_memory:
-            self.log('too_big',key=key,size=value_memory)
+            # Log Value over Max Cache
+            self.log('MAX',**{
+                self.k_val: key,
+                self.k_size: value_memory
+            })
             return -1
         # Add new item to cache memory count
         self._now_memory += value_memory
@@ -35,25 +47,15 @@ class Cache(object):
                 old_value = self._cache.popitem(last=False)[1]
                 self._now_memory -= self.value_size(old_value)
         # Add new item to the cache
-        self.log('add_query',key=key,size=self._now_memory)
         self._cache[key] = value
+        # Log successful add
+        self.log('ADD',**{
+            self.k_val: key,
+            self.k_size: self._now_memory
+        })
         return 0
 
     def value_size(self, value):
         if isinstance(value,dict):
             return int(value[self._cache_meta])
         return sys.getsizeof(value)
-
-    def log(self, action, **kwargs):
-        statuses = {
-            'add_query': 'info',
-            'too_big': 'warning'
-        }
-        actions = {
-            'add_query': 'Adding {key} to cache. Cache now {size} bytes',
-            'too_big': 'Cannot cache {key}. {size} bytes is too big.'
-        }
-        status = statuses[action]
-        message = actions[action].format(**kwargs)
-        getattr(logging, status)(message)
-        return message

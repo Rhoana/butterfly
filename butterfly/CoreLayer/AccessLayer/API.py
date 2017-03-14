@@ -241,11 +241,7 @@ class API(RequestHandler):
     def _except(self,result,detail):
         k_out = self.RUNTIME.ERROR.OUT.NAME
         detail[k_out] = result
-        raise URLError({
-            'error': 'bad_check',
-            'keys': detail,
-            'http': '400'
-        })
+        raise URLError(['CHECK', 400, detail])
 
     def _match_condition(self,result,checked,kwargs):
         if not checked: self._except(result, kwargs)

@@ -10,18 +10,12 @@ import cv2
 class Core(object):
 
     def __init__(self, db):
-        RUNTIME = db.RUNTIME
-        self._cache = Cache(RUNTIME)
+        # Get DB Terms
         self._db = db
+        RUNTIME = db.RUNTIME
 
-    def start_db(self, dname):
-        return self.DB_CLASS()
-
-    def update_feature(self, query, volume):
-        return 0
-
-    def read_feature(self, query):
-        return ""
+        # Make Cache with keywords
+        self._cache = Cache(RUNTIME)
 
     '''
     All methods to load data

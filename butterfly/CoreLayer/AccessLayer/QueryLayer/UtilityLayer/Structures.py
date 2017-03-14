@@ -32,6 +32,10 @@ class NamelessStruct(object):
     def __getitem__(self, key):
         return self.__dict__.get(key,self._n_get(key))
 
+    def get(self, key, default={}):
+        found = self.__getitem__(key)
+        return found if found else default
+
     def __setitem__(self, key, value):
         item = self.__getitem__(key)
         # Set the VALUE of the item if is struct

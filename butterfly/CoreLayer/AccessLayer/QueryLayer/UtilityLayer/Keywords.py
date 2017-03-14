@@ -171,7 +171,48 @@ class RUNTIME():
         self.ERROR = NamelessStruct(
             TERM = NamedStruct('term'),
             OUT = NamedStruct('value'),
-            CHECK = NamedStruct('check')
+            SIZE = NamedStruct('size'),
+            CHECK = NamedStruct('check'),
+            REQUEST = NamelessStruct(
+                CHECK = NamedStruct('bad_check',
+                    LOG = 'info',
+                    ACT = '''
+The {term} {value} is not {check}.
+                    '''.replace('\n','')
+                )
+            ),
+            SERVER = NamelessStruct(
+                START = NamedStruct('start',
+                    LOG = 'info',
+                    ACT = '''
+*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
+    Running server on port {value}.
+_______________________________________
+                    '''
+                ),
+                STOP = NamedStruct('stop',
+                    LOG = 'info',
+                    ACT = '''
+|||||||||||||||||||||||||||||||||||||||
+    Closed server on port {value}.
+*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
+                    '''
+                )
+            ),
+            CACHE = NamelessStruct(
+                ADD = NamedStruct('add_query',
+                    LOG = 'info',
+                    ACT = '''
+Add {value} to cache. Cache now {size} bytes.
+                    '''.replace('\n','')
+                ),
+                MAX = NamedStruct('over_max',
+                    LOG = 'warning',
+                    ACT = '''
+Cannot cache {value}. {size} bytes is over max.
+                    '''.replace('\n','')
+                )
+            ),
         )
 
 '''

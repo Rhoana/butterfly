@@ -47,10 +47,10 @@ class Query():
         output = self.OUTPUT.INFO
         runtime = self.RUNTIME.IMAGE
         # Get the right kind of datsource and datatype
-        source_val = keywords.get(runtime.SOURCE.NAME,None)
-        type_val = keywords.get(output.TYPE.NAME,None)
+        source_val = keywords.get(runtime.SOURCE.NAME)
+        type_val = keywords.get(output.TYPE.NAME)
         # Get the right blocksize
-        block = keywords.get(runtime.BLOCK.NAME,None)
+        block = keywords.get(runtime.BLOCK.NAME)
         # Unpack dimensions for full volume
         full_size = keywords.get(output.SIZE.NAME, [0,0,0])
 
@@ -98,7 +98,7 @@ class Query():
         k_out = errors.OUT.NAME
 
         if not is_good:
-            self.raise_error('bad_check',{
+            self.raise_error('CHECK',{
                 k_check: message,
                 k_out: str(value),
                 k_term: term
@@ -119,8 +119,5 @@ class Query():
         self.check_any(is_length,msg1,value,term)
 
     def raise_error(self,status,detail):
-        raise URLError({
-            'error': status,
-            'keys': detail,
-            'http': 503
-        })
+        raise URLError([status, 503, detail])
+

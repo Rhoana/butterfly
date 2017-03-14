@@ -2,16 +2,16 @@ import logging
 
 class MakeLog(object):
     # Make an interface to logging
-    def __init__(self, statuses, actions):
-        self.stats = statuses
-        self.acts = actions
+    def __init__(self, struct):
+        self.logs = struct
 
     # The actual logging function
-    def logging(self, action, keys):
+    def logging(self, action, **keys):
         # Get the log status and template
-        status = self.stats.get(action,'error')
-        template = self.acts.get(action,'Unknown')
-        # Try to format the sting
+        field = self.logs.get(action,{})
+        status = field.get('LOG','error')
+        template = field.get('ACT','Error')
+        # Try to format the string
         try:
             message = template.format(**keys)
         except KeyError:

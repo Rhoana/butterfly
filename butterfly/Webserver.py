@@ -7,6 +7,7 @@ class Webserver(object):
     maxbuffer = 1024 * 1024 * 150000
     def __init__(self, db, **kwargs):
         # Create a core with a database
+        self.RUNTIME = db.RUNTIME
         self._core = Core(db)
         self._db = db
 
@@ -22,28 +23,21 @@ class Webserver(object):
             (r'/ocp/(.*)', Access.OCP, app_in)
         ], **app_set)
 
-        # Prepare error logging
-        statuses = {
-            'start': 'info',
-            'stop': 'info'
-        }
-        actions = {
-            'start': 'Running server on port {port}',
-            'stop': 'Closed server on port {port}'
-        }
         # Create info logger
-        logger = Utility.MakeLog(statuses,actions)
-        self._logger = logger.logging
+        log_list = self.RUNTIME.ERROR.SERVER
+        self.log = Utility.MakeLog(log_list).logging
 
     def start(self,_port):
         app_start = {
             'max_buffer_size': self.maxbuffer
         }
         self._port = _port
+        # Keyword constants
+        k_val = self.RUNTIME.ERROR.OUT.NAME
         # Begin to serve the web application
         self._webapp.listen(_port, **app_start)
         self._server = IOLoop.instance()
-        self.log('start', port=_port)
+        self.log('START', **{k_val: _port})
         # Return the webserver
         return self._server
 
@@ -51,8 +45,8 @@ class Webserver(object):
         # Ask tornado to stop
         ioloop = self._server
         ioloop.add_callback(ioloop.stop)
-        self.log('stop', port=self._port)
+        # Keyword constants
+        k_val = self.RUNTIME.ERROR.OUT.NAME
+        self.log('STOP', **{k_val: self._port})
 
-    def log(self, action, **keys):
-        # Log error and return
-        return self._logger(action,keys)
+

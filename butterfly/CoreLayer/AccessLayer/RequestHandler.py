@@ -18,23 +18,9 @@ class RequestHandler(web.RequestHandler):
         self._core = _core
         self._db = _db
 
-        # Get global error strings
-        errors = self.RUNTIME.ERROR
-        k_check = errors.CHECK.NAME
-        k_term = errors.TERM.NAME
-        k_out = errors.OUT.NAME
-
-        # Prepare info logging
-        statuses = {
-            'bad_check': 'info'
-        }
-        actions = {
-            'bad_check': '''The {{{}}} {{{}}} is not {{{}}}
-            '''.format(k_term, k_out, k_check)
-        }
         # Create info logger
-        logger = Utility.MakeLog(statuses,actions)
-        self._logger = logger.logging
+        log_list = self.RUNTIME.ERROR.REQUEST
+        self.log = Utility.MakeLog(log_list).logging
 
     # Each Handler must define
     def parse(self, _request):
@@ -47,10 +33,10 @@ class RequestHandler(web.RequestHandler):
             yield self._ex.submit(self.handle, query)
         except URLError, u_error:
             # Get error information
-            details = u_error.args[0]
-            self.set_status(int(details.get('http',500)))
+            action, status, details = u_error.args[0]
+            self.set_status(int(status))
             self.set_header('Content-Type', 'text/plain')
-            self.write(self.log(details))
+            self.write(self.log(action, **details))
 
     def check(self, _query):
         return _query
@@ -65,10 +51,3 @@ class RequestHandler(web.RequestHandler):
         # Return content
         self.write(content)
         return content
-
-    def log(self, detail):
-        # Get error info and type
-        keys = detail.get('keys',{})
-        action = detail.get('error','')
-        # Log error and return
-        return self._logger(action,keys)
