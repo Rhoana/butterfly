@@ -32,7 +32,9 @@ class NamelessStruct(object):
     def __getitem__(self, key):
         return self.__dict__.get(key,self._n_get(key))
 
-    def get(self, key, default={}):
+    def get(self, key, default=None):
+        if default is None:
+            default = {}
         found = self.__getitem__(key)
         return found if found else default
 
