@@ -1,8 +1,9 @@
 # butterfly
 
 ### Version 2:
-[![V2][V2.IMAGE.CI]][V2.LINK.CI][![V2][V2.IMAGE.COVER]][V2.LINK.COVER]
-[![V2][V2.IMAGE.QC]][V2.LINK.QC]
+[![V2][V2.IMAGE.CI]][V2.LINK.CI] [![V2][V2.IMAGE.COVER]][V2.LINK.COVER]
+
+[![V2][V2.IMAGE.QC]][V2.LINK.QC] [![V2][V2.IMAGE.CODACY]][V2.LINK.CODACY]
 
 ### Master:
 [![V1][V1.IMAGE.CI]][V1.LINK.CI]
@@ -13,6 +14,8 @@
 [V2.LINK.COVER]: https://coveralls.io/github/Rhoana/butterfly?branch=update_v2
 [V2.IMAGE.QC]: https://www.quantifiedcode.com/api/v1/project/2ec68224940e403ab129befc98da67b0/snapshot/origin:update_v2:HEAD/badge.svg
 [V2.LINK.QC]: https://www.quantifiedcode.com/app/project/2ec68224940e403ab129befc98da67b0?branch=origin%2Fupdate_v2
+[V2.IMAGE.CODACY]: https://img.shields.io/codacy/grade/f8a7af03a553445ca1e53a673d2eff7d/update_v2.svg 
+[V2.LINK.CODACY]: https://www.codacy.com/app/thejohnhoffer/butterfly/dashboard
 
 
 [V1.IMAGE.CI]: https://img.shields.io/circleci/project/github/Rhoana/butterfly/master.svg 
