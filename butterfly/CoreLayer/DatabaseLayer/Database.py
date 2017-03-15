@@ -86,7 +86,8 @@ class Database():
                 return self.get_all(table, path)
             # Filter by filter fun if callable
             if callable(key):
-                return self.get_by_fun(table, path, key)
+                result = self.get_by_fun(table, path, key)
+                return result if result else []
             # Filter by a secondary key
             if table == tables.NEURON.NAME:
                 keywords[tables.NEURON.KEY.NAME] = key
@@ -94,7 +95,8 @@ class Database():
             else:
                 return self.get_by_key(table, path, key)
         # Filter the database by keywords
-        return self.get_by_keywords(table, path, **keywords)
+        result = self.get_by_keywords(table, path, **keywords)
+        return result if result else []
 
     # Must be overwritten
     def get_all(self, table, path):

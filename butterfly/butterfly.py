@@ -90,22 +90,23 @@ class Butterfly():
         full_path = os.path.join(dataset_path, k_file)
         # List all the syapse database keys
         k_keys = k_nodes_out + k_points_out
-        # For output file
-        synapes_dicts = []
 
-        # Begin adding synapses to database
-        with open(full_path, 'r') as f:
-            all_json = json.load(f)
-            # Get points and centers from json
-            get_node = lambda n: all_json[n]
-            get_point = lambda p: all_json[k_point][p]
-            # Transpose the list of all synapses
-            center = map(get_point, k_points_in)
-            link0, link1 = map(get_node, k_nodes_in)
-            synapse_list = zip(link0,link1, *center)
-            # Get a list of dictionaries for all synapses
-            get_dict = lambda s: dict(zip(k_keys,s))
-            synapse_dicts = map(get_dict, synapse_list)
+        try:
+            # Begin adding synapses to database
+            with open(full_path, 'r') as f:
+                all_s = json.load(f)
+        # Return if not valid file or json
+        except IOError, ValueError:
+            return -1
+
+        # Transpose the list of all synapses
+        center = map(all_s[k_point].get, k_points_in)
+        link0, link1 = map(all_s.get, k_nodes_in)
+        synapse_list = zip(link0,link1, *center)
+
+        # Get a list of dictionaries for all synapses
+        get_dict = lambda s: dict(zip(k_keys,s))
+        synapse_dicts = map(get_dict, synapse_list)
 
         # Add the synapses to the database
         entry_args = [k_synapse,dataset_path,synapse_dicts]
@@ -157,7 +158,6 @@ class Butterfly():
             'save': 'path of output yaml file indexing experiments',
             'port': 'port >1024 for hosting this server'
         }
-
         parser = argparse.ArgumentParser(description=help['bfly'])
         parser.add_argument('port', **{
             'type': int,

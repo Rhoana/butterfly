@@ -42,7 +42,6 @@ class RequestHandler(web.RequestHandler):
         return _query
 
     def handle(self, _query):
-        this_method = _query.INPUT.METHODS.VALUE
         self.set_header('Content-Type',_query.mime_type)
         if _query.is_data:
             content = self._core.get_data(_query)

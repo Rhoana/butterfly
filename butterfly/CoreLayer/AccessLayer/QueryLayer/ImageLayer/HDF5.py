@@ -10,26 +10,20 @@ class HDF5(Datasource):
     meta_files = ['.json']
 
     @staticmethod
-    def h5_info(query):
-        path = query.OUTPUT.INFO.PATH
-        h5_info = query.RUNTIME.IMAGE.SOURCE.HDF5
-        return [path,h5_info.INNER]
-
-    @staticmethod
     def load_tile(query):
 
         # call superclass
         Datasource.load_tile(query)
         # Load information about full hdf5
-        path, inner = HDF5.h5_info(query)
+        h5_info = query.RUNTIME.IMAGE.SOURCE.HDF5
 
         # Find the region to crop
         sk,sj,si = query.all_scales
         z0,y0,x0 = query.tile_origin
         z1,y1,x1 = query.tile_origin + query.blocksize
 
-        with h5py.File(path.VALUE) as fd:
-            vol = fd[inner.VALUE]
+        with h5py.File(h5_info.OUTER.VALUE) as fd:
+            vol = fd[h5_info.INNER.VALUE]
             return vol[z0:z1:sk,y0:y1:sj,x0:x1:si]
 
     @staticmethod
@@ -37,17 +31,18 @@ class HDF5(Datasource):
         # Keyword names
         output = query.OUTPUT.INFO
         runtime = query.RUNTIME.IMAGE
-        inner = runtime.SOURCE.HDF5.INNER
+        h5_info = runtime.SOURCE.HDF5
         # call superclass
         Datasource.preload_source(query)
 
         # Check if path is valid
         keywords = HDF5.valid_path(query)
         if not keywords:
-            return {}
+            return keywords
+
         # Get validated name and dataset
-        filename = keywords[output.PATH.NAME]
-        dataset = keywords[inner.NAME]
+        filename = keywords[h5_info.OUTER.NAME]
+        dataset = keywords[h5_info.INNER.NAME]
         # Load properties from H5 dataset
         with h5py.File(filename,'r') as fd:
             vol = fd[dataset]
@@ -58,12 +53,13 @@ class HDF5(Datasource):
                 runtime.BLOCK.NAME: np.uint32(block),
                 output.SIZE.NAME: np.uint32(vol.shape)
             })
-            return keywords
+        # Return all canonical keywords
+        return keywords
 
     @staticmethod
     def valid_path(query):
         # Dereference path to hdf5 data
-        path, inner = HDF5.h5_info(query)
+        h5_info = query.RUNTIME.IMAGE.SOURCE.HDF5
         filename, dataset = HDF5.load_info(query)
         # Try to load the file
         try:
@@ -71,11 +67,11 @@ class HDF5(Datasource):
                 if dataset not in fd.keys():
                     dataset = fd.keys()[0]
                 return {
-                    path.NAME: filename,
-                    inner.NAME: dataset
+                    h5_info.OUTER.NAME: filename,
+                    h5_info.INNER.NAME: dataset
                 }
         except IOError:
-            return False
+            return {}
 
     @staticmethod
     def load_info(query):
@@ -87,13 +83,17 @@ class HDF5(Datasource):
         # Load path if ends with json
         ending = os.path.splitext(filename)[1]
         if ending in HDF5.meta_files:
-            # Read the metainfo file
+            # Get function to read the metainfo file
             order = HDF5.meta_files.index(ending)
-            with open(filename) as infile:
-                info = HDF5.read[order](infile)
-                # Get the inner dataset and the new path
-                filename = info[h5_info.OUTER.NAME]
-                dataset = info[h5_info.INNER.NAME]
+            try:
+                with open(filename) as infile:
+                    # Read the metainfo file
+                    info = HDF5.read[order](infile)
+            except IOError:
+                return [filename, dataset]
+            # Get the inner dataset and the new path
+            filename = info[h5_info.OUTER.NAME]
+            dataset = info[h5_info.INNER.NAME]
 
         return [filename, dataset]
 

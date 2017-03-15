@@ -1,6 +1,4 @@
-import sys
-import logging
-import collections
+import sys, collections
 from .AccessLayer.QueryLayer import Utility
 
 class Cache(object):

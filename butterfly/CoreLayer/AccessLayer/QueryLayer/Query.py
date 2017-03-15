@@ -1,10 +1,9 @@
 from mimetypes import types_map
-from urllib2 import URLError
 from UtilityLayer import INPUT
 from UtilityLayer import RUNTIME
 from UtilityLayer import OUTPUT
+from urllib2 import URLError
 import numpy as np
-import logging
 
 class Query():
 
@@ -18,7 +17,6 @@ class Query():
         command = keywords.get(self.INPUT.METHODS.NAME,'')
         self.INPUT.METHODS.VALUE = command
         self.keywords = keywords
-        pass
 
     def set_key(self,struct,key,empty=''):
         field = getattr(struct, key)
@@ -54,13 +52,6 @@ class Query():
         # Unpack dimensions for full volume
         full_size = keywords.get(output.SIZE.NAME, [0,0,0])
 
-
-        # Get error keywords
-        errors = self.RUNTIME.ERROR
-        k_check = errors.CHECK.NAME
-        k_term = errors.TERM.NAME
-        k_out = errors.OUT.NAME
-
         # Make sure the source and type are valid
         self.check_list(runtime.SOURCE.LIST, source_val, 'source')
         self.check_list(output.TYPE.LIST, type_val, 'type')
@@ -86,7 +77,8 @@ class Query():
 
         # Optional keywords by source
         inner_path = runtime.SOURCE.HDF5.INNER
-        optional_fields = [inner_path, output.PATH]
+        outer_path = runtime.SOURCE.HDF5.OUTER
+        optional_fields = [inner_path, outer_path]
         # Assign all optional keywords
         for op in optional_fields:
             op.VALUE = keywords.get(op.NAME,op.VALUE)

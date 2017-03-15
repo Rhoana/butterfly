@@ -249,7 +249,9 @@ class API(RequestHandler):
 
     def _try_condition(self,result,check,kwargs):
         try: return check(result)
-        except: self._except(result, kwargs)
+        # Except main errors for known checks
+        except TypeError, ValueError:
+            self._except(result, kwargs)
 
     def _try_typecast_int(self,qparam,result):
         k_term = self.RUNTIME.ERROR.TERM.NAME

@@ -22,11 +22,11 @@ class Core(object):
     '''
 
     def get_info(self, i_query):
-        status = self.update_query(i_query)
+        self.update_query(i_query)
         return i_query.dump
 
     def get_data(self, query):
-        status = self.update_query(query)
+        self.update_query(query)
         image = self.find_tiles(query)
         return self.write_image(query, image)
 

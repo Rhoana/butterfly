@@ -1,8 +1,5 @@
 from Query import Query
-import numpy as np
-import logging
-import json
-import yaml
+import json, yaml
 
 class InfoQuery(Query):
 

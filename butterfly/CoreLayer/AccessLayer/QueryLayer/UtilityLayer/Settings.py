@@ -1,5 +1,4 @@
 from rh_config import config
-import cv2
 import os
 
 # Server settings
