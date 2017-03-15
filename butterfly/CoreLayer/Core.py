@@ -93,7 +93,7 @@ class Core(object):
         cache_tile = self._cache.get(t_query.key)
         if len(cache_tile):
             return cache_tile[K0:K1,J0:J1,I0:I1]
-        # Load from disk 
+        # Load from disk
         tile = t_query.tile
 
         self._cache.set(t_query.key, tile)

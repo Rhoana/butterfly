@@ -11,7 +11,8 @@ class NamelessStruct(object):
             keyval = _keywords[key]
             setattr(self,key,keyval)
             # Put all lists into list
-            more = keyval if type(keyval) is list else []
+            is_list = isinstance(keyval,list)
+            more = keyval if is_list else []
             # Put all term names into list
             if hasattr(keyval, 'NAME'):
                 more = [keyval.NAME]
