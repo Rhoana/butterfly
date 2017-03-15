@@ -1,4 +1,3 @@
-from tornado.ioloop import IOLoop
 import butterfly as bfly
 import unittest as ut
 import datetime

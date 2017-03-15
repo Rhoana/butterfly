@@ -96,7 +96,7 @@ class Butterfly():
             with open(full_path, 'r') as f:
                 all_s = json.load(f)
         # Return if not valid file or json
-        except IOError, ValueError:
+        except (IOError, ValueError):
             return -1
 
         # Transpose the list of all synapses

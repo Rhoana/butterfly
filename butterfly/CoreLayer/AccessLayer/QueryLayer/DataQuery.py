@@ -1,6 +1,5 @@
 from Query import Query
 import numpy as np
-import logging
 
 class DataQuery(Query):
 
