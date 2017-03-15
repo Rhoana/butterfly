@@ -7,7 +7,7 @@ class Argv(object):
     def to_argv(*args, **flags):
         # Get positional and keyword arguments
         ordered = ['main'] + map(str, args)
-        keyed = flags.items()
+        keyed = sorted(flags.items())
         # Flatten all keys and values
         return reduce(Argv.flat, keyed, ordered)
 
