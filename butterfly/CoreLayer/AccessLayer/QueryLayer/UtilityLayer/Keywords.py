@@ -1,4 +1,5 @@
 from Settings import MAX_CACHE_SIZE
+from Settings import CONFIG_FILENAME
 from Structures import NamelessStruct
 from Structures import NamedStruct
 
@@ -15,6 +16,8 @@ _groupings = {
     _channels: 'channel'
 }
 
+_group_list = [_experiments, _samples, _datasets, _channels]
+
 '''
 THIS HELPS HANDLE URL REQUESTS
 '''
@@ -22,13 +25,11 @@ class INPUT():
     def __init__(self):
         # ALL THE METHOD NAMES
         self.METHODS = NamedStruct( 'method',
-            GROUP_LIST = [
-                _experiments, _samples, _datasets, _channels
-            ],
             INFO_LIST = ['channel_metadata', 'entity_feature'],
             META = NamedStruct('channel_metadata'),
             FEAT = NamedStruct('entity_feature'),
-            IMAGE_LIST = ['data', 'mask']
+            IMAGE_LIST = ['data', 'mask'],
+            GROUP_LIST = _group_list
         )
         self.GROUP = NamedStruct( 'name',
             LIST = map(_groupings.get, self.METHODS.GROUP_LIST)
@@ -163,6 +164,10 @@ class RUNTIME():
                     POINT  = NamedStruct('synapse_center',
                         LIST = ['z','y','x']
                     )
+                ),
+                CONFIG = NamedStruct(CONFIG_FILENAME,
+                    GROUP_LIST = _group_list,
+                    PATH = NamedStruct('path')
                 )
             ),
             JOIN = NamedStruct('{}://{}')

@@ -40,25 +40,9 @@ class Butterfly():
         # Get the correct database class
         db_class = getattr(Database, Utility.DB_TYPE)
         # Create the database with RUNTIME constants
-        self._db = db_class(Utility.DB_PATH, self.RUNTIME)
-        # Get keywords for the BFLY_CONFIG
-        k_list = self.INPUT.METHODS.GROUP_LIST
-        k_path = self.OUTPUT.INFO.PATH.NAME
-        '''
-        Make a dictionary mapping channel paths to dataset paths
-        '''
-        layer0 = Utility.BFLY_CONFIG
-        pather = lambda l: l.get(k_path,'')
-        lister = lambda l,n: l.get(k_list[n],[])
-        mapper  = lambda l,p: {c:p for c in map(pather,l)}
-        join = lambda l,p,a: dict(mapper(l,p),**a) if p else a
-        get_layer2 = lambda a,l: join(lister(l,3), pather(l), a)
-        get_layer1 = lambda a,l: reduce(get_layer2, lister(l,2), a)
-        get_layer0 = lambda a,l: reduce(get_layer1, lister(l,1), a)
-        all_paths = reduce(get_layer0, lister(layer0,0), {})
-
-        # Fill the database with content
-        return self._db.add_paths(all_paths)
+        db = db_class(Utility.DB_PATH, self.RUNTIME)
+        # Load database paths, tables, and entries
+        return db.load_config(Utility.BFLY_CONFIG)
 
     def parse_argv(self, argv):
         sys.argv = argv

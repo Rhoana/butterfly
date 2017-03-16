@@ -8,6 +8,50 @@ class Database():
         self.RUNTIME = _runtime
 
     '''
+    Interface for loading config
+    '''
+    def load_config(self, config):
+        # Get file fields
+        k_files = self.RUNTIME.DB.FILE
+        # Get keywords for the BFLY_CONFIG
+        k_list = k_files.CONFIG.GROUP_LIST
+        k_path = k_files.CONFIG.PATH.NAME
+        # Get the depth to the channels
+        k_deep = len(k_list) - 1
+
+        # Join lists from config groups
+        def cat_lists(groups, level):
+            # Get the next group key
+            lev_key = k_list[level]
+            # Get a list of lists of all the next groups
+            g_lists = [g.get(lev_key, []) for g in groups]
+            # Get list of all groups from groups
+            return [g for l in g_lists for g in l]
+
+        # Join all lists from within config
+        all_lists = reduce(cat_lists, range(k_deep), [config])
+
+        # Map channel paths to datasource paths
+        def map_paths(all_map, src):
+            # Get the channel key and list
+            c_key = k_list[k_deep]
+            c_list = src.get(c_key,{})
+            # Get the source path
+            path = src.get(k_path)
+            # Add none to map if no path
+            if not path: return all_map
+            # Map new channel paths to path if exists
+            a_map = {c[k_path]: path for c in c_list}
+            return dict(all_map, **a_map)
+
+        # Create dictionary from each channel in lists
+        all_paths = reduce(map_paths, all_lists, {})
+
+        # Add all paths to the database
+        return self.add_paths(all_paths)
+
+
+    '''
     Interface for adding paths
     '''
 

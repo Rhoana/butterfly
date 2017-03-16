@@ -1,8 +1,10 @@
+from rh_config import config_filename
 from rh_config import config
 import os
 
 # Server settings
 BFLY_CONFIG = config.get("bfly", {})
+CONFIG_FILENAME = config_filename
 
 #HTTP port for server
 PORT = int(BFLY_CONFIG.get("port", 2001))
