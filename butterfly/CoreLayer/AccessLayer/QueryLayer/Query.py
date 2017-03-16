@@ -110,6 +110,7 @@ class Query():
         is_length = len(value) == length
         self.check_any(is_length,msg1,value,term)
 
-    def raise_error(self,status,detail):
+    @staticmethod
+    def raise_error(status,detail):
         raise URLError([status, 503, detail])
 

@@ -38,9 +38,6 @@ class RequestHandler(web.RequestHandler):
             self.set_header('Content-Type', 'text/plain')
             self.write(self.log(action, **details))
 
-    def check(self, _query):
-        return _query
-
     def handle(self, _query):
         self.set_header('Content-Type',_query.mime_type)
         if _query.is_data:

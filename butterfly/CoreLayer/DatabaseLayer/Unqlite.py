@@ -12,17 +12,16 @@ class Unqlite(Database):
     Overwriting interface Setters
     '''
 
-    def add_one_path(self,c_path,d_path):
-        Database.add_one_path(self, c_path, d_path)
+    def add_path(self,c_path,d_path):
+        Database.add_path(self, c_path, d_path)
         self.db[c_path] = d_path
-        return ''
 
-    def add_one_table(self, table, path):
-        tablepath = Database.add_one_table(self, table, path)
+    def add_table(self, table, path):
+        tablepath = Database.add_table(self, table, path)
         # Create collection with table, path name
         collect= self.db.collection(tablepath)
         collect.create()
-        return ''
+        return tablepath
 
     def add_entry(self, table, path, entry):
         # Get constant keywords

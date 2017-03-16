@@ -60,7 +60,7 @@ class Database():
         dataset_paths = set(all_paths.values())
         # Add all paths to database
         for c_path,d_path in all_paths.iteritems():
-            self.add_one_path(c_path, d_path)
+            self.add_path(c_path, d_path)
         # Add all tables for each path
         for d_path in dataset_paths:
             self.add_tables(d_path)
@@ -71,8 +71,8 @@ class Database():
         return self
 
     # Must be overwritten
-    def add_one_path(self, c_path, d_path):
-        return ''
+    def add_path(self, c_path, d_path):
+        pass
 
     '''
     Interface for adding tables
@@ -84,11 +84,11 @@ class Database():
         # Create all tables for the path
         for k_table in k_list:
             # Make a table from path and table name
-            self.add_one_table(k_table, path)
-        return ''
+            self.add_table(k_table, path)
+        return self
 
     # Must be overwritten
-    def add_one_table(self, table, path):
+    def add_table(self, table, path):
         k_join = self.RUNTIME.DB.JOIN.NAME
         return k_join.format(table, path)
 
@@ -202,7 +202,7 @@ class Database():
 
     # Must be overwritten
     def get_path(self, path):
-        return path
+        pass
 
     # Must be overwritten
     def get_table(self, table, path):
@@ -259,5 +259,5 @@ class Database():
     '''
     # Must be overwritten
     def commit(self):
-        return ''
+        pass
 

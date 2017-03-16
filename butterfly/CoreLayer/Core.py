@@ -30,7 +30,8 @@ class Core(object):
         image = self.find_tiles(query)
         return self.write_image(query, image)
 
-    def make_data_query(self, i_query):
+    @staticmethod
+    def make_data_query(i_query):
         # Begin building needed keywords
         i_path = i_query.OUTPUT.INFO.PATH
 
@@ -39,7 +40,8 @@ class Core(object):
             i_path.NAME: i_path.VALUE
         })
 
-    def make_tile_query(self, query, t_index):
+    @staticmethod
+    def make_tile_query(query, t_index):
         tile_crop = query.all_in_some(t_index)
         return TileQuery(query, t_index, tile_crop)
 
@@ -100,16 +102,18 @@ class Core(object):
 
         return tile[K0:K1,J0:J1,I0:I1]
 
-    def id_to_color(self, vol):
-        colors = np.zeros((3,)+vol.shape).astype(np.uint8)
-        colors[0] = np.mod(107*vol,700).astype(np.uint8)
-        colors[1] = np.mod(509*vol,900).astype(np.uint8)
-        colors[2] = np.mod(200*vol,777).astype(np.uint8)
-        return np.moveaxis(colors,0,-1)
-
     def view_volume(self, view, vol):
+        # Set up a colormap
+        def id_to_color(vol):
+            colors = np.zeros((3,)+vol.shape).astype(np.uint8)
+            colors[0] = np.mod(107*vol,700).astype(np.uint8)
+            colors[1] = np.mod(509*vol,900).astype(np.uint8)
+            colors[2] = np.mod(200*vol,777).astype(np.uint8)
+            return np.moveaxis(colors,0,-1)
+
+        # Colormap if a colormap view
         if view.VALUE == view.COLOR.NAME:
-            return self.id_to_color(vol)
+            return id_to_color(vol)
         return vol
 
     def write_image(self, query, volume):
