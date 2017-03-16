@@ -24,10 +24,10 @@ class Unqlite(Database):
         collect.create()
         return ''
 
-    def add_one_entry(self, table, path, entry):
+    def add_entry(self, table, path, entry):
         # Get constant keywords
         k_table = self.RUNTIME.DB.TABLE[table].KEY_LIST
-        Database.add_one_entry(self, table, path, entry)
+        Database.add_entry(self, table, path, entry)
         # Get the collection
         collect = self.get_table(table, path)
         # Check if not unique in collection

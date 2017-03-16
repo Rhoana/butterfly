@@ -38,7 +38,7 @@ class TestWebserver(ut.TestCase):
         one_sec = datetime.timedelta(seconds=1)
         server.add_timeout(one_sec, web.stop)
 
-        # Start the webserver right now 
+        # Start the webserver right now
         server.start()
 
 if __name__ == '__main__':

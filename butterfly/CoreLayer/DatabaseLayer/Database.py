@@ -1,3 +1,6 @@
+import json, os
+import numpy as np
+
 class Database():
 
     def __init__(self, path, _runtime):
@@ -9,11 +12,19 @@ class Database():
     '''
 
     def add_paths(self, all_paths):
+        # Get unique dataset paths
+        dataset_paths = set(all_paths.values())
+        # Add all paths to database
         for c_path,d_path in all_paths.iteritems():
             self.add_one_path(c_path, d_path)
+        # Add all tables for each path
+        for d_path in dataset_paths:
+            self.add_tables(d_path)
+            synapses = self.load_synapses(d_path)
+            self.load_neurons(d_path, synapses)
         # Save to disk
         self.commit()
-        return ''
+        return self
 
     # Must be overwritten
     def add_one_path(self, c_path, d_path):
@@ -23,14 +34,7 @@ class Database():
     Interface for adding tables
     '''
 
-    def add_tables(self, paths):
-        # Add all tables joined to paths
-        map(self.add_each_table, paths)
-        # Save to disk
-        self.commit()
-        return ''
-
-    def add_each_table(self, path):
+    def add_tables(self, path):
         # Get keywords for the database
         k_list = self.RUNTIME.DB.TABLE.LIST
         # Create all tables for the path
@@ -45,20 +49,103 @@ class Database():
         return k_join.format(table, path)
 
     '''
+    Interface for loading entries
+    '''
+    def load_synapses(self, path):
+        # Get file fields
+        k_files = self.RUNTIME.DB.FILE
+        # Get keywords for input file
+        k_file = k_files.SYNAPSE.NAME
+        k_point = k_files.SYNAPSE.POINT.NAME
+        k_points_in = k_files.SYNAPSE.POINT.LIST
+        k_nodes_in = k_files.SYNAPSE.NEURON_LIST
+        # Get the full path to the synapse file
+        full_path = os.path.join(path, k_file)
+
+        try:
+            # Begin adding synapses to database
+            with open(full_path, 'r') as f:
+                all_dict = json.load(f)
+                point_dict = all_dict[k_point]
+        # Return if not valid file or json
+        except (IOError, ValueError):
+            return []
+
+        # Transpose the list of all synapses
+        links = map(all_dict.get, k_nodes_in)
+        center = map(point_dict.get, k_points_in)
+        synapses = np.uint32(links + center).T
+
+        # Add synapses to database
+        self.add_synapses(path, synapses)
+        return synapses
+
+    def load_neurons(self, path, synapses):
+        # Find neurons that are never targets
+        all_src = np.unique(synapses[:,0],True)[1]
+        all_tgt = np.unique(synapses[:,1],True)[1]
+        only_src = list(set(all_src) - set(all_tgt))
+        # Get all neuron lists with synapse positions
+        neuron_src = np.delete(synapses[only_src], 1, 1)
+        neuron_tgt = np.delete(synapses, 0, 1)
+        # Get full neuron list from source and target
+        neurons = np.r_[neuron_src, neuron_tgt]
+
+        # Add neuons to database
+        self.add_neurons(path, neurons)
+        return neurons
+
+    '''
     Interface for adding entries
     '''
+    def add_synapses(self, path, synapses):
+        # Get database fields
+        k_tables = self.RUNTIME.DB.TABLE
+        # Get keywords for the database
+        k_synapse = k_tables.SYNAPSE.NAME
+        # List all the syapse database keys
+        k_nodes_out = k_tables.SYNAPSE.NEURON_LIST
+        k_points_out = k_tables.ALL.POINT_LIST
+        k_keys = k_nodes_out + k_points_out
 
-    def add_entries(self, table, path, entries):
-        for entry in entries:
-            # Add a dictionary entry
-            if isinstance(entry, dict):
-                self.add_one_entry(table, path, entry)
+        # Add entries
+        return self.add_entries(k_synapse, path, k_keys, synapses)
+
+    def add_neurons(self, path, neurons):
+        # Get database fields
+        k_tables = self.RUNTIME.DB.TABLE
+        # Get keywords for the database
+        k_neuron = k_tables.NEURON.NAME
+        # List all the syapse database keys
+        k_node_out = k_tables.NEURON.KEY.NAME
+        k_points_out = k_tables.ALL.POINT_LIST
+        k_keys = [k_node_out] + k_points_out
+
+        # Add entries
+        return self.add_entries(k_neuron, path, k_keys, neurons)
+
+    def add_entries(self, table, path, t_keys, entries):
+        # Typecast values uniformly
+        def cast(value):
+            # convert if numpy datatype
+            if isinstance(value, np.number):
+                return value.item()
+            return value
+        # Add entries to database
+        def add_entry(entry):
+            # Add a tuple entry as a dict
+            if hasattr(entry, '__len__'):
+                d_entry = dict(zip(t_keys, map(cast,entry)))
+                self.add_entry(table, path, d_entry)
+                return d_entry
+        # add all the entries
+        dict_entries = map(add_entry, entries)
         # Save to disk
         self.commit()
-        return ''
+        return dict_entries
 
     # Must be overwritten
-    def add_one_entry(self, table, path, entry):
+    def add_entry(self, table, path, entry):
         k_join = self.RUNTIME.DB.JOIN.NAME
         return k_join.format(table, path)
 
@@ -78,7 +165,7 @@ class Database():
 
     def get_entry(self, table, path, key=None, **keywords):
         # Get the necessary keywords
-        tables = self.RUNTIME.DB.TABLE
+        k_tables = self.RUNTIME.DB.TABLE
         # Use key if no keywords
         if not len(keywords):
             # Return all if no key
@@ -89,8 +176,8 @@ class Database():
                 result = self.get_by_fun(table, path, key)
                 return result if result else []
             # Filter by a secondary key
-            if table == tables.NEURON.NAME:
-                keywords[tables.NEURON.KEY.NAME] = key
+            if table == k_tables.NEURON.NAME:
+                keywords[k_tables.NEURON.KEY.NAME] = key
             # Treat the key as the primary key
             else:
                 return self.get_by_key(table, path, key)
