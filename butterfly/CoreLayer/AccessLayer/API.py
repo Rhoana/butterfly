@@ -118,6 +118,8 @@ class API(RequestHandler):
         k_tables = self.RUNTIME.DB.TABLE
         k_nodes = k_tables.SYNAPSE.NEURON_LIST
         k_z,k_y,k_x = k_tables.ALL.POINT_LIST
+        # Get output keyword arguments
+        k_links = self.OUTPUT.FEATURES.LINKS
 
         # Shorthand database name, table, key
         db, db_table, db_key = self._db_feature(feat)
@@ -159,9 +161,9 @@ class API(RequestHandler):
         # If the request asks for all links
         if feat == feats.SYNAPSE_LINKS.NAME:
             return {
-                'synapse_id': result[db_key],
-                'synapse_parent_pre': result[k_nodes[0]],
-                'synapse_parent_post': result[k_nodes[1]]
+                k_links.ID.NAME: result[db_key],
+                k_links.PRE.NAME: result[k_nodes[0]],
+                k_links.POST.NAME: result[k_nodes[1]]
             }
 
         # Not yet supported

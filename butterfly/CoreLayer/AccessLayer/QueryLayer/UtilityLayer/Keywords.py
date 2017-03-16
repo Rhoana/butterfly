@@ -199,17 +199,17 @@ The {term} {value} is not {check}.
                 START = NamedStruct('start',
                     LOG = 'info',
                     ACT = '''
-*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
-    Running server on port {value}.
-_______________________________________
+*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
+ Start server on port {value}.
+_______________________________
                     '''
                 ),
                 STOP = NamedStruct('stop',
                     LOG = 'info',
                     ACT = '''
-|||||||||||||||||||||||||||||||||||||||
-    Closed server on port {value}.
-*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
+|||||||||||||||||||||||||||||||
+ Stop server on port {value}.
+*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
                     '''
                 )
             ),
@@ -248,6 +248,14 @@ class OUTPUT():
                 X = NamedStruct('x'),
                 Y = NamedStruct('y'),
                 Z = NamedStruct('z')
+            )
+        )
+        # ALL THE FEATURE OUTPUT TERMS
+        self.FEATURES = NamelessStruct(
+            LINKS = NamelessStruct(
+                ID = NamedStruct('synapse_id'),
+                PRE = NamedStruct('synapse_parent_pre'),
+                POST = NamedStruct('synapse_parent_post')
             )
         )
 

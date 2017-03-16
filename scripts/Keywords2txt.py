@@ -1,21 +1,21 @@
 import re
 import yaml
 import numpy as np
-from UtilityLayer import INPUT
-from UtilityLayer import RUNTIME
-from UtilityLayer import OUTPUT
+from butterfly import Utility
 
 yaml_setup = {
-    'default_flow_style': False
+    'default_flow_style': False,
+    'width': 33
 }
 np_setup = {
     'fmt': '%s',
     'delimiter': ' | '
 }
+CLASS = ['INPUT','RUNTIME','OUTPUT']
 
 def class2yaml(it):
-    classy = [INPUT,RUNTIME,OUTPUT][int(it)]
-    classn = ['INPUT','RUNTIME','OUTPUT'][int(it)]
+    classn = CLASS[int(it)]
+    classy = getattr(Utility, classn)
     unclean = yaml.dump({classn:classy()}, **yaml_setup)
     clean = re.sub('!!python.+\n','\n',unclean)
     return clean.split('\n')
