@@ -40,8 +40,9 @@ class DataQuery(Query):
 
     @property
     def target_shape(self):
-        get_val = lambda k: getattr(self.INPUT.POSITION,k).VALUE
-        return np.uint32(map(get_val,['DEPTH','HEIGHT','WIDTH']))
+        shapes = ['DEPTH','HEIGHT','WIDTH']
+        dhw = map(self.INPUT.POSITION.get, shapes)
+        return np.uint32([s.VALUE for s in dhw])
 
     @property
     def source_shape(self):
@@ -53,8 +54,8 @@ class DataQuery(Query):
 
     @property
     def source_origin(self):
-        get_val = lambda k: getattr(self.INPUT.POSITION,k).VALUE
-        return np.uint32(map(get_val,'ZYX'))
+        zyx = map(self.INPUT.POSITION.get,'ZYX')
+        return np.uint32([c.VALUE for c in zyx])
 
     @property
     def target_bounds(self):

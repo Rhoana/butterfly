@@ -245,9 +245,14 @@ class Database():
         return  self.get_table(table, path)
 
     def get_by_keywords(self, table, path, **keys):
-        values = lambda e: map(e.get, keys.keys())
-        getter = lambda e: values(e) == keys.values()
-        return self.get_by_fun(table, path, getter)
+        # Make keyword filter
+        def key_filter(v):
+            values = map(v.get, keys.keys())
+            # Compare all values with keywords
+            compare = zip(values, keys.values())
+            return all(a==b for a,b in compare)
+        # Filter table by keywords
+        return self.get_by_fun(table, path, key_filter)
 
     '''
     Interface for saving to disk
