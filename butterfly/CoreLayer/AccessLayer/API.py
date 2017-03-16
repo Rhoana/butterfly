@@ -316,4 +316,3 @@ class API(RequestHandler):
     def _get_int_query(self, _query):
         result = self.get_query_argument(_query.NAME, _query.VALUE)
         return self._try_typecast_int(_query.NAME, result)
-
