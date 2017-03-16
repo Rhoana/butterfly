@@ -14,8 +14,8 @@
 [V2.LINK.COVER]: https://coveralls.io/github/Rhoana/butterfly?branch=update_v2
 [V2.IMAGE.QC]: https://www.quantifiedcode.com/api/v1/project/2ec68224940e403ab129befc98da67b0/snapshot/origin:update_v2:HEAD/badge.svg
 [V2.LINK.QC]: https://www.quantifiedcode.com/app/project/2ec68224940e403ab129befc98da67b0?branch=origin%2Fupdate_v2
-[V2.IMAGE.CODACY]: https://img.shields.io/codacy/grade/f8a7af03a553445ca1e53a673d2eff7d/update_v2.svg 
-[V2.LINK.CODACY]: https://www.codacy.com/app/thejohnhoffer/butterfly/dashboard
+[V2.IMAGE.CODACY]: https://img.shields.io/codacy/grade/64cd27791fca49949ba1ffa285884202/update_v2.svg
+[V2.LINK.CODACY]: https://www.codacy.com/app/rhoana/butterfly/dashboard
 
 
 [V1.IMAGE.CI]: https://img.shields.io/circleci/project/github/Rhoana/butterfly/master.svg 
