@@ -16,7 +16,10 @@ _groupings = {
     _channels: 'channel'
 }
 
+# List all groups for the API and the rh-config
 _group_list = [_experiments, _samples, _datasets, _channels]
+# List all tables for the API and the database
+_table_list = ['neuron', 'synapse']
 
 '''
 THIS HELPS HANDLE URL REQUESTS
@@ -24,7 +27,7 @@ THIS HELPS HANDLE URL REQUESTS
 class INPUT():
     def __init__(self):
         # ALL THE METHOD NAMES
-        self.METHODS = NamedStruct( 'method',
+        self.METHODS = NamedStruct('method',
             INFO_LIST = ['channel_metadata', 'entity_feature'],
             META = NamedStruct('channel_metadata'),
             FEAT = NamedStruct('entity_feature'),
@@ -35,19 +38,25 @@ class INPUT():
             LIST = map(_groupings.get, self.METHODS.GROUP_LIST)
         )
         # ALL THE FEATURE NAMES
-        self.FEATURES = NamedStruct( 'feature',
-            NEURON_LIST = [
-                'neuron_keypoint',
-                'neuron_ids',
-                'is_neuron'
-            ],
-            SYNAPSE_LIST = [
-                'synapse_keypoint',
-                'neuron_children',
-                'synapse_parent',
-                'synapse_ids',
-                'is_synapse'
-            ],
+        self.FEATURES = NamedStruct('feature',
+            TABLES = NamelessStruct(
+                NEURON = NamedStruct(_table_list[0],
+                    LIST = [
+                        'neuron_keypoint',
+                        'neuron_ids',
+                        'is_neuron'
+                    ]
+                ),
+                SYNAPSE = NamedStruct(_table_list[1],
+                    LIST = [
+                        'synapse_keypoint',
+                        'neuron_children',
+                        'synapse_parent',
+                        'synapse_ids',
+                        'is_synapse'
+                    ]
+                )
+            ),
             SYNAPSE_LINKS = NamedStruct('synapse_parent'),
             NEURON_CHILDREN = NamedStruct('neuron_children'),
             POINT_LIST = ['synapse_keypoint','neuron_keypoint'],
@@ -144,12 +153,12 @@ class RUNTIME():
         # ALL THE DATABASE RUNTIME TERMS
         self.DB = NamelessStruct(
             TABLE = NamelessStruct(
-                LIST = ['neuron', 'synapse'],
-                NEURON = NamedStruct('neuron',
+                LIST = _table_list,
+                NEURON = NamedStruct(_table_list[0],
                     KEY = NamedStruct('neuron'),
                     KEY_LIST = ['neuron']
                 ),
-                SYNAPSE = NamedStruct('synapse',
+                SYNAPSE = NamedStruct(_table_list[1],
                     KEY = NamedStruct('__id'),
                     NEURON_LIST = ['n1','n2'],
                     KEY_LIST = ['n1','n2']

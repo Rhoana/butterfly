@@ -14,9 +14,9 @@ class API(RequestHandler):
         command = self._match_list('method',request,meths)
 
         if command == self.INPUT.METHODS.META.NAME:
-            return self._get_meta_info()
+            return self._meta_info
         if command == self.INPUT.METHODS.FEAT.NAME:
-            return self._get_feature_info()
+            return self._feature_info
         # Handle all methods the same if in same list
         if command in self.INPUT.METHODS.GROUP_LIST:
             return self._get_group(command)
@@ -29,7 +29,8 @@ class API(RequestHandler):
     Loads dictionary for info methods
     '''
 
-    def _get_meta_info(self):
+    @property
+    def _meta_info(self):
         # Get needed metadata
         info = self.OUTPUT.INFO
         in_info = self.INPUT.INFO
@@ -47,7 +48,8 @@ class API(RequestHandler):
             in_info.FORMAT.NAME: out_format
         })
 
-    def _get_feature_info(self):
+    @property
+    def _feature_info(self):
         # Get needed metadata
         info = self.OUTPUT.INFO
         in_info = self.INPUT.INFO
@@ -59,108 +61,144 @@ class API(RequestHandler):
 
         # Get all the channel info
         meta_info = self._get_group_dict('')
-        # The input format becomes the output format
+        # The path and the  output format
+        path = meta_info[info.PATH.NAME]
         out_format = self._get_list_query(in_info.FORMAT)
         # Get the name of the feature to load from db
         feat = self._get_list_query(feats)
-        # Get the channel pathname
-        path = meta_info[info.PATH.NAME]
-        # Check for all features that take an id
+
+        # All features that need id
         if feat not in feats.LABEL_LIST:
             id_key = self._get_int_query(in_info.ID)
-        # Check for all features that need bounds
-        if feat in feats.VOXEL_LIST + feats.LABEL_LIST:
-            # get integers from POSITION
+            # Return feature based on id
+            feature = self._id_feature(feat, path, id_key)
+        # All features that need bounds
+        else:
+            # get bounds from input
             for key in ['Z','Y','X','DEPTH','HEIGHT','WIDTH']:
                 term = getattr(self.INPUT.POSITION, key)
                 bounds.append(self._get_int_query(term))
-
-        # Get all the information based on feature parameter
-        feature_list = self._get_feature_list(feat, id_key, bounds, path)
+            # Return feature based on bounds
+            feature = self._box_feature(feat, path, bounds)
 
         # Return an infoquery
         return InfoQuery(**{
             methods.NAME: methods.FEAT.NAME,
             in_info.FORMAT.NAME: out_format,
-            info.NAMES.NAME: feature_list,
+            info.NAMES.NAME: feature,
             info.PATH.NAME: path
         })
 
-    def _get_feature_list(self, feat, id_key, bounds, path):
+    # Get the db table and key
+    def _db_feature(self, feat):
+        # Get all keywords
+        feats = self.INPUT.FEATURES
+        k_tables = self.RUNTIME.DB.TABLE
+
+        # List all the tables in the database
+        db_list = map(feats.TABLES.get, k_tables.LIST)
+        # Get the table that handles given request
+        in_db = (f.NAME for f in db_list if feat in f.LIST)
+        db_table = next(in_db, '')
+
+        # return empty
+        if not db_table:
+            return self._db, db_table, 0
+
+        # Find the primary key for the table
+        db_key = k_tables[db_table].KEY.NAME
+        # Return database, table, and key
+        return self._db, db_table, db_key
+
+    # Get all features that need an id
+    def _id_feature(self, feat, path, id_key):
         # Get input keyword arguments
         feats = self.INPUT.FEATURES
         # Get metadata for database
-        tables = self.RUNTIME.DB.TABLE
-        k_nodes = tables.SYNAPSE.NEURON_LIST
+        k_tables = self.RUNTIME.DB.TABLE
+        k_nodes = k_tables.SYNAPSE.NEURON_LIST
+        k_z,k_y,k_x = k_tables.ALL.POINT_LIST
 
-        # Check requests for neurons or synapses
-        feat_checks = enumerate(['NEURON', 'SYNAPSE'])
-        check_in = lambda l: feat in feats[l+'_LIST']
-        in_list =  [i for i,l in feat_checks if check_in(l)]
+        # Shorthand database name, table, key
+        db, db_table, db_key = self._db_feature(feat)
 
-        # Need new table
-        if not len(in_list):
+        # Do not have
+        if not db_table:
             return ['Voxel List not Supported yet']
-        # We'll need the dataset path and table
-        table = tables.LIST[in_list[0]]
-        # Let's find the primary key as well
-        main_key = tables[table].KEY.NAME
-        get_main = lambda s: s[main_key]
-        # Get abreviatons for database variables
-        k_z,k_y,k_x = tables.ALL.POINT_LIST
 
-        # Features requiring ID
-        if id_key is not None:
+        # Find all synapses where neuron is parent
+        if feat == feats.NEURON_CHILDREN.NAME:
+            result = db.get_entry(db_table, path, **{
+                k_nodes[0]: id_key
+            })
+            return [ s[db_key] for s in result ]
 
-            # Find all synapses where neuron is parent
-            if feat == feats.NEURON_CHILDREN.NAME:
-                result = self._db.get_entry(table, path, **{
-                    k_nodes[0]: id_key
-                })
-                return map(get_main, result)
+        # Just look at one result with the ID
+        result = db.get_entry(db_table, path, id_key)
 
-            # The next features use the same single result
-            result = self._db.get_entry(table, path, id_key)
-            if isinstance(result, list) and len(result):
-                result = result[0]
+        # Only first result needed
+        if result and isinstance(result, list):
+            result = result[0]
 
-            # If the request just checks an ID
-            if feat in feats.BOOL_LIST:
-                return not not result
+        # Just check record of an ID
+        if feat in feats.BOOL_LIST:
+            return not not result
 
-            # The next features return if not result
-            if not result:
-                return {}
+        # Empty features
+        if not result:
+            return {}
 
-            # If the request gets a keypoint
-            if feat in feats.POINT_LIST:
-                return {
-                    k_z: result[k_z],
-                    k_y: result[k_y],
-                    k_x: result[k_x]
-                }
+        # If the request gets a keypoint
+        if feat in feats.POINT_LIST:
+            return {
+                k_z: result[k_z],
+                k_y: result[k_y],
+                k_x: result[k_x]
+            }
 
-            # If the request asks for all links
-            if feat == feats.SYNAPSE_LINKS.NAME:
-                return {
-                    'synapse_id': result[main_key],
-                    'synapse_parent_pre': result[k_nodes[0]],
-                    'synapse_parent_post': result[k_nodes[1]]
-                }
+        # If the request asks for all links
+        if feat == feats.SYNAPSE_LINKS.NAME:
+            return {
+                'synapse_id': result[db_key],
+                'synapse_parent_pre': result[k_nodes[0]],
+                'synapse_parent_post': result[k_nodes[1]]
+            }
 
-        # Find labels in bounds
-        if feat in feats.LABEL_LIST and len(bounds):
-            start = np.uint32(bounds[:3])
-            end = start + bounds[3:]
-            # Find the centerpoints within the bounds
-            inbounds = lambda c: all(c>start) and all(c<end)
-            center = lambda s: map(s.get, [k_z,k_y,k_x])
-            center_bound = lambda s: inbounds(center(s))
-            result = self._db.get_entry(table, path, center_bound)
-            return map(get_main, result)
+        # Not yet supported
+        return [db_table]
 
-        # Features not yet supported
-        return [table]
+    # Get all features that need bounds
+    def _box_feature(self, feat, path, bounds):
+        # Get input keyword arguments
+        feats = self.INPUT.FEATURES
+        # Get metadata for database
+        k_tables = self.RUNTIME.DB.TABLE
+        k_z,k_y,k_x = k_tables.ALL.POINT_LIST
+
+        # Shorthand database name, table, key
+        db, db_table, db_key = self._db_feature(feat)
+
+        # Get start and end of bounds
+        start = np.uint32(bounds[:3])
+        end = start + bounds[3:]
+
+        # Bound center in start and end
+        def bounded(s):
+            c = map(s.get, [k_z,k_y,k_x])
+            return all(c > start) and all(c < end)
+
+        # Do not know
+        if not db_table:
+            return ['Feature not understood']
+
+        # if request for labels in bounds
+        if feat in feats.LABEL_LIST:
+            # Find the center points within the bounds
+            result = db.get_entry(db_table, path, bounded)
+            return [ s[db_key] for s in result ]
+
+        # Not yet supported
+        return [db_table]
 
     '''
     Lists values from config for group methods
