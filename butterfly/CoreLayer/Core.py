@@ -102,7 +102,8 @@ class Core(object):
 
         return tile[K0:K1,J0:J1,I0:I1]
 
-    def view_volume(self, view, vol):
+    @staticmethod
+    def view_volume(view, vol):
         # Set up a colormap
         def id_to_color(vol):
             colors = np.zeros((3,)+vol.shape).astype(np.uint8)
