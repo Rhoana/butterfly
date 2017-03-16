@@ -14,6 +14,12 @@ class Butterfly():
         'filename': 'bfly.log',
         'level': logging.INFO
     }
+    # Constants
+    PORT = Utility.PORT
+    DB_TYPE = Utility.DB_TYPE
+    DB_PATH = Utility.DB_PATH
+    BFLY_CONFIG = Utility.BFLY_CONFIG
+
     def __init__(self,_argv):
 
         # keyword arguments
@@ -38,11 +44,11 @@ class Butterfly():
     # Update the database from the config file
     def update_db(self):
         # Get the correct database class
-        db_class = getattr(Database, Utility.DB_TYPE)
+        db_class = getattr(Database, self.DB_TYPE)
         # Create the database with RUNTIME constants
-        db = db_class(Utility.DB_PATH, self.RUNTIME)
+        db = db_class(self.DB_PATH, self.RUNTIME)
         # Load database paths, tables, and entries
-        return db.load_config(Utility.BFLY_CONFIG)
+        return db.load_config(self.BFLY_CONFIG)
 
     def parse_argv(self, argv):
         sys.argv = argv
@@ -57,7 +63,7 @@ class Butterfly():
         parser.add_argument('port', **{
             'type': int,
             'nargs': '?',
-            'default': Utility.PORT,
+            'default': self.PORT,
             'help': helps['port']
         })
         parser.add_argument('-e','--exp', metavar='exp', help=helps['folder'])
