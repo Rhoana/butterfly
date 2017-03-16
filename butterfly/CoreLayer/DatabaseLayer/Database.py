@@ -125,12 +125,15 @@ class Database():
         return synapses
 
     def load_neurons(self, path, synapses):
+        # Get all source and target nodes
+        all_tgt = np.unique(synapses[:,1])
+        all_src, arg_src = np.unique(synapses[:,0], True)
+        src_dict = dict(zip(all_src, arg_src))
         # Find neurons that are never targets
-        all_src = np.unique(synapses[:,0],True)[1]
-        all_tgt = np.unique(synapses[:,1],True)[1]
         only_src = list(set(all_src) - set(all_tgt))
-        # Get all neuron lists with synapse positions
-        neuron_src = np.delete(synapses[only_src], 1, 1)
+        src_keys = map(src_dict.get, only_src)
+        # Get all neuron lists from synapse targets, sources
+        neuron_src = np.delete(synapses[src_keys], 1, 1)
         neuron_tgt = np.delete(synapses, 0, 1)
         # Get full neuron list from source and target
         neurons = np.r_[neuron_src, neuron_tgt]
