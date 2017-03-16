@@ -3,8 +3,6 @@ from CoreLayer import Database
 from Webserver import Webserver
 import sys, argparse
 import logging
-import json
-import os
 
 class Butterfly():
     '''

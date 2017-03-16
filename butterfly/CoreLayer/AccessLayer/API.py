@@ -132,7 +132,7 @@ class API(RequestHandler):
             if not result:
                 return {}
 
-            # If the request gets a keypoint 
+            # If the request gets a keypoint
             if feat in feats.POINT_LIST:
                 return {
                     k_z: result[k_z],
