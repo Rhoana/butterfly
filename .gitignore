@@ -8,6 +8,9 @@
 .tox
 *.log
 
+# Docs
+docs/build/*
+
 # Database
 *.db
 
