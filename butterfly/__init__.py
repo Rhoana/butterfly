@@ -1,12 +1,13 @@
-__all__ = ["bfly", "Webserver"]
-__all__ += ["Core", "Cache", "Database"]
-__all__ += ["Utility", "Image", "Query", "Access"]
+__all__ = ["main", "Butterfly", "Webserver"]
+__all__ += ["Core", "Database"]
+__all__ += ["Utility", "Image"]
+__all__ += ["Query", "Access"]
 
 from .Webserver import Webserver
-import butterfly as bfly
+from .Butterfly import Butterfly
+from .Butterfly import main
 
-from .CoreLayer import Core
-from .CoreLayer import Cache
+import CoreLayer as Core
 from .CoreLayer import Access
 from .CoreLayer import Query
 from .CoreLayer import Image

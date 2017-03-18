@@ -3,16 +3,16 @@
 # butterfly documentation build configuration file, created by
 # sphinx-quickstart on Fri Mar 17 13:11:45 2017.
 #
-# All configuration values have a default; values that are commented out
-# serve to show the default.
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../butterfly'))
+
+print sys.path
 
 
 # -- General configuration ------------------------------------------------
@@ -29,6 +29,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
+    'sphinx.ext.autosectionlabel',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -41,7 +42,7 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'content'
 
 # General information about the project.
 project = u'butterfly'
@@ -74,8 +75,66 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'default'
 
+from collections import OrderedDict
+
+html_theme = 'alabaster'
+
+extra_links = OrderedDict()
+
+api_link = '{site}{repo}{path}#{anchor}'.format(
+    site = 'https://github.com/',
+    repo = 'microns-ariadne/ariadne-nda/',
+    path = 'blob/master/specs/finished.md',
+    anchor = 'readme'
+)
+
+wiki_link = '{site}{repo}{path}'.format(
+    site = 'https://github.com/',
+    repo = 'Rhoana/butterfly/',
+    path = 'wiki'
+)
+
+extra_links['Full API documentation'] = api_link
+extra_links['Guides on Github Wiki'] = wiki_link
+
+html_theme_options = dict(
+    logo = 'bfly.png',
+    logo_name = False,
+    font_size = '1.0em',
+    page_width = '875px',
+    github_button = False,
+    show_powered_by = False,
+    github_user = 'Rhoana',
+    github_repo = 'butterfly',
+    code_font_size = 'inherit',
+    extra_nav_links = extra_links,
+    description = 'The butterfly image server',
+    code_font_family = '"Anonymous Pro", monospace',
+    sidebar_link_underscore = '#ACE',
+    link = '#ACE',
+    gray_1 = '#CCC',
+    gray_2 = '#CCC',
+    gray_3 = '#CCC',
+    body_text = '#CCC',
+    footer_text = '#CCC',
+    sidebar_link = '#CCC',
+    link_hover = '#FFF',
+    sidebar_header = '#FFF',
+    anchor_hover_fg = '#FFF',
+    anchor_hover_bg = '#000',
+    font_family = "'Lato', Arial, sans-serif",
+    head_font_family = "'Raleway', Arial, sans-serif"
+)
+
+html_sidebars = {
+    '**': [
+        'about.html',
+        'relations.html',
+        'navigation.html',
+        'searchbox.html',
+    ]
+}
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
