@@ -10,7 +10,8 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+bfly_path = os.path.join(os.path.abspath('../..'))
+sys.path.append(bfly_path)
 
 
 # -- General configuration ------------------------------------------------
