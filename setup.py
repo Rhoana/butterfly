@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from setuptools import find_packages
 from setuptools import setup
 
 VERSION = 2.0
@@ -15,8 +16,8 @@ INSTALL_REQ = [
 setup(
     version=VERSION,
     name='butterfly',
-    packages=['butterfly'],
     author='Daniel Haehn',
+    packages=find_packages(),
     author_email='haehn@seas.harvard.edu',
     url="https://github.com/Rhoana/butterfly",
     description="butterfly dense image server",
@@ -24,6 +25,6 @@ setup(
     install_requires= INSTALL_REQ,
     # Allows command line execution
     entry_points=dict(console_scripts=[
-        'bfly = butterfly.main'
+        'bfly = butterfly.Butterfly:main'
     ])
 )
