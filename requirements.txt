@@ -1,4 +1,2 @@
 cython>=0.25.2
 opencv-python>=3.2.0.6
-sphinx>=1.5.3
-sphinx-autobuild>=0.6.0
