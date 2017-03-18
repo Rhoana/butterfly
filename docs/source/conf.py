@@ -12,8 +12,6 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../butterfly'))
 
-print sys.path
-
 
 # -- General configuration ------------------------------------------------
 
@@ -69,6 +67,7 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+primary_domain = 'py'
 
 # -- Options for HTML output ----------------------------------------------
 
