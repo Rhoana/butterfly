@@ -1,4 +1,4 @@
-import butterfly as bfly
+import bfly
 import unittest as ut
 import datetime
 import logging

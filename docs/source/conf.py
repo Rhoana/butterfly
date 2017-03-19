@@ -10,9 +10,20 @@
 
 import os
 import sys
-bfly_path = os.path.join(os.path.abspath('../..'))
-sys.path.append(bfly_path)
 
+# Add a given path to sys.path
+def add_sys_path(path):
+    full_path = os.path.join('../..', path)
+    bfly_path = os.path.abspath(full_path)
+    sys.path.append(bfly_path)
+
+bfly_paths = [
+    'bfly/CoreLayer',
+    'bfly',
+    '.',
+]
+
+add_sys_path('.')
 
 # -- General configuration ------------------------------------------------
 
@@ -44,7 +55,7 @@ source_suffix = '.rst'
 master_doc = 'content'
 
 # General information about the project.
-project = u'butterfly'
+project = u'bfly'
 copyright = u'2017, Harvard Visual Computing Group'
 author = u'Harvard Visual Computing Group'
 

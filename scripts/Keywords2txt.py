@@ -1,7 +1,7 @@
 import re
 import yaml
 import numpy as np
-from butterfly import Utility
+from bfly import Utility
 
 yaml_setup = {
     'default_flow_style': False,

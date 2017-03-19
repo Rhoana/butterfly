@@ -15,7 +15,7 @@ INSTALL_REQ = [
 
 setup(
     version=VERSION,
-    name='butterfly',
+    name='bfly',
     author='Daniel Haehn',
     packages=find_packages(),
     author_email='haehn@seas.harvard.edu',
@@ -25,6 +25,6 @@ setup(
     install_requires= INSTALL_REQ,
     # Allows command line execution
     entry_points=dict(console_scripts=[
-        'bfly = butterfly.Butterfly:main'
+        'bfly = bfly.Butterfly:main'
     ])
 )

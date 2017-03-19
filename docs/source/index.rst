@@ -1,11 +1,11 @@
 .. butterfly documentation master file, created by
    sphinx-quickstart on Fri Mar 17 13:11:45 2017.
 
-butterfly
-=====================================
-.. automodule:: butterfly
+bfly
+=======================
+.. automodule:: bfly
 
-From :mod:`butterfly` import any submodule alias.
+From :mod:`bfly` import any submodule alias.
 
 .. autoclass:: Core
 .. autoclass:: Database
@@ -14,19 +14,23 @@ From :mod:`butterfly` import any submodule alias.
 .. autoclass:: Image
 .. autoclass:: Utility
 
-butterfly classes
+bfly classes
 -------------------- 
+.. module:: bfly.Butterfly
 .. autoclass:: Butterfly
+
+.. module:: bfly.Webserver
 .. autoclass:: Webserver
 
-The logic layers
+The model layers
 =======================
 
 CoreLayer
 ------------------
-.. automodule:: butterfly.CoreLayer
+.. module:: CoreLayer
 
-From :mod:`CoreLayer <butterfly.CoreLayer>` import any :mod:`DatabaseLayer <butterfly.CoreLayer.DatabaseLayer>` or :mod:`AccessLayer <butterfly.CoreLayer.AccessLayer>` submodule alias.
+..
+    From :mod:CoreLayer import any :mod:DatabaseLayer or :mod:AccessLayer submodule alias.
 
 .. autoclass:: Database
 .. autoclass:: Access
@@ -40,75 +44,76 @@ CoreLayer classes
 .. autoclass:: Cache
 
 
-DatabaseLayer
-------------------
-.. automodule:: butterfly.CoreLayer.DatabaseLayer
+..
+    DatabaseLayer
+    ------------------
+    .. automodule:: bfly.CoreLayer.DatabaseLayer
 
-DatabaseLayer classes
-************************* 
-.. autoclass:: Unqlite
-
-
-The interface layers
-============================
-
-AccessLayer
-------------------
-.. automodule:: butterfly.CoreLayer.AccessLayer
-
-From :mod:`AccessLayer <butterfly.CoreLayer.AccessLayer>` import any :mod:`QueryLayer <butterfly.CoreLayer.AccessLayer.QueryLayer>` submodule alias.
-
-.. autoclass:: Query
-.. autoclass:: Image
-.. autoclass:: Utility
-
-AccessLayer classes
-************************* 
-.. autoclass:: API
+    DatabaseLayer classes
+    ************************* 
+    .. autoclass:: Unqlite
 
 
-QueryLayer
-------------------
-.. automodule:: butterfly.CoreLayer.AccessLayer.QueryLayer
+    The interface layers
+    ============================
 
-From :mod:`QueryLayer <butterfly.CoreLayer.AccessLayer.QueryLayer>` import the :mod:`ImageLayer <butterfly.CoreLayer.AccessLayer.QueryLayer.ImageLayer>` or the :mod:`UtilityLayer <butterfly.CoreLayer.AccessLayer.QueryLayer.ImageLayer>` submodule alias.
+    AccessLayer
+    ------------------
+    .. automodule:: bfly.CoreLayer.AccessLayer
 
-.. autoclass:: Image
-.. autoclass:: Utility
+    From :mod:`AccessLayer <bfly.CoreLayer.AccessLayer>` import any :mod:`QueryLayer <bfly.CoreLayer.AccessLayer.QueryLayer>` submodule alias.
 
+    .. autoclass:: Query
+    .. autoclass:: Image
+    .. autoclass:: Utility
 
-QueryLayer classes
-************************* 
-.. autoclass:: DataQuery
-.. autoclass:: TileQuery
-
-
-ImageLayer
-------------------
-.. automodule:: butterfly.CoreLayer.AccessLayer.QueryLayer.ImageLayer
-
-ImageLayer classes
-************************* 
-.. autoclass:: HDF5
+    AccessLayer classes
+    ************************* 
+    .. autoclass:: API
 
 
-UtilityLayer
-------------------
-.. automodule:: butterfly.CoreLayer.AccessLayer.QueryLayer.UtilityLayer
+    QueryLayer
+    ------------------
+    .. automodule:: bfly.CoreLayer.AccessLayer.QueryLayer
 
-UtilityLayer classes
-************************* 
-.. autoclass:: INPUT
-.. autoclass:: RUNTIME
-.. autoclass:: OUTPUT
-.. autoclass:: MakeLog
+    From :mod:`QueryLayer <bfly.CoreLayer.AccessLayer.QueryLayer>` import the :mod:`ImageLayer <bfly.CoreLayer.AccessLayer.QueryLayer.ImageLayer>` or the :mod:`UtilityLayer <bfly.CoreLayer.AccessLayer.QueryLayer.ImageLayer>` submodule alias.
+
+    .. autoclass:: Image
+    .. autoclass:: Utility
 
 
-Find modules
-===============
+    QueryLayer classes
+    ************************* 
+    .. autoclass:: DataQuery
+    .. autoclass:: TileQuery
 
-* Index:
-    * :ref:`General Index <genindex>`
-    * :ref:`Module Index <modindex>`
-* :ref:`Search <search>`
+
+    ImageLayer
+    ------------------
+    .. automodule:: bfly.CoreLayer.AccessLayer.QueryLayer.ImageLayer
+
+    ImageLayer classes
+    ************************* 
+    .. autoclass:: HDF5
+
+
+    UtilityLayer
+    ------------------
+    .. automodule:: bfly.CoreLayer.AccessLayer.QueryLayer.UtilityLayer
+
+    UtilityLayer classes
+    ************************* 
+    .. autoclass:: INPUT
+    .. autoclass:: RUNTIME
+    .. autoclass:: OUTPUT
+    .. autoclass:: MakeLog
+
+
+    Find modules
+    ===============
+
+    * Index:
+        * :ref:`General Index <genindex>`
+        * :ref:`Module Index <modindex>`
+    * :ref:`Search <search>`
 
