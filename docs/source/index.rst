@@ -24,6 +24,7 @@ All layers
 ----------------
 
 You can ``import`` bfly from ``./`` or with ``bfly`` installed_.
+
 You can ``from bfly import`` any layer.
 
 .. code-block:: python
