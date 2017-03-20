@@ -20,7 +20,7 @@ class Butterfly():
     DB_PATH = UtilityLayer.DB_PATH
     BFLY_CONFIG = UtilityLayer.BFLY_CONFIG
 
-    def __init__(self,_argv):
+    def __init__(self, _argv):
 
         # keyword arguments
         self.INPUT = UtilityLayer.INPUT()
@@ -70,8 +70,8 @@ class Butterfly():
         parser.add_argument('-o','--out', metavar='out', help=helps['save'])
         return vars(parser.parse_args())
 
-def main(args=None):
-    Butterfly(sys.argv)
+def main(*args, **flags):
+    Butterfly(UtilityLayer.to_argv(*args, **flags))
 
 if __name__ == "__main__":
     main()
