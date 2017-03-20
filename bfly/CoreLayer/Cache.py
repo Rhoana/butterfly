@@ -1,5 +1,6 @@
-import sys, collections
-from .AccessLayer.QueryLayer import Utility
+from AccessLayer import UtilityLayer
+import collections
+import sys
 
 class Cache(object):
 
@@ -14,7 +15,7 @@ class Cache(object):
         self.k_val = _runtime.ERROR.OUT.NAME
         # Create info logger
         log_list = _runtime.ERROR.CACHE
-        self.log = Utility.MakeLog(log_list).logging
+        self.log = UtilityLayer.MakeLog(log_list).logging
 
     def get(self, key):
         try:

@@ -1,5 +1,5 @@
-from CoreLayer import Utility
-from CoreLayer import Database
+from CoreLayer import UtilityLayer
+from CoreLayer import DatabaseLayer
 from Webserver import Webserver
 import sys, argparse
 import logging
@@ -15,17 +15,17 @@ class Butterfly():
         'level': logging.INFO
     }
     # Constants
-    PORT = Utility.PORT
-    DB_TYPE = Utility.DB_TYPE
-    DB_PATH = Utility.DB_PATH
-    BFLY_CONFIG = Utility.BFLY_CONFIG
+    PORT = UtilityLayer.PORT
+    DB_TYPE = UtilityLayer.DB_TYPE
+    DB_PATH = UtilityLayer.DB_PATH
+    BFLY_CONFIG = UtilityLayer.BFLY_CONFIG
 
     def __init__(self,_argv):
 
         # keyword arguments
-        self.INPUT = Utility.INPUT()
-        self.OUTPUT = Utility.OUTPUT()
-        self.RUNTIME = Utility.RUNTIME()
+        self.INPUT = UtilityLayer.INPUT()
+        self.OUTPUT = UtilityLayer.OUTPUT()
+        self.RUNTIME = UtilityLayer.RUNTIME()
 
         # Get the port
         args = self.parse_argv(_argv)
@@ -44,7 +44,7 @@ class Butterfly():
     # Update the database from the config file
     def update_db(self):
         # Get the correct database class
-        db_class = getattr(Database, self.DB_TYPE)
+        db_class = getattr(DatabaseLayer, self.DB_TYPE)
         # Create the database with RUNTIME constants
         db = db_class(self.DB_PATH, self.RUNTIME)
         # Load database paths, tables, and entries

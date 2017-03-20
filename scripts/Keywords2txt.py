@@ -1,7 +1,7 @@
 import re
 import yaml
 import numpy as np
-from bfly import Utility
+from bfly import UtilityLayer
 
 yaml_setup = {
     'default_flow_style': False,
@@ -15,7 +15,7 @@ CLASS = ['INPUT','RUNTIME','OUTPUT']
 
 def class2yaml(it):
     classn = CLASS[int(it)]
-    classy = getattr(Utility, classn)
+    classy = getattr(UtilityLayer, classn)
     unclean = yaml.dump({classn:classy()}, **yaml_setup)
     clean = re.sub('!!python.+\n','\n',unclean)
     return clean.split('\n')

@@ -11,10 +11,9 @@ definitions
     git clone https://github.com/Rhoana/butterfly
     cd butterfly && pwd
 
-- We refer to layers, which are submodules of the ``bfly`` package.
-    - You can import them like ``from bfly import CoreLayer`` or,
-    - You can import from them like ``from bfly.Core import *``.
-    - The suffix ``Layer`` indicates the layer has a source folder.
+- We call subfolders in the ``bfly`` package 'layers'.
+    - You can import them like ``from bfly import CoreLayer``,
+    - Or, import from them like ``from bfly.CoreLayer import *``,
 
 bfly
 =======================
@@ -36,15 +35,15 @@ From :mod:`bfly` import any module from any layer.
 
 :ref:`All core layers <The core layers>`
 ***************************************************
-.. autoclass:: Core
-.. autoclass:: Database
-.. autoclass:: Access
+.. autoclass:: CoreLayer
+.. autoclass:: DatabaseLayer
+.. autoclass:: AccessLayer
 
 :ref:`All access layers <The access layers>`
 ***************************************************
-.. autoclass:: Query
-.. autoclass:: Image
-.. autoclass:: Utility
+.. autoclass:: QueryLayer
+.. autoclass:: ImageLayer
+.. autoclass:: UtilityLayer
 
 
 
@@ -55,7 +54,7 @@ You can ``import`` all bfly from ``.`` or with ``bfly`` installed.
 
 .. code-block:: python
 
-    from bfly import Butterfly, Webserver, Core
+    from bfly import Butterfly, Webserver, CoreLayer
 
 You can also ``import`` each bfly layer directly from ``./bfly/``.
 
@@ -97,16 +96,16 @@ You can ``import`` the CoreLayer itself from ``./bfly/``.
 
 .. code-block:: python
 
-    from bfly import Core
+    from bfly import CoreLayer
     import CoreLayer
 
 CoreLayer alias
 ****************
-.. autoclass:: Database
-.. autoclass:: Access
-.. autoclass:: Query
-.. autoclass:: Image
-.. autoclass:: Utility
+.. autoclass:: DatabaseLayer
+.. autoclass:: AccessLayer
+.. autoclass:: QueryLayer
+.. autoclass:: ImageLayer
+.. autoclass:: UtilityLayer
 
 CoreLayer classes
 ************************* 
@@ -122,8 +121,8 @@ Import both core layers as below with bfly or CoreLayer on your ``sys.path``.
 
 .. code-block:: python
 
-    from bfly.Core import Database, Access
-    from CoreLayer import Database, Access
+    from bfly.CoreLayer import DatabaseLayer, AccessLayer
+    from CoreLayer import DatabaseLayer, AccessLayer
 
 
 DatabaseLayer
@@ -134,8 +133,8 @@ DatabaseLayer
 
 .. code-block:: python
 
-    from bfly import Database
-    from CoreLayer import Database
+    from bfly import DatabaseLayer
+    from CoreLayer import DatabaseLayer
     import DatabaseLayer
 
 DatabaseLayer classes
@@ -151,17 +150,17 @@ AccessLayer
 
 .. code-block:: python
 
-    from bfly import Access
-    from CoreLayer import Access
+    from bfly import AccessLayer
+    from CoreLayer import AccessLayer
     import AccessLayer
 
 AccessLayer alis
 ****************
 From :ref:AccessLayer import any :ref:QueryLayer submodule alias.
 
-.. autoclass:: Query
-.. autoclass:: Image
-.. autoclass:: Utility
+.. autoclass:: QueryLayer
+.. autoclass:: ImageLayer
+.. autoclass:: UtilityLayer
 
 AccessLayer classes
 ************************* 
@@ -180,17 +179,17 @@ QueryLayer
 
 .. code-block:: python
 
-    from bfly import Query
-    from CoreLayer import Query
-    from AccessLayer import Query
+    from bfly import QueryLayer
+    from CoreLayer import QueryLayer
+    from AccessLayer import QueryLayer
     import QueryLayer
 
 QueryLayer alias
 ****************
 From :mod:`QueryLayer` import the :mod:`ImageLayer` or the :mod:`UtilityLayer` submodule alias.
 
-.. autoclass:: Image
-.. autoclass:: Utility
+.. autoclass:: ImageLayer
+.. autoclass:: UtilityLayer
 
 QueryLayer classes
 ************************* 

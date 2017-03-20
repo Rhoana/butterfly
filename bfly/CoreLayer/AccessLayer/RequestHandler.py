@@ -1,15 +1,15 @@
 from tornado import web
 from tornado import gen
 from urllib2 import URLError
-from .QueryLayer import Utility
+from QueryLayer import UtilityLayer
 from concurrent.futures import ThreadPoolExecutor
 
 class RequestHandler(web.RequestHandler):
 
-    INPUT = Utility.INPUT()
-    OUTPUT = Utility.OUTPUT()
-    RUNTIME = Utility.RUNTIME()
-    BFLY_CONFIG = Utility.BFLY_CONFIG
+    INPUT = UtilityLayer.INPUT()
+    OUTPUT = UtilityLayer.OUTPUT()
+    RUNTIME = UtilityLayer.RUNTIME()
+    BFLY_CONFIG = UtilityLayer.BFLY_CONFIG
 
     def initialize(self, _core, _db):
         self._ex = ThreadPoolExecutor(max_workers=10)
@@ -20,7 +20,7 @@ class RequestHandler(web.RequestHandler):
 
         # Create info logger
         log_list = self.RUNTIME.ERROR.REQUEST
-        self.log = Utility.MakeLog(log_list).logging
+        self.log = UtilityLayer.MakeLog(log_list).logging
 
     # Each Handler must define
     def parse(self, _request):

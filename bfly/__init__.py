@@ -1,14 +1,14 @@
 __all__ = ["Butterfly", "Webserver"]
-__all__ += ["Core", "Database"]
-__all__ += ["Utility", "Image"]
-__all__ += ["Query", "Access"]
+__all__ += ["CoreLayer", "DatabaseLayer"]
+__all__ += ["UtilityLayer", "ImageLayer"]
+__all__ += ["QueryLayer", "AccessLayer"]
 
 import Webserver
 import Butterfly
+import CoreLayer
 
-import CoreLayer as Core
-from .CoreLayer import Access
-from .CoreLayer import Query
-from .CoreLayer import Image
-from .CoreLayer import Utility
-from .CoreLayer import Database
+from CoreLayer import AccessLayer
+from CoreLayer import QueryLayer
+from CoreLayer import ImageLayer
+from CoreLayer import UtilityLayer
+from CoreLayer import DatabaseLayer

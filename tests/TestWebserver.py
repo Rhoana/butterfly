@@ -13,7 +13,7 @@ class TestWebserver(ut.TestCase):
     PORT = 2017
     DB_PATH = ':mem:'
     DB_TYPE = 'Unqlite'
-    RUNTIME = bfly.Utility.RUNTIME()
+    RUNTIME = bfly.UtilityLayer.RUNTIME()
     # Log to the command line
     log_info = {
         'stream': sys.stdout,
@@ -27,7 +27,7 @@ class TestWebserver(ut.TestCase):
         logging.basicConfig(**cls.log_info)
 
         # Make a dummy database
-        db_class = getattr(bfly.Database, cls.DB_TYPE)
+        db_class = getattr(bfly.DatabaseLayer, cls.DB_TYPE)
         db = db_class(cls.DB_PATH, cls.RUNTIME)
 
         # Make a dummy webserver

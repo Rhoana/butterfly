@@ -1,5 +1,6 @@
-from CoreLayer import Utility
-from CoreLayer import Core, Access
+from CoreLayer import UtilityLayer
+from CoreLayer import AccessLayer
+from CoreLayer import Core
 from tornado.web import Application
 from tornado.ioloop import IOLoop
 
@@ -19,13 +20,13 @@ class Webserver(object):
             'autoreload': True
         }
         self._webapp = Application([
-            (r'/api/(.*)', Access.API, app_in),
-            (r'/ocp/(.*)', Access.OCP, app_in)
+            (r'/api/(.*)', AccessLayer.API, app_in),
+            (r'/ocp/(.*)', AccessLayer.OCP, app_in)
         ], **app_set)
 
         # Create info logger
         log_list = self.RUNTIME.ERROR.SERVER
-        self.log = Utility.MakeLog(log_list).logging
+        self.log = UtilityLayer.MakeLog(log_list).logging
 
     def start(self,_port):
         app_start = {

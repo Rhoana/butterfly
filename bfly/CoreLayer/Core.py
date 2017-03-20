@@ -1,6 +1,6 @@
-from .AccessLayer.QueryLayer import TileQuery
-from .AccessLayer.QueryLayer import DataQuery
-from .Cache import Cache
+from AccessLayer.QueryLayer import TileQuery
+from AccessLayer.QueryLayer import DataQuery
+from Cache import Cache
 import numpy as np
 import tifffile
 import StringIO

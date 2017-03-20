@@ -84,7 +84,7 @@ Output item #{} is {}, but it should be {}
         def test_one(test):
             args, keys = test['IN']
             # Send args and keys to to_argv
-            output = bfly.Utility.to_argv(*args,**keys)
+            output = bfly.UtilityLayer.to_argv(*args,**keys)
             # Check if the same length
             same_length(output, test['OUT'])
             # Check if the same list

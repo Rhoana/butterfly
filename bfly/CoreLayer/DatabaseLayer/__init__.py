@@ -1,3 +1,3 @@
 __all__ = ["Unqlite"]
 
-from .Unqlite import Unqlite
+from Unqlite import Unqlite
