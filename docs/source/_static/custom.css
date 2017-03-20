@@ -53,6 +53,15 @@ div.body > div.section > div > h2 {
     margin-left: -30px;
 }
 
+/*
+ * Sidebar
+ */
+
+div.sphinxsidebarwrapper {
+    overflow-y: scroll;
+    max-height: 100vh;
+}
+
 div.sphinxsidebarwrapper > h3{
     margin: 15px 0px 0px 0px;
 }
@@ -103,7 +112,9 @@ div.sphinxsidebar a:hover {
         margin: 0;
     }
     div.sphinxsidebar {
-        background-color: #1A1A1A;
+        max-height: calc(6em + 10vh);
+        background-color: #000;
+        overflow-y: scroll;
     }
     div.sphinxsidebarwrapper {
         margin: 3px 30px 3px 30px;

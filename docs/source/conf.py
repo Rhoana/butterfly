@@ -99,6 +99,10 @@ wiki_link = '{site}{repo}{path}'.format(
     path = 'wiki'
 )
 
+# Add index links
+extra_links['General Index']= 'genindex.html'
+extra_links['Module Index']= 'py-modindex.html'
+# Add external links
 extra_links['Full API documentation'] = api_link
 extra_links['Guides on Github Wiki'] = wiki_link
 
@@ -107,7 +111,9 @@ html_theme_options = dict(
     logo_name = False,
     font_size = '1.0em',
     page_width = '875px',
+    fixed_sidebar = True,
     github_button = False,
+    sidebar_collapse = True,
     show_powered_by = False,
     github_user = 'Rhoana',
     github_repo = 'butterfly',
@@ -135,9 +141,9 @@ html_theme_options = dict(
 html_sidebars = {
     '**': [
         'about.html',
+        'searchbox.html',
         'relations.html',
         'navigation.html',
-        'searchbox.html',
     ]
 }
 # Theme options are theme-specific and customize the look and feel of a theme
