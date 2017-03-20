@@ -11,19 +11,11 @@
 import os
 import sys
 
-# Add a given path to sys.path
-def add_sys_path(path):
-    full_path = os.path.join('../..', path)
-    bfly_path = os.path.abspath(full_path)
-    sys.path.append(bfly_path)
-
-bfly_paths = [
-    'bfly/CoreLayer',
-    'bfly',
-    '.',
-]
-
-add_sys_path('.')
+# Get the root package path
+bfly_root = os.path.abspath('../../bfly')
+all_paths = [d for d,n,f in os.walk(bfly_root)]
+# Add all package paths to sys.path
+map(sys.path.append, all_paths)
 
 # -- General configuration ------------------------------------------------
 
@@ -74,7 +66,7 @@ release = u'2.0'
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'monokai'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -127,6 +119,7 @@ html_theme_options = dict(
     gray_1 = '#CCC',
     gray_2 = '#CCC',
     gray_3 = '#CCC',
+    pre_bg = '#000',
     body_text = '#CCC',
     footer_text = '#CCC',
     sidebar_link = '#CCC',

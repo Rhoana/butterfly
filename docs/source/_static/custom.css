@@ -21,14 +21,16 @@ div.body > div.section > * {
     padding: 0px 30px 0px 30px;
 }
 
-div.body > div.section > h1 {
+div.body > div.section h1,
+div.body > div.section h2 {
     background-color: #000;
     line-height: 1.4em;
     position: relative;
     margin-right: 0.7em;
     margin-top: 0.7em;
 }
-div.body > div.section > h1::after{
+div.body > div.section h1::after, 
+div.body > div.section h2::after {
     top: 50%;
     width: 0;
     height: 0;
@@ -42,6 +44,11 @@ div.body > div.section > h1::after{
     margin-top: -0.7em;
 }
 
+div.body > div.section > div > h2 {
+    padding-left: inherit;
+    margin-left: -30px;
+}
+
 div.sphinxsidebarwrapper > h3{
     margin: 15px 0px 0px 0px;
 }
@@ -52,7 +59,7 @@ div.sphinxsidebarwrapper > h3{
 
 code, code.descclassname, code.descname {
     background-color: #000;
-    margin: 0px 1px 0px 1px;
+    margin: 0px 3px 0px 3px;
     color: #FFF;
 }
 
@@ -83,8 +90,12 @@ div.sphinxsidebar a:hover {
         padding-right: calc(3px + 27 * ((100vw - 320px)/555));
         padding-left: calc(3px + 27 * ((100vw - 320px)/555));
     }
+    div.body > div.section > div > h2 {
+        margin-left: calc(-3px - 27 * ((100vw - 320px)/555));
+        padding-left: inherit;
+    }
     div.body > div.section > ul {
-        padding: 0px 30px 0px 30px;
+        padding-left: 30px;
         margin: 0;
     }
     div.sphinxsidebar {
