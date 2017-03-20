@@ -1,7 +1,9 @@
-# Root layers and modules
-import Webserver
-import Butterfly
+# Root layer
 import CoreLayer
+
+# Get all classes
+from Webserver import Webserver
+from Butterfly import Butterfly
 
 # Take all layers from CoreLayer
 from CoreLayer import AccessLayer
