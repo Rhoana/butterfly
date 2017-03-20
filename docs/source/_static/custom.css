@@ -44,6 +44,10 @@ div.body > div.section h2::after {
     margin-top: -0.7em;
 }
 
+div.body > div.section :not(h1):not(h2):not(h3) {
+    font-size: 100%;
+}
+
 div.body > div.section > div > h2 {
     padding-left: inherit;
     margin-left: -30px;
