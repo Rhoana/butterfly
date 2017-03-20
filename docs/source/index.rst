@@ -20,13 +20,10 @@ definitions
     - You can import them like ``from bfly import CoreLayer``,
     - Or, import from them like ``from bfly.CoreLayer import *``,
 
-
-You can ``import`` bfly from ``./`` or with ``bfly`` installed_.
-
-
 All layers
 ----------------
 
+You can ``import`` bfly from ``./`` or with ``bfly`` installed_.
 You can ``from bfly import`` any layer.
 
 .. code-block:: python
