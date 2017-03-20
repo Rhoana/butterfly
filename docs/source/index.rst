@@ -11,31 +11,35 @@ definitions
     git clone https://github.com/Rhoana/butterfly
     cd butterfly && pwd
 
-- We call subfolders in the ``bfly`` package 'layers'.
+- We call folders or files in the :mod:`bfly` package "layers".
     - You can import them like ``from bfly import CoreLayer``,
     - Or, import from them like ``from bfly.CoreLayer import *``,
+
 
 bfly
 =======================
 .. automodule:: bfly
 
+You can ``import`` bfly from ``./`` or with :mod:`bfly` installed_.
+
 .. code-block:: python
 
     import bfly
 
+
 bfly alias
 ----------------
 
-From :mod:`bfly` import any module from any layer.
+You can ``from bfly import`` any layer.
 
 :ref:`All bfly layers <The bfly layers>`
 ***************************************************
 .. autoclass:: Butterfly
 .. autoclass:: Webserver
+.. autoclass:: CoreLayer
 
 :ref:`All core layers <The core layers>`
 ***************************************************
-.. autoclass:: CoreLayer
 .. autoclass:: DatabaseLayer
 .. autoclass:: AccessLayer
 
@@ -50,54 +54,44 @@ From :mod:`bfly` import any module from any layer.
 The bfly layers
 =======================
 
-You can ``import`` all bfly from ``.`` or with ``bfly`` installed.
+Import all bfly layers from ``./`` or with :mod:`bfly` installed_.
 
 .. code-block:: python
 
     from bfly import Butterfly, Webserver, CoreLayer
 
-You can also ``import`` each bfly layer directly from ``./bfly/``.
+Or, in scripts in some directories:
+
+.. code-block:: python
+
+    # if './bfly/' in sys.path
+    import Butterfly, Webserver, CoreLayer
+
 
 Butterfly
 ------------
 .. module:: bfly.Butterfly
 .. automodule:: Butterfly
 
-.. code-block:: python
-
-    from bfly import Butterfly
-
 Butterfly classes
 ******************
 .. autoclass:: Butterfly
+
 
 Webserver
 ------------
 .. module:: bfly.Webserver
 .. automodule:: Webserver
 
-You can ``import`` the Webserver itself from ``./bfly/``.
-
-.. code-block:: python
-
-    from bfly import Webserver
-    import Webserver
-
 Webserver classes
 ******************
 .. autoclass:: Webserver
+
 
 CoreLayer
 ------------------
 .. automodule:: bfly.CoreLayer
 .. automodule:: CoreLayer
-
-You can ``import`` the CoreLayer itself from ``./bfly/``.
-
-.. code-block:: python
-
-    from bfly import CoreLayer
-    import CoreLayer
 
 CoreLayer alias
 ****************
@@ -117,25 +111,26 @@ CoreLayer classes
 The core layers
 =======================
 
-Import both core layers as below with bfly or CoreLayer on your ``sys.path``.
+You can ``import`` all core layers from ``./`` or with :mod:`bfly` installed_.
 
 .. code-block:: python
 
     from bfly.CoreLayer import DatabaseLayer, AccessLayer
-    from CoreLayer import DatabaseLayer, AccessLayer
 
+Or, in scripts in some directories:
+
+.. code-block:: python
+
+    # if './bfly/' in sys.path
+    from CoreLayer import DatabaseLayer, AccessLayer
+    # if './bfly/CoreLayer/' in sys.path 
+    import DatabaseLayer, AccessLayer
 
 DatabaseLayer
 ------------------
 .. module:: bfly.CoreLayer.DatabaseLayer
 .. module:: CoreLayer.DatabaseLayer
 .. automodule:: DatabaseLayer
-
-.. code-block:: python
-
-    from bfly import DatabaseLayer
-    from CoreLayer import DatabaseLayer
-    import DatabaseLayer
 
 DatabaseLayer classes
 ************************* 
@@ -148,15 +143,8 @@ AccessLayer
 .. module:: CoreLayer.AccessLayer
 .. automodule:: AccessLayer
 
-.. code-block:: python
-
-    from bfly import AccessLayer
-    from CoreLayer import AccessLayer
-    import AccessLayer
-
 AccessLayer alis
 ****************
-From :ref:AccessLayer import any :ref:QueryLayer submodule alias.
 
 .. autoclass:: QueryLayer
 .. autoclass:: ImageLayer
@@ -170,19 +158,31 @@ AccessLayer classes
 The access layers
 ============================
 
+You can ``import`` all core layers from ``./`` or with :mod:`bfly` installed_.
+
+
+.. code-block:: python
+
+    from bfly.AccessLayer import QueryLayer, ImageLayer, UtilityLayer
+
+Or, in scripts in some directories:
+
+.. code-block:: python
+
+    # if './bfly/' in sys.path
+    from CoreLayer.AccessLayer import QueryLayer, ImageLayer, UtilityLayer
+    # if './bfly/CoreLayer/' in sys.path 
+    from AccessLayer import QueryLayer, ImageLayer, UtilityLayer
+    # if './bfly/CoreLayer/AccessLayer' in sys.path 
+    import QueryLayer, ImageLayer, UtilityLayer
+
+
 QueryLayer
 ------------------
 .. module:: bfly.CoreLayer.AccessLayer.QueryLayer
 .. module:: CoreLayer.AccessLayer.QueryLayer
 .. module:: AccessLayer.QueryLayer
 .. automodule:: QueryLayer
-
-.. code-block:: python
-
-    from bfly import QueryLayer
-    from CoreLayer import QueryLayer
-    from AccessLayer import QueryLayer
-    import QueryLayer
 
 QueryLayer alias
 ****************
@@ -229,3 +229,5 @@ Find modules
     * :ref:`Module Index <modindex>`
 * :ref:`Search <search>`
 
+
+.. _installed: https://github.com/Rhoana/butterfly#butterfly-installation
