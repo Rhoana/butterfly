@@ -12,10 +12,11 @@ import os
 import sys
 
 # Get the root package path
-bfly_root = os.path.abspath('../../bfly')
+repo_root = os.path.abspath('../..')
+bfly_root = os.path.join(repo_root,'bfly')
 all_paths = [d for d,n,f in os.walk(bfly_root)]
-# Add all package paths to sys.path
-map(sys.path.append, all_paths)
+# Add all package paths and root path to sys.path
+map(sys.path.append, all_paths+[repo_root])
 
 # -- General configuration ------------------------------------------------
 
