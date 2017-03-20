@@ -112,12 +112,29 @@ div.sphinxsidebar a:hover {
         margin: 0;
     }
     div.sphinxsidebar {
-        max-height: calc(6em + 10vh);
+        max-height: calc(6em + 20vh);
         background-color: #000;
         overflow-y: scroll;
     }
     div.sphinxsidebarwrapper {
         margin: 3px 30px 3px 30px;
+    }
+    div.sphinxsidebarwrapper ul a:after {
+        padding-right: 0.5em;
+        content: ',';
+    }
+    div.sphinxsidebarwrapper *:not(script) {
+        display: inline;
+        float: left;
+    }
+    div.sphinxsidebarwrapper input {
+        margin: -0.5em 0.5em 0em 0.5em;
+    }
+    div.sphinxsidebarwrapper h3 {
+        display: none;
+    }
+    div.sphinxsidebarwrapper * {
+        font-size: 100% !important;
     }
 }
 
