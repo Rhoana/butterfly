@@ -55,8 +55,27 @@ The bfly classes
 ------------------
 
 .. autoclass:: Butterfly
+    :members:
+
+    .. attribute:: BFLY_CONFIG
+        :annotation: := Dictionary from rh-config
+
+    .. attribute:: INPUT
+        :annotation: := UtilityLayer.INPUT instance
+
+    .. attribute:: RUNTIME
+        :annotation: := UtilityLayer.RUNTIME instance
+
+    .. attribute:: OUTPUT
+        :annotation: := UtilityLayer.OUTPUT instance
+
 .. autoclass:: Webserver
 
 .. _installed: https://github.com/Rhoana/butterfly#butterfly-installation
+
+The bfly commands
+------------------
+.. automodule:: __main__
+.. autofunction:: bfly.__main__.main
 
 

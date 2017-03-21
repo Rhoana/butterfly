@@ -5,19 +5,22 @@ import sys, argparse
 import logging
 
 class Butterfly():
-    '''
-    Butterfly 2.0
-    EM Data server
-    2017 VCG + Lichtman Lab
-    '''
+    """Starts :class:`bfly.Webserver` and runs :meth:`update_db`.
+
+    :param list _argv:
+        passed through :meth:`parse_argv`
+    """
     log_info = {
-        'filename': 'bfly.log',
+        'filename': UtilityLayer.LOG_PATH,
         'level': logging.INFO
     }
-    # Constants
+    #: Port for :class:`Webserver`
     PORT = UtilityLayer.PORT
+    #: Class of :mod:`DatabaseLayer`
     DB_TYPE = UtilityLayer.DB_TYPE
+    #: Relative path to .db file
     DB_PATH = UtilityLayer.DB_PATH
+    # Loaded from the rh-config
     BFLY_CONFIG = UtilityLayer.BFLY_CONFIG
 
     def __init__(self, _argv):
@@ -43,6 +46,10 @@ class Butterfly():
 
     # Update the database from the config file
     def update_db(self):
+        """ Starts :mod:`DatabaseLayer`. :data:`DB_TYPE`.
+
+        Loads the database with paths from :data:`BFLY_CONFIG`.
+        """
         # Get the correct database class
         db_class = getattr(DatabaseLayer, self.DB_TYPE)
         # Create the database with RUNTIME constants
@@ -50,28 +57,52 @@ class Butterfly():
         # Load database paths, tables, and entries
         return db.load_config(self.BFLY_CONFIG)
 
-    def parse_argv(self, argv):
-        sys.argv = argv
-
+    @staticmethod
+    def get_parser():
+        """:return argparse.ArgumentParser
+        """
         helps = {
             'bfly': 'Host a butterfly server!',
-            'folder': 'relative, absolute, or user path/of/all/experiments',
-            'save': 'path of output yaml file indexing experiments',
-            'port': 'port >1024 for hosting this server'
+            'out': 'path to output yaml config file',
+            'exp': 'path/of/all/data or path/to/config',
+            'port': 'port >1024 for hosting this server',
         }
+        _port = UtilityLayer.PORT
         parser = argparse.ArgumentParser(description=helps['bfly'])
-        parser.add_argument('port', **{
-            'type': int,
-            'nargs': '?',
-            'default': self.PORT,
-            'help': helps['port']
-        })
-        parser.add_argument('-e','--exp', metavar='exp', help=helps['folder'])
-        parser.add_argument('-o','--out', metavar='out', help=helps['save'])
+        parser.add_argument('port', type= int, nargs= '?',
+                            default= _port, help= helps['port'])
+        parser.add_argument('-e','--exp', help= helps['exp'])
+        parser.add_argument('-o','--out', help= helps['out'])
+        # return the parser
+        return parser
+
+    def parse_argv(self, argv):
+        """Converts argv list to dictionary with defaults.
+
+        :param list argv:
+            parsed as sys.argv by argparse
+        :return dict:
+            * port (int) -- for :class:`bfly.Webserver`
+            * exp (str) -- path to config or folder of data
+            * out (str) -- path to save config from folder
+        """
+        sys.argv = argv
+        # Get the parser
+        parser = self.get_parser()
+        # Actually parse the arguments 
         return vars(parser.parse_args())
 
 def main(*args, **flags):
+    """Starts a :class:`Butterfly` with arguments.
+
+    :param list args:
+        * [0] (int) -- port for :class:`bfly.Webserver`
+    :param dict flags:
+        * exp (str) -- path to config or folder of data
+        * out (str) -- path to save config from folder
+    """
+
     Butterfly(UtilityLayer.to_argv(*args, **flags))
 
 if __name__ == "__main__":
-    main()
+    Butterfly(sys.argv)

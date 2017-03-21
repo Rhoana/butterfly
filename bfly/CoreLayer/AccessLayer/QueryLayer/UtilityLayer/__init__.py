@@ -2,6 +2,7 @@
 from Settings import BFLY_CONFIG
 from Settings import MAX_CACHE_SIZE
 from Settings import ALLOWED_PATHS
+from Settings import LOG_PATH
 from Settings import DB_PATH
 from Settings import DB_TYPE
 from Settings import PORT

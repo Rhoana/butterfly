@@ -1,5 +1,5 @@
-from rh_config import config_filename
-from rh_config import config
+from .rh_config import config_filename
+from .rh_config import config
 import os
 
 # Server settings
@@ -11,6 +11,8 @@ PORT = int(BFLY_CONFIG.get("port", 2001))
 #Path to database and kind of database
 DB_PATH = BFLY_CONFIG.get("db-path", "bfly.db")
 DB_TYPE = BFLY_CONFIG.get("db-type", "Unqlite")
+#Path to the log file
+LOG_PATH = BFLY_CONFIG.get("log-path", "bfly.log")
 
 #Maximum size of the cache in MiB: 1 GiB by default
 _max_cache = BFLY_CONFIG.get("max-cache-size", 1024)
