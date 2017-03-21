@@ -1,14 +1,12 @@
-input {
-    background-color: #CCC;
-}
-
 body {
     background-color: #000;
 }
 
+input {
+    background-color: #CCC;
+}
+
 div.body {
-    margin: 0px;
-    padding: 0px;
     overflow: scroll;
     background-color: #1A1A1A;
 }
@@ -16,10 +14,6 @@ div.body {
 /*
  * Heading colors and padding
  */
-
-div.body > div.section > * {
-    padding: 0px 30px 0px 30px;
-}
 
 div.body > div.section h1,
 div.body > div.section h2 {
@@ -43,14 +37,15 @@ div.body > div.section h2::after {
     border-width: 0.7em;
     margin-top: -0.7em;
 }
-
-div.body > div.section :not(h1):not(h2):not(h3) {
-    font-size: 100%;
-}
-
-div.body > div.section > div > h2 {
-    padding-left: inherit;
-    margin-left: -30px;
+div.body > div.section h1::before,
+div.body > div.section h2::before {
+    top: 0%;
+    left: -30px;
+    content: '';
+    width: 30px;
+    height: 1.4em;
+    position: absolute;
+    background-color: #000;
 }
 
 /*
@@ -58,12 +53,8 @@ div.body > div.section > div > h2 {
  */
 
 div.sphinxsidebarwrapper {
-    overflow-y: scroll;
     max-height: 100vh;
-}
-
-div.sphinxsidebarwrapper > h3{
-    margin: 15px 0px 0px 0px;
+    overflow-y: scroll;
 }
 
 /*
@@ -91,49 +82,37 @@ div.sphinxsidebar a:hover {
  * Responsive font and margins
  */
 @media screen and (max-width: 875px) {
-    body {
-        background-color: #000;
-        padding-bottom: 0px;
-        padding-top: 0px;
-    }
     div.body > div.section {
         font-size: calc(0.666em + 0.334 * ((100vw - 20em)/36));
     }
-    body, div.body > div.section > * {
+    body, div.body > div.section {
         padding-right: calc(3px + 27 * ((100vw - 320px)/555));
         padding-left: calc(3px + 27 * ((100vw - 320px)/555));
     }
-    div.body > div.section > div > h2 {
-        margin-left: calc(-3px - 27 * ((100vw - 320px)/555));
-        padding-left: inherit;
-    }
-    div.body > div.section > ul {
-        padding-left: 30px;
-        margin: 0;
-    }
+    /*
+     * Inline Navigation List
+     */
     div.sphinxsidebar {
         max-height: calc(6em + 20vh);
         background-color: #000;
         overflow-y: scroll;
     }
-    div.sphinxsidebarwrapper {
-        margin: 3px 30px 3px 30px;
-    }
-    div.sphinxsidebarwrapper * {
-        font-size: 100% !important;
-    }
     div.sphinxsidebarwrapper *:not(script) {
-        display: inline;
-        float: left;
+        display: inline-block;
     }
-    div.sphinxsidebarwrapper ul a:after {
-        padding-right: 0.5em;
-        content: ',';
+    div.sphinxsidebarwrapper li > a:after {
+        white-space: pre;
+        content: ', ';
     }
-    div.sphinxsidebarwrapper > ul > li > a:before {
-        padding-left: 0.5em;
-        content:"• ";
+    div.sphinxsidebarwrapper li {
+        vertical-align: top;
     }
+    div.sphinxsidebarwrapper ul {
+        display: block;
+    }
+    /*
+     * Align input, remove h3
+     */
     div.sphinxsidebarwrapper input {
         margin: -0.5em 0.5em 0em 0.5em;
     }
@@ -145,7 +124,6 @@ div.sphinxsidebar a:hover {
 /*
  * For highlighting
  */
-
 dt:target, .highlighted {
     background-color: #000;
     background: #000;
@@ -155,7 +133,6 @@ dt:target, .highlighted {
 /*
  * For the index pages
  */
-
 table.indextable tr.cap {
     background-color: #000;
     color: #FFF;
