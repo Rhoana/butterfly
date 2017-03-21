@@ -17,6 +17,8 @@ bfly_root = os.path.join(repo_root,'bfly')
 all_paths = [d for d,n,f in os.walk(bfly_root)]
 # Add all package paths and root path to sys.path
 map(sys.path.append, all_paths+[repo_root])
+# Import needed for generating docs
+from bfly import Butterfly
 
 # -- General configuration ------------------------------------------------
 
@@ -38,14 +40,10 @@ extensions = [
 # Autodoc configuration
 autodoc_member_order = 'groupwise'
 
-
-# Add any paths that contain templates here, relative to this directory.
+# Add any paths that contain templates
 templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
-# You can specify multiple suffix as a list of string:
-#
-# source_suffix = ['.rst', '.md']
 source_suffix = '.rst'
 
 # The master toctree document.
@@ -56,6 +54,29 @@ project = u'bfly'
 copyright = u'2017, Harvard Visual Computing Group'
 author = u'Harvard Visual Computing Group'
 
+# Gloabal variables to be replaced in docstrings
+def write_global_rst(**keywords):
+    # Open global.rst 
+    with open('global.rst','w') as g:
+        # Write all the keywords
+        for k,v in keywords.items():
+            newline = ' |nl| '
+            assign = """.. |{}| replace::
+{} """.format(k,v)
+            assign = assign.replace('\n',newline)
+            assign = assign.replace('\r',newline)
+            # write assignment
+            g.write(assign)
+        # Write unicode replacement
+        newline_def = """
+..{}unicode:: U+000A""".format(newline)
+        g.write(newline_def)
+
+# All gloabl variables
+write_global_rst(
+    # bfly help (docstring bfly.__main__.main)
+    bfly_help = Butterfly.get_parser().format_help()
+)
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.

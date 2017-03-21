@@ -14,7 +14,9 @@ div.body {
 /*
  * Heading colors and padding
  */
-
+div.body > div.section p {
+    white-space: pre-wrap; 
+}
 div.body > div.section h1,
 div.body > div.section h2 {
     background-color: #000;

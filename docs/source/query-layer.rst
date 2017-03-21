@@ -1,4 +1,6 @@
 
+.. include:: global.rst
+
 The QueryLayer
 ============================
 

@@ -67,6 +67,7 @@ class Butterfly():
             'exp': 'path/of/all/data or path/to/config',
             'port': 'port >1024 for hosting this server',
         }
+        sys.argv[0] = 'bfly'
         _port = UtilityLayer.PORT
         parser = argparse.ArgumentParser(description=helps['bfly'])
         parser.add_argument('port', type= int, nargs= '?',

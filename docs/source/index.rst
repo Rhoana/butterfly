@@ -1,6 +1,7 @@
 .. butterfly documentation master file, created by
    sphinx-quickstart on Fri Mar 17 13:11:45 2017.
 
+.. include:: global.rst
 
 The bfly package
 =======================
