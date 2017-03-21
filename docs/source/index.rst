@@ -71,6 +71,11 @@ The bfly classes
     .. attribute:: OUTPUT
         :annotation: := UtilityLayer.OUTPUT instance
 
+    .. autoattribute:: PORT
+    .. autoattribute:: DB_TYPE
+    .. autoattribute:: DB_PATH
+    .. autoattribute:: log_info
+
 .. autoclass:: Webserver
 
 .. _installed: https://github.com/Rhoana/butterfly#butterfly-installation

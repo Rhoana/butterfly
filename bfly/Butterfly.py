@@ -10,6 +10,7 @@ class Butterfly():
     :param list _argv:
         passed through :meth:`parse_argv`
     """
+    #: Path to log at log priority level
     log_info = {
         'filename': UtilityLayer.LOG_PATH,
         'level': logging.INFO
