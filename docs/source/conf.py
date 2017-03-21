@@ -56,20 +56,20 @@ author = u'Harvard Visual Computing Group'
 
 # Gloabal variables to be replaced in docstrings
 def write_global_rst(**keywords):
+    # Newline injection
+    newline = ' |nl| '
+    newline_def = """
+..{}unicode:: U+000A""".format(newline)
     # Open global.rst 
     with open('global.rst','w') as g:
         # Write all the keywords
         for k,v in keywords.items():
-            newline = ' |nl| '
-            assign = """.. |{}| replace::
-{} """.format(k,v)
+            assign = '.. |{}| replace:: {}'.format(k,v)
             assign = assign.replace('\n',newline)
             assign = assign.replace('\r',newline)
             # write assignment
             g.write(assign)
-        # Write unicode replacement
-        newline_def = """
-..{}unicode:: U+000A""".format(newline)
+        # Write newline replacement
         g.write(newline_def)
 
 # All gloabl variables
