@@ -57,6 +57,7 @@ The bfly classes
 
 .. autoclass:: Butterfly
     :members:
+    :private-members:
 
     .. attribute:: BFLY_CONFIG
         :annotation: := Dictionary from rh-config
