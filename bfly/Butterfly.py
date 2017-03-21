@@ -14,14 +14,14 @@ class Butterfly():
         'filename': UtilityLayer.LOG_PATH,
         'level': logging.INFO
     }
+    #: Port for :class:`Webserver`
     PORT = UtilityLayer.PORT
-    """ Port for :class:`Webserver` """
+    #: Class of :mod:`DatabaseLayer`
     DB_TYPE = UtilityLayer.DB_TYPE
-    """ Class of :mod:`DatabaseLayer` """
+    #: Relative path to .db file
     DB_PATH = UtilityLayer.DB_PATH
-    """ Relative path to .db file """
-    BFLY_CONFIG = UtilityLayer.BFLY_CONFIG
     # Loaded from the rh-config
+    BFLY_CONFIG = UtilityLayer.BFLY_CONFIG
 
     def __init__(self, _argv):
 
