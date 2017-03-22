@@ -16,7 +16,7 @@ repo_root = os.path.abspath('../..')
 bfly_root = os.path.join(repo_root,'bfly')
 all_paths = [d for d,n,f in os.walk(bfly_root)]
 # Add all package paths and root path to sys.path
-map(sys.path.append, all_paths+[repo_root])
+map(sys.path.append, all_paths+[repo_root,'.'])
 # Import needed for generating docs
 from bfly import Butterfly
 
@@ -71,7 +71,7 @@ def write_global_rst(**keywords):
             g.write('\n')
         # Write constant globals
         g.write("""
-.. role:: h3
+.. role:: h
 .. |nl| unicode:: U+000A
 """)
 
@@ -80,9 +80,26 @@ write_global_rst(
     # bfly help (docstring bfly.__main__.main)
     bfly_help = Butterfly.get_parser().format_help(),
 )
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
+
+###########
+#
+# Make changes to docstrings
+#
+##########
+
+from formatclass import FormatClass
+
+# Standard hook for custom docstrings
+def edit_docstring(app, what, name, obj, options, lines):
+    ## Only proecss for classes with docstrings
+    if lines and what == 'class':
+        FormatClass(obj, lines)
+
+# autodoc hook
+def setup(app):
+    app.connect('autodoc-process-docstring', edit_docstring)
+
+# The version info, acts as replacement for |version| and |release|
 #
 # The short X.Y version.
 version = u'2.0'

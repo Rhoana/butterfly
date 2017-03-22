@@ -11,35 +11,39 @@ class Butterfly():
     -------
     _argv : list
         passed through :meth:`parse_argv`
+
+    Attributes
+    -----------
+        _bfly_config : dict
+            all data from rh-config
+        _runtime : :class:`UtilityLayer.RUNTIME`
+            has settings for :mod:`CoreLayer`
+
     """
 
-    #: Path to log at log priority level
-    log_info = {
+    #: path to log and the log priority level
+    _log_info = {
         'filename': UtilityLayer.LOG_PATH,
         'level': logging.INFO
     }
-    #: Port for :class:`Webserver`
-    PORT = UtilityLayer.PORT
-    #: Class of :mod:`DatabaseLayer`
-    DB_TYPE = UtilityLayer.DB_TYPE
-    #: Relative path to .db file
-    DB_PATH = UtilityLayer.DB_PATH
-    # Loaded from the rh-config
-    BFLY_CONFIG = UtilityLayer.BFLY_CONFIG
+    #: class of :mod:`DatabaseLayer`
+    _db_type = UtilityLayer.DB_TYPE
+    #: relative path to .db file
+    _db_path = UtilityLayer.DB_PATH
+
+    # loaded from the rh-config
+    _bfly_config = UtilityLayer.BFLY_CONFIG
+    # keyword arguments for :mod:`CoreLayer`
+    _runtime = UtilityLayer.RUNTIME()
 
     def __init__(self, _argv):
-
-        # keyword arguments
-        self.INPUT = UtilityLayer.INPUT()
-        self.OUTPUT = UtilityLayer.OUTPUT()
-        self.RUNTIME = UtilityLayer.RUNTIME()
 
         # Get the port
         args = self.parse_argv(_argv)
         port = args['port']
 
         # Start to write to log files
-        logging.basicConfig(**self.log_info)
+        logging.basicConfig(**self._log_info)
 
         # Populate the database
         db = self.update_db()
@@ -50,26 +54,28 @@ class Butterfly():
 
     # Update the database from the config file
     def update_db(self):
-        """ Starts :mod:`DatabaseLayer`. :data:`DB_TYPE`.
+        """ Starts :mod:`DatabaseLayer`. :data:`_db_type`.
 
-        Loads the database with paths from :data:`BFLY_CONFIG`.
+        Loads the database with paths from :data:`_bfly_config`.
         """
+
         # Get the correct database class
-        db_class = getattr(DatabaseLayer, self.DB_TYPE)
-        # Create the database with RUNTIME constants
-        db = db_class(self.DB_PATH, self.RUNTIME)
+        db_class = getattr(DatabaseLayer, self._db_type)
+        # Create the database with runtime constants
+        db = db_class(self._db_path, self._runtime)
         # Load database paths, tables, and entries
-        return db.load_config(self.BFLY_CONFIG)
+        return db.load_config(self._bfly_config)
 
     @staticmethod
     def get_parser():
-        """ Makes an argv parser for Butterfly
+        """ Makes an argv parser for ``Butterfly``.
 
         Returns
         ----------
         argparse.ArgumentParser
-            Can turn argv lists into args and keywords
+            map from argv lists to args and keywords
         """
+
         helps = {
             'bfly': 'Host a butterfly server!',
             'out': 'path to output yaml config file',
@@ -100,6 +106,7 @@ class Butterfly():
             * exp (str) -- path to config or folder of data
             * out (str) -- path to save config from folder
         """
+
         sys.argv = argv
         # Get the parser
         parser = self.get_parser()

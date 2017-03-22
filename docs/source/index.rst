@@ -56,32 +56,10 @@ The bfly classes
 ------------------
 
 .. autoclass:: Butterfly
-    :members: get_parser,parse_argv,update_db
-
-    .. attribute:: BFLY_CONFIG
-
-        Dictionary from rh-config
-
-    .. attribute:: INPUT
-
-        :class:`UtilityLayer.INPUT` instance
-
-    .. attribute:: RUNTIME
-
-        :class:`UtilityLayer.RUNTIME` instance
-
-    .. attribute:: OUTPUT
-
-        :class:`UtilityLayer.OUTPUT` instance
-
-    .. autoattribute:: log_info
-    .. autoattribute:: DB_PATH
-    .. autoattribute:: DB_TYPE
-    .. autoattribute:: PORT
-
-    :h3:`Butterfly Methods:`
+    :members:
 
 .. autoclass:: Webserver
+    :members:
 
 .. _installed: https://github.com/Rhoana/butterfly#butterfly-installation
 

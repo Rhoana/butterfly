@@ -5,6 +5,13 @@ from tornado.web import Application
 from tornado.ioloop import IOLoop
 
 class Webserver(object):
+    """ Starts the class:`CoreLayer.Core` and tornado web app.
+
+    Attributes
+    ------------
+        _log : :class:`UtilityLayer.MakeLog`
+            Log strings from UtilityLayer.RUNTIME.ERROR.SERVER
+    """
     maxbuffer = 1024 * 1024 * 150000
     def __init__(self, db, **kwargs):
         # Create a core with a database
@@ -26,7 +33,8 @@ class Webserver(object):
 
         # Create info logger
         log_list = self.RUNTIME.ERROR.SERVER
-        self.log = UtilityLayer.MakeLog(log_list).logging
+        # Has all Webserver log strings from UtilityLayer
+        self._log = UtilityLayer.MakeLog(log_list).logging
 
     def start(self,_port):
         app_start = {
@@ -38,7 +46,7 @@ class Webserver(object):
         # Begin to serve the web application
         self._webapp.listen(_port, **app_start)
         self._server = IOLoop.instance()
-        self.log('START', **{k_val: _port})
+        self._log('START', **{k_val: _port})
         # Return the webserver
         return self._server
 
@@ -48,6 +56,6 @@ class Webserver(object):
         ioloop.add_callback(ioloop.stop)
         # Keyword constants
         k_val = self.RUNTIME.ERROR.OUT.NAME
-        self.log('STOP', **{k_val: self._port})
+        self._log('STOP', **{k_val: self._port})
 
 
