@@ -7,9 +7,12 @@ import logging
 class Butterfly():
     """Starts :class:`bfly.Webserver` and runs :meth:`update_db`.
 
-    :param list _argv:
+    Args
+    -------
+    _argv : list
         passed through :meth:`parse_argv`
     """
+
     #: Path to log at log priority level
     log_info = {
         'filename': UtilityLayer.LOG_PATH,
@@ -60,7 +63,12 @@ class Butterfly():
 
     @staticmethod
     def get_parser():
-        """:return argparse.ArgumentParser
+        """ Makes an argv parser for Butterfly
+
+        Returns
+        ----------
+        argparse.ArgumentParser
+            Can turn argv lists into args and keywords
         """
         helps = {
             'bfly': 'Host a butterfly server!',
@@ -81,9 +89,13 @@ class Butterfly():
     def parse_argv(self, argv):
         """Converts argv list to dictionary with defaults.
 
-        :param list argv:
+        Args
+        -------
+        argv : list
             parsed as sys.argv by argparse
-        :return dict:
+        Returns
+        ---------
+        dict
             * port (int) -- for :class:`bfly.Webserver`
             * exp (str) -- path to config or folder of data
             * out (str) -- path to save config from folder
@@ -97,11 +109,17 @@ class Butterfly():
 def main(*args, **flags):
     """Starts a :class:`Butterfly` with arguments.
 
-    :param list args:
+    Args
+    ------
+    args : list
         * [0] (int) -- port for :class:`bfly.Webserver`
-    :param dict flags:
+    flags: dict
         * exp (str) -- path to config or folder of data
         * out (str) -- path to save config from folder
+    Returns
+    --------
+    Butterfly
+        This instance handles everything internally
     """
 
     Butterfly(UtilityLayer.to_argv(*args, **flags))

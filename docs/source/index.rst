@@ -56,25 +56,30 @@ The bfly classes
 ------------------
 
 .. autoclass:: Butterfly
-    :members:
-    :private-members:
+    :members: get_parser,parse_argv,update_db
 
     .. attribute:: BFLY_CONFIG
-        :annotation: := Dictionary from rh-config
+
+        Dictionary from rh-config
 
     .. attribute:: INPUT
-        :annotation: := UtilityLayer.INPUT instance
+
+        :class:`UtilityLayer.INPUT` instance
 
     .. attribute:: RUNTIME
-        :annotation: := UtilityLayer.RUNTIME instance
+
+        :class:`UtilityLayer.RUNTIME` instance
 
     .. attribute:: OUTPUT
-        :annotation: := UtilityLayer.OUTPUT instance
 
-    .. autoattribute:: PORT
-    .. autoattribute:: DB_TYPE
-    .. autoattribute:: DB_PATH
+        :class:`UtilityLayer.OUTPUT` instance
+
     .. autoattribute:: log_info
+    .. autoattribute:: DB_PATH
+    .. autoattribute:: DB_TYPE
+    .. autoattribute:: PORT
+
+    :h3:`Butterfly Methods:`
 
 .. autoclass:: Webserver
 
@@ -82,7 +87,7 @@ The bfly classes
 
 The bfly commands
 ------------------
-.. automodule:: __main__
-.. autofunction:: bfly.__main__.main
+.. automodule:: bfly.__main__
+.. autofunction:: bfly
 
 

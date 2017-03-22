@@ -34,6 +34,7 @@ extensions = [
     'sphinx.ext.doctest',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
+    'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
 ]
 
@@ -58,8 +59,6 @@ author = u'Harvard Visual Computing Group'
 def write_global_rst(**keywords):
     # Newline injection
     newline = ' |nl| '
-    newline_def = """
-..{}unicode:: U+000A""".format(newline)
     # Open global.rst 
     with open('global.rst','w') as g:
         # Write all the keywords
@@ -69,13 +68,17 @@ def write_global_rst(**keywords):
             assign = assign.replace('\r',newline)
             # write assignment
             g.write(assign)
-        # Write newline replacement
-        g.write(newline_def)
+            g.write('\n')
+        # Write constant globals
+        g.write("""
+.. role:: h3
+.. |nl| unicode:: U+000A
+""")
 
 # All gloabl variables
 write_global_rst(
     # bfly help (docstring bfly.__main__.main)
-    bfly_help = Butterfly.get_parser().format_help()
+    bfly_help = Butterfly.get_parser().format_help(),
 )
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

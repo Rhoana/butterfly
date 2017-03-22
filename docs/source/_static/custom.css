@@ -51,6 +51,16 @@ div.body > div.section h2::before {
 }
 
 /*
+ * Fake Heading styles 
+ */
+
+div.body span.h3 {
+    font-family: 'Raleway', Arial, sans-serif;
+    font-size: 150%;
+}
+
+
+/*
  * Sidebar
  */
 

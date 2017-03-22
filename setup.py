@@ -25,6 +25,6 @@ setup(
     install_requires= INSTALL_REQ,
     # Allows command line execution
     entry_points=dict(console_scripts=[
-        'bfly = bfly.__main__:main'
+        'bfly = bfly.__main__:bfly'
     ])
 )
