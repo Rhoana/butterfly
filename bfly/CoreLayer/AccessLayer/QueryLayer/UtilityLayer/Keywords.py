@@ -228,10 +228,6 @@ Cannot cache {value}. {size} bytes is over max.
                 )
             ),
         )
-    def __del__(self):
-        print """
-
-        """
 
 '''
 THIS HELPS RETURN TEXT
