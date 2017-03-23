@@ -153,7 +153,7 @@ class RUNTIME():
         # ALL THE DATABASE RUNTIME TERMS
         self.DB = NamelessStruct(
             TABLE = NamelessStruct(
-                LIST = _table_list[:],
+                LIST = _table_list,
                 NEURON = NamedStruct(_table_list[0],
                     KEY = NamedStruct('neuron'),
                     KEY_LIST = ['neuron']
