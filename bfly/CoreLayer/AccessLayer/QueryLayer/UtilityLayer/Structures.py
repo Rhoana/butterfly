@@ -4,19 +4,19 @@ from itertools import ifilter
 class NamelessStruct(object):
     VALUE = None
     def __init__(self,**_keywords):
-        # Begin making the list
-        all_list = _keywords.get('LIST',[])
+        # Begin a new list of all keyword NAMES
+        all_list = _keywords.get('LIST',[])[:]
         # Add other keywords to list
         for key in _keywords:
             keyval = _keywords[key]
             setattr(self,key,keyval)
             # Put all lists into list
-            is_list = isinstance(keyval,list)
-            more = keyval if is_list else []
-            # Put all term names into list
+            if isinstance(keyval, list):
+                all_list += keyval
+            # Put all keyword names into list
             if hasattr(keyval, 'NAME'):
-                more = [keyval.NAME]
-            all_list += more
+                all_list.append(keyval.NAME)
+        # If there are named keywords
         if len(all_list):
             all_set = set(all_list)
             all_key = all_list.index
