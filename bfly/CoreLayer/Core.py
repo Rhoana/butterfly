@@ -59,9 +59,7 @@ class Core(object):
             keywords = t0_query.preload_source
             self._cache.set(query.key, keywords)
         # Update current query with preloaded terms
-        status = query.update_source(keywords)
-        # Handle Errors
-        return status
+        query.update_source(keywords)
 
     '''
     Image Specific Methods

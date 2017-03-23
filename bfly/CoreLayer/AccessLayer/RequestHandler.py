@@ -46,4 +46,3 @@ class RequestHandler(web.RequestHandler):
             content = self._core.get_info(_query)
         # Return content
         self.write(content)
-        return content

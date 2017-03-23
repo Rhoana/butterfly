@@ -48,15 +48,14 @@ class FormatClass:
         def is_method(att):
             return isinstance(getattr(obj,att),types.MethodType)
         # do nothing if docstring has headings
-        if any([':h:' in l for l in lines]):
-            return lines
-        # get all attributes starting with one underscore
-        private = re.compile('(?:_[^_]+)+').match
-        priv_all = filter(private, dir(obj))
-        # filter out private methods vs attributes
-        priv_meth = filter(is_method, priv_all)
-        priv_att = set(priv_all) - set(priv_meth)
-        # add unlisted attributes and methods
-        add_attributes(lines, priv_att)
-        add_methods(lines, priv_meth)
+        if not any([':h:' in l for l in lines]):
+            # get all attributes starting with one underscore
+            private = re.compile('(?:_[^_]+)+').match
+            priv_all = filter(private, dir(obj))
+            # filter out private methods vs attributes
+            priv_meth = filter(is_method, priv_all)
+            priv_att = set(priv_all) - set(priv_meth)
+            # add unlisted attributes and methods
+            add_attributes(lines, priv_att)
+            add_methods(lines, priv_meth)
 
