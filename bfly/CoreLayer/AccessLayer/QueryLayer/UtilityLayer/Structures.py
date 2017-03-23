@@ -4,6 +4,8 @@ from itertools import ifilter
 class NamelessStruct(object):
     VALUE = None
     def __init__(self,**_keywords):
+        self.LIST = []
+        self.SIBLINGS = []
         # Begin making the list
         all_list = _keywords.get('LIST',[])
         # Add other keywords to list
@@ -15,6 +17,8 @@ class NamelessStruct(object):
             more = keyval if is_list else []
             # Put all term names into list
             if hasattr(keyval, 'NAME'):
+                # DEBUG pass this list to child
+                keyval.SIBLINGS = self.LIST
                 more = [keyval.NAME]
             all_list += more
         if len(all_list):
@@ -58,7 +62,10 @@ class NamelessStruct(object):
 # For all keywords with names
 class NamedStruct(NamelessStruct):
     NAME = None
+
     def __init__(self,_name,**_keywords):
         NamelessStruct.__init__(self, **_keywords)
         self.NAME = _name
 
+    def __del__(self):
+        print 'still have {}'.format(self.SIBLINGS)

@@ -153,7 +153,7 @@ class RUNTIME():
         # ALL THE DATABASE RUNTIME TERMS
         self.DB = NamelessStruct(
             TABLE = NamelessStruct(
-                LIST = _table_list,
+                LIST = _table_list[:],
                 NEURON = NamedStruct(_table_list[0],
                     KEY = NamedStruct('neuron'),
                     KEY_LIST = ['neuron']
@@ -228,6 +228,10 @@ Cannot cache {value}. {size} bytes is over max.
                 )
             ),
         )
+    def __del__(self):
+        print """
+
+        """
 
 '''
 THIS HELPS RETURN TEXT
