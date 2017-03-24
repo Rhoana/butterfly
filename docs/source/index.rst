@@ -17,7 +17,7 @@ definitions
     git clone https://github.com/Rhoana/butterfly
     cd butterfly && pwd
 
-- We call folders or files in the :mod:`bfly` package "layers".
+- We call all folders in the :mod:`bfly` package "layers".
     - You can import them like ``from bfly import CoreLayer``,
     - Or, import from them like ``from bfly.CoreLayer import *``,
 

@@ -82,9 +82,9 @@ class Butterfly():
             'exp': 'path/of/all/data or path/to/config',
             'port': 'port >1024 for hosting this server',
         }
-        sys.argv[0] = 'bfly'
         _port = UtilityLayer.PORT
-        parser = argparse.ArgumentParser(description=helps['bfly'])
+        parser = argparse.ArgumentParser(prog= 'bfly',
+                            description= helps['bfly'])
         parser.add_argument('port', type= int, nargs= '?',
                             default= _port, help= helps['port'])
         parser.add_argument('-e','--exp', help= helps['exp'])
@@ -107,11 +107,11 @@ class Butterfly():
             * out (str) -- path to save config from folder
         """
 
-        sys.argv = argv
         # Get the parser
         parser = self.get_parser()
         # Actually parse the arguments 
-        return vars(parser.parse_args())
+        parsed = parser.parse_args(argv[1:])
+        return vars(parsed)
 
 def main(*args, **flags):
     """Starts a :class:`Butterfly` with arguments.
@@ -128,8 +128,8 @@ def main(*args, **flags):
     Butterfly
         This instance handles everything internally
     """
-
-    Butterfly(UtilityLayer.to_argv(*args, **flags))
+    argv = UtilityLayer.to_argv(*args, **flags)
+    Butterfly(argv)
 
 if __name__ == "__main__":
     Butterfly(sys.argv)
