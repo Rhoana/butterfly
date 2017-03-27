@@ -104,6 +104,8 @@ bfly:
     # Serve only files under a list of paths
     allowed-paths:
         - /
+    # Restart the server on code change
+    developer-mode: no
 ```
 
 Let's say the user `username` has these folders in `~/data`:

@@ -11,6 +11,7 @@ BFLY_CONFIG : dict
 from Settings import BFLY_CONFIG
 from Settings import MAX_CACHE_SIZE
 from Settings import ALLOWED_PATHS
+from Settings import DEV_MODE
 from Settings import LOG_PATH
 from Settings import DB_PATH
 from Settings import DB_TYPE
@@ -34,8 +35,13 @@ from . import rh_config
 to_argv = Argv.to_argv
 
 # Define all the constants, classes, and methods in UtilityLayer
+<<<<<<< HEAD
 __all__ = ['PORT','DB_TYPE','DB_PATH','ALLOWED_PATHS']
 __all__ += ['rh_config','to_argv','MakeLog']
 __all__ += ['NamedStruct','NamelessStruct']
+=======
+__all__ = ['PORT','DB_TYPE','DB_PATH','ALLOWED_PATHS','DEV_MODE']
+__all__ += ['BFLY_CONFIG','to_argv','MakeLog']
+>>>>>>> f3eb52f... developer mode
 __all__ += ['INPUT','RUNTIME','OUTPUT']
 __all__ += ['BFLY_CONFIG']
