@@ -113,6 +113,7 @@ Private classes
 .. autoclass:: UtilityLayer.NamedStruct
     :members:
 .. autoclass:: UtilityLayer.NamelessStruct
+    :special-members:
     :members:
 
 .. _installed: https://github.com/Rhoana/butterfly#butterfly-installation

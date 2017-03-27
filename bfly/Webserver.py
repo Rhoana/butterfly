@@ -48,7 +48,6 @@ class Webserver(object):
             '_core': self._core,
             '_db': self._db
         }
-        print UtilityLayer.DEV_MODE
         app_set = {
             'autoreload': UtilityLayer.DEV_MODE
         }
