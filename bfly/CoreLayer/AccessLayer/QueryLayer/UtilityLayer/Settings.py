@@ -1,13 +1,38 @@
+""" Loads Settings from :mod:`UtilityLayer.rh_config`
+
+Attributes
+-------------
+LOG_PATH : int
+    Write logs to bfly.log or 'log-path' from :data:`config`
+DB_TYPE : int
+    Use Unqlite database or 'db-type' from :data:`config`
+DB_PATH : int
+    Write data to bfly.db or 'db-path' from :data:`config`
+PORT : int
+    Serve on 2001 or 'port' from :data:`config`
+MAX_CACHE_SIZE : int
+    Cache 1024^3 bytes or 1024^2 times 'max-cache-size'\ 
+    in megabytes from :data:`config`
+BFLY_CONFIG : dict
+    Values from 'bfly' key of :data:`config`
+config : dict
+    From :data:`UtilityLayer.rh_config.config`
+config_filename : str
+    From :data:`UtilityLayer.rh_config.config_filename`
+"""
+
+
 from .rh_config import config_filename
 from .rh_config import config
 import os
 
-# Server settings
+#Server settings
 BFLY_CONFIG = config.get("bfly", {})
 CONFIG_FILENAME = config_filename
 
-#HTTP port for server
+# HTTP port for server
 PORT = int(BFLY_CONFIG.get("port", 2001))
+
 #Path to database and kind of database
 DB_PATH = BFLY_CONFIG.get("db-path", "bfly.db")
 DB_TYPE = BFLY_CONFIG.get("db-type", "Unqlite")

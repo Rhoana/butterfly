@@ -37,7 +37,12 @@ You can import ``AccessLayer`` from :mod:`bfly` and :mod:`CoreLayer`.
 AccessLayer classes
 ************************* 
 .. autoclass:: API
+    :members:
+
+:h:`Base class`
+
+.. autoclass:: RequestHandler
+    :members:
+
 
 .. _installed: https://github.com/Rhoana/butterfly#butterfly-installation
-
-

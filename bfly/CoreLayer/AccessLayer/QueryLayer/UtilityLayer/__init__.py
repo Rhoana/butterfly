@@ -1,3 +1,12 @@
+""" Provieds Keywords, Logging templates, and an argument handler.
+
+Attributes
+-----------
+BFLY_CONFIG : dict
+   Loads all data from  the rh-config given\ 
+   by the :mod:`rh_config` module.
+
+"""
 # Get all the constants
 from Settings import BFLY_CONFIG
 from Settings import MAX_CACHE_SIZE
@@ -18,12 +27,15 @@ from Argv import Argv
 from Structures import NamedStruct
 from Structures import NamelessStruct
 
+# Get a module for documentation
+from . import rh_config
+
 # Get a static method
 to_argv = Argv.to_argv
 
 # Define all the constants, classes, and methods in UtilityLayer
 __all__ = ['PORT','DB_TYPE','DB_PATH','ALLOWED_PATHS']
-__all__ += ['BFLY_CONFIG','to_argv','MakeLog']
+__all__ += ['rh_config','to_argv','MakeLog']
 __all__ += ['NamedStruct','NamelessStruct']
 __all__ += ['INPUT','RUNTIME','OUTPUT']
-
+__all__ += ['BFLY_CONFIG']

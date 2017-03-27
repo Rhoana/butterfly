@@ -1,4 +1,13 @@
-'''Configuration loader'''
+""" Loads ``config`` from the path ``config_filename``
+
+Attributes
+-------------
+config_filename : str
+    Tries environment variable "RH_CONFIG_FILENAME"\  
+    but defaults to ~/.rh-config.yaml.\ 
+config : dict
+    Loaded from a yaml file at ``config_filename``
+"""
 
 import os
 import yaml

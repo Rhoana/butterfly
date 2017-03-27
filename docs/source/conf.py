@@ -94,6 +94,9 @@ def edit_docstring(app, what, name, obj, options, lines):
     ## Only proecss for classes with docstrings
     if lines and what == 'class':
         FormatClass(obj, lines)
+    ## Only document value of data
+    if lines and what == 'data':
+        del lines[:]
 
 # autodoc hook
 def setup(app):
