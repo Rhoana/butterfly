@@ -12,7 +12,7 @@ from AccessLayer import ImageLayer
 from AccessLayer import UtilityLayer
 
 # Define all classes in CoreLayer
-__all__ = ["Core", "Cache"]
+__all__ = ['Core', 'Cache']
 # Define all layers in CoreLayer
-__all__ += ["DatabaseLayer", "AccessLayer"]
-__all__ += ["UtilityLayer", "ImageLayer", "QueryLayer"]
+__all__ += ['DatabaseLayer', 'AccessLayer']
+__all__ += ['UtilityLayer', 'ImageLayer', 'QueryLayer']

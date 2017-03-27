@@ -8,7 +8,22 @@ import zlib
 import cv2
 
 class Core(object):
+    """ Starts the :class:`Cache`
 
+    Arguments
+    -----------
+    db : :data:`bfly.Butterfly._db_type`
+        A fully-loaded database
+
+    Attributes
+    ------------
+    _db: :data:`bfly.Butterfly._db_type`
+        Taken from first argument ``db``
+    _cache: :class:`Cache`
+        Able to store images and metadata using \ 
+        :class:`UtilityLayer.RUNTIME` instance \ 
+        from ``db`` argument
+    """
     def __init__(self, db):
         # Get DB Terms
         self._db = db
@@ -17,18 +32,59 @@ class Core(object):
         # Make Cache with keywords
         self._cache = Cache(RUNTIME)
 
-    '''
-    All methods to load data
-    '''
+    #####
+    # All methods to load data
+    #     1. get_info answers an InfoQuery i_query. 
+    #     2. get_data answers a DataQuery d_query.
+    #
+    # Both get_info or get_data call update_query.
+    #
+    # To give answers , update_query uses _cache or:
+    #     1. make_data_query if only i_query given.
+    #     2. make_tile_query with new or given d_query.
+    #####
 
     def get_info(self, i_query):
+        """ dumps answer to ``i_query`` as a string
+
+        Calls :meth:`update_query` with more information\ 
+        from the cache or from the properties of a tile.
+
+        Arguments
+        ----------
+        i_query: :class:`QueryLayer.InfoQuery`
+            A request for information
+
+        Returns
+        --------
+        str
+            Answer for the :class:`QueryLayer.InfoQuery`
+        """
         self.update_query(i_query)
         return i_query.dump
 
-    def get_data(self, query):
-        self.update_query(query)
-        image = self.find_tiles(query)
-        return self.write_image(query, image)
+    def get_data(self, d_query):
+        """ dumps answer to ``d_query`` as a string
+
+        Calls :meth:`update_query` with more information\ 
+        from the cache or from the properties of a tile.\ 
+        Also calls :meth:`find_tiles` to get the complete\ 
+        image needed to answer the ``d_query``.
+
+        Arguments
+        ----------
+        i_query: :class:`QueryLayer.InfoQuery`
+            A request for information
+
+        Returns
+        --------
+        str
+            Answer for the :class:`QueryLayer.InfoQuery`
+        """
+
+        self.update_query(d_query)
+        image = self.find_tiles(d_query)
+        return self.write_image(d_query, image)
 
     @staticmethod
     def make_data_query(i_query):

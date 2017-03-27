@@ -13,6 +13,7 @@ class Webserver(object):
     -----------
     db : :data:`bfly.Butterfly._db_type`
         A fully-loaded database
+
     Attributes
     ------------
     _db: :data:`bfly.Butterfly._db_type`
@@ -66,7 +67,7 @@ class Webserver(object):
 
         Sets two new class attributes:
             * :data:`_port` taken from the ``port`` argument
-            * :data:`_server` internal attribute of :data:`_webapp`
+            * :data:`_server` needed to stop the :data:`_webapp`
 
         Arguments
         -----------
@@ -76,7 +77,7 @@ class Webserver(object):
         Returns
         ---------
         tornado.IOLoop
-            The :data:`_server` is needed to stop the :data:`_webapp`
+            The :data:`_server` needed to stop the :data:`_webapp`
 
         """
         app_start = {

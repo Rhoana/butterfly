@@ -13,9 +13,9 @@ from CoreLayer import UtilityLayer
 from CoreLayer import DatabaseLayer
 
 # Define all modules of bfly
-__all__ = ["Butterfly", "Webserver"]
+__all__ = ['Butterfly', 'Webserver']
 # Define all the layers in bfly
-__all__ += ["CoreLayer", "DatabaseLayer"]
-__all__ += ["UtilityLayer", "ImageLayer"]
-__all__ += ["QueryLayer", "AccessLayer"]
+__all__ += ['CoreLayer', 'DatabaseLayer']
+__all__ += ['UtilityLayer', 'ImageLayer']
+__all__ += ['QueryLayer', 'AccessLayer']
 

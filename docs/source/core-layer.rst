@@ -36,7 +36,9 @@ You can import ``CoreLayer`` from :mod:`bfly`.
 CoreLayer classes
 ************************* 
 .. autoclass:: Core
+    :members:
 .. autoclass:: Cache
+    :members:
 
 
 DatabaseLayer
@@ -50,7 +52,12 @@ You can import ``DatabaseLayer`` from :mod:`bfly` and :mod:`CoreLayer`.
 DatabaseLayer classes
 ************************* 
 .. autoclass:: Unqlite
+    :members:
 
+:h:`Base class`
+
+.. autoclass:: Database
+    :members:
 
 .. _installed: https://github.com/Rhoana/butterfly#butterfly-installation
 
