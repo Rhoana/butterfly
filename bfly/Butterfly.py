@@ -7,17 +7,19 @@ import logging
 class Butterfly():
     """Starts :class:`bfly.Webserver` and runs :meth:`update_db`.
 
-    Args
+    We pass the database from :meth:`update_db` to a new :class:`bfly.Webserver`.
+
+    Arguments
     -------
     _argv : list
         passed through :meth:`parse_argv`
 
     Attributes
     -----------
-        _bfly_config : dict
-            all data from rh-config
-        _runtime : :class:`UtilityLayer.RUNTIME`
-            has settings for :mod:`CoreLayer`
+    _bfly_config : dict
+        all data from rh-config
+    _runtime : :class:`UtilityLayer.RUNTIME`
+        has settings for :mod:`CoreLayer`
 
     """
 
@@ -56,7 +58,12 @@ class Butterfly():
     def update_db(self):
         """ Starts :mod:`DatabaseLayer`. :data:`_db_type`.
 
-        Loads the database with paths from :data:`_bfly_config`.
+        Creates the DatabaseLayer \ 
+        with the path from :data:`_db_path` and \ 
+        with all values from :data:`_runtime`.
+
+        Runs :meth:`DatabaseLayer.load_config`\ 
+        with paths from :data:`_bfly_config`.
         """
 
         # Get the correct database class
@@ -95,7 +102,7 @@ class Butterfly():
     def parse_argv(self, argv):
         """Converts argv list to dictionary with defaults.
 
-        Args
+        Arguments
         -------
         argv : list
             parsed as sys.argv by argparse
@@ -116,7 +123,7 @@ class Butterfly():
 def main(*args, **flags):
     """Starts a :class:`Butterfly` with arguments.
 
-    Args
+    Arguments
     ------
     args : list
         * [0] (int) -- port for :class:`bfly.Webserver`
