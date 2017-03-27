@@ -27,8 +27,10 @@ def add_methods(lines, methods):
     # add all unset methods to the lines
     for method in set(methods) - meth_set:
         lines.insert(meth_start, add_meth(method))
+        lines.insert(meth_start, '')
     # add methods header for style points
-    lines.insert(meth_start, ':h:`Methods`')
+    if len(methods) or len(meth_set):
+        lines.insert(meth_start, ':h:`Methods`')
     lines.insert(meth_start, '')
 
 # Add unlisted private attributes

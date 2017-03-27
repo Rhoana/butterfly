@@ -72,14 +72,11 @@ UtilityLayer
 .. module:: bfly.CoreLayer.AccessLayer.QueryLayer.UtilityLayer
 .. automodule:: UtilityLayer
 
-You can import ``UtilityLayer`` from :mod:`bfly`, :mod:`CoreLayer`, :mod:`AccessLayer`, and :mod:`QueryLayer`.
-
-UtilityLayer Keywords
-***********************
 .. autodata:: PORT
 .. autodata:: DB_TYPE
 .. autodata:: DB_PATH
-.. data:: BFLY_CONFIG
+
+You can import ``UtilityLayer`` from :mod:`bfly`, :mod:`CoreLayer`, :mod:`AccessLayer`, and :mod:`QueryLayer`.
 
 UtilityLayer classes
 ************************* 
@@ -92,13 +89,17 @@ UtilityLayer classes
 .. autoclass:: MakeLog
     :members:
 
+Private classes
+*******************
+.. autoclass:: NamedStruct
+    :members:
+.. autoclass:: NamelessStruct
+    :special-members:
+    :members:
+
 UtilityLayer functions
 *************************
 .. autofunction:: to_argv
-
-The Keywords module
-**************************
-.. automodule:: UtilityLayer.Keywords
 
 The Settings module
 **************************
@@ -107,13 +108,5 @@ The Settings module
 The rh_config module
 **************************
 .. automodule:: UtilityLayer.rh_config
-
-Private classes
-*******************
-.. autoclass:: UtilityLayer.NamedStruct
-    :members:
-.. autoclass:: UtilityLayer.NamelessStruct
-    :special-members:
-    :members:
 
 .. _installed: https://github.com/Rhoana/butterfly#butterfly-installation
