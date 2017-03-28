@@ -54,7 +54,8 @@ DatabaseLayer classes
 .. autoclass:: Unqlite
     :members:
 
-:h:`Base class`
+Database base class
+************************
 
 .. autoclass:: Database
     :members:

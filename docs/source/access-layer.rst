@@ -39,7 +39,8 @@ AccessLayer classes
 .. autoclass:: API
     :members:
 
-:h:`Base class`
+Request Handler base class
+****************************
 
 .. autoclass:: RequestHandler
     :members:

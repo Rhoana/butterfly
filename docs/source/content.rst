@@ -5,3 +5,4 @@
     core-layer
     access-layer
     query-layer
+    utility-layer

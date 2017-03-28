@@ -43,7 +43,8 @@ QueryLayer classes
 .. autoclass:: TileQuery
     :members:
 
-:h:`Base class`
+Query base class
+*******************
 
 .. autoclass:: Query
     :members:
@@ -61,52 +62,10 @@ ImageLayer classes
 .. autoclass:: HDF5
     :members:
 
-:h:`Base class`
+Datasource base class
+***********************
 
 .. autoclass:: Datasource
     :members:
-
-
-UtilityLayer
-------------------
-.. module:: bfly.CoreLayer.AccessLayer.QueryLayer.UtilityLayer
-.. automodule:: UtilityLayer
-
-.. autodata:: PORT
-.. autodata:: DB_TYPE
-.. autodata:: DB_PATH
-
-You can import ``UtilityLayer`` from :mod:`bfly`, :mod:`CoreLayer`, :mod:`AccessLayer`, and :mod:`QueryLayer`.
-
-UtilityLayer classes
-************************* 
-.. autoclass:: INPUT
-    :members:
-.. autoclass:: RUNTIME
-    :members:
-.. autoclass:: OUTPUT
-    :members:
-.. autoclass:: MakeLog
-    :members:
-
-Private classes
-*******************
-.. autoclass:: NamedStruct
-    :members:
-.. autoclass:: NamelessStruct
-    :special-members:
-    :members:
-
-UtilityLayer functions
-*************************
-.. autofunction:: to_argv
-
-The Settings module
-**************************
-.. automodule:: UtilityLayer.Settings
-
-The rh_config module
-**************************
-.. automodule:: UtilityLayer.rh_config
 
 .. _installed: https://github.com/Rhoana/butterfly#butterfly-installation

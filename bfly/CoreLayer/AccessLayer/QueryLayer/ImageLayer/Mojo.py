@@ -1,11 +1,36 @@
 from Datasource import Datasource
 
 class Mojo(Datasource):
+    """ Not implemented
+    """
+    @staticmethod
+    def load_tile(t_query):
+        """load a single tile (image)
+
+        Arguments
+        -----------
+        t_query: :class:`TileQuery`
+            With file path and image position
+        """
+        return None
 
     @staticmethod
-    def load_tile(query):
+    def preload_source(t_query):
+        """load info from example tile (image)
 
-        # call superclass
-        Datasource.load_tile(query)
+        Arguments
+        -----------
+        t_query: :class:`TileQuery`
+            Only the file path is needed
 
-        return None
+        Returns
+        --------
+        dict
+            * :data:`OUTPUT.INFO`.``TYPE.NAME`` -- \ 
+                numpy datatype of any given tile
+            * :data:`RUNTIME.IMAGE`.``BLOCK.NAME`` -- \ 
+                numpy 3x1 array of any given tile shape
+            * :data:`OUTPUT.INFO`.``SIZE.NAME`` -- \ 
+                numpy 3x1 array of full volume shape
+        """
+        return {}
