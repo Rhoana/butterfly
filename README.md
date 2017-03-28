@@ -1,5 +1,7 @@
 # butterfly
 
+[![Docs][IMAGE.RTD]][LINK.RTD]
+
 ### Version 2:
 [![V2][V2.IMAGE.CI]][V2.LINK.CI] [![V2][V2.IMAGE.COVER]][V2.LINK.COVER]
 
@@ -7,6 +9,9 @@
 
 ### Master:
 [![V1][V1.IMAGE.CI]][V1.LINK.CI]
+
+[IMAGE.RTD]: http://readthedocs.org/projects/butterfly/badge/?version=latest
+[LINK.RTD]: http://butterfly.readthedocs.io/en/latest/?badge=latest
 
 [V2.IMAGE.CI]: https://img.shields.io/circleci/project/github/Rhoana/butterfly/update_v2.svg 
 [V2.LINK.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/update_v2
