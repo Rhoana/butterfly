@@ -7,7 +7,7 @@ input {
 }
 
 div.body {
-    overflow: scroll;
+    overflow: auto;
     background-color: #1A1A1A;
 }
 
@@ -79,6 +79,11 @@ code, code.descclassname, code.descname {
     color: #FFF;
 }
 
+div.viewcode-block,
+div.viewcode-block:target {
+    background-color: #000;
+}
+
 code.xref, code.xref > span.pre {
     border-bottom: inherit;
     background-color: #000;
@@ -107,7 +112,7 @@ div.sphinxsidebar a:hover {
     div.sphinxsidebar {
         max-height: calc(6em + 20vh);
         background-color: #000;
-        overflow-y: scroll;
+        overflow-y: auto;
     }
     div.sphinxsidebarwrapper *:not(script) {
         display: inline-block;

@@ -5,7 +5,9 @@ from QueryLayer import UtilityLayer
 from concurrent.futures import ThreadPoolExecutor
 
 class RequestHandler(web.RequestHandler):
-
+    """ Responds to requests from :data:`bfly.Webserver._webapp`
+    :h:`Methods`
+    """
     INPUT = UtilityLayer.INPUT()
     OUTPUT = UtilityLayer.OUTPUT()
     RUNTIME = UtilityLayer.RUNTIME()

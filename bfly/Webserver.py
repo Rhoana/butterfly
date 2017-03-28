@@ -24,10 +24,10 @@ class Webserver(object):
         Shared runtime instance with :data:`_db`
 
     _log: :class:`UtilityLayer.MakeLog`
-        Log strings from UtilityLayer.RUNTIME.ERROR.SERVER
+        Log strings from :class:`RUNTIME` ``.ERROR.SERVER``
     _webapp: :class:`tornado.web.Application`
         Allow access to content at /api and /ocp \ 
-        with all in :mod:`AccessLayer`
+        with :class:`API` and :class:`OCP`
     _server: :class:`tornado.web.Application.IOLoop`
         Allows us to stop the :data:`webapp`.\ 
         It is the :data:`webapp`'s IOLoop instance.\ 
