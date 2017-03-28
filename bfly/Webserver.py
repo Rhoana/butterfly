@@ -20,7 +20,7 @@ class Webserver(object):
         Taken from first argument ``db``
     _core: :class:`CoreLayer.Core`
         Also given the ``db`` argument
-    RUNTIME: :class:`UtilityLayer.RUNTIME`
+    RUNTIME: :class:`RUNTIME`
         Shared runtime instance with :data:`_db`
 
     _log: :class:`UtilityLayer.MakeLog`

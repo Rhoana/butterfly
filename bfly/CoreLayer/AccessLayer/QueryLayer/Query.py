@@ -183,12 +183,12 @@ class Query():
 
         Arguments
         -----------
-            whitelist: list-like
-                The list of desired values
-            value: anything
-                The value should be in the ``whitelist``
-            term: str
-                The name of the attriubte to test
+        whitelist: list-like
+            The list of desired values
+        value: anything
+            The value should be in the ``whitelist``
+        term: str
+            The name of the attriubte to test
         """
         in_list = value in whitelist
         msg = 'in {}'.format(whitelist)
@@ -199,12 +199,12 @@ class Query():
 
         Arguments
         -----------
-            length: int
-                The desired length of the value
-            value: list-like
-                The value should be a list or array
-            term: str
-                The name of the attriubte to test
+        length: int
+            The desired length of the value
+        value: list-like
+            The value should be a list or array
+        term: str
+            The name of the attriubte to test
         """
         msg0 = 'a list or array'
         has_len = hasattr(value, '__len__')
