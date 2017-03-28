@@ -346,7 +346,6 @@ class API(RequestHandler):
         --------
         dict
             The requested subdictionary from :data:`BFLY_CONFIG`
-
         """
         configured = self.BFLY_CONFIG
         # validate each query value in each configured level
@@ -405,7 +404,6 @@ class API(RequestHandler):
             has the path to data in the requested group from \ 
             :meth:`_get_group_dict`
         """
-
         # Parse all the group terms
         meta_dict = self._get_group_dict('')
         path_key = self.OUTPUT.INFO.PATH.NAME
@@ -518,7 +516,6 @@ class API(RequestHandler):
         ---------
         numpy.uint32
             If the ``result`` can convert to an integer
-
         """
         k_term = self.RUNTIME.ERROR.TERM.NAME
         k_check = self.RUNTIME.ERROR.CHECK.NAME
@@ -543,9 +540,7 @@ class API(RequestHandler):
         ---------
         anything
             If the ``result`` is in the ``whitelist``
-
         """
-
         k_term = self.RUNTIME.ERROR.TERM.NAME
         k_check = self.RUNTIME.ERROR.CHECK.NAME
         # Check if the result is in the list
@@ -572,7 +567,6 @@ class API(RequestHandler):
         ---------
         anything
             If the ``result`` is in the ``field.LIST``
-
         """
         result = self.get_query_argument(field.NAME, field.VALUE)
         return self._match_list(field.NAME, result, field.LIST)
@@ -593,7 +587,6 @@ class API(RequestHandler):
         ---------
         np.uint32
             If the ``result`` can be converted to an integer
-
         """
         result = self.get_query_argument(field.NAME, field.VALUE)
         return self._try_typecast_int(field.NAME, result)

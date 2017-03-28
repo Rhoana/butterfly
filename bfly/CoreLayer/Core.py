@@ -88,6 +88,19 @@ class Core(object):
 
     @staticmethod
     def make_data_query(i_query):
+        """ Make a data query from an info query
+
+        Arguments
+        ----------
+        i_query: :class:`InfoQuery`
+            only needs ``PATH`` set in :data:`OUTPUT.INFO`
+
+        Returns
+        --------
+        :class:`DataQuery`
+            takes only the `PATH` from ``i_query``
+
+        """
         # Begin building needed keywords
         i_path = i_query.OUTPUT.INFO.PATH
 
@@ -97,11 +110,36 @@ class Core(object):
         })
 
     @staticmethod
-    def make_tile_query(query, t_index):
-        tile_crop = query.all_in_some(t_index)
-        return TileQuery(query, t_index, tile_crop)
+    def make_tile_query(d_query, t_index):
+        """ Make a :class:`TileQuery` from :class:`DataQuery`
+
+        Arguments
+        ----------
+        d_query: :class:`DataQuery`
+            only needs ``PATH`` set in :data:`OUTPUT.INFO`
+        t_index: numpy.ndarray
+            The 3x1 count of tiles form the origin
+
+        Returns
+        --------
+        :class:`TileQuery`
+            One tile request in the given data request
+        """
+        tile_crop = d_query.all_in_some(t_index)
+        return TileQuery(d_query, t_index, tile_crop)
 
     def update_query(self, query):
+        """ Finds missing query details from cache or tile
+
+        Calls :meth:`Query.update_source` with ``keywords`` \ 
+        taken from either the :data:`_cache` or from a new \ 
+        :class:`TileQuery` to update the given ``query``
+
+        Arguments
+        ----------
+        query: :class:`Query`
+            Either an :class:`InfoQuery` or a :class:`DataQuery`
+        """
         keywords = self._cache.get(query.key)
         if not len(keywords):
             d_query = query
@@ -117,29 +155,51 @@ class Core(object):
         # Update current query with preloaded terms
         query.update_source(keywords)
 
-    '''
-    Image Specific Methods
-    '''
+    #####
+    # Image Specific Methods
+    #####
 
-    def find_tiles(self, query):
-        first_tile_index = query.tile_bounds[0]
-        all_tiles = np.argwhere(np.ones(query.tile_shape))
-        cutout = np.zeros(query.target_shape, query.dtype)
+    def find_tiles(self, d_query):
+        """ Load the requested image for a :class:`DataQuery`
+
+        Arguments
+        ----------
+        d_query: :class:`DataQuery`
+            Request for a scaled subvolume of a source image
+
+        Returns
+        numpy.ndarray
+            The full image data for the requested region
+        """
+        first_tile_index = d_query.tile_bounds[0]
+        all_tiles = np.argwhere(np.ones(d_query.tile_shape))
+        cutout = np.zeros(d_query.target_shape, d_query.dtype)
         tiles_needed = first_tile_index + all_tiles
 
         for t_index in tiles_needed:
             # Make a query for the given tile
-            t_query = self.make_tile_query(query, t_index)
-            tile = self.load_tile(query, t_query)
+            t_query = self.make_tile_query(d_query, t_index)
+            tile = self.load_tile(t_query)
             # Fill the tile into the full cutout
             to_cut = [t_query.target_origin, tile.shape]
-            [Z0,Y0,X0],[Z1,Y1,X1] = query.some_in_all(*to_cut)
+            [Z0,Y0,X0],[Z1,Y1,X1] = d_query.some_in_all(*to_cut)
             cutout[Z0:Z1,Y0:Y1,X0:X1] = tile
 
         return cutout
 
+    def load_tile(self, t_query):
+        """ Load a single tile from the cache or from disk
 
-    def load_tile(self, query, t_query):
+        Arguments
+        ----------
+        t_query: :class:`TileQuery`
+            With tile coordinates and volume within the tile
+
+        Returns
+        --------
+        numpy.ndarray
+            The subregion image data for the requested tile
+        """
         # grab request size for query
         t_bounds = t_query.target_bounds
         t_origin = t_query.tile_origin
@@ -158,12 +218,26 @@ class Core(object):
 
     @staticmethod
     def view_volume(view, vol):
+        """ Display a volume in color or grayscale
+
+        Arguments
+        ----------
+        view: str
+            The requested color or gray view of the data
+        vol: str
+            Raw volume from :class:`Cache` / :class:`Datasource`
+
+        Returns
+        --------
+        numpy.ndarray
+            Colorized or original raw volume
+        """
         # Set up a colormap
         def id_to_color(vol):
-            colors = np.zeros((3,)+vol.shape).astype(np.uint8)
-            colors[0] = np.mod(107*vol,700).astype(np.uint8)
-            colors[1] = np.mod(509*vol,900).astype(np.uint8)
-            colors[2] = np.mod(200*vol,777).astype(np.uint8)
+            colors = np.zeros((3,)+ vol.shape).astype(np.uint8)
+            colors[0] = np.mod(107 * vol, 700).astype(np.uint8)
+            colors[1] = np.mod(509 * vol, 900).astype(np.uint8)
+            colors[2] = np.mod(200 * vol, 777).astype(np.uint8)
             return np.moveaxis(colors,0,-1)
 
         # Colormap if a colormap view
@@ -171,11 +245,24 @@ class Core(object):
             return id_to_color(vol)
         return vol
 
-    def write_image(self, query, volume):
+    def write_image(self, d_query, volume):
+        """ Format a volume for a given :class:`DataQuery`
 
-        img_format = query.INPUT.IMAGE.FORMAT
-        img_view = query.INPUT.IMAGE.VIEW
-        img_type = query.OUTPUT.INFO.TYPE
+        Arguments
+        ----------
+        d_query: :class:`DataQuery`
+            With the format and view for the requested volume
+        volume: numpy.ndarray
+            Raw volume from :class:`Cache` / :class:`Datasource`
+
+        Returns
+        --------
+        str:
+            The image response as a formatted bytestring
+        """
+        img_format = d_query.INPUT.IMAGE.FORMAT
+        img_view = d_query.INPUT.IMAGE.VIEW
+        img_type = d_query.OUTPUT.INFO.TYPE
 
         # Only if grayscale view is set
         if img_view.VALUE == img_view.GRAY.NAME:

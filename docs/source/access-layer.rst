@@ -45,8 +45,6 @@ Request Handler base class
 .. autoclass:: RequestHandler
     :members:
 
-    :h:`tornado.web.RequestHandler`
-
     .. automethod :: get_query_argument
 
 .. _installed: https://github.com/Rhoana/butterfly#butterfly-installation
