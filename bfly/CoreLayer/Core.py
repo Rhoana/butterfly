@@ -34,7 +34,7 @@ from ``db`` argument
 
     #####
     # All methods to load data
-    #     1. get_info answers an InfoQuery i_query. 
+    #     1. get_info answers an InfoQuery i_query.
     #     2. get_data answers a DataQuery d_query.
     #
     # Both get_info or get_data call update_query.

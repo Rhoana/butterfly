@@ -36,7 +36,7 @@ Only set after :meth:`start` starts :data:`_webapp`.
     _port: int
         Only set after port passed to :meth:`start`
     """
-    #: Max bytes of memory for :data:`_webapp` 
+    #: Max bytes of memory for :data:`_webapp`
     _maxbuffer = 1024 * 1024 * 200
     def __init__(self, db):
         # Create a core with a database

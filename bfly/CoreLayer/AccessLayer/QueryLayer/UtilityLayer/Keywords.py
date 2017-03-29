@@ -132,9 +132,6 @@ data or mask requests.
             )
         )
 
-'''
-THIS HELPS LOAD TILES
-'''
 class RUNTIME():
     """ Keywords passed between classes and layers.
     All the attributes and their attributes store \

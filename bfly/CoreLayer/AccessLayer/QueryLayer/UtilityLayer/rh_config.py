@@ -3,7 +3,7 @@
 Attributes
 -------------
 config_filename : str
-    Tries environment variable "RH_CONFIG_FILENAME"\  
+    Tries environment variable "RH_CONFIG_FILENAME"\
     but defaults to ~/.rh-config.yaml. \
 config : dict
     Loaded from a yaml file at :data:`config_filename`

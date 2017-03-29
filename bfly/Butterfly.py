@@ -116,7 +116,7 @@ with paths from :data:`_bfly_config`.
 
         # Get the parser
         parser = self.get_parser()
-        # Actually parse the arguments 
+        # Actually parse the arguments
         parsed = parser.parse_args(argv[1:])
         return vars(parsed)
 
