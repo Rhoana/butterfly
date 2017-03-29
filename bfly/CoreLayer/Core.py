@@ -44,6 +44,21 @@ from ``db`` argument
     #     2. make_tile_query with new or given d_query.
     #####
 
+    def get_groups(self, i_query):
+        """ dumps group list for ``i_query`` as a string
+
+        Arguments
+        ----------
+        i_query: :class:`QueryLayer.InfoQuery`
+            A request for a list of groups
+
+        Returns
+        --------
+        str
+            A list of all groups for the ``i_query``
+        """
+        return i_query.dump
+
     def get_info(self, i_query):
         """ dumps answer to ``i_query`` as a string
 

@@ -1,8 +1,9 @@
-from CoreLayer import UtilityLayer
-from CoreLayer import AccessLayer
 from CoreLayer import Core
-from tornado.web import Application
 from tornado.ioloop import IOLoop
+from CoreLayer import AccessLayer
+from CoreLayer import UtilityLayer
+from tornado.web import Application
+from CoreLayer.AccessLayer import StaticHandler
 
 class Webserver(object):
     """ Starts the :class:`CoreLayer.Core` and tornado web app.
@@ -44,17 +45,31 @@ Only set after :meth:`start` starts :data:`_webapp`.
         self._core = Core(db)
         self._db = db
 
+        # Arguments for data and info requests
         app_in = {
             '_core': self._core,
             '_db': self._db
         }
+        # Arguments for static requests
+        stat_in = {
+            '_root': __name__
+        }
+        # Set for entire webapp
         app_set = {
             'autoreload': UtilityLayer.DEV_MODE
         }
         # Create the webapp with both access layers
         self._webapp = Application([
             (r'/api/(.*)', AccessLayer.API, app_in),
-            (r'/ocp/(.*)', AccessLayer.OCP, app_in)
+            (r'/ocp/(.*)', AccessLayer.OCP, app_in),
+            # A file requested from root of static,
+            # Or a file requested from a static folder
+            (r'/([^/]*\..*)?', StaticHandler, stat_in),
+            (r'/(shaders/.*)', StaticHandler, stat_in),
+            (r'/(images/.*)', StaticHandler, stat_in),
+            (r'/(style/.*)', StaticHandler, stat_in),
+            (r'/(index/.*)', StaticHandler, stat_in),
+            (r'/(viz/.*)', StaticHandler, stat_in),
         ], **app_set)
 
         # Create info logger

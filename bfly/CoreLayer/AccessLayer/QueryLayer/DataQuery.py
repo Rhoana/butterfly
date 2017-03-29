@@ -129,10 +129,10 @@ the voxel scales from :meth:`scales`.
         Returns
         --------
         numpy.ndarray
-            The 3x1 :meth:`source_origin` divided by \
-the voxel scales from :meth:`scales`.
+            The 3x1 block of Z, Y, and X in `INPUT.POSITION`
         """
-        return np.uint32(self.source_origin / self.scales)
+        zyx = map(self.INPUT.POSITION.get,'ZYX')
+        return np.uint32([c.VALUE for c in zyx])
 
     @property
     def source_origin(self):
@@ -141,11 +141,10 @@ the voxel scales from :meth:`scales`.
         Returns
         --------
         numpy.ndarray
-            The 3x1 block of Z, Y, and X \
-values from `INPUT.POSITION`
+            The 3x1 :meth:`target_origin` multiplied by \
+the voxel scales from :meth:`scales`.
         """
-        zyx = map(self.INPUT.POSITION.get,'ZYX')
-        return np.uint32([c.VALUE for c in zyx])
+        return np.uint32(self.target_origin * self.scales)
 
     @property
     def target_bounds(self):

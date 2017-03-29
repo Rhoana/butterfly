@@ -1,0 +1,92 @@
+#proto {
+  display:none;
+}
+
+#api {
+  font-family: sans-serif;
+  background-color:#000;
+  position:absolute;
+  height:100%;
+  width:100%;
+  left:0px;
+  top:0px;
+}
+
+svg {
+  transition: .125s all;
+}
+
+label {
+  transition: .25s all;
+	overflow: hidden;
+	cursor: pointer;
+  display: block;
+  font-size: 1em;
+  color: #FFF;
+}
+
+div > ul {
+  padding-left: 0px;
+	margin: 0px;
+}
+
+path {
+  stroke:#FFF
+}
+
+label a[href] {
+	color: #FF0;
+}
+
+label a:after {
+	content: ':'
+}
+
+input + label span span {
+  padding-left: 0.75em;
+  font-size: 0.7em;
+	color: #CCC;
+}
+
+input + label span span:before {
+  content: '('
+}
+
+input + label span span:after {
+  content: ')'
+}
+
+label:first-child > span {
+  font-size: 0.8em;
+}
+
+input[type="checkbox"] {
+	position: absolute;
+	opacity: 0;
+}
+
+input[type="checkbox"]:checked + label svg {
+  transform: rotate(-90deg);
+}
+
+input[type="checkbox"]:checked + label + ul label{
+  max-height:2em;
+}
+
+input[type="checkbox"]:not(:checked) + label + ul label{
+	max-height:0em;
+}
+
+ /* Entirely for Keyboad Navigation Purposes */
+
+input[type="checkbox"]:focus + label svg path {
+  stroke:#FF0
+}
+
+input[type="checkbox"]:not(:checked) + label + ul input{
+	visibility:hidden;
+}
+
+input[type="checkbox"]:not(:checked) + label + ul label{
+	visibility:hidden;
+}

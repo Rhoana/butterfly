@@ -62,9 +62,24 @@ and the ``key`` has no default in the struct
     @property
     def is_data(self):
         """ Checks whether the method requests images
+
+        Returns
+        -------
+        bool
         """
         image_methods = self.INPUT.METHODS.IMAGE_LIST
         return self.INPUT.METHODS.VALUE in image_methods
+
+    @property
+    def is_group(self):
+        """ Checks whether the method requests groups
+
+        Returns
+        -------
+        bool
+        """
+        group_methods = self.INPUT.METHODS.GROUP_LIST
+        return self.INPUT.METHODS.VALUE in group_methods
 
     @property
     def mime_type(self):

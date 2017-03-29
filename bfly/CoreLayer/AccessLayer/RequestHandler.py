@@ -1,5 +1,4 @@
-from tornado import web
-from tornado import gen
+from tornado import web, gen
 from urllib2 import URLError
 from QueryLayer import UtilityLayer
 from concurrent.futures import ThreadPoolExecutor
@@ -76,7 +75,7 @@ class RequestHandler(web.RequestHandler):
 
     @gen.coroutine
     def get(self, *args):
-        """ Asynchronous uses :data:`_ex` to call :meth:`handle`
+        """ Asynchronously uses :data:`_ex` to call :meth:`handle`
 
         The query is returned from :meth:`parse` and passed \
 asynchronously to :meth:`handle`.
@@ -108,10 +107,16 @@ based on the type of the query from :meth:`Query.is_data`
         _query: :class:`Query`
             The details formatted by :meth:`parse`
         """
+
         self.set_header('Content-Type',_query.mime_type)
         if _query.is_data:
+            # get an image formatted as a string
             content = self._core.get_data(_query)
+        elif _query.is_group:
+            # get a list of groups formatted as a string
+            content = self._core.get_groups(_query)
         else:
+            # get a list or dict of information as a string
             content = self._core.get_info(_query)
         # Return content
         self.write(content)
