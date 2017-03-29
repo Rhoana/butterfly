@@ -197,6 +197,12 @@ default dataset given by \
                     info = HDF5._read[order](infile)
             except IOError:
                 return [filename, dataset]
+            ######
+            ## Handle references to multiple h5 files
+            ## Get first item in list
+            ######
+            if isinstance(info, list):
+                info = info[0]
             # Get the inner dataset and the new path
             filename = info.get(h5_info.OUTER.NAME, filename)
             dataset = info.get(h5_info.INNER.NAME, dataset)
