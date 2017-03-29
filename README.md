@@ -43,7 +43,7 @@ In your system shell, enter the below `code blocks` in order:
 2. __Prepare__ to install
 
     ```
-    pip install -U 
+    pip install -U pip
     pip install -r requirements.txt
     ```
 
