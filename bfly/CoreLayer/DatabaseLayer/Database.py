@@ -98,15 +98,27 @@ class Database():
         self.commit()
         return self
 
-    # Must be overwritten
     def add_path(self, c_path, d_path):
+        """ store a link from a ``c_path`` to a ``d_path``
+        Must be overridden by derived class.
+
+        Arguments
+        ----------
+        c_path: str
+            The path to a given channel with images
+        d_path: str
+            The path to the dataset with metadata files
+        """
         pass
 
-    '''
-    Interface for adding tables
-    '''
-
     def add_tables(self, path):
+        """ Store all the tables for a given path
+
+        Arguments
+        ----------
+        path: str
+            The dataset path to metadata files
+        """
         # Get keywords for the database
         k_list = self.RUNTIME.DB.TABLE.LIST
         # Create all tables for the path
@@ -115,15 +127,41 @@ class Database():
             self.add_table(k_table, path)
         return self
 
-    # Must be overwritten
     def add_table(self, table, path):
+        """ Add a table to the database
+        Must be overridden by derived classes
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+
+        Returns
+        --------
+        str or bool
+            The table name combining ``table`` and ``path`` \
+The derived classes should return whether the table was \
+added successfully.
+        """
         k_join = self.RUNTIME.DB.JOIN.NAME
         return k_join.format(table, path)
 
-    '''
-    Interface for loading entries
-    '''
     def load_synapses(self, path):
+        """ Load all the synapse information from files
+
+        Arguments
+        ----------
+        path: str
+            The dataset path to metadata files
+
+        Returns
+        --------
+        numpy.ndarray
+            The Nx5 array of pre, post, z, y, x values \
+where N is the number of synapses for the ``path``.
+        """
         # Get file fields
         k_files = self.RUNTIME.DB.FILE
         # Get keywords for input file
@@ -153,6 +191,23 @@ class Database():
         return synapses
 
     def load_neurons(self, path, synapses):
+        """ Load all the neuron information from files
+
+        Arguments
+        ----------
+        path: str
+            The dataset path to metadata files
+        synapses: numpy.ndarray
+            The Nx5 array of pre, post, z, y, x values \
+where N is the number of synapses for the ``path``.
+
+        Returns
+        --------
+        numpy.ndarray
+            The Nx4 array of id, z, y, x values \
+where N is the number of neurons for the ``path``.
+        """
+
         # Get all source and target nodes
         all_tgt = np.unique(synapses[:,1])
         all_src, arg_src = np.unique(synapses[:,0], True)
@@ -170,10 +225,25 @@ class Database():
         self.add_neurons(path, neurons)
         return neurons
 
-    '''
-    Interface for adding entries
-    '''
     def add_synapses(self, path, synapses):
+        """ Add all the synapases to the database
+
+        Arguments
+        ----------
+        path: str
+            The dataset path to metadata files
+        synapses: numpy.ndarray
+            The Nx5 array of pre, post, z, y, x values \
+where N is the number of synapses for the ``path``.
+
+        Returns
+        --------
+        list
+            A list of dicts from each row of ``synapses`` \
+with dictionary keys taken from both ``SYNAPSE.NEURON_LIST`` \
+and ``ALL.POINT_LIST`` fields of :data:`RUNTIME.DB`
+
+        """
         # Get database fields
         k_tables = self.RUNTIME.DB.TABLE
         # Get keywords for the database
@@ -187,6 +257,25 @@ class Database():
         return self.add_entries(k_synapse, path, k_keys, synapses)
 
     def add_neurons(self, path, neurons):
+        """ Add all the neurons to the database
+
+        Arguments
+        ----------
+        path: str
+            The dataset path to metadata files
+        neurons: numpy.ndarray
+            The Nx4 array of id, z, y, x values \
+where N is the number of neurons for the ``path``.
+
+        Returns
+        --------
+        list
+            A list of dicts from each row of ``neurons`` \
+with dictionary keys taken from both ``NEURON.KEY.NAME`` \
+and ``ALL.POINT_LIST`` fields of :data:`RUNTIME.DB`
+
+        """
+
         # Get database fields
         k_tables = self.RUNTIME.DB.TABLE
         # Get keywords for the database
@@ -200,6 +289,21 @@ class Database():
         return self.add_entries(k_neuron, path, k_keys, neurons)
 
     def add_entries(self, table, path, t_keys, entries):
+        """ Add an numpy.array of entries to a table
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+        t_keys: list
+            All of ``K`` keys for each row of ``entries``
+        entries: numpy.ndarray
+            ``N`` by ``K`` array where ``N`` is the number \
+of entries to add and ``K`` is the number of keys per entry
+
+        """
         # Typecast values uniformly
         def cast(value):
             # convert if numpy datatype
@@ -219,26 +323,89 @@ class Database():
         self.commit()
         return dict_entries
 
-    # Must be overwritten
     def add_entry(self, table, path, entry):
+        """ and a single entry to a table for a path
+        Must be overridden by derived class.
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+        entry: dict
+            The mapping of keys to values for the entry
+
+        Returns
+        --------
+        str or bool
+            Full database name of the table for a path. \
+The derived classes should return whether the entry was \
+added successfully.
+        """
         k_join = self.RUNTIME.DB.JOIN.NAME
         return k_join.format(table, path)
 
-    '''
-    Interface for getting
-    '''
-
-    # Must be overwritten
     def get_path(self, path):
+        """ Map a channel path to a dataset path
+        Must be overridden by derived class.
+
+        Arguments
+        ----------
+        path: str
+            The path to the given channel
+
+        Returns
+        --------
+        str
+            The dataset path for the  given ``path``
+        """
         pass
 
-    # Must be overwritten
     def get_table(self, table, path):
+        """ Get the actual table for a given path
+        Must be overridden by derived class.
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+
+        Returns
+        --------
+        str or object
+            Full database name of the table for a path. \
+The derived classes should actually return the python \
+object reference to the real table.
+        """
         real_path = self.get_path(path)
         k_join = self.RUNTIME.DB.JOIN.NAME
         return k_join.format(table, real_path)
 
     def get_entry(self, table, path, key=None, **keywords):
+        """ Get an actual entry in the database
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+        key: int or callable
+            Either the primary key value for any entry \
+or a filter function to get multiple entries
+        keywords: dict
+            The entry field values to filter entries
+
+        Returns
+        --------
+        dict or list
+            A single entry given as a dict or multiple \
+entries given as a list of dict entries.
+        """
+
         # Get the necessary keywords
         k_tables = self.RUNTIME.DB.TABLE
         # Use key if no keywords
@@ -260,19 +427,89 @@ class Database():
         result = self.get_by_keywords(table, path, **keywords)
         return result if result else []
 
-    # Must be overwritten
     def get_all(self, table, path):
+        """ Get all the entries in a table path
+        Must be overridden by derived class.
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+
+        Returns
+        --------
+        object or list
+            The object reference from :meth:`get_table`. \
+The derived class should list all entries in the table.
+        """
+
         return self.get_table(table, path)
 
-    # Must be overwritten
     def get_by_key(self, table, path, key):
+        """ Get the entry for the key in the table.
+        Must be overridden by derived class.
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+        key: int
+            The primary key value for any entry
+
+        Returns
+        --------
+        object or dict
+            The object reference from :meth:`get_table`. \
+The derived class should give an entry in the table.
+        """
         return  self.get_table(table, path)
 
-    # Must be overwritten
     def get_by_fun(self, table, path, fun):
+        """ Get the entries where function is true.
+        Must be overridden by derived class.
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+        fun: int
+            The function to filter the table entries
+
+        Returns
+        --------
+        object or list
+            The object reference from :meth:`get_table`. \
+The derived class should list all entries that make the \
+function return a true value.
+        """
         return  self.get_table(table, path)
 
     def get_by_keywords(self, table, path, **keys):
+        """ Get the entries where the fields match ``keys``.
+        Must be overridden by derived class.
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+        keys: dict
+            The keywords to filter the table entries
+
+        Returns
+        --------
+        object or list
+            The object reference from :meth:`get_table`. \
+The derived class should list all entries that match the \
+keyword value paris given in ``keys``.
+        """
         # Make keyword filter
         def key_filter(v):
             values = map(v.get, keys.keys())
@@ -282,10 +519,9 @@ class Database():
         # Filter table by keywords
         return self.get_by_fun(table, path, key_filter)
 
-    '''
-    Interface for saving to disk
-    '''
-    # Must be overwritten
     def commit(self):
+        """ Save all database changes to the database file.
+        Must be overridden by derived class.
+        """
         pass
 
