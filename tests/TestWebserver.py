@@ -5,11 +5,8 @@ import logging
 import sys
 
 class TestWebserver(ut.TestCase):
-    '''
-    Butterfly 2.0
-    Test the EM Data server
-    2017 VCG + Lichtman Lab
-    '''
+    """ set up tests for `bfly.Webserver`
+    """
     PORT = 2017
     DB_PATH = ':mem:'
     DB_TYPE = 'Unqlite'
@@ -22,6 +19,8 @@ class TestWebserver(ut.TestCase):
 
     @classmethod
     def test_web(cls):
+        """ test that `bfly.Webserver` can start and stop.
+        """
 
         # Log to command line
         logging.basicConfig(**cls.log_info)

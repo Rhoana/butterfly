@@ -14,6 +14,8 @@ np_setup = {
 CLASS = ['INPUT','RUNTIME','OUTPUT']
 
 def class2yaml(it):
+    """ writes a class as a yaml list
+    """
     classn = CLASS[int(it)]
     classy = getattr(UtilityLayer, classn)
     unclean = yaml.dump({classn:classy()}, **yaml_setup)
@@ -21,6 +23,8 @@ def class2yaml(it):
     return clean.split('\n')
 
 def pad_lists(lists):
+    """ add whitespace to printed lists
+    """
     max_lines = len(max(lists,key=len))
     c_shape = (max_lines, len(lists))
     max_chars = 0

@@ -4,11 +4,8 @@ import logging
 import sys
 
 class TestArgv(ut.TestCase):
-    '''
-    Butterfly 2.0
-    Test Argument Flattening
-    2017 VCG + Lichtman Lab
-    '''
+    """ set up tests for ``UtilityLayer.to_argv``
+    """
     PORT = 2017
     # Log to the command line
     log_info = {
@@ -49,7 +46,8 @@ class TestArgv(ut.TestCase):
     ]
 
     def test_argv(self):
-
+        """ Test the ``UtilityLayer.to_argv``
+        """
         # Log to command line
         logging.basicConfig(**self.log_info)
 
