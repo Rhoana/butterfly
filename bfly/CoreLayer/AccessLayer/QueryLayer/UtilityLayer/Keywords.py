@@ -23,30 +23,29 @@ _table_list = ['neuron', 'synapse']
 
 class INPUT():
     """ Keywords to read input files and requests
-
-    All the attributes and their attributes store \ 
-    a mutable VALUE of and type, and some store a \ 
-    static NAME that should always be used externally.
+    All the attributes and their attributes store \
+a mutable VALUE of and type, and some store a \
+static NAME that should always be used externally.
 
     Attributes
     ------------
-    METHODS : :class:`NamedStruct`
+    METHODS: :class:`NamedStruct`
         All methods for :class:`RequestHandler` requests
-    GROUP : :class:`NamedStruct`
+    GROUP: :class:`NamedStruct`
         All groups from the :data:`UtilityLayer.BFLY_CONFIG`
-    FEATURES : :class:`NamedStruct`
+    FEATURES: :class:`NamedStruct`
         All features for /api/entity_feature requests
-    POSITION : :class:`NamelessStruct`
+    POSITION: :class:`NamelessStruct`
         Center coordintates for :meth:`Database.load_config`
         All coordinates for :class:`RequestHandler` requests
-    RESOLUTION : :class:`NamelessStruct`
+    RESOLUTION: :class:`NamelessStruct`
         All resolutions for :class:`RequestHandler` requests
-    INFO : :class:`NamelessStruct`
-        Formats for /api/channel_metadata requests \ 
-        and id for /api/entity_feature requests
-    IMAGE : :class:`NamelessStruct`
-        Formats and views for :class:`RequestHandler`\ 
-        data or mask requests.
+    INFO: :class:`NamelessStruct`
+        Formats for /api/channel_metadata requests \
+and id for /api/entity_feature requests
+    IMAGE: :class:`NamelessStruct`
+        Formats and views for :class:`RequestHandler` \
+data or mask requests.
     """
 
     def __init__(self):
@@ -138,21 +137,21 @@ THIS HELPS LOAD TILES
 '''
 class RUNTIME():
     """ Keywords passed between classes and layers.
-    All the attributes and their attributes store \ 
-    a mutable VALUE of and type, and some store a \ 
-    static NAME that should always be used externally.
+    All the attributes and their attributes store \
+a mutable VALUE of and type, and some store a \
+static NAME that should always be used externally.
 
     Attributes
     ------------
-    TILE : :class:`NamelessStruct`
+    TILE: :class:`NamelessStruct`
         For :class:`QueryLayer.TileQuery`
-    IMAGE : :class:`NamelessStruct`
+    IMAGE: :class:`NamelessStruct`
         For :class:`QueryLayer.DataQuery`
-    CACHE : :class:`NamelessStruct`
+    CACHE: :class:`NamelessStruct`
         For :class:`CoreLayer.Cache`
-    DB : :class:`NamelessStruct`
+    DB: :class:`NamelessStruct`
         For :mod:`DatabaseLayer`
-    ERROR : :class:`NamelessStruct`
+    ERROR: :class:`NamelessStruct`
         For :class:`MakeLog`
     """
 
@@ -274,15 +273,15 @@ Cannot cache {value}. {size} bytes is over max.
 
 class OUTPUT():
     """ Keywords used for writing out from server.
-    All the attributes and their attributes store \ 
-    a mutable VALUE of and type, and some store a \ 
-    static NAME that should always be used externally.
+    All the attributes and their attributes store \
+a mutable VALUE of and type, and some store a \
+static NAME that should always be used externally.
 
     Attributes
     ------------
-    INFO : :class:`NamelessStruct`
+    INFO: :class:`NamelessStruct`
         Outputs for /api/channel_metadata requests
-    FEATURES : :class:`NamelessStruct`
+    FEATURES: :class:`NamelessStruct`
         Outputs for /api/entity_feature requests
     """
     def __init__(self):

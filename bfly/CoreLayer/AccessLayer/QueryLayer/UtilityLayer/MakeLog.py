@@ -6,8 +6,8 @@ class MakeLog(object):
     Arguments
     ----------
     struct : NamelessStruct
-        Member of :data:`RUNTIME.ERROR` with \ 
-        all the string templates for logging
+        Member of :data:`RUNTIME.ERROR` with \
+all the string templates for logging
 
     Attributes
     logs : NamelessStruct
@@ -20,8 +20,8 @@ class MakeLog(object):
     def logging(self, action, **keys):
         """ Log the action and keys to a template
 
-        Calls the logging method in :data:`logs` \ 
-        with the formatted template in :data:`logs`.
+        Calls the logging method in :data:`logs` \
+with the formatted template in :data:`logs`.
 
         Arguments
         ----------

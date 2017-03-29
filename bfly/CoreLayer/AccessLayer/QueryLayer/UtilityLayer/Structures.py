@@ -14,10 +14,10 @@ class NamelessStruct(object):
     VALUE : anything
         Any instance has its own mutable VALUE.
     LIST : list
-        All unique attriubtes are given here. \ 
-        If 'LIST' is given as a keyword, the order\ 
-        of the attributes given in the 'LIST' keyword\ 
-        is preserved at the top of the :data:`LIST`.
+        All unique attributes are given here. \
+If 'LIST' is given as a keyword, the order\
+of the attributes given in the 'LIST' keyword\
+is preserved at the top of the :data:`LIST`.
     """
     VALUE = None
     def __init__(self,**_keywords):
@@ -45,8 +45,8 @@ class NamelessStruct(object):
         Arguments
         -----------
         name: str
-            The NAME attribute of the requested \ 
-            :class:`NamedStruct`.
+            The NAME attribute of the requested \
+:class:`NamedStruct`.
         """
         children = self.__dict__.values()
         # Make sure name is the same
@@ -59,10 +59,10 @@ class NamelessStruct(object):
     def __getitem__(self, key):
         """ Get any attribute as if from a dictionary
 
-        If the attriubte is a :class:`NamedStruct`, \ 
-        then the `key` can be either the attribute or the NAME of \ 
-        the attribute. The key is first used as an attribute and \ 
-        then used as a NAME with :meth:`_n_get` if not an attribute.
+        If the attribute is a :class:`NamedStruct`, \
+then the `key` can be either the attribute or the NAME of \
+the attribute. The key is first used as an attribute and \
+then used as a NAME with :meth:`_n_get` if not an attribute.
 
         Arguments
         ----------
@@ -108,12 +108,12 @@ class NamedStruct(NamelessStruct):
     Attributes
     -----------
     NAME : str
-        This is a constant used externally whenever \ 
-        passing the :data:`VALUE` attribute between \ 
-        classes, methods, and external files. \ 
-        All ``NamedStruct`` or ``NamelessStruct`` with a \ 
-        ``NamedStruct`` attribute can access the ``NameStruct`` \ 
-        with the NAME as a dictionary key such as parent['a_name'].
+        This is a constant used externally whenever \
+passing the :data:`VALUE` attribute between \
+classes, methods, and external files. \
+All ``NamedStruct`` or ``NamelessStruct`` with a \
+``NamedStruct`` attribute can access the ``NameStruct`` \
+with the NAME as a dictionary key such as parent['a_name'].
     LIST : list
         see :data:`NamelessStruct.LIST`
     VALUE : anything

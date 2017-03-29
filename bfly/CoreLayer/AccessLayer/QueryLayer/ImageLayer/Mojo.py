@@ -26,11 +26,11 @@ class Mojo(Datasource):
         Returns
         --------
         dict
-            * :data:`OUTPUT.INFO`.``TYPE.NAME`` -- \ 
-                numpy datatype of any given tile
-            * :data:`RUNTIME.IMAGE`.``BLOCK.NAME`` -- \ 
-                numpy 3x1 array of any given tile shape
-            * :data:`OUTPUT.INFO`.``SIZE.NAME`` -- \ 
-                numpy 3x1 array of full volume shape
+            * :data:`OUTPUT.INFO`.``TYPE.NAME`` -- \
+numpy datatype of any given tile
+            * :data:`RUNTIME.IMAGE`.``BLOCK.NAME`` -- \
+numpy 3x1 array of any given tile shape
+            * :data:`OUTPUT.INFO`.``SIZE.NAME`` -- \
+numpy 3x1 array of full volume shape
         """
         return {}

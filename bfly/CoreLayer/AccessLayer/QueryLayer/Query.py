@@ -13,9 +13,9 @@ class Query():
     args: list
         See :class:`TileQuery` for use of positional arguments
     keywords: dict
-        Each derived class may use any keyword arguments given \ 
-        keys each match a `NAME` of a :class:`NamedStruct`in \ 
-        :class:`INPUT`, :class:`RUNTIME`, or :class:`OUTPUT`.
+        Each derived class may use any keyword arguments given \
+keys each match a `NAME` of a :class:`NamedStruct`in \
+:class:`INPUT`, :class:`RUNTIME`, or :class:`OUTPUT`.
 
     Attributes
     ------------
@@ -38,7 +38,7 @@ class Query():
         self.keywords = keywords
 
     def set_key(self, struct, key, empty=''):
-        """ Copy a the key from keywords to the structure
+        """ Copy the key from keywords to the structure
 
         Arguments
         ----------
@@ -47,8 +47,8 @@ class Query():
         key: str
             The key to transfer from :data:`keywords`
         empty: anything
-            The value if :data:`keywords` has no ``key``\ 
-            and the ``key`` has no default in the struct
+            The value if :data:`keywords` has no ``key``\
+and the ``key`` has no default in the struct
         """
         # Get field to be set
         field = struct.get(key, {})
@@ -70,9 +70,9 @@ class Query():
     def mime_type(self):
         """ Gets the mime type for the file_type
 
-        The mime type is from :data:`INPUT.IMAGE` \ 
-        if :meth:`is_data`, or :data:`INPUT.INFO` \ 
-        otherwise.
+        The mime type is from :data:`INPUT.IMAGE` \
+if :meth:`is_data`, or :data:`INPUT.INFO` \
+otherwise.
 
         Returns
         --------
@@ -107,12 +107,12 @@ class Query():
             * :class:`RUNTIME` ``.IMAGE.SOURCE.HDF5.OUTER.NAME``
                 (str) -- The direct filename to an hdf5 file
             * :class:`RUNTIME` ``.IMAGE.SOURCE.HDF5.INNER.NAME``
-                (str) -- The datset in the file with image data
+                (str) -- The dataset in the file with image data
         """
         # take named keywords
         output = self.OUTPUT.INFO
         runtime = self.RUNTIME.IMAGE
-        # Get the right kind of datsource and datatype
+        # Get the right kind of datasource and datatype
         source_val = keywords.get(runtime.SOURCE.NAME)
         type_val = keywords.get(output.TYPE.NAME)
         # Get the right blocksize
@@ -188,7 +188,7 @@ class Query():
         value: anything
             The value should be in the ``whitelist``
         term: str
-            The name of the attriubte to test
+            The name of the attribute to test
         """
         in_list = value in whitelist
         msg = 'in {}'.format(whitelist)
@@ -204,7 +204,7 @@ class Query():
         value: list-like
             The value should be a list or array
         term: str
-            The name of the attriubte to test
+            The name of the attribute to test
         """
         msg0 = 'a list or array'
         has_len = hasattr(value, '__len__')
@@ -223,12 +223,12 @@ class Query():
         status: str
             The name of the log template
         detail: dict
-            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \ 
-                (str) -- description of failure
-            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \ 
-                (str) -- the failed property name
-            * :data:`RUNTIME` ``.ERROR.OUT.NAME`` \ 
-                (str) -- the failed property value
+            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \
+(str) -- description of failure
+            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \
+(str) -- the failed property name
+            * :data:`RUNTIME` ``.ERROR.OUT.NAME`` \
+(str) -- the failed property value
 
         Raises
         -------

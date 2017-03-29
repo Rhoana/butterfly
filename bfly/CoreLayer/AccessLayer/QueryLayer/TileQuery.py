@@ -71,9 +71,9 @@ class TileQuery(Query):
         Returns
         -------
         str
-            the path value from :meth:`path` \ 
-            joined with the tile_values from \ 
-            :meth:`index_zyx` and :meth:`all_scales`
+            the path value from :meth:`path` \
+joined with the tile_values from \
+:meth:`index_zyx` and :meth:`all_scales`
         """
         origin = self.index_zyx
         scales = self.all_scales
@@ -110,9 +110,9 @@ class TileQuery(Query):
         Returns
         -------
         :class:`Datasource`
-            the source value from ``RUNTIME.IMAGE`` \ 
-            as an actual :class:`Datasource` \ 
-            that can load a ``TileQuery``.
+            the source value from ``RUNTIME.IMAGE`` \
+as an actual :class:`Datasource` \
+that can load a ``TileQuery``.
         """
         my_source = self.RUNTIME.IMAGE.SOURCE.VALUE
         return self.get_source(my_source)
@@ -230,7 +230,7 @@ class TileQuery(Query):
         # Preload the metadata from the source
         keywords = self.valid_source
 
-        # Get the size of this dicitonary for the cache
+        # Get the size of this dictionary for the cache
         dict_size = np.uint32(sys.getsizeof({}))
         keywords[cache_meta.NAME] = dict_size
         # calculate the size
@@ -247,8 +247,8 @@ class TileQuery(Query):
         Returns
         --------
         dict
-            Empty if no :meth:`Datasource.preload_source` \ 
-            can find this filname to give a valid volume.
+            Empty if no :meth:`Datasource.preload_source` \
+can find this filname to give a valid volume.
 
             * :class:`RUNTIME` ``.IMAGE.SOURCE.NAME``
                 (str) -- The :class:`Datasource` subclass
@@ -286,8 +286,8 @@ class TileQuery(Query):
         Arguments
         ----------
         name: str
-            The key to a ``Datasource`` subclass \ 
-            as listed in :data:`SOURCES`
+            The key to a ``Datasource`` subclass \
+as listed in :data:`SOURCES`
 
         Returns
         --------

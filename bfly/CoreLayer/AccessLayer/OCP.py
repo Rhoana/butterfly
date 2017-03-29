@@ -6,7 +6,7 @@ class OCP(RequestHandler):
 
     Attributes
     -----------
-    inherrits: :class:`RequestHandler`
+    inherits: :class:`RequestHandler`
 
 
     :h:`Methods`
@@ -14,6 +14,7 @@ class OCP(RequestHandler):
     """
     def parse(self, request):
         """ Extract details from any of the methods
+        Overrides :meth:`Database.parse`
 
         Arguments
         ----------

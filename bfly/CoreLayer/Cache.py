@@ -13,11 +13,11 @@ class Cache(object):
     Attributes
     -----------
     _max_memory: int
-        ``MAX`` from :data:`RUNTIME.CACHE`, and \ 
-        the max bytes of memory to be used.
+        ``MAX`` from :data:`RUNTIME.CACHE`, and \
+the max bytes of memory to be used.
     _cach_meta: str
-        ``MAX`` from :data:`RUNTIME.CACHE`, and \ 
-        the key for the size of cached keywords
+        ``MAX`` from :data:`RUNTIME.CACHE`, and \
+the key for the size of cached keywords
     _cache: Collections.OrderedDict
         A Least recently used ordered dictionary
     _now_memory: int

@@ -13,15 +13,15 @@ class Argv(object):
         args: list
             All in list must be able to become ``str``
         flags: dict
-            All keys,values in dict must be able to \ 
-                become ``str``
+            All keys,values in dict must be able to \
+become ``str``
 
         Returns
         ---------
         list
-            Allows :class:`argparse.ArgumentParser` to \ 
-            handle a list and dictionary in the same way \ 
-            that it would handle ``sys.argv``.
+            Allows :class:`argparse.ArgumentParser` to \
+handle a list and dictionary in the same way \
+that it would handle ``sys.argv``.
         """
 
         # Get positional and keyword arguments
@@ -39,8 +39,8 @@ class Argv(object):
         argv : list
             List of previously flattened arguments
         key_value : 2-list or 2-tuple
-            Pair from dictionary to add to next list \ 
-            of flattened arguments
+            Pair from dictionary to add to next list \
+of flattened arguments
 
         Returns
         --------

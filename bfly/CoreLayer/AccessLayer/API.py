@@ -9,7 +9,7 @@ class API(RequestHandler):
 
     Attributes
     -----------
-    inherrits: :class:`RequestHandler`
+    inherits: :class:`RequestHandler`
 
 
     :h:`Methods`
@@ -17,6 +17,7 @@ class API(RequestHandler):
     """
     def parse(self, request):
         """ Extract details from any of the methods
+        Overrides :meth:`Database.parse`
 
         Calls :meth:`_meta_info`, :meth:`_feature_info`, \
 :meth:`_get_group`, or :meth:`_get_data` to return \
@@ -345,7 +346,7 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         Returns
         --------
         dict
-            The requested subdictionary from :data:`BFLY_CONFIG`
+            The requested sub-dictionary from :data:`BFLY_CONFIG`
         """
         configured = self.BFLY_CONFIG
         # validate each query value in each configured level

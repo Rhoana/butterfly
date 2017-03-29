@@ -20,15 +20,15 @@ class DataQuery(Query):
         * `INPUT.POSITION.DEPTH` (int) --
             the requested scaled depth of the image request
         * `INPUT.POSITION.HEIGHT` (int) --
-            the reduested scaled height of the image request
+            the requested scaled height of the image request
         * `INPUT.POSITION.WIDTH` (int) --
             the requested scaled width of the image request
         * `INPUT.RESOLUTION.XY` (int) --
             the number of halvings along the X and Y axes
         * `INPUT.RESOLUTION.FORMAT` (str) --
-            the requessted output image file format
+            the requested output image file format
         * `INPUT.RESOLUTION.VIEW` (str) --
-            the requessted coloring method for images
+            the requested coloring method for images
 
     """
 
@@ -103,8 +103,8 @@ class DataQuery(Query):
         Returns
         -------
         numpy.ndarray
-            The 3x1 block of DEPTH, HEIGHT, WIDTH \ 
-            values from `INPUT.POSITION`
+            The 3x1 block of DEPTH, HEIGHT, WIDTH \
+values from `INPUT.POSITION`
         """
         shapes = ['DEPTH','HEIGHT','WIDTH']
         dhw = map(self.INPUT.POSITION.get, shapes)
@@ -117,8 +117,8 @@ class DataQuery(Query):
         Returns
         --------
         numpy.ndarray
-            The 3x1 :meth:`target_shape` multiplied by \ 
-            the voxel scales from :meth:`scales`.
+            The 3x1 :meth:`target_shape` multiplied by \
+the voxel scales from :meth:`scales`.
         """
         return np.uint32(self.target_shape * self.scales)
 
@@ -129,8 +129,8 @@ class DataQuery(Query):
         Returns
         --------
         numpy.ndarray
-            The 3x1 :meth:`source_origin` divided by \ 
-            the voxel scales from :meth:`scales`.
+            The 3x1 :meth:`source_origin` divided by \
+the voxel scales from :meth:`scales`.
         """
         return np.uint32(self.source_origin / self.scales)
 
@@ -141,8 +141,8 @@ class DataQuery(Query):
         Returns
         --------
         numpy.ndarray
-            The 3x1 block of Z, Y, and X \ 
-            values from `INPUT.POSITION`
+            The 3x1 block of Z, Y, and X \
+values from `INPUT.POSITION`
         """
         zyx = map(self.INPUT.POSITION.get,'ZYX')
         return np.uint32([c.VALUE for c in zyx])
@@ -154,9 +154,9 @@ class DataQuery(Query):
         Returns
         --------
         numpy.ndarray
-            The 2x3 joining of :meth:`target_origin` \ 
-            and :meth:`target_shape` transposed such that \ 
-            each row gives one of two bounding corners.
+            The 2x3 joining of :meth:`target_origin` \
+and :meth:`target_shape` transposed such that \
+each row gives one of two bounding corners.
         """
         z0y0x0 = self.target_origin
         z1y1x1 = z0y0x0 + self.target_shape
@@ -169,9 +169,9 @@ class DataQuery(Query):
         Returns
         --------
         numpy.ndarray
-            The 2x3 joining of the lowermost tile \ 
-            and the uppermost tile transposed such that \ 
-            a row gives the upper or lower limit of tiles.
+            The 2x3 joining of the lowermost tile \
+and the uppermost tile transposed such that \
+a row gives the upper or lower limit of tiles.
         """
         target_bounds = self.target_bounds
         float_block = np.float32(self.blocksize)
@@ -188,9 +188,9 @@ class DataQuery(Query):
         Returns
         --------
         numpy.ndarray
-            The 3x1 difference of :meth:`tile_bounds` \ 
-            to give three numbers that count the number \ 
-            of tiles needed in all three directions.
+            The 3x1 difference of :meth:`tile_bounds` \
+to give three numbers that count the number \
+of tiles needed in all three directions.
         """
         return np.diff(self.tile_bounds,axis=0)[0]
 
@@ -200,20 +200,20 @@ class DataQuery(Query):
         Arguments
         ----------
         t_origin: numpy.ndarray
-            The 3x1 origin of the tile in the scaled \ 
-            target image
+            The 3x1 origin of the tile in the scaled \
+target image
         t_shape: numpy.ndarray
-            The 3x1 shape of the tile in the scaled \ 
-            target image
+            The 3x1 shape of the tile in the scaled \
+target image
 
         Returns
         --------
         numpy.ndarray
-            The 2x3 joining of ``t_origin`` and ``t_shape`` \ 
-            offset from :meth:`target_origin` and clipped by \ 
-            :meth:`target_shape` such that either row gives \ 
-            the upper or lower corner of the tile in the full \ 
-            scaled target volume.
+            The 2x3 joining of ``t_origin`` and ``t_shape`` \
+offset from :meth:`target_origin` and clipped by \
+:meth:`target_shape` such that either row gives \
+the upper or lower corner of the tile in the full \
+scaled target volume.
         """
 
         tile_bounds = t_origin + np.outer([0,1],t_shape)
@@ -231,11 +231,11 @@ class DataQuery(Query):
         Returns
         --------
         numpy.ndarray
-            The 2x3 offset of :meth:`target_bounds` from \ 
-            the origin of ``tile_origin`` repetitions of \ 
-            :meth:`blocksize` such that either row gives \ 
-            an upper or lower corner of the total target \ 
-            volume within the requested ``t_index`` tile.
+            The 2x3 offset of :meth:`target_bounds` from \
+the origin of ``tile_origin`` repetitions of \
+:meth:`blocksize` such that either row gives \
+an upper or lower corner of the total target \
+volume within the requested ``t_index`` tile.
         """
         tile_origin = self.blocksize * t_index
         all_in = self.target_bounds - tile_origin

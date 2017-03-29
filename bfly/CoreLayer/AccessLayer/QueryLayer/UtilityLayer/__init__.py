@@ -3,8 +3,8 @@
 Attributes
 -----------
 BFLY_CONFIG : dict
-   Loads all data from  the rh-config given\ 
-   by the :mod:`rh_config` module.
+   Loads all data from  the rh-config given\
+by the :mod:`rh_config` module.
 
 """
 # Get all the constants

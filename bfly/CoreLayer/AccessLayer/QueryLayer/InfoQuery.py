@@ -56,7 +56,7 @@ class InfoQuery(Query):
 
     @property
     def get_format(self):
-        """ get the index ef the output format
+        """ get the index of the output format
 
         Returns
         -------

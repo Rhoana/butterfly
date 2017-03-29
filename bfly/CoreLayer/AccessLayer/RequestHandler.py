@@ -19,7 +19,7 @@ class RequestHandler(web.RequestHandler):
         All data from rh-config
 
     _ex: ``concurrent.futures.ThreadPoolExecutor``
-        Allows handling of parralel requests
+        Allows handling of parallel requests
     _core: :class:`CoreLayer.Core`
         Converts a request into a response
     _db: :class:`DatabaseLayer.Database`
@@ -60,7 +60,7 @@ class RequestHandler(web.RequestHandler):
     def parse(self, request):
         """ Extract details from any of the methods
 
-        Must be ovewritten by derived classes
+        Must be overridden by derived classes
 
         Arguments
         ----------
@@ -78,8 +78,8 @@ class RequestHandler(web.RequestHandler):
     def get(self, *args):
         """ Asynchronous uses :data:`_ex` to call :meth:`handle`
 
-        The query is returned from :meth:`parse` and passed \ 
-        asynchronously to :meth:`handle`.
+        The query is returned from :meth:`parse` and passed \
+asynchronously to :meth:`handle`.
 
         Arguments
         ----------
@@ -100,8 +100,8 @@ class RequestHandler(web.RequestHandler):
     def handle(self, _query):
         """ Sends response of :data:`_core` to ``_query``
 
-        Calls :meth:`Core.get_data` or :meth:`Core.get_info` \ 
-        based on the type of the query from :meth:`Query.is_data`
+        Calls :meth:`Core.get_data` or :meth:`Core.get_info` \
+based on the type of the query from :meth:`Query.is_data`
 
         Arguments
         ----------

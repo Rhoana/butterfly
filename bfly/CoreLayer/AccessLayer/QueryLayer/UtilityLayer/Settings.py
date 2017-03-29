@@ -11,8 +11,8 @@ DB_PATH : int
 PORT : int
     Serve on 2001 or 'port' from :data:`config`
 MAX_CACHE_SIZE : int
-    Cache 1024^3 bytes or 1024^2 times 'max-cache-size'\ 
-    in megabytes from :data:`config`
+    Cache 1024^3 bytes or 1024^2 times 'max-cache-size'\
+in megabytes from :data:`config`
 BFLY_CONFIG : dict
     Values from 'bfly' key of :data:`config`
 config : dict

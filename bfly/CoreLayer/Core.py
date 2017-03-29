@@ -20,9 +20,9 @@ class Core(object):
     _db: :data:`bfly.Butterfly._db_type`
         Taken from first argument ``db``
     _cache: :class:`Cache`
-        Able to store images and metadata using \ 
-        :class:`UtilityLayer.RUNTIME` instance \ 
-        from ``db`` argument
+        Able to store images and metadata using \
+:class:`UtilityLayer.RUNTIME` instance \
+from ``db`` argument
     """
     def __init__(self, db):
         # Get DB Terms
@@ -47,8 +47,8 @@ class Core(object):
     def get_info(self, i_query):
         """ dumps answer to ``i_query`` as a string
 
-        Calls :meth:`update_query` with more information\ 
-        from the cache or from the properties of a tile.
+        Calls :meth:`update_query` with more information\
+from the cache or from the properties of a tile.
 
         Arguments
         ----------
@@ -66,10 +66,10 @@ class Core(object):
     def get_data(self, d_query):
         """ dumps answer to ``d_query`` as a string
 
-        Calls :meth:`update_query` with more information\ 
-        from the cache or from the properties of a tile. \ 
-        Also calls :meth:`find_tiles` to get the complete\ 
-        image needed to answer the ``d_query``.
+        Calls :meth:`update_query` with more information\
+from the cache or from the properties of a tile. \
+Also calls :meth:`find_tiles` to get the complete\
+image needed to answer the ``d_query``.
 
         Arguments
         ----------
@@ -131,9 +131,9 @@ class Core(object):
     def update_query(self, query):
         """ Finds missing query details from cache or tile
 
-        Calls :meth:`Query.update_source` with ``keywords`` \ 
-        taken from either the :data:`_cache` or from a new \ 
-        :class:`TileQuery` to update the given ``query``
+        Calls :meth:`Query.update_source` with ``keywords`` \
+taken from either the :data:`_cache` or from a new \
+:class:`TileQuery` to update the given ``query``
 
         Arguments
         ----------
@@ -143,10 +143,10 @@ class Core(object):
         keywords = self._cache.get(query.key)
         if not len(keywords):
             d_query = query
-            # Create a preporatory data_query
+            # Create a preparatory data_query
             if not isinstance(query, DataQuery):
                 d_query = self.make_data_query(query)
-            # Create a preporatory tile_query
+            # Create a preparatory tile_query
             t0_index = np.uint32([0,0,0])
             t0_query = self.make_tile_query(d_query, t0_index)
             # Update keywords and set the cache
