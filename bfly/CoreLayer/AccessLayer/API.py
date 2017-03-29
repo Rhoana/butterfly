@@ -18,10 +18,10 @@ class API(RequestHandler):
     def parse(self, request):
         """ Extract details from any of the methods
 
-        Calls :meth:`_meta_info`, :meth:`_feature_info`, \ 
-        :meth:`_get_group`, or :meth:`_get_data` to return \ 
-        an :class:`InfoQuery` or :class:`DataQuery` as a \ 
-        response to the given ``method``
+        Calls :meth:`_meta_info`, :meth:`_feature_info`, \
+:meth:`_get_group`, or :meth:`_get_data` to return \
+an :class:`InfoQuery` or :class:`DataQuery` as a \
+response to the given ``method``
 
         Arguments
         ----------
@@ -84,8 +84,8 @@ class API(RequestHandler):
         Returns
         --------
         :class:`InfoQuery`
-            with a feature passed as `OUTPUT.INFO.NAMES` \ 
-            from :meth:`_id_feature` or :meth:`_box_feature`
+            with a feature passed as `OUTPUT.INFO.NAMES` \
+from :meth:`_id_feature` or :meth:`_box_feature`
         """
         # Get needed metadata
         info = self.OUTPUT.INFO
@@ -370,9 +370,9 @@ class API(RequestHandler):
         Returns
         --------
         :class:`InfoQuery`
-            The :data:`OUTPUT.INFO` ``.NAMES.NAME`` keyword \ 
-            has the list of groups in the requested group from \ 
-            :meth:`_get_group_dict`
+            The :data:`OUTPUT.INFO` ``.NAMES.NAME`` keyword \
+has the list of groups in the requested group from \
+:meth:`_get_group_dict`
         """
         out_format = self._get_list_query(self.INPUT.INFO.FORMAT)
         group_list = self._get_group_dict(_method).get(_method,[])
@@ -400,9 +400,9 @@ class API(RequestHandler):
         Returns
         --------
         :class:`DataQuery`
-            The :data:`OUTPUT.INFO` ``.Path.NAME`` keyword \ 
-            has the path to data in the requested group from \ 
-            :meth:`_get_group_dict`
+            The :data:`OUTPUT.INFO` ``.Path.NAME`` keyword \
+has the path to data in the requested group from \
+:meth:`_get_group_dict`
         """
         # Parse all the group terms
         meta_dict = self._get_group_dict('')
@@ -440,10 +440,10 @@ class API(RequestHandler):
         result: anything
             the failed ``result`` value
         detail: dict
-            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \ 
-                (str) -- description of failure
-            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \ 
-                (str) -- the failed property name
+            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \
+(str) -- description of failure
+            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \
+(str) -- the failed property name
 
         Raises
         -------
@@ -464,10 +464,10 @@ class API(RequestHandler):
         checked: bool
             Raises an exception if false
         detail: dict
-            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \ 
-                (str) -- description of possible failure
-            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \ 
-                (str) -- the name of ``result`` property
+            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \
+(str) -- description of possible failure
+            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \
+(str) -- the name of ``result`` property
 
         Returns
         --------
@@ -487,10 +487,10 @@ class API(RequestHandler):
         checked: callable
             The function to try to call on ``result``
         detail: dict
-            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \ 
-                (str) -- description of possible failure
-            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \ 
-                (str) -- the name of ``result`` property
+            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \
+(str) -- description of possible failure
+            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \
+(str) -- the name of ``result`` property
 
         Returns
         --------
@@ -553,8 +553,8 @@ class API(RequestHandler):
     def _get_list_query(self, field):
         """ Call :meth:`_match_list` for a given structure
 
-        Get a ``result`` from the URL parameter for the ``field``\ 
-        using :meth:`get_query_argument`
+        Get a ``result`` from the URL parameter for the ``field``\
+using :meth:`get_query_argument`
 
         Arguments
         ----------
@@ -574,8 +574,8 @@ class API(RequestHandler):
     def _get_int_query(self, field):
         """ Call :meth:`_try_typecast_int` for a structure
 
-        Get a ``result`` from the URL parameter for the ``field``\ 
-        using :meth:`get_query_argument`
+        Get a ``result`` from the URL parameter for the ``field``\
+using :meth:`get_query_argument`
 
         Arguments
         ----------

@@ -26,12 +26,12 @@ class Webserver(object):
     _log: :class:`UtilityLayer.MakeLog`
         Log strings from :class:`RUNTIME` ``.ERROR.SERVER``
     _webapp: :class:`tornado.web.Application`
-        Allow access to content at /api and /ocp \ 
-        with :class:`API` and :class:`OCP`
+        Allow access to content at /api and /ocp \
+with :class:`API` and :class:`OCP`
     _server: :class:`tornado.web.Application.IOLoop`
-        Allows us to stop the :data:`webapp`.\ 
-        It is the :data:`webapp`'s IOLoop instance.\ 
-        Only set after :meth:`start` starts :data:`_webapp`.
+        Allows us to stop the :data:`webapp`. \
+It is the :data:`webapp`'s IOLoop instance. \
+Only set after :meth:`start` starts :data:`_webapp`.
 
     _port: int
         Only set after port passed to :meth:`start`
@@ -96,15 +96,15 @@ class Webserver(object):
     def stop(self):
         """ Stops the :data:`_webapp`.
 
-        Adds a :data:`_server``.``stop`` callback to :data:`_server`.\ 
-        This stops :data:`_server`, which is \ 
-        also known as the :data:`_webapp`'s IOLoop.
+        Adds a :data:`_server``.``stop`` callback to :data:`_server`. \
+This stops :data:`_server`, which is \
+also known as the :data:`_webapp`'s IOLoop.
 
         Arguments
         -----------
             _port: int
-                The port number to serve all entry points.\ 
-                Also sets the class attribute :data:`_port`
+                The port number to serve all entry points. \
+Also sets the class attribute :data:`_port`
 
         """
 

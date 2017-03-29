@@ -14,7 +14,7 @@ class NamelessStruct(object):
     VALUE : anything
         Any instance has its own mutable VALUE.
     LIST : list
-        All unique attriubtes are given here.\ 
+        All unique attriubtes are given here. \ 
         If 'LIST' is given as a keyword, the order\ 
         of the attributes given in the 'LIST' keyword\ 
         is preserved at the top of the :data:`LIST`.

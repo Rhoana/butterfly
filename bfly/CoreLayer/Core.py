@@ -67,7 +67,7 @@ class Core(object):
         """ dumps answer to ``d_query`` as a string
 
         Calls :meth:`update_query` with more information\ 
-        from the cache or from the properties of a tile.\ 
+        from the cache or from the properties of a tile. \ 
         Also calls :meth:`find_tiles` to get the complete\ 
         image needed to answer the ``d_query``.
 

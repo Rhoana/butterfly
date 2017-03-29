@@ -2,15 +2,37 @@ import json, os
 import numpy as np
 
 class Database():
+    """ Stores tables to respond to :meth:`API._feature_info`
 
+    Arguments
+    ----------
+    path: str
+        The file path to store and access the database
+    _runtime: :class:`RUNTIME`
+        Gets stored as :data:`RUNTIME`
+
+    Attributes
+    -----------
+    RUNTIME: :class:`RUNTIME`
+        With keywords needed to load files and use tables
+    """
     def __init__(self, path, _runtime):
         # Get the database keywords
         self.RUNTIME = _runtime
 
-    '''
-    Interface for loading config
-    '''
     def load_config(self, config):
+        """ Loads all files from ``config`` into database
+
+        Arguments
+        ----------
+        config: dict
+            all data from :mod:`UtilityLayer.rh_config`
+
+        Returns
+        ---------
+        :class:`Database`
+            the derived database class instance
+        """
         # Get file fields
         k_files = self.RUNTIME.DB.FILE
         # Get keywords for the BFLY_CONFIG
@@ -50,12 +72,18 @@ class Database():
         # Add all paths to the database
         return self.add_paths(all_paths)
 
-
-    '''
-    Interface for adding paths
-    '''
-
     def add_paths(self, all_paths):
+        """
+        Arguments
+        ----------
+        all_paths: dict
+            The mapping from channel path to dataset path
+
+        Returns
+        ---------
+        :class:`Database`
+            the derived database class instance
+        """
         # Get unique dataset paths
         dataset_paths = set(all_paths.values())
         # Add all paths to database

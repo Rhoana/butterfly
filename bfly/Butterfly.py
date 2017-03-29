@@ -7,7 +7,8 @@ import logging
 class Butterfly():
     """Starts :class:`bfly.Webserver` and runs :meth:`update_db`.
 
-    We pass the database from :meth:`update_db` to a new :class:`bfly.Webserver`.
+    We pass the database from :meth:`update_db` to a \
+new :class:`bfly.Webserver`.
 
     Arguments
     -------
@@ -17,7 +18,7 @@ class Butterfly():
     Attributes
     -----------
     _bfly_config : dict
-        all data from rh-config
+        all data from :mod:`UtilityLayer.rh_config`
     _runtime : :class:`UtilityLayer.RUNTIME`
         has settings for :mod:`CoreLayer`
 
@@ -58,12 +59,11 @@ class Butterfly():
     def update_db(self):
         """ Starts :mod:`DatabaseLayer`. :data:`_db_type`.
 
-        Creates the DatabaseLayer \ 
-        with the path from :data:`_db_path` and \ 
-        with all values from :data:`_runtime`.
+        Creates the DatabaseLayer with the path from \
+:data:`_db_path` and with all values from :data:`_runtime`.
 
-        Runs :meth:`DatabaseLayer.load_config`\ 
-        with paths from :data:`_bfly_config`.
+        Runs :meth:`DatabaseLayer.load_config` \
+with paths from :data:`_bfly_config`.
         """
 
         # Get the correct database class
