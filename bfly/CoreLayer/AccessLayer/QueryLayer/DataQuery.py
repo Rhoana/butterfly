@@ -12,11 +12,11 @@ class DataQuery(Query):
         * `OUTPUT.INFO.PATH` (str) --
             the path to the given :class:`Datasource`
         * `INPUT.POSITION.Z` (int) --
-            the full resolution z start of the image request
+            the scaled resolution z start of the image request
         * `INPUT.POSITION.Y` (int) --
-            the full resolution y start of the image request
+            the scaled resolution y start of the image request
         * `INPUT.POSITION.X` (int) --
-            the full resolution x start of the image request
+            the scaled resolution x start of the image request
         * `INPUT.POSITION.DEPTH` (int) --
             the requested scaled depth of the image request
         * `INPUT.POSITION.HEIGHT` (int) --
