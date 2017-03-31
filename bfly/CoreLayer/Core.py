@@ -44,7 +44,8 @@ from ``db`` argument
     #     2. make_tile_query with new or given d_query.
     #####
 
-    def get_groups(self, i_query):
+    @staticmethod
+    def get_groups(i_query):
         """ dumps group list for ``i_query`` as a string
 
         Arguments
