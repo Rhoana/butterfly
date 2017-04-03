@@ -173,7 +173,7 @@ where N is the number of synapses for the ``path``.
         full_path = os.path.join(path, k_file)
 
         try:
-            # Begin adding synapses to database
+            # Load the file with the synapses
             with open(full_path, 'r') as f:
                 all_dict = json.load(f)
                 point_dict = all_dict[k_point]
@@ -207,6 +207,9 @@ where N is the number of synapses for the ``path``.
             The Nx4 array of id, z, y, x values \
 where N is the number of neurons for the ``path``.
         """
+        ####
+        # Get neurons from loaded synapses
+        ####
 
         # Get all source and target nodes
         all_tgt = np.unique(synapses[:,1])
@@ -221,9 +224,49 @@ where N is the number of neurons for the ``path``.
         # Get full neuron list from source and target
         neurons = np.r_[neuron_src, neuron_tgt]
 
-        # Add neuons to database
+        # Add neurons to database
         self.add_neurons(path, neurons)
         return neurons
+
+    def load_blocks(self, path):
+        """ Load all the block information from files
+
+        Arguments
+        ----------
+        path: str
+            The dataset path to metadata files
+
+        Returns
+        --------
+        numpy.ndarray
+            The Nx6 array of z0, y0, x0, z1, y1, x1 values \
+where N is the number of blocks for the ``path``.
+        """
+        # Get file fields
+        k_files = self.RUNTIME.DB.FILE
+        # Get name of the block file
+        k_file = k_files.BLOCKS.NAME
+        # Get boundary keys for the block file
+        k_bounds = k_files.BLOCKS.BOUNDS.NAME
+        k_start = k_files.BLOCKS.BOUNDS.START
+        k_shape = k_files.BLOCKS.BOUNDS.SHAPE
+        # Get neuron keys for the block file
+        k_blocks = k_files.BLOCKS.BLOCKS.NAME
+        # Get the full path to the block file
+        full_path = os.path.join(path, k_file)
+
+        try:
+            # Load the file with all blocks
+            with open(full_path, 'r') as f:
+                all_dict = json.load(f)
+                full_size = all_dict[k_bounds][0]
+                all_blocks = all_dict[k_blocks]
+        # Return if not valid file or json
+        except (IOError, ValueError):
+            return []
+
+        # Add blocks to the database
+        return []
 
     def add_synapses(self, path, synapses):
         """ Add all the synapases to the database

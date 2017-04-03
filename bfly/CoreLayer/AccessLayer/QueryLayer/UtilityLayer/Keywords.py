@@ -213,6 +213,13 @@ static NAME that should always be used externally.
                         LIST = ['z','y','x']
                     )
                 ),
+                BLOCKS = NamedStruct('connectivity-graph.json',
+                    BOUNDS = NamedStruct('locations',
+                        START = ['z', 'y', 'x',],
+                        SHAPE = ['depth', 'height', 'width']
+                    ),
+                    BLOCKS = NamedStruct('volumes')
+                ),
                 CONFIG = NamedStruct(CONFIG_FILENAME,
                     GROUP_LIST = _group_list,
                     PATH = NamedStruct('path')
