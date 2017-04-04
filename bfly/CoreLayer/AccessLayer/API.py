@@ -202,10 +202,20 @@ from :meth:`_id_feature` or :meth:`_box_feature`
 
         # Find all synapses where neuron is parent
         if feat == feats.NEURON_CHILDREN.NAME:
-            result = db.get_entry(db_table, path, **{
+            post_result = db.get_entry(db_table, path, **{
                 k_nodes[0]: id_key
             })
-            return [ s[db_key] for s in result ]
+            pre_result = db.get_entry(db_table, path, **{
+                k_nodes[1]: id_key
+            })
+            all_results = {}
+            ## Format them in a dictionary
+            for pre in pre_result:
+                all_results[pre[db_key]] = 1
+            for post in post_result:
+                all_results[post[db_key]] = 2
+            # return pre and post results
+            return all_results
 
         # Just look at one result with the ID
         result = db.get_entry(db_table, path, id_key)
