@@ -11,19 +11,19 @@
 
 DOJO.Input = function(scope) {
 
-  var proto = document.getElementById('proto');
+  var proto = document.getElementById("proto");
   var corner = scope.openSD.element.childNodes[0].childNodes[3];
   var list = proto.getElementsByTagName("UL")[0].cloneNode(true);
   this.findings = list.getElementsByTagName("LI");
   corner.appendChild(list);
-  list.id = 'findings';
+  list.id = "findings";
 
   this.osd = scope.openSD;
   this.stack = scope.stack;
   this.realT = new DOJO.RealTime(scope);
   this.realT.init(this).then(this.init.bind(this));
   this.findings[0].childNodes[0].innerHTML = this.stack.z;
-  this.findings[0].childNodes[1].innerHTML = '/'+(this.stack.depth-1);
+  this.findings[0].childNodes[1].innerHTML = "/"+(this.stack.depth-1);
 }
 
 DOJO.Input.prototype = {
@@ -36,7 +36,7 @@ DOJO.Input.prototype = {
   },
   init: function(){
     var seaGL = this.realT.seaGL;
-    var toolbar = ['home','up','down'].map(this.button, this);
+    var toolbar = ["home","up","down"].map(this.button, this);
     this.osd.addViewerInputHook({ keyDown: this.keyDown.bind(this, toolbar) });
     this.osd.addViewerInputHook({ clickHandler: function(e){e.quick=false;} });
     window.onkeydown = this.osd.innerTracker.keyDownHandler;
@@ -53,8 +53,8 @@ DOJO.Input.prototype = {
     }
   },
   event: function(event) {
-    if (event == 'home'){
-      window.location = 'index.html';
+    if (event == "home"){
+      window.location = "index.html";
       return;
     }
     if (!this.stack.clamp(1,event)){
@@ -73,14 +73,14 @@ DOJO.Input.prototype = {
     stack.showLayer(1);
     stack.hideLayer(0);
     stack.z ++;
-    stack.zBuff = stack.updateBuff(stack.zBuff,'up');
+    stack.zBuff = stack.updateBuff(stack.zBuff,"up");
     this.findings[0].childNodes[0].innerHTML = stack.z;
   },
   down: function(stack){
     stack.showLayer(-1);
     stack.hideLayer(0);
     stack.z --;
-    stack.zBuff = stack.updateBuff(stack.zBuff,'down');
+    stack.zBuff = stack.updateBuff(stack.zBuff,"down");
     this.findings[0].childNodes[0].innerHTML = stack.z;
   }
 }

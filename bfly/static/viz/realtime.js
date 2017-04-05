@@ -12,8 +12,8 @@
 DOJO.RealTime = function(scope) {
   this.stack = scope.stack;
   this.seaGL = new openSeadragonGL(scope.openSD);
-  this.seaGL.vShader = './shaders/vertex/rect.glsl';
-  this.seaGL.fShader = './shaders/fragment/rect.glsl';
+  this.seaGL.vShader = "./shaders/vertex/rect.glsl";
+  this.seaGL.fShader = "./shaders/fragment/rect.glsl";
 }
 
 DOJO.RealTime.prototype = {
@@ -87,7 +87,7 @@ DOJO.RealTime.prototype = {
     }
     // Load for glsl
     var GLloaded = function(program) {
-      this.clicker = this.gl.getUniformLocation(program, 'u_click_id');
+      this.clicker = this.gl.getUniformLocation(program, "u_click_id");
     }
     // Draw for glsl
     var GLdrawing = function() {
@@ -95,10 +95,10 @@ DOJO.RealTime.prototype = {
       this.gl.uniform4f(this.clicker, clickID[0], clickID[1], clickID[2], clickID[3]);
     }
     found[1].childNodes[1].innerHTML = 0;
-    seaGL.addHandler('gl-drawing',GLdrawing);
-    seaGL.addHandler('gl-loaded',GLloaded);
-    seaGL.addHandler('canvas-click',click);
-    seaGL.addHandler('tile-drawing',draw);
+    seaGL.addHandler("gl-drawing",GLdrawing);
+    seaGL.addHandler("gl-loaded",GLloaded);
+    seaGL.addHandler("canvas-click",click);
+    seaGL.addHandler("tile-drawing",draw);
     return seaGL.init();
   }
 }

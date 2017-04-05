@@ -14,8 +14,8 @@ DOJO.Stack = function(src_terms){
   this.src_terms = src_terms;
   this.depth = src_terms.depth;
   this.z = src_terms.z || this.z;
-  var channels = src_terms.channel || ['0raw'];
-  var channel_terms = channels.split(',').sort().reverse();
+  var channels = src_terms.channel || ["0raw"];
+  var channel_terms = channels.split(",").sort().reverse();
   this.preset = channel_terms.map(this.layerer,this);
   this.nLayers = this.preset.length;
   // Prepare the sources
@@ -31,8 +31,8 @@ DOJO.Stack.prototype = {
   level: 0,
   z: 0,
   flip: {
-    up: 'down',
-    down: 'up'
+    up: "down",
+    down: "up"
   },
   zBuff: {
     up: 0,
@@ -45,11 +45,11 @@ DOJO.Stack.prototype = {
   layerer: function(char){
     var src = {};
     var the = this.src_terms;
-    src.target = (char[0] == '1');
-    src.datapath = '/api/data?experiment=' + the.experiment +
-      '&sample=' + the.sample + '&dataset=' + the.dataset +
-      '&channel=' + char.slice(1);
-    if (char == '0dojo'){
+    src.target = (char[0] == "1");
+    src.datapath = "/api/data?experiment=" + the.experiment +
+      "&sample=" + the.sample + "&dataset=" + the.dataset +
+      "&channel=" + char.slice(1);
+    if (char == "0dojo"){
       src.dojo = true;
     }
     return {src:src, set:{}}
@@ -69,7 +69,7 @@ DOJO.Stack.prototype = {
       }
     }
     var src = {z:-1,minLevel:this.level};
-    var dojosource = this.layerer('0dojo');
+    var dojosource = this.layerer("0dojo");
     sources.push(this.make(proto,dojosource,src,1));
     return sources;
   },
@@ -151,7 +151,7 @@ DOJO.Stack.prototype = {
       }
     }
     if(this.fullyLoaded(newBuff)){
-      for (var arrow of ['down', 'up']){
+      for (var arrow of ["down", "up"]){
         var nextStep = newBuff[arrow]+1;
         if (this.clamp(nextStep, arrow)){
           this.preload(nextStep, arrow, true);
@@ -162,7 +162,7 @@ DOJO.Stack.prototype = {
     return newBuff;
   },
   refresher: function(e){
-    e.item.addHandler('fully-loaded-change',function(e){
+    e.item.addHandler("fully-loaded-change",function(e){
       var image = e.eventSource;
       var source = image.source;
       if(e.fullyLoaded){
