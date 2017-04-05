@@ -48,12 +48,20 @@ window.DOJO.Write.prototype = {
     var old = source.old.replace(/&channel=([^&]+)/,"&channel="+channel);
     var [w,h,d] = [Math.max(size.x,512),Math.max(size.y,512),size.z];
     var path = "viz.html?depth="+d+"&width="+w+"&height="+h;
-    cousin.children[0].href = path + "&" + old;
-    if (uncle.children[0].href) {
-      uncle.children[0].href += "," + channel;
+    // Get the path for this channel
+    this_path = path + "&" + old;
+    // Set the current group href
+    current = cousin.children[0];
+    current.setAttribute("href", this_path);
+    // Set the containing group href
+    group = uncle.children[0]
+    if (group.href) {
+      // Add the current channel to the containing group
+      group.setAttribute("href", group.href + "," + channel);
     }
     else {
-      uncle.children[0].href = path +"&"+old;
+      // Add the full path to the containing group
+      group.setAttribute("href", this_path);
     }
     cousin.children[1].innerHTML = dtype;
     uncle.children[1].innerHTML = [w,h,d].join(", ");
