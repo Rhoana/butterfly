@@ -12,8 +12,8 @@
 }
 
 #findings {
-    background-color: rgba(0, 0, 0, 0.6) !important;
-    padding: .5em .5em 0em 1em !important;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: .5em .5em 0em 1em;
     font-family: sans-serif;
     color: white;
     height: 3em;
