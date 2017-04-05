@@ -250,7 +250,6 @@ where N is the number of blocks for the ``path``.
         # Get name of the block file
         k_file = k_files.BLOCK.NAME
         # Get boundary keys for the block file
-        k_bounds = k_files.BLOCK.BOUND.NAME
         k_start = k_files.BLOCK.BOUND.START
         k_shape = k_files.BLOCK.BOUND.SHAPE
         # Get neuron keys for the block file

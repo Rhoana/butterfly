@@ -46,7 +46,7 @@ DOJO.Write.prototype = {
     var size = source.dimensions;
     var dtype = source["data-type"];
     var channel = Number(!dtype.match(/float|uint8/)) + source.channel;
-    var old = source.old.replace(/&channel=([^&]+)/,"&channel="+channel);;
+    var old = source.old.replace(/&channel=([^&]+)/,"&channel="+channel);
     var [w,h,d] = [Math.max(size.x,512),Math.max(size.y,512),size.z];
     var path = "viz.html?depth="+d+"&width="+w+"&height="+h;
     cousin.children[0].href = path + "&" + old;

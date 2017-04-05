@@ -351,7 +351,7 @@ with :meth:`sub_data`. N is either 1 or 6.
         k_start, k_stop, k_neurons = k_tables.BLOCK.KEY_LIST
 
         # Shorthand database name, table, key
-        db, db_table, db_key = self._db_feature(feat)
+        db, db_table = self._db_feature(feat)[:2]
         # Do not know
         if not db_table:
             return ['Feature not understood']
