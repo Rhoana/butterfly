@@ -1,15 +1,14 @@
-var DOJO = DOJO || {};
 //-----------------------------------
 //
-// DOJO.Stack: Stack some tileSources
-// New DOJO.Source
-//     DOJO.Source.init
+// window.DOJO.Stack: Stack some tileSources
+// New window.DOJO.Source
+//     window.DOJO.Source.init
 // -- Made by main.js
 // -- Init by main.js
 //-----------------------------------
 //log = console.log.bind(window.console);
 
-DOJO.Stack = function(src_terms){
+window.DOJO.Stack = function(src_terms){
 
   // Setup
   this.src_terms = src_terms;
@@ -20,12 +19,12 @@ DOJO.Stack = function(src_terms){
   this.preset = channel_terms.map(this.layerer,this);
   this.nLayers = this.preset.length;
   // Prepare the sources
-  protoSource = new DOJO.Source(src_terms);
+  protoSource = new window.DOJO.Source(src_terms);
   this.source = this.sourcer(protoSource);
   this.maxLevel = this.source[0].tileSource.maxLevel;
 }
 
-DOJO.Stack.prototype = {
+window.DOJO.Stack.prototype = {
   w: null,
   vp: null,
   maxBuff: 3,
@@ -55,7 +54,7 @@ DOJO.Stack.prototype = {
     }
     return {src:src, set:{}}
   },
-  share: DOJO.Source.prototype.share.bind(null),
+  share: window.DOJO.Source.prototype.share.bind(null),
   make: function(protoSource,preset,src,alpha){
     var source = protoSource.init(this.share(preset.src, src));
     return this.share({opacity: alpha, preload: !!alpha}, source);

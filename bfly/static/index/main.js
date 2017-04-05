@@ -1,18 +1,18 @@
-var API = API || {};
-var DOJO = DOJO || {};
+window.API = {}
+window.DOJO = {}
 //-----------------------------------
 //
 // http://<host>:<port>/index.html
-// New DOJO.Setup
+// New window.DOJO.Setup
 // -- Called first
 //-----------------------------------
 
 window.onload = function(e){
-  API.setup = new DOJO.Setup(API);
+  window.API.setup = new window.DOJO.Setup(window.API);
 }
 
 // Change any preset terms set in input address
-API.parse = function(input) {
+window.API.parse = function(input) {
   var output = {};
   var string = decodeURI(input);
   // read value pair as bool, string, or int

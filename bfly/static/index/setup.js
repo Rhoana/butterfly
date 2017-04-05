@@ -1,21 +1,20 @@
-var DOJO = DOJO || {};
 //log = console.log.bind(window.console);
 //-----------------------------------
 //
-// DOJO.Setup: request data from server
+// window.DOJO.Setup: request data from server
 // -- Made by main.js
 //-----------------------------------
 
-DOJO.Setup = function(api){
+window.DOJO.Setup = function(api){
   this.parse = api.parse;
-  this.write = new DOJO.Write(this);
+  this.write = new window.DOJO.Write(this);
   var allData = this.start("");
   allData.then(function(all){
 //    log(all)
   })
 }
 
-DOJO.Setup.prototype = {
+window.DOJO.Setup.prototype = {
   ask: [
     "experiment","sample",
     "dataset","channel",

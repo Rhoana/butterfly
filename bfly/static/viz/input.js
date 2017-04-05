@@ -1,16 +1,15 @@
-var DOJO = DOJO || {};
 //-----------------------------------
 //
-// DOJO.Input - Let people control slices
+// window.DOJO.Input - Let people control slices
 // gets OpenSeadragon
-// gets DOJO.Stack
-// new DOJO.RealTime
-//     DOJO.RealTime.init
+// gets window.DOJO.Stack
+// new window.DOJO.RealTime
+//     window.DOJO.RealTime.init
 // -- Called by main.js
 // -- Init by self
 //-----------------------------------
 
-DOJO.Input = function(scope) {
+window.DOJO.Input = function(scope) {
 
   var proto = document.getElementById("proto");
   var corner = scope.openSD.element.childNodes[0].childNodes[3];
@@ -21,13 +20,13 @@ DOJO.Input = function(scope) {
 
   this.osd = scope.openSD;
   this.stack = scope.stack;
-  this.realT = new DOJO.RealTime(scope);
+  this.realT = new window.DOJO.RealTime(scope);
   this.realT.init(this).then(this.init.bind(this));
   this.findings[0].childNodes[0].innerHTML = this.stack.z;
   this.findings[0].childNodes[1].innerHTML = "/"+(this.stack.depth-1);
 }
 
-DOJO.Input.prototype = {
+window.DOJO.Input.prototype = {
 
   codes: {
     190: 1,

@@ -1,23 +1,22 @@
-var DOJO = DOJO || {};
 //-----------------------------------
 //
-// DOJO.RealTime - WebGL Annimation
+// window.DOJO.RealTime - WebGL Annimation
 // gets OpenSeadragon
 // new openSeadragonGL
 //     openSeadragonGL.init
-// -- Made by DOJO.Input
-// -- Init by DOJO.Input
+// -- Made by window.DOJO.Input
+// -- Init by window.DOJO.Input
 //-----------------------------------
 
 
-DOJO.RealTime = function(scope) {
+window.DOJO.RealTime = function(scope) {
   this.stack = scope.stack;
   this.seaGL = new openSeadragonGL(scope.openSD);
   this.seaGL.vShader = "./shaders/vertex/rect.glsl";
   this.seaGL.fShader = "./shaders/fragment/rect.glsl";
 }
 
-DOJO.RealTime.prototype = {
+window.DOJO.RealTime.prototype = {
   init: function(input){
     var seaGL = this.seaGL;
     var stack = this.stack;

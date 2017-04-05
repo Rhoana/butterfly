@@ -1,14 +1,13 @@
-var DOJO = DOJO || {};
 //-----------------------------------
 //
-// DOJO.Write: write data to HTML
-// -- Made by DOJO.Setup
+// window.DOJO.Write: write data to HTML
+// -- Made by window.DOJO.Setup
 //-----------------------------------
 
-DOJO.Write = function(setup){
+window.DOJO.Write = function(setup){
   this.share = setup.share;
 }
-DOJO.Write.prototype = {
+window.DOJO.Write.prototype = {
   totalIds: 0,
   copy: function(id,i){
     return document.getElementById(id).children[i].cloneNode(1);
