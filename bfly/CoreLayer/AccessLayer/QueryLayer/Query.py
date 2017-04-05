@@ -33,8 +33,18 @@ keys each match a `NAME` of a :class:`NamedStruct`in \
         self.RUNTIME = RUNTIME()
         self.OUTPUT = OUTPUT()
 
-        command = keywords.get(self.INPUT.METHODS.NAME,'')
-        self.INPUT.METHODS.VALUE = command
+        # Get method and feature
+        method = keywords.get(self.INPUT.METHODS.NAME,'')
+        feature = keywords.get(self.INPUT.FEATURES.NAME,'')
+        # Set method and feature
+        self.INPUT.METHODS.VALUE = method
+        self.INPUT.FEATURES.VALUE = feature
+
+        # Get and set the linked list of queries
+        queries = keywords.get(self.OUTPUT.INFO.QUERY.NAME,'')
+        self.OUTPUT.INFO.QUERY.VALUE = queries
+
+        # Set instance keywords
         self.keywords = keywords
 
     def set_key(self, struct, key, empty=''):
@@ -80,6 +90,17 @@ and the ``key`` has no default in the struct
         """
         group_methods = self.INPUT.METHODS.GROUP_LIST
         return self.INPUT.METHODS.VALUE in group_methods
+
+    @property
+    def has_block(self):
+        """ Checks whether the feature has block data
+
+        Returns
+        -------
+        bool
+        """
+        block_feats = self.INPUT.FEATURES.TABLES.BLOCK.LIST
+        return self.INPUT.FEATURES.VALUE in block_feats
 
     @property
     def mime_type(self):

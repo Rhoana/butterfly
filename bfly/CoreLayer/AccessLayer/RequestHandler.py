@@ -115,6 +115,9 @@ based on the type of the query from :meth:`Query.is_data`
         elif _query.is_group:
             # get a list of groups formatted as a string
             content = self._core.get_groups(_query)
+        elif _query.has_block:
+            # Get the unique id values in a block
+            content = self._core.get_blocks(_query)
         else:
             # get a list or dict of information as a string
             content = self._core.get_info(_query)

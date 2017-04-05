@@ -19,7 +19,7 @@ _groupings = {
 # List all groups for the API and the rh-config
 _group_list = [_experiments, _samples, _datasets, _channels]
 # List all tables for the API and the database
-_table_list = ['neuron', 'synapse']
+_table_list = ['neuron', 'synapse', 'block']
 
 class INPUT():
     """ Keywords to read input files and requests
@@ -66,7 +66,6 @@ data or mask requests.
                 NEURON = NamedStruct(_table_list[0],
                     LIST = [
                         'neuron_keypoint',
-                        'neuron_ids',
                         'is_neuron'
                     ]
                 ),
@@ -77,6 +76,11 @@ data or mask requests.
                         'synapse_parent',
                         'synapse_ids',
                         'is_synapse'
+                    ]
+                ),
+                BLOCK = NamedStruct(_table_list[2],
+                    LIST = [
+                        'neuron_ids'
                     ]
                 )
             ),
@@ -97,7 +101,8 @@ data or mask requests.
             HEIGHT = NamedStruct('height'),
             DEPTH = NamedStruct('depth',
                 VALUE = 1
-            )
+            ),
+            LIST = ['z','y','x','depth','width','height']
         )
         # ALL THE RESOLUTION INPUTS
         self.RESOLUTION = NamelessStruct(
@@ -202,6 +207,11 @@ static NAME that should always be used externally.
                     NEURON_LIST = ['n1','n2'],
                     KEY_LIST = ['n1','n2']
                 ),
+                BLOCK = NamedStruct(_table_list[2],
+                    KEY = NamedStruct('__id'),
+                    BOUND_LIST = ['start','stop'],
+                    KEY_LIST = ['start','stop','neurons']
+                ),
                 ALL = NamelessStruct(
                     POINT_LIST = ['z','y','x']
                 )
@@ -213,12 +223,12 @@ static NAME that should always be used externally.
                         LIST = ['z','y','x']
                     )
                 ),
-                BLOCKS = NamedStruct('connectivity-graph.json',
-                    BOUNDS = NamedStruct('locations',
+                BLOCK = NamedStruct('connectivity-graph.json',
+                    BOUND = NamedStruct('locations',
                         START = ['z', 'y', 'x',],
                         SHAPE = ['depth', 'height', 'width']
                     ),
-                    BLOCKS = NamedStruct('volumes')
+                    BLOCK = NamedStruct('volumes')
                 ),
                 CONFIG = NamedStruct(CONFIG_FILENAME,
                     GROUP_LIST = _group_list,
@@ -292,6 +302,7 @@ static NAME that should always be used externally.
         # ALL THE INFO OUTPUT TERMS
         self.INFO = NamelessStruct(
             CHANNEL = NamedStruct('name'),
+            QUERY = NamedStruct('query'),
             NAMES  = NamedStruct('list'),
             PATH  = NamedStruct('path'),
             TYPE = NamedStruct('data-type',

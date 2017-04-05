@@ -95,7 +95,8 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         feats = self.INPUT.FEATURES
         # Create empty parameters
         id_key = None
-        bounds = []
+        all_queries = []
+        target_bounds = []
 
         # Get all the channel info
         meta_info = self._get_group_dict('')
@@ -108,23 +109,42 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         # All features that need id
         if feat not in feats.LABEL_LIST:
             id_key = self._get_int_query(in_info.ID)
-            # Return feature based on id
-            feature = self._id_feature(feat, path, id_key)
+            # Return names based on id
+            names = self._id_feature(feat, path, id_key)
         # All features that need bounds
         else:
+            # get resolution from input
+            res_xy = self.INPUT.RESOLUTION.XY
+            resolution = self._get_int_query(res_xy)
             # get bounds from input
             for key in ['Z','Y','X','DEPTH','HEIGHT','WIDTH']:
                 term = getattr(self.INPUT.POSITION, key)
-                bounds.append(self._get_int_query(term))
-            # Return feature based on bounds
-            feature = self._box_feature(feat, path, bounds)
+                target_bounds.append(self._get_int_query(term))
+            # scale the bounds from resolution
+            scale = 2**resolution
+            scales = np.tile([1,scale,scale],2)
+            bounds = np.uint32(target_bounds) * scales
+            # Check if feature is based on blocks
+            if feat in feats.TABLES.BLOCK.LIST:
+                # Return regions and neurons based on blocks
+                regions, names = self._block_feature(feat, path, bounds)
+                # Rescale the regions like the target bounds
+                target_regions = regions // scales
+                # Data queries for all region
+                for reg in target_regions:
+                    all_queries.append(self.sub_data('data', reg))
+            else:
+                # Return names based on bounds
+                names = self._box_feature(feat, path, bounds)
 
         # Return an infoquery
         return InfoQuery(**{
             methods.NAME: methods.FEAT.NAME,
             in_info.FORMAT.NAME: out_format,
-            info.NAMES.NAME: feature,
-            info.PATH.NAME: path
+            info.QUERY.NAME: all_queries,
+            info.NAMES.NAME: names,
+            info.PATH.NAME: path,
+            feats.NAME: feat
         })
 
     # Get the db table and key
@@ -280,25 +300,112 @@ from :meth:`_id_feature` or :meth:`_box_feature`
 
         # Shorthand database name, table, key
         db, db_table, db_key = self._db_feature(feat)
+        # Do not know
+        if not db_table:
+            return ['Feature not understood']
 
         # Get start and end of bounds
         start = np.uint32(bounds[:3])
-        end = start + bounds[3:]
+        stop = start + bounds[3:]
 
         # Bound center in start and end
         def bounded(s):
             c = map(s.get, [k_z,k_y,k_x])
-            return all(c > start) and all(c < end)
-
-        # Do not know
-        if not db_table:
-            return ['Feature not understood']
+            return all(c > start) and all(c < stop)
 
         # if request for labels in bounds
         if feat in feats.LABEL_LIST:
             # Find the center points within the bounds
             result = db.get_entry(db_table, path, bounded)
-            return [ s[db_key] for s in result ]
+            return [ str(s[db_key]) for s in result ]
+
+        # Not yet supported
+        return [db_table]
+
+    def _block_feature(self, feat, path, bounds):
+        """ Loads a feature that needs block-level input
+
+        Calls :meth:`_db_feature` to access database
+
+        Arguments
+        -----------
+        feat : str
+            The name of the feature request
+        path : str
+            The path to the corresponding image data
+        bounds : list
+            The 6-item list of a volume origin and shape
+
+        Returns
+        --------
+        list
+            * The the Nx6 array of z,y,x,depth,height,width \
+target-scale region boundaries to make N :class:`DataQuery` \
+with :meth:`sub_data`. N is either 1 or 6.
+            * The list of unique neurons in all full blocks
+        """
+        # Get input keyword arguments
+        feats = self.INPUT.FEATURES
+        # Get metadata for database
+        k_tables = self.RUNTIME.DB.TABLE
+        k_start, k_stop, k_neurons = k_tables.BLOCK.KEY_LIST
+
+        # Shorthand database name, table, key
+        db, db_table, db_key = self._db_feature(feat)
+        # Do not know
+        if not db_table:
+            return ['Feature not understood']
+
+        # Get start and stop of bounds
+        start = np.uint32(bounds[:3])
+        stop = start + bounds[3:]
+
+        # Bound blocks with start and stop
+        def bounded(block):
+            b_stop = block[k_stop]
+            b_start = block[k_start]
+            return all(b_start >= start) and all(b_stop <= stop)
+
+        # if request for labels in bounds
+        if feat in feats.LABEL_LIST:
+            # Find the center points within the bounds
+            result = db.get_entry(db_table, path, bounded)
+            if not len(result):
+                # return the full bounds and no neurons
+                return [np.uint32([bounds]), []]
+            # Find the minimum start and maximum stop
+            min_start = np.amin([b[k_start] for b in result], axis=0)
+            max_stop = np.amax([b[k_stop] for b in result], axis=0)
+            #####
+            # Find at most six regions needed to query
+            #####
+            # Assume the full bounds for all regions
+            full_b = [list(start)+list(stop)] * 6
+            # Get the smaller bounds for each region
+            out_b = [np.r_[max_stop, min_start]] * 6
+            in_b = [np.r_[min_start, max_stop]] * 6
+            # Fill surround with 6 non-overlapping boundaries
+            out_lim = np.eye(6, dtype = np.uint32)
+            in_lim = np.ones(3, dtype = np.uint32)
+            in_lim = np.tile(np.tril(in_lim, k=-1),(2,2))
+            # Get all limits on the full bounds
+            full_lim = np.uint32(in_lim + out_lim == 0)
+
+            ####
+            # Get the exact boundaries for all six regions
+            ####
+            # Join full boundaries to the outer and inner boundaries
+            regions = full_b*full_lim + out_b*out_lim + in_b*in_lim
+            # Convert the bounding boxes to origin and shape
+            regions[:,3:] = regions[:,3:] - regions[:,:3]
+
+            ####
+            # Find the unique neurons in all returned blocks
+            ####
+            all_unique = [set(s[k_neurons]) for s in result]
+            all_neurons = list(set.union(*all_unique))
+            # Return the regions and the unique neurons
+            return [regions, all_neurons]
 
         # Not yet supported
         return [db_table]
@@ -411,6 +518,31 @@ has the list of groups in the requested group from \
         Returns
         --------
         :class:`DataQuery`
+            Created with the :meth:`sub_data` for the full request
+        """
+        k_pos = self.INPUT.POSITION
+        positions = map(k_pos.get, k_pos.LIST)
+        # get integer bounds from POSITION LIST
+        bounds = map(self._get_int_query, positions)
+
+        # Create the data query for the full bounds
+        return self.sub_data(_method, bounds)
+
+
+    def sub_data(self, _method, bounds):
+        """ Make :class:`DataQuery` for any subregion or request
+
+        Arguments
+        ----------
+        _method: str
+            The name of the method requesting image information
+        bounds: numpy.ndarray
+            The 6x1 array of z,y,x,depth,width,height values for \
+the bounds requested for a data query
+
+        Returns
+        --------
+        :class:`DataQuery`
             The :data:`OUTPUT.INFO` ``.Path.NAME`` keyword \
 has the path to data in the requested group from \
 :meth:`_get_group_dict`
@@ -420,21 +552,23 @@ has the path to data in the requested group from \
         path_key = self.OUTPUT.INFO.PATH.NAME
 
         # Begin building needed keywords
-        terms = {path_key: meta_dict[path_key]}
-        terms[self.INPUT.METHODS.NAME] = _method
+        terms = {
+            path_key: meta_dict[path_key],
+            self.INPUT.METHODS.NAME: _method
+        }
 
         # get terms from IMAGE
         for key in ['VIEW','FORMAT']:
             term = getattr(self.INPUT.IMAGE, key)
             terms[term.NAME] = self._get_list_query(term)
 
-        # get integers from POSITION
-        for key in ['Z','Y','X','DEPTH','HEIGHT','WIDTH']:
-            term = getattr(self.INPUT.POSITION, key)
-            terms[term.NAME] = self._get_int_query(term)
+        # get integers from bounds
+        for order in range(6):
+            key = self.INPUT.POSITION.LIST[order]
+            terms[key] = bounds[order]
 
         # get integers from RESOLUTION
-        term = getattr(self.INPUT.RESOLUTION, 'XY')
+        term = self.INPUT.RESOLUTION.XY
         terms[term.NAME] = self._get_int_query(term)
 
         return DataQuery(**terms)
