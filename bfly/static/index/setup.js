@@ -11,8 +11,8 @@ window.DOJO.Setup = function(api){
   var allData = this.start("");
   allData.then(function(all){
 //    log(all)
-  })
-}
+  });
+};
 
 window.DOJO.Setup.prototype = {
   ask: [
@@ -38,7 +38,7 @@ window.DOJO.Setup.prototype = {
         var target = where.split("?").pop();
         return this({out:json,old:target});
       }
-      console.log("error loading")
+      console.log("error loading");
     };
     return new Promise(function(done){
       var bid = new XMLHttpRequest();

@@ -14,7 +14,7 @@ window.DOJO.RealTime = function(scope) {
   this.seaGL = new openSeadragonGL(scope.openSD);
   this.seaGL.vShader = "./shaders/vertex/rect.glsl";
   this.seaGL.fShader = "./shaders/fragment/rect.glsl";
-}
+};
 
 window.DOJO.RealTime.prototype = {
   init: function(input){

@@ -22,7 +22,7 @@ window.DOJO.Stack = function(src_terms){
   protoSource = new window.DOJO.Source(src_terms);
   this.source = this.sourcer(protoSource);
   this.maxLevel = this.source[0].tileSource.maxLevel;
-}
+};
 
 window.DOJO.Stack.prototype = {
   w: null,
@@ -52,7 +52,10 @@ window.DOJO.Stack.prototype = {
     if (char == "0dojo"){
       src.dojo = true;
     }
-    return {src:src, set:{}}
+    return {
+      src:src,
+      set:{}
+    };
   },
   share: window.DOJO.Source.prototype.share.bind(null),
   make: function(protoSource,preset,src,alpha){
@@ -79,7 +82,7 @@ window.DOJO.Stack.prototype = {
     return this;
   },
   findIndex: function(zb){
-    var found = []
+    var found = [];
     for (var layi in this.preset){
       found.push(layi*this.depth + this.z + zb);
     }
@@ -89,7 +92,7 @@ window.DOJO.Stack.prototype = {
     return this.findIndex(zb).map(this.w.getItemAt,this.w);
   },
   findBuffer: function(zBuff,dojo){
-    var buffer = []
+    var buffer = [];
     for (var zb = -zBuff.down; zb <= zBuff.up; zb++){
       [].push.apply(buffer,this.findLayer(zb));
     }

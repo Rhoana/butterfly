@@ -6,7 +6,7 @@
 
 window.DOJO.Write = function(setup){
   this.share = setup.share;
-}
+};
 window.DOJO.Write.prototype = {
   totalIds: 0,
   copy: function(id,i){
@@ -63,7 +63,7 @@ window.DOJO.Write.prototype = {
       ["description", source["short-description"] || source["name"]],
       ["datasource", source.datasource || "unknown"],
       ["path", source.path || "unknown"]
-    ]
+    ];
     factsheet.forEach(function(items){
       var temp = this.copy("proto",2);
       var info = this.grandkid(temp,[0,0]);

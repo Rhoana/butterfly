@@ -1,5 +1,5 @@
-window.API = {}
-window.DOJO = {}
+window.API = {};
+window.DOJO = {};
 //-----------------------------------
 //
 // http://<host>:<port>/index.html
@@ -9,7 +9,7 @@ window.DOJO = {}
 
 window.onload = function(e){
   window.API.setup = new window.DOJO.Setup(window.API);
-}
+};
 
 // Change any preset terms set in input address
 window.API.parse = function(input) {

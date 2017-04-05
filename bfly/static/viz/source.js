@@ -7,7 +7,7 @@
 window.DOJO.Source = function(src_terms){
   // Change the default source terms
   this.tileSource = this.share(src_terms, this.tileSource);
-}
+};
 
 window.DOJO.Source.prototype = {
   init: function(src_terms){

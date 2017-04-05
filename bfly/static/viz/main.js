@@ -1,5 +1,5 @@
-window.SCOPE = {}
-window.DOJO = {}
+window.SCOPE = {};
+window.DOJO = {};
 //-----------------------------------
 //
 // http://<host>:<port>/viz.html?server=<...>&datapath=<...>
