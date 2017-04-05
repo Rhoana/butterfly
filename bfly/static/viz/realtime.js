@@ -1,3 +1,4 @@
+var DOJO = DOJO || {};
 //-----------------------------------
 //
 // DOJO.RealTime - WebGL Annimation

@@ -1,3 +1,4 @@
+var DOJO = DOJO || {};
 //-----------------------------------
 //
 // DOJO.Input - Let people control slices

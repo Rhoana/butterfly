@@ -1,3 +1,4 @@
+var DOJO = DOJO || {};
 //-----------------------------------
 //
 // DOJO.Stack: Stack some tileSources

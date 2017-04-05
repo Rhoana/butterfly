@@ -1,5 +1,5 @@
-var SCOPE = {};
-var DOJO = {};
+var SCOPE = SCOPE || {};
+var DOJO = DOJO || {};
 //-----------------------------------
 //
 // http://<host>:<port>/viz.html?server=<...>&datapath=<...>

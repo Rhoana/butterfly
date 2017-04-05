@@ -1,3 +1,4 @@
+var DOJO = DOJO || {};
 //log = console.log.bind(window.console);
 //-----------------------------------
 //

@@ -1,5 +1,5 @@
-var API = {};
-var DOJO = {};
+var API = API || {};
+var DOJO = DOJO || {};
 //-----------------------------------
 //
 // http://<host>:<port>/index.html

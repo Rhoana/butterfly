@@ -1,3 +1,4 @@
+var DOJO = DOJO || {};
 //-----------------------------------
 //
 // DOJO.Write: write data to HTML

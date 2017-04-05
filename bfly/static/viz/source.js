@@ -1,3 +1,4 @@
+var DOJO = DOJO || {};
 //-----------------------------------
 //
 // DOJO.Source: makes tileSources
