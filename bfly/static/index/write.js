@@ -49,12 +49,12 @@ window.DOJO.Write.prototype = {
     var [w,h,d] = [Math.max(size.x,512),Math.max(size.y,512),size.z];
     var path = "viz.html?depth="+d+"&width="+w+"&height="+h;
     // Get the path for this channel
-    this_path = path + "&" + old;
+    var this_path = path + "&" + old;
     // Set the current group href
-    current = cousin.children[0];
+    var current = cousin.children[0];
     current.setAttribute("href", this_path);
     // Set the containing group href
-    group = uncle.children[0]
+    var group = uncle.children[0];
     if (group.href) {
       // Add the current channel to the containing group
       group.setAttribute("href", group.href + "," + channel);
