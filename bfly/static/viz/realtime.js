@@ -32,7 +32,7 @@ window.DOJO.RealTime.prototype = {
       return this.source && this.source.dojo;
     });
     var nearTile = function(tile){
-      var where = new OpenSeadragon.Point(tile.x,tile.y);
+      var where = new window.OpenSeadragon.Point(tile.x,tile.y);
       return this.level === tile.level && this.xy.equals(where);
     };
     var isTile = function(tile){
@@ -101,4 +101,4 @@ window.DOJO.RealTime.prototype = {
     seaGL.addHandler("tile-drawing",draw);
     return seaGL.init();
   }
-}
+};

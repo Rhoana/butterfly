@@ -54,7 +54,7 @@ window.DOJO.Input.prototype = {
   },
   event: function(event) {
     if (event === "home"){
-      window.location = "index.html";
+      window.location.replace("index.html");
       return;
     }
     if (!this.stack.clamp(1,event)){
@@ -62,7 +62,7 @@ window.DOJO.Input.prototype = {
     }
     var check = function(slice){
       return slice && slice.lastDrawn.length;
-    }
+    };
     var sign = this.stack.sign[event];
     var slices = this.stack.findLayer(sign);
     if (slices && slices.every(check)) {

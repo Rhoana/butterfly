@@ -168,7 +168,7 @@ window.DOJO.Stack.prototype = {
     var newBuff = {
       up: zBuff.up,
       down: zBuff.down
-    }
+    };
     if (action){
       newBuff = this.nextBuff(zBuff, newBuff, action);
     }

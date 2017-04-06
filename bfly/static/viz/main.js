@@ -11,7 +11,7 @@ window.DOJO = {};
 //-----------------------------------
 window.onload = function(e){
 
-  window.OpenSeadragon.ImageLoader = ZipLoader;
+  window.OpenSeadragon.ImageLoader = window.ZipLoader;
   // preset tile source
   window.SCOPE.stack  = new window.DOJO.Stack(window.SCOPE.parse());
   // Open a seadragon with two layers

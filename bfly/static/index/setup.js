@@ -97,4 +97,4 @@ window.DOJO.Setup.prototype = {
     var draw = this.draw.bind(this, parent, depth);
     return this.find(folder, depth).then(draw);
   }
-}
+};
