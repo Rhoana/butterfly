@@ -61,8 +61,7 @@ class TileQuery(Query):
         # Only applies to HDF5 datasource
         query_h5 = query.RUNTIME.IMAGE.SOURCE.HDF5
         self_h5 = self.RUNTIME.IMAGE.SOURCE.HDF5
-        self_h5.INNER.VALUE = query_h5.INNER.VALUE
-        self_h5.OUTER.VALUE = query_h5.OUTER.VALUE
+        self_h5.VALUE = query_h5.VALUE
 
     @property
     def key(self):

@@ -21255,5 +21255,3 @@ $.extend( $.World.prototype, $.EventSource.prototype, /** @lends OpenSeadragon.W
 });
 
 }( OpenSeadragon ));
-
-//# sourceMappingURL=openseadragon.js.map

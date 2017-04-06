@@ -174,10 +174,11 @@ static NAME that should always be used externally.
                     'regularimagestack'
                 ],
                 HDF5 = NamedStruct('hdf5',
+                    OFF = NamedStruct('z-offset'),
                     OUTER = NamedStruct('filename'),
                     INNER = NamedStruct('dataset-path',
                         VALUE = 'main'
-                    )
+                    ),
                 ),
                 VALUE = 'regularimagestack'
             ),

@@ -180,12 +180,9 @@ otherwise.
         }
 
         # Optional keywords by source
-        inner_path = runtime.SOURCE.HDF5.INNER
-        outer_path = runtime.SOURCE.HDF5.OUTER
-        optional_fields = [inner_path, outer_path]
+        h5_field = runtime.SOURCE.HDF5
         # Assign all optional keywords
-        for op in optional_fields:
-            op.VALUE = keywords.get(op.NAME,op.VALUE)
+        h5_field.VALUE = keywords.get(h5_field.NAME)
 
     def check_any(self, is_good, message, value, term):
         """ Calls :mod:`raise_error` if check doesn't pass
