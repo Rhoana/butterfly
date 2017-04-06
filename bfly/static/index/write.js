@@ -86,4 +86,4 @@ window.DOJO.Write.prototype = {
     this[source.target](source,parent,cousin);
     return terms;
   }
-}
+};

@@ -11,11 +11,11 @@ window.DOJO = {};
 //-----------------------------------
 window.onload = function(e){
 
-  OpenSeadragon.ImageLoader = ZipLoader;
+  window.OpenSeadragon.ImageLoader = ZipLoader;
   // preset tile source
   window.SCOPE.stack  = new window.DOJO.Stack(window.SCOPE.parse());
   // Open a seadragon with two layers
-  window.SCOPE.openSD = OpenSeadragon({
+  window.SCOPE.openSD = new window.OpenSeadragon({
     tileSources: window.SCOPE.stack.source,
     crossOriginPolicy: "Anonymous",
     prefixUrl: "../images/icons/",

@@ -40,7 +40,7 @@ window.DOJO.Setup.prototype = {
         var target = where.split("?").pop();
         return this({out:json,old:target});
       }
-      console.log("error loading");
+      //console.log("error loading");
     };
     return new Promise(function(done){
       var bid = new XMLHttpRequest();
@@ -69,12 +69,12 @@ window.DOJO.Setup.prototype = {
     var constant = {
       old: result.old,
       depth: depth
-    }
+    };
     var target = {
       self: parent.concat(0),
       parent: parent,
       target: "body"
-    }
+    };
     var loader = this.loader.bind(this);
     var build = this.build.bind(this,constant);
     if (result.out instanceof Array){

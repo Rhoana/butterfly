@@ -19,7 +19,7 @@ window.DOJO.Stack = function(src_terms){
   this.preset = channel_terms.map(this.layerer,this);
   this.nLayers = this.preset.length;
   // Prepare the sources
-  protoSource = new window.DOJO.Source(src_terms);
+  var protoSource = new window.DOJO.Source(src_terms);
   this.source = this.sourcer(protoSource);
   this.maxLevel = this.source[0].tileSource.maxLevel;
 };
@@ -125,7 +125,7 @@ window.DOJO.Stack.prototype = {
   fullyLoaded: function(zBuff){
     var fullyLoaded = function(image){
       return  image && image.getFullyLoaded();
-    }
+    };
     return this.findBuffer(zBuff,1).every(fullyLoaded);
   },
   preload: function(buffer,sign,value){

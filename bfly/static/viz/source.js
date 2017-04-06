@@ -55,4 +55,4 @@ window.DOJO.Source.prototype = {
     }
     return to;
   }
-}
+};

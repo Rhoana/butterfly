@@ -24,7 +24,7 @@ window.DOJO.Input = function(scope) {
   this.realT.init(this).then(this.init.bind(this));
   this.findings[0].childNodes[0].innerText = this.stack.z;
   this.findings[0].childNodes[1].innerText = "/"+(this.stack.depth-1);
-}
+};
 
 window.DOJO.Input.prototype = {
 
@@ -83,4 +83,4 @@ window.DOJO.Input.prototype = {
     stack.zBuff = stack.updateBuff(stack.zBuff,"down");
     this.findings[0].childNodes[0].innerText = stack.z;
   }
-}
+};
