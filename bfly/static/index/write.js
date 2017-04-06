@@ -50,19 +50,18 @@ window.DOJO.Write.prototype = {
     var path = "viz.html?depth="+d+"&width="+w+"&height="+h;
     // Get the path for this channel
     var this_path = path + "&" + old;
+    var this_channel = "," + channel;
     // Set the current group href
     var current = cousin.children[0];
     current.setAttribute("href", this_path);
     // Set the containing group href
     var group = uncle.children[0];
-    if (group.href) {
-      // Add the current channel to the containing group
-      group.setAttribute("href", group.href + "," + channel);
-    }
-    else {
-      // Add the full path to the containing group
-      group.setAttribute("href", this_path);
-    }
+    // add to the group's path
+    var first_path = Number(!!group.href);
+    var new_path = [this_path, this_channel][first_path];
+    // Add full path or current channel to the containing group
+    group.setAttribute("href", group.href + new_path);
+    // Fill in the details for the channel
     cousin.children[1].innerText = dtype;
     uncle.children[1].innerText = [w,h,d].join(", ");
     grandparent.children[0].checked = false;
@@ -78,7 +77,7 @@ window.DOJO.Write.prototype = {
       info.children[0].innerText = items[0];
       info.children[1].innerText = items[1];
       parent.appendChild(temp);
-    },this);
+    }, this);
   },
   main: function(terms){
     var source = this.share(terms,{self:terms.self.join(",")});

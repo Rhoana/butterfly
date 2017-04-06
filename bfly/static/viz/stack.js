@@ -45,11 +45,11 @@ window.DOJO.Stack.prototype = {
   layerer: function(char){
     var src = {};
     var the = this.src_terms;
-    src.target = (char[0] == "1");
+    src.target = (char[0] === "1");
     src.datapath = "/api/data?experiment=" + the.experiment +
       "&sample=" + the.sample + "&dataset=" + the.dataset +
       "&channel=" + char.slice(1);
-    if (char == "0dojo"){
+    if (char === "0dojo"){
       src.dojo = true;
     }
     return {
@@ -66,14 +66,17 @@ window.DOJO.Stack.prototype = {
     var sources = [];
     for (var preset of this.preset){
       for (var level = 0; level < this.depth; level++){
-        var alp = Number(level == this.z);
+        var alp = Number(level === this.z);
         var src = {z:level,minLevel:this.level};
-        sources.push(this.make(proto,preset,src,alp));
+        sources.push(this.make(proto, preset, src, alp));
       }
     }
-    var src = {z:-1,minLevel:this.level};
+    var source = {
+      minLevel: this.level,
+      z: -1
+    };
     var dojosource = this.layerer("0dojo");
-    sources.push(this.make(proto,dojosource,src,1));
+    sources.push(this.make(proto, dojosource, source, 1));
     return sources;
   },
   init: function(osd){
@@ -84,7 +87,9 @@ window.DOJO.Stack.prototype = {
   findIndex: function(zb){
     var found = [];
     for (var layi in this.preset){
-      found.push(layi*this.depth + this.z + zb);
+      if (this.preset.hasOwnProperty(layi)) {
+        found.push(layi*this.depth + this.z + zb);
+      }
     }
     return found;
   },
@@ -106,7 +111,7 @@ window.DOJO.Stack.prototype = {
     return this.w.getItemAt(index);
   },
   setPreload: function(image){
-    image.setPreload(Boolean(this==true));
+    image.setPreload(Boolean(this));
   },
   setOpacity: function(image){
     image.setOpacity(Number(this));
@@ -134,33 +139,41 @@ window.DOJO.Stack.prototype = {
     var small = 0 <= buffer && buffer <= this.maxBuff;
     return small && this.range(buffer,sign);
   },
-  updateBuff: function(zBuff,action){
+  nextBuff: function(zBuff, newBuff, action){
+    var back = this.flip[action];
+    var backStep = newBuff[back]+1;
+    var actStep = newBuff[action]-1;
+    if(this.clamp(backStep, back)) {
+      newBuff[back] = backStep;
+    }
+    else if (this.range(backStep, back)){
+      this.preload(backStep, back, false);
+    }
+    if (this.clamp(actStep, action)){
+      newBuff[action] = actStep;
+    }
+    return newBuff;
+  },
+  swapBuff: function(zBuff, newBuff){
+    for (var arrow of ["down", "up"]){
+      var nextStep = newBuff[arrow]+1;
+      if (this.clamp(nextStep, arrow)){
+        this.preload(nextStep, arrow, true);
+        newBuff[arrow] = nextStep;
+      }
+    }
+    return newBuff;
+  },
+  updateBuff: function(zBuff, action){
     var newBuff = {
       up: zBuff.up,
       down: zBuff.down
     }
     if (action){
-      var back = this.flip[action];
-      var backStep = newBuff[back]+1;
-      var actStep = newBuff[action]-1;
-      if(this.clamp(backStep, back)) {
-        newBuff[back] = backStep;
-      }
-      else if (this.range(backStep, back)){
-        this.preload(backStep, back, false);
-      }
-      if (this.clamp(actStep, action)){
-        newBuff[action] = actStep;
-      }
+      newBuff = this.nextBuff(zBuff, newBuff, action);
     }
     if(this.fullyLoaded(newBuff)){
-      for (var arrow of ["down", "up"]){
-        var nextStep = newBuff[arrow]+1;
-        if (this.clamp(nextStep, arrow)){
-          this.preload(nextStep, arrow, true);
-          newBuff[arrow] = nextStep;
-        }
-      }
+      newBuff = this.swapBuff(zBuff, newBuff);
     }
     return newBuff;
   },

@@ -53,7 +53,7 @@ window.DOJO.Input.prototype = {
     }
   },
   event: function(event) {
-    if (event == "home"){
+    if (event === "home"){
       window.location = "index.html";
       return;
     }

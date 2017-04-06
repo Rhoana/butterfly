@@ -49,7 +49,9 @@ window.DOJO.Source.prototype = {
   },
   share: function(from, to) {
     for (var key in from) {
-      to[key] = from[key];
+      if (from.hasOwnProperty(key)) {
+        to[key] = from[key];
+      }
     }
     return to;
   }

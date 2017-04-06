@@ -26,14 +26,16 @@ window.DOJO.Setup.prototype = {
   // Copy an object
   share: function(from, to) {
     for (var key in from) {
-      to[key] = from[key];
+      if (from.hasOwnProperty(key)) {
+        to[key] = from[key];
+      }
     }
     return to;
   },
   // Get a file as a promise
   get: function(where) {
     var win = function(bid){
-      if (bid.status == 200) {
+      if (bid.status === 200) {
         var json = JSON.parse(bid.response);
         var target = where.split("?").pop();
         return this({out:json,old:target});

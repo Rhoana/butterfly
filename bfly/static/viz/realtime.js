@@ -33,12 +33,12 @@ window.DOJO.RealTime.prototype = {
     });
     var nearTile = function(tile){
       var where = new OpenSeadragon.Point(tile.x,tile.y);
-      return this.level == tile.level && this.xy.equals(where);
+      return this.level === tile.level && this.xy.equals(where);
     }
     var isTile = function(tile){
       var here = this.bounds.getTopLeft();
       var where = tile.bounds.getTopLeft();
-      return this.level == tile.level && here.equals(where);
+      return this.level === tile.level && here.equals(where);
     }
     var contextualize = function(tile){
       return tile.cacheImageRecord.getRenderedContext();
