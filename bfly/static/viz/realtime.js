@@ -64,7 +64,7 @@ window.DOJO.RealTime.prototype = {
         var hereTile = targets.lastDrawn.filter(nearTile.bind(here))[0];
         if(hereTile){
           this.viaGL.clickID = pointColor(point,hereTile);
-          found[1].childNodes[1].innerHTML = rgb2id(this.viaGL.clickID);
+          found[1].childNodes[1].innerText = rgb2id(this.viaGL.clickID);
           this.openSD.forceRedraw();
         }
       }
@@ -94,7 +94,7 @@ window.DOJO.RealTime.prototype = {
       var clickID = this.clickID || [-1,-1,-1,-1];
       this.gl.uniform4f(this.clicker, clickID[0], clickID[1], clickID[2], clickID[3]);
     }
-    found[1].childNodes[1].innerHTML = 0;
+    found[1].childNodes[1].innerText = 0;
     seaGL.addHandler("gl-drawing",GLdrawing);
     seaGL.addHandler("gl-loaded",GLloaded);
     seaGL.addHandler("canvas-click",click);

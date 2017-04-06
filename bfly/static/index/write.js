@@ -35,8 +35,8 @@ window.DOJO.Write.prototype = {
     });
     self.children[0].checked = true;
     parent.appendChild(self);
-    offspring.children[0].innerHTML = source.name;
-    cousin.children[1].innerHTML = source.length;
+    offspring.children[0].innerText = source.name;
+    cousin.children[1].innerText = source.length;
   },
   body: function(source,parent,cousin){
     var grandparent = this.grandparent(cousin);
@@ -63,8 +63,8 @@ window.DOJO.Write.prototype = {
       // Add the full path to the containing group
       group.setAttribute("href", this_path);
     }
-    cousin.children[1].innerHTML = dtype;
-    uncle.children[1].innerHTML = [w,h,d].join(", ");
+    cousin.children[1].innerText = dtype;
+    uncle.children[1].innerText = [w,h,d].join(", ");
     grandparent.children[0].checked = false;
     ancestor.children[0].checked = false;
     var factsheet = [
@@ -75,8 +75,8 @@ window.DOJO.Write.prototype = {
     factsheet.forEach(function(items){
       var temp = this.copy("proto",2);
       var info = this.grandkid(temp,[0,0]);
-      info.children[0].innerHTML = items[0];
-      info.children[1].innerHTML = items[1];
+      info.children[0].innerText = items[0];
+      info.children[1].innerText = items[1];
       parent.appendChild(temp);
     },this);
   },
