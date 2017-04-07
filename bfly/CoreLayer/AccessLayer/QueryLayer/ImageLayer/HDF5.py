@@ -49,26 +49,64 @@ of the full tile resolution.
         # Load data for all the h5 files
         h5_files = t_query.RUNTIME.IMAGE.SOURCE.HDF5.VALUE
         # Get all the z indices and coordinates
-        z_starts = enumerate(zip(*h5_files)[-1])
+        z_stops = list(enumerate(zip(*h5_files)[-1]))
+        z_starts = z_stops[::-1]
 
         # Find the region to crop
         sk,sj,si = t_query.all_scales
         z0,y0,x0 = t_query.tile_origin
         z1,y1,x1 = t_query.tile_origin + t_query.blocksize
+        # Get the scaled blocksize for the output array
+        zb,yb,xb = t_query.target_blocksize
 
-        # get the right h5 file for the current z index
-        all_z = (i for i, z in z_starts if z < z0)
-        h5_file = h5_files[next(all_z, 0)]
+        # get the right h5 files for the current z index
+        start_z = next((i for i, z in z_starts if z <= z0), 0)
+        stop_z = next((i for i, z in z_stops if z >= z1), len(z_stops))
+        needed_files = [h5_files[zi] for zi in range(start_z, stop_z)]
 
-        # Add the h5_file z offset
-        z0 += h5_file[-1]
-        z1 += h5_file[-1]
+        ####
+        # Load from all needed files
+        ####
+        dtype = getattr(np, t_query.OUTPUT.INFO.TYPE.VALUE)
+        # Make the full volume for all needed file volumes
+        full_vol = np.zeros([zb, yb, xb], dtype = dtype)
 
-        # Load the image region from the h5 file
-        with h5py.File(h5_file[0]) as fd:
-            vol = fd[h5_file[1]]
-            return vol[z0:z1:sk,y0:y1:sj,x0:x1:si]
+        # Get the first offset
+        offset_0 = needed_files[0][-1]
 
+        # Loop through all needed h5 files
+        for h5_file in needed_files:
+            # Offset for this file
+            z_offset = h5_file[-1]
+            # Get input and output start
+            iz0 = max(z0 - z_offset, 0)
+            # Scale output bounds by z-scale
+            oz0 = (z_offset - offset_0) // sk
+
+            # Load the image region from the h5 file
+            with h5py.File(h5_file[0]) as fd:
+                # read from one file
+                vol = fd[h5_file[1]]
+                # Get the input and output end-bounds
+                iz1 = min(z1 - z_offset, vol.shape[0])
+                # Scale the output bounds by the z-scale
+                oz1 = oz0 + (iz1 - iz0) // sk
+                # Add the volume from one file to the full volume for all files
+                full_vol[oz0:oz1] = vol[iz0:iz1:sk, y0:y1:sj, x0:x1:si][:zb,:yb,:xb]
+
+        # Combined from all files
+        return full_vol
+
+    @staticmethod
+    def load_file(h5_file):
+        """ Load the needed volume from a single h5 File
+
+        Arguments
+        -----------
+        t_query: :class:`TileQuery`
+            With file path and image position
+
+        """
     @staticmethod
     def preload_source(t_query):
         """load info from example tile (image)
@@ -101,6 +139,9 @@ this filname to not give a valid h5 volume.
         output = t_query.OUTPUT.INFO
         runtime = t_query.RUNTIME.IMAGE
         k_h5 = runtime.SOURCE.HDF5.NAME
+        # Get the max block size in bytes for a single tile
+        max_bytes = t_query.RUNTIME.CACHE.MAX_BLOCK.VALUE
+
         # call superclass
         Datasource.preload_source(t_query)
 
@@ -109,20 +150,34 @@ this filname to not give a valid h5 volume.
         if not keywords:
             return {}
 
-        # Validate first file name and dataset
-        filename = keywords[k_h5][0][0]
-        dataset = keywords[k_h5][0][1]
+        # Validate highest in z file name and dataset
+        filename = keywords[k_h5][-1][0]
+        dataset = keywords[k_h5][-1][1]
+        offset = keywords[k_h5][-1][2]
         # Load properties from H5 dataset
         with h5py.File(filename,'r') as fd:
             # Get the volume
             vol = fd[dataset]
+            # Get a shape for all the files
+            shape = np.uint32(vol.shape)
+            shape[0] += offset
+            ####
             # Get a blockshape as a flat section
-            block = [1, vol.shape[1], vol.shape[2]]
+            ####
+            # Get the bytes for a full slice
+            voxel_bytes = np.uint32(vol.dtype.itemsize)
+            slice_bytes = voxel_bytes * np.prod(shape[1:])
+            # Get the nearest tile size under cache limit
+            square_overage = np.ceil(slice_bytes / max_bytes)
+            side_scalar = np.ceil(np.sqrt(square_overage))
+            # Set the actual blocksize to be under the cache limit
+            plane_shape = np.ceil(shape[1:] / side_scalar)
+            block = (1,) + tuple(plane_shape)
             # return named keywords
             keywords.update({
                 output.TYPE.NAME: str(vol.dtype),
                 runtime.BLOCK.NAME: np.uint32(block),
-                output.SIZE.NAME: np.uint32(vol.shape)
+                output.SIZE.NAME: np.uint32(shape)
             })
         # Return all canonical keywords
         return keywords
@@ -172,7 +227,7 @@ dataset path will be returned.
 
         # return reverse sorted files
         return {
-            k_h5: sorted(h5_list, key=z_sort, reverse=True)
+            k_h5: sorted(h5_list, key=z_sort)
         }
 
 

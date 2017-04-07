@@ -1,3 +1,4 @@
+from Settings import MAX_BLOCK_SIZE
 from Settings import MAX_CACHE_SIZE
 from Settings import CONFIG_FILENAME
 from Structures import NamelessStruct
@@ -191,6 +192,9 @@ static NAME that should always be used externally.
             META = NamedStruct('meta-size',
                 VALUE = 567
             ),
+            MAX_BLOCK = NamedStruct('max-block-size',
+                VALUE = MAX_BLOCK_SIZE
+           ),
             MAX = NamedStruct('max-cache-size',
                 VALUE = MAX_CACHE_SIZE
             )

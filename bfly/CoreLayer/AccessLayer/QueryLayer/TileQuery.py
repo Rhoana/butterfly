@@ -47,10 +47,14 @@ class TileQuery(Query):
         self.RUNTIME.TILE.KJI.VALUE = kji_pixels
         self.RUNTIME.TILE.SCALES.VALUE = query.scales
 
+        # Get the right blocksize, datatype, and path
         q_block = query.RUNTIME.IMAGE.BLOCK.VALUE
-        self.RUNTIME.IMAGE.BLOCK.VALUE = q_block
-
+        q_type = query.OUTPUT.INFO.TYPE.VALUE
         q_path = query.OUTPUT.INFO.PATH.VALUE
+
+        # Set the right blocksize, datatype, and path
+        self.RUNTIME.IMAGE.BLOCK.VALUE = q_block
+        self.OUTPUT.INFO.TYPE.VALUE = q_type
         self.OUTPUT.INFO.PATH.VALUE = q_path
 
         # Very important to get the right datasource
@@ -159,6 +163,19 @@ that can load a ``TileQuery``.
             The 3x1 block value from ``RUNTIME.IMAGE``
         """
         return np.uint32(self.RUNTIME.IMAGE.BLOCK.VALUE)
+
+    @property
+    def target_blocksize(self):
+        """ get the scaled size of each :class:`Datasource` tile
+
+        Returns
+        -------
+        numpy.ndarray
+            The 3x1 block value from ``RUNTIME.IMAGE``
+        """
+        return self.blocksize // self.all_scales
+
+
 
     @property
     def tile_origin(self):
