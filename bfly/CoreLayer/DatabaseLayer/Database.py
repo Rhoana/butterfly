@@ -270,8 +270,8 @@ where N is the number of blocks for the ``path``.
         def reformat_block(block):
             # Get the bounds for the volume
             bound_start = map(block[0].get, k_start)
-            bound_off = map(block[0].get, k_shape) - 1
-            bound_end = list(np.uint32(bound_start) + bound_off)
+            bound_shape = map(block[0].get, k_shape)
+            bound_end = list(np.uint32(bound_start) + bound_shape)
             # Get the actual neuron ids
             def get_full_id(id_map):
                 return id_map[1]
