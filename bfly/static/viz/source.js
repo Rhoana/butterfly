@@ -27,7 +27,7 @@ window.DOJO.Source.prototype = {
     maxLevel: 1,
     width: 8192,
     height: 8192,
-    tileSize: 512,
+    tileSize: 1024,
     getTileUrl: function( level, x, y ) {
 
       if (this.dojo) {
