@@ -47,8 +47,8 @@ LOG_PATH = BFLY_CONFIG.get('log-path', 'bfly.log')
 # Maximum size of the cache in MiB: 1 GiB by default
 _max_cache = BFLY_CONFIG.get('max-cache-size', 1024)
 MAX_CACHE_SIZE = int(_max_cache) * (1024**2)
-# Maximum size of a single block in MiB: 32 MiB by default
-_max_block = BFLY_CONFIG.get('max-block-size', 32)
+# Maximum size of a single block in MiB: 1 MiB by default
+_max_block = BFLY_CONFIG.get('max-block-size', 1)
 MAX_BLOCK_SIZE = int(_max_block) * (1024**2)
 
 # Paths must start with one of the following allowed paths

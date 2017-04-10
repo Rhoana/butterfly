@@ -181,9 +181,8 @@ this filname to not give a valid h5 volume.
             ####
             lo_res = 10
             # Get all block sizes by halving the max block size
-            all_blocks = [max_block/(2**res) for res in range(lo_res)]
+            all_blocks = [shape/(2**res) for res in range(lo_res)]
             block_array = np.clip(np.ceil(all_blocks), 1, max_block)
-            print np.uint32(block_array)
             # return named keywords
             keywords.update({
                 runtime.BLOCK.NAME: np.uint32(block_array),
