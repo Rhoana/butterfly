@@ -159,13 +159,18 @@ otherwise.
         # Make sure the source and type are valid
         self.check_list(runtime.SOURCE.LIST, source_val, 'source')
         self.check_list(output.TYPE.LIST, type_val, 'type')
-        # Make sure the blocksize and size have len 3
-        self.check_length(3, block, 'blocksize')
+        # Make sure the size has a length of 3
         self.check_length(3, full_size, 'full size')
-        # Make sure size is bigger than blocksize
-        msg = 'bigger than {}'.format(block)
-        within = np.all(np.uint32(block) <= full_size)
-        self.check_any(within, msg, full_size, 'full size')
+        # Make sure the blocksize is a list of any length
+        self.check_length('*', block, 'blocksize')
+        # Make sure all blocks are valid
+        for block_i in block:
+            msg = 'bigger than {}'.format(block_i)
+            # Make sure each blocksize has length 3
+            self.check_length(3, block_i, 'blocksize')
+            # Make sure size is bigger than each blocksize
+            within = np.all(np.uint32(block_i) <= full_size)
+            self.check_any(within, msg, full_size, 'full size')
 
         # Set all the clean values
         output.TYPE.VALUE = type_val
@@ -243,9 +248,11 @@ otherwise.
         has_len = hasattr(value, '__len__')
         self.check_any(has_len, msg0, value, term)
 
-        msg1 = 'of length {}'.format(length)
-        is_length = len(value) == length
-        self.check_any(is_length, msg1, value, term)
+        # Check length if length given
+        if isinstance(length, int):
+            msg1 = 'of length {}'.format(length)
+            is_length = len(value) == length
+            self.check_any(is_length, msg1, value, term)
 
     @staticmethod
     def raise_error(status, detail):

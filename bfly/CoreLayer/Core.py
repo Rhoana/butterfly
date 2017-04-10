@@ -289,7 +289,7 @@ taken from either the :data:`_cache` or from a new \
         """
         # grab request size for query
         t_bounds = t_query.target_bounds
-        t_origin = t_query.tile_origin
+        t_origin = t_query.target_tile_bounds[0]
         (K0,J0,I0),(K1,J1,I1) = t_bounds-t_origin
 
         # Load from cache or from disk if needed

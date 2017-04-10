@@ -47,13 +47,14 @@ class TileQuery(Query):
         self.RUNTIME.TILE.KJI.VALUE = kji_pixels
         self.RUNTIME.TILE.SCALES.VALUE = query.scales
 
+        # Set blocksize from the query
+        self.blocksize = query.blocksize
+
         # Get the right blocksize, datatype, and path
-        q_block = query.RUNTIME.IMAGE.BLOCK.VALUE
         q_type = query.OUTPUT.INFO.TYPE.VALUE
         q_path = query.OUTPUT.INFO.PATH.VALUE
 
         # Set the right blocksize, datatype, and path
-        self.RUNTIME.IMAGE.BLOCK.VALUE = q_block
         self.OUTPUT.INFO.TYPE.VALUE = q_type
         self.OUTPUT.INFO.PATH.VALUE = q_path
 
@@ -154,65 +155,55 @@ that can load a ``TileQuery``.
         return np.uint32(self.RUNTIME.TILE.ZYX.VALUE)
 
     @property
-    def blocksize(self):
-        """ get the size of each :class:`Datasource` tile
-
-        Returns
-        -------
-        numpy.ndarray
-            The 3x1 block value from ``RUNTIME.IMAGE``
-        """
-        return np.uint32(self.RUNTIME.IMAGE.BLOCK.VALUE)
-
-    @property
-    def target_blocksize(self):
-        """ get the scaled size of each :class:`Datasource` tile
-
-        Returns
-        -------
-        numpy.ndarray
-            The 3x1 block value from ``RUNTIME.IMAGE``
-        """
-        return self.blocksize // self.all_scales
-
-
-
-    @property
-    def tile_origin(self):
-        """The scaled image origin of the tile
+    def target_tile_bounds(self):
+        """The scaled target bounds of the tile
 
         Returns
         --------
         numpy.ndarray
-            3x1 scaled image pixel origin
+            2x3 scaled target pixel bounds
         """
-        return self.blocksize*self.index_zyx
+        # Get the target offset from the target origin
+        tile_origin = self.index_zyx * self.blocksize
+        offset = np.outer([0,1], self.blocksize)
+        return tile_origin + offset
+
+    @property
+    def source_tile_bounds(self):
+        """The full image bounds of the tile
+
+        Returns
+        --------
+        numpy.ndarray
+            2x3 full image pixel bounds
+        """
+        return self.all_scales * self.target_tile_bounds
 
     @property
     def target_origin(self):
-        """The origin of the target in the tile
+        """The origin of query in target coordinates
 
         Returns
         --------
         numpy.ndarray
-            3x1 scaled target pixel lower bound in tile
+            3x1 target pixel lower bound
         """
-        return  self.pixels_kji[0] + self.tile_origin
+        return  self.target_bounds[0]
 
     @property
     def target_bounds(self):
-        """The scaled target bounds within the tile
+        """The bounds of query in target coordinates
 
         Returns
         --------
         numpy.ndarray
-            2x3 both scaled target pixel bounds in tile
+        2x3 target pixel boundaries
         """
-        return  self.pixels_kji + self.tile_origin
+        return self.pixels_kji + self.target_tile_bounds[0]
 
     @property
     def source_bounds(self):
-        """Full resolution bounds within the tile
+        """The bounds of query in full coordinates
 
         Returns
         --------

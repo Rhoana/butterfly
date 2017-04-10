@@ -86,15 +86,28 @@ class DataQuery(Query):
         return np.float32([1,s_xy,s_xy])
 
     @property
-    def blocksize(self):
-        """ get the size of each :class:`Datasource` tile
+    def blocksizes(self):
+        """ get the sizes of each :class:`Datasource` tile
 
         Returns
         -------
         numpy.ndarray
-            The 3x1 block value from ``RUNTIME.IMAGE``
+            The Nx3 block values from ``RUNTIME.IMAGE``
         """
         return np.uint32(self.RUNTIME.IMAGE.BLOCK.VALUE)
+
+    @property
+    def blocksize(self):
+        """ get the size of a :class:`Datasource` tile
+
+        Returns
+        -------
+        numpy.ndarray
+            The 3x1 block value for this resolution
+        """
+        smallest = len(self.blocksizes) - 1
+        res_xy = self.INPUT.RESOLUTION.XY.VALUE
+        return self.blocksizes[min(res_xy, smallest)]
 
     @property
     def target_shape(self):

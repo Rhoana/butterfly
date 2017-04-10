@@ -4,6 +4,8 @@ from Settings import CONFIG_FILENAME
 from Structures import NamelessStruct
 from Structures import NamedStruct
 
+import numpy as np
+
 # Query params for grouping
 _experiments = 'experiments'
 _samples = 'samples'
@@ -184,7 +186,7 @@ static NAME that should always be used externally.
                 VALUE = 'regularimagestack'
             ),
             BLOCK = NamedStruct('block-size',
-                VALUE = [1, 512, 512]
+                VALUE = np.uint32([[1, 512, 512]])
             )
         )
         # ALL THE CACHE RUNTIME TERMS

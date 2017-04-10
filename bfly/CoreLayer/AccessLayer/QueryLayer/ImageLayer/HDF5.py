@@ -54,10 +54,13 @@ of the full tile resolution.
 
         # Find the region to crop
         sk,sj,si = t_query.all_scales
-        z0,y0,x0 = t_query.tile_origin
-        z1,y1,x1 = t_query.tile_origin + t_query.blocksize
+        [z0,y0,x0],[z1,y1,x1] = t_query.source_tile_bounds
         # Get the scaled blocksize for the output array
-        zb,yb,xb = t_query.target_blocksize
+        zb,yb,xb = t_query.blocksize
+
+        #print z0,y0,x0
+        #print z1,y1,x1
+        #print ''
 
         # get the right h5 files for the current z index
         start_z = next((i for i, z in z_starts if z <= z0), 0)
@@ -90,9 +93,13 @@ of the full tile resolution.
                 # Get the input and output end-bounds
                 iz1 = min(z1 - z_offset, vol.shape[0])
                 # Scale the output bounds by the z-scale
-                oz1 = oz0 + (iz1 - iz0) // sk
-                # Add the volume from one file to the full volume for all files
-                full_vol[oz0:oz1] = vol[iz0:iz1:sk, y0:y1:sj, x0:x1:si][:zb,:yb,:xb]
+                dz = iz1 - iz0
+                oz1 = oz0 + dz // sk
+                # Get the volume from one file
+                file_vol = vol[iz0:iz1:sk, y0:y1:sj, x0:x1:si]
+                yf, xf = file_vol.shape[1:]
+                # Add the volume to the full volume
+                full_vol[oz0:oz1,:yf,:xf] = file_vol
 
         # Combined from all files
         return full_vol
@@ -172,12 +179,21 @@ this filname to not give a valid h5 volume.
             side_scalar = np.ceil(np.sqrt(square_overage))
             # Set the actual blocksize to be under the cache limit
             plane_shape = np.ceil(shape[1:] / side_scalar)
-            block = (1,) + tuple(plane_shape)
+            max_block = np.r_[[1], plane_shape]
+            ####
+            # Get max blocksizes for different resolutions
+            ####
+            lo_res = 10
+            # Get all block sizes by halving the max block size
+            all_blocks = [shape/(2**res) for res in range(lo_res)]
+            block_array = np.clip(np.ceil(all_blocks), 1, max_block)
+            # Clip all block sizes above lowest resolution
+            print np.uint32(block_array)
             # return named keywords
             keywords.update({
+                runtime.BLOCK.NAME: np.uint32(block_array),
+                output.SIZE.NAME: np.uint32(shape),
                 output.TYPE.NAME: str(vol.dtype),
-                runtime.BLOCK.NAME: np.uint32(block),
-                output.SIZE.NAME: np.uint32(shape)
             })
         # Return all canonical keywords
         return keywords
