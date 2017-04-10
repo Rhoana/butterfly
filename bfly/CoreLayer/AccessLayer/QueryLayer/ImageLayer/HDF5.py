@@ -58,10 +58,6 @@ of the full tile resolution.
         # Get the scaled blocksize for the output array
         zb,yb,xb = t_query.blocksize
 
-        #print z0,y0,x0
-        #print z1,y1,x1
-        #print ''
-
         # get the right h5 files for the current z index
         start_z = next((i for i, z in z_starts if z <= z0), 0)
         stop_z = next((i for i, z in z_stops if z >= z1), len(z_stops))
@@ -187,8 +183,6 @@ this filname to not give a valid h5 volume.
             # Get all block sizes by halving the max block size
             all_blocks = [shape/(2**res) for res in range(lo_res)]
             block_array = np.clip(np.ceil(all_blocks), 1, max_block)
-            # Clip all block sizes above lowest resolution
-            print np.uint32(block_array)
             # return named keywords
             keywords.update({
                 runtime.BLOCK.NAME: np.uint32(block_array),
