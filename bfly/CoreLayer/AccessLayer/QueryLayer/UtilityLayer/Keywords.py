@@ -224,20 +224,27 @@ static NAME that should always be used externally.
                 )
             ),
             FILE = NamelessStruct(
-                SYNAPSE = NamedStruct('synapse-connections.json',
+                SYNAPSE = NamedStruct('synapse-connections',
+                    VALUE = 'synapse-connections.json',
                     NEURON_LIST = ['neuron_1','neuron_2'],
                     POINT  = NamedStruct('synapse_center',
                         LIST = ['z','y','x']
                     )
                 ),
-                BLOCK = NamedStruct('connectivity-graph.json',
+                BLOCK = NamedStruct('connectivity-graph',
+                    VALUE = 'connectivity-graph.json',
                     BOUND = NamedStruct('locations',
                         START = ['z', 'y', 'x',],
                         SHAPE = ['depth', 'height', 'width']
                     ),
                     BLOCK = NamedStruct('volumes')
                 ),
-                CONFIG = NamedStruct(CONFIG_FILENAME,
+                DB_LIST = [
+                    'synapse-connections',
+                    'connectivity-graph'
+                ],
+                CONFIG = NamedStruct('rh-config',
+                    VALUE = CONFIG_FILENAME,
                     GROUP_LIST = _group_list,
                     PATH = NamedStruct('path')
                 )

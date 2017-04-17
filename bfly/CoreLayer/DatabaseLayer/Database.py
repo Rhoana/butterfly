@@ -37,9 +37,7 @@ class Database():
         k_files = self.RUNTIME.DB.FILE
         # Get keywords for the BFLY_CONFIG
         k_list = k_files.CONFIG.GROUP_LIST
-        k_path = k_files.CONFIG.PATH.NAME
-        # Get the depth to the channels
-        k_deep = len(k_list) - 1
+        k_range = range(len(k_list) - 1)
 
         # Join lists from config groups
         def cat_lists(groups, level):
@@ -51,55 +49,52 @@ class Database():
             return [g for l in g_lists for g in l]
 
         # Join all lists from within config
-        all_lists = reduce(cat_lists, range(k_deep), [config])
+        all_lists = reduce(cat_lists, k_range, [config])
+        # Load all files for each dataset
+        map(self.load_all, all_lists)
 
-        # Map channel paths to datasource paths
-        def map_paths(all_map, src):
-            # Get the channel key and list
-            c_key = k_list[k_deep]
-            c_list = src.get(c_key,{})
-            # Get the source path
-            path = src.get(k_path)
-            # Add none to map if no path
-            if not path: return all_map
-            # Map new channel paths to path if exists
-            a_map = {c[k_path]: path for c in c_list}
-            return dict(all_map, **a_map)
+        # Save to disk
+        self.commit()
+        return self
 
-        # Create dictionary from each channel in lists
-        all_paths = reduce(map_paths, all_lists, {})
-
-        # Add all paths to the database
-        return self.add_paths(all_paths)
-
-    def add_paths(self, all_paths):
-        """
+    def load_all(self, source):
+        """ Load the tables, synapses, and neuron configs
         Arguments
         ----------
-        all_paths: dict
-            The mapping from channel path to dataset path
-
-        Returns
-        ---------
-        :class:`Database`
-            the derived database class instance
+        source: dict
+            The configuration options for a dataset
         """
-        # Get unique dataset paths
-        dataset_paths = set(all_paths.values())
-        # Add all paths to database
-        for c_path,d_path in all_paths.iteritems():
+        # Get file fields
+        k_files = self.RUNTIME.DB.FILE
+        # Get keywords for the BFLY_CONFIG
+        k_list = k_files.CONFIG.GROUP_LIST
+        k_path = k_files.CONFIG.PATH.NAME
+        # Get the key to the channels
+        k_channel = k_list[-1]
+
+        # Set custom names of files
+        for n in k_files.DB_LIST:
+            n_file = k_files[n]
+            filepath = source.get(n_file.NAME, n_file.VALUE)
+            n_file.VALUE = filepath
+
+        # list of channels for the dataset path
+        c_list = source.get(k_channel, [])
+        d_path = source.get(k_path, '')
+
+        # Add all channel paths to database
+        for c_path in c_list:
             self.add_path(c_path, d_path)
-        # Add all tables for each path
-        for d_path in dataset_paths:
+
+        # if a real dataset path
+        if d_path:
+            # Add all tables for the dataset path
             self.add_tables(d_path)
             # Load all the blocks
             self.load_blocks(d_path)
             # Load all synapses and neurons
             synapses = self.load_synapses(d_path)
             self.load_neurons(d_path, synapses)
-        # Save to disk
-        self.commit()
-        return self
 
     def add_path(self, c_path, d_path):
         """ store a link from a ``c_path`` to a ``d_path``
@@ -168,7 +163,7 @@ where N is the number of synapses for the ``path``.
         # Get file fields
         k_files = self.RUNTIME.DB.FILE
         # Get keywords for input file
-        k_file = k_files.SYNAPSE.NAME
+        k_file = k_files.SYNAPSE.VALUE
         k_point = k_files.SYNAPSE.POINT.NAME
         k_points_in = k_files.SYNAPSE.POINT.LIST
         k_nodes_in = k_files.SYNAPSE.NEURON_LIST
@@ -248,7 +243,7 @@ where N is the number of blocks for the ``path``.
         # Get file fields
         k_files = self.RUNTIME.DB.FILE
         # Get name of the block file
-        k_file = k_files.BLOCK.NAME
+        k_file = k_files.BLOCK.VALUE
         # Get boundary keys for the block file
         k_start = k_files.BLOCK.BOUND.START
         k_shape = k_files.BLOCK.BOUND.SHAPE
