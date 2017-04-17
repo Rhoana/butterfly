@@ -3,10 +3,11 @@
 *.swp
 
 # Testing
-.coverage
 .coveralls.yml
-.tox
+tests/data/*.h5
+.coverage
 *.log
+.tox
 
 # Docs
 docs/build/*

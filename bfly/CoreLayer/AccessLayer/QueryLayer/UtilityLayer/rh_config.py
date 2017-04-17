@@ -12,11 +12,31 @@ config : dict
 import os
 import yaml
 
-config = {}
-config_env = "RH_CONFIG_FILENAME"
-default_config_filename = os.path.expanduser("~/.rh-config.yaml")
-config_filename = os.environ.get(config_env, default_config_filename)
 
-if os.path.exists(config_filename):
-    config = yaml.safe_load(open(config_filename, "r"))
+def load(default_path = "~/.rh-config.yaml"):
+    """ Load a config dictionary from a file
 
+    Arguments
+    ----------
+    rh_path : str
+        The path to a yaml file overriding the default\
+path of "~/.rh-config.yaml". Will always be overridden by\
+"RH_CONFIG_FILENAME" environment variable.
+
+    Returns
+    --------
+    dict
+        The dictionary containing all the config information
+    """
+    config_out = {}
+    config_env = "RH_CONFIG_FILENAME"
+    full_default = os.path.expanduser(default_path)
+    config_path = os.environ.get(config_env, full_default)
+
+    # Load the config file if exists
+    if os.path.exists(config_path):
+        config_out = yaml.safe_load(open(config_path, "r"))
+    # Return the config file or an empty dictionary
+    return config_path, config_out
+
+config_filename, config = load()
