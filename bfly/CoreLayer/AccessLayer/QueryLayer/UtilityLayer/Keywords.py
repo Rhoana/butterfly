@@ -225,14 +225,14 @@ static NAME that should always be used externally.
             ),
             FILE = NamelessStruct(
                 SYNAPSE = NamedStruct('synapse-connections',
-                    VALUE = 'synapse-connections.json',
+                    DEFAULT = 'synapse-connections.json',
                     NEURON_LIST = ['neuron_1','neuron_2'],
                     POINT  = NamedStruct('synapse_center',
                         LIST = ['z','y','x']
                     )
                 ),
                 BLOCK = NamedStruct('connectivity-graph',
-                    VALUE = 'connectivity-graph.json',
+                    DEFAULT = 'connectivity-graph.json',
                     BOUND = NamedStruct('locations',
                         START = ['z', 'y', 'x',],
                         SHAPE = ['depth', 'height', 'width']

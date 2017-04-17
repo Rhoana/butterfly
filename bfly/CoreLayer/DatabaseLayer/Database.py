@@ -73,10 +73,8 @@ class Database():
         k_channel = k_list[-1]
 
         # Set custom names of files
-        for n in k_files.DB_LIST:
-            n_file = k_files[n]
-            filepath = source.get(n_file.NAME, n_file.VALUE)
-            n_file.VALUE = filepath
+        for nf in map(k_files.get, k_files.DB_LIST):
+            nf.VALUE = source.get(nf.NAME, nf.DEFAULT)
 
         # list of channels for the dataset path
         c_list = source.get(k_channel, [])
