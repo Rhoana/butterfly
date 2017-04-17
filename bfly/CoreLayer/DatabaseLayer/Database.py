@@ -84,8 +84,8 @@ class Database():
         for c_path in c_list:
             self.add_path(c_path, d_path)
 
-        # if a real dataset path
-        if d_path:
+        # if a real dataset and channel paths
+        if d_path and len(c_list):
             # Add all tables for the dataset path
             self.add_tables(d_path)
             # Load all the blocks
