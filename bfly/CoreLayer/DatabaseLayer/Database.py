@@ -203,6 +203,9 @@ where N is the number of synapses for the ``path``.
             The Nx4 array of id, z, y, x values \
 where N is the number of neurons for the ``path``.
         """
+        # return if not synapses
+        if not len(synapses):
+            return synapses
         ####
         # Get neurons from loaded synapses
         ####
