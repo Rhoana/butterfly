@@ -207,7 +207,7 @@ static NAME that should always be used externally.
                 LIST = _table_list,
                 NEURON = NamedStruct(_table_list[0],
                     KEY = NamedStruct('neuron'),
-                    FULL_LIST = ['neuron','z','y','x']
+                    FULL_LIST = ['neuron','z','y','x'],
                     KEY_LIST = ['neuron']
                 ),
                 SYNAPSE = NamedStruct(_table_list[1],
