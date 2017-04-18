@@ -207,17 +207,20 @@ static NAME that should always be used externally.
                 LIST = _table_list,
                 NEURON = NamedStruct(_table_list[0],
                     KEY = NamedStruct('neuron'),
+                    FULL_LIST = ['neuron','z','y','x']
                     KEY_LIST = ['neuron']
                 ),
                 SYNAPSE = NamedStruct(_table_list[1],
                     KEY = NamedStruct('__id'),
                     NEURON_LIST = ['n1','n2'],
-                    KEY_LIST = ['n1','n2']
+                    FULL_LIST = ['n1','n2','z','y','x'],
+                    KEY_LIST = ['n1','n2'],
                 ),
                 BLOCK = NamedStruct(_table_list[2],
                     KEY = NamedStruct('__id'),
                     BOUND_LIST = ['start','stop'],
-                    KEY_LIST = ['start','stop','neurons']
+                    FULL_LIST = ['start','stop','neurons'],
+                    KEY_LIST = ['start','stop']
                 ),
                 ALL = NamelessStruct(
                     POINT_LIST = ['z','y','x']

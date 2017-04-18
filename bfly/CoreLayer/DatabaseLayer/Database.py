@@ -295,13 +295,13 @@ and neurons where N is the number of blocks for the ``path``.
         --------
         list
             A list of dicts from each row of ``blocks`` \
-with dictionary keys taken from both ``BLOCK.KEY_LIST``
+with dictionary keys taken from ``BLOCK.FULL_LIST``
 
         """
         # Get database fields
         k_tables = self.RUNTIME.DB.TABLE
         # Get table key_values
-        k_keys = k_tables.BLOCK.KEY_LIST
+        k_keys = k_tables.BLOCK.FULL_LIST
         k_block = k_tables.BLOCK.NAME
 
         # Add entries
@@ -322,8 +322,8 @@ where N is the number of synapses for the ``path``.
         --------
         list
             A list of dicts from each row of ``synapses`` \
-with dictionary keys taken from both ``SYNAPSE.NEURON_LIST`` \
-and ``ALL.POINT_LIST`` fields of :data:`RUNTIME.DB`
+with dictionary keys taken from ``SYNAPSE.FULL_LIST`` \
+field of :data:`RUNTIME.DB`
 
         """
         # Get database fields
@@ -331,9 +331,7 @@ and ``ALL.POINT_LIST`` fields of :data:`RUNTIME.DB`
         # Get keywords for the database
         k_synapse = k_tables.SYNAPSE.NAME
         # List all the syapse database keys
-        k_nodes_out = k_tables.SYNAPSE.NEURON_LIST
-        k_points_out = k_tables.ALL.POINT_LIST
-        k_keys = k_nodes_out + k_points_out
+        k_keys = k_tables.SYNAPSE.FULL_LIST
 
         # Add entries
         return self.add_entries(k_synapse, path, k_keys, synapses)
@@ -353,8 +351,8 @@ where N is the number of neurons for the ``path``.
         --------
         list
             A list of dicts from each row of ``neurons`` \
-with dictionary keys taken from both ``NEURON.KEY.NAME`` \
-and ``ALL.POINT_LIST`` fields of :data:`RUNTIME.DB`
+with dictionary keys from the ``NEURON.FULL_LIST`` \
+field of :data:`RUNTIME.DB`
 
         """
 
@@ -363,9 +361,7 @@ and ``ALL.POINT_LIST`` fields of :data:`RUNTIME.DB`
         # Get keywords for the database
         k_neuron = k_tables.NEURON.NAME
         # List all the syapse database keys
-        k_node_out = k_tables.NEURON.KEY.NAME
-        k_points_out = k_tables.ALL.POINT_LIST
-        k_keys = [k_node_out] + k_points_out
+        k_keys = k_tables.NEURON.FULL_LIST
 
         # Add entries
         return self.add_entries(k_neuron, path, k_keys, neurons)
