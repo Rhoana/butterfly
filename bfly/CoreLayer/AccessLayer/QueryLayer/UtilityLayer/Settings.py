@@ -40,7 +40,7 @@ CONFIG_FILENAME = config_filename
 PORT = int(BFLY_CONFIG.get('port', 2001))
 # Path to database and kind of database
 DB_PATH = BFLY_CONFIG.get('db-path', 'bfly.db')
-DB_TYPE = BFLY_CONFIG.get('db-type', 'ZODB')
+DB_TYPE = BFLY_CONFIG.get('db-type', 'Zodb')
 # Path to the log file
 LOG_PATH = BFLY_CONFIG.get('log-path', 'bfly.log')
 
