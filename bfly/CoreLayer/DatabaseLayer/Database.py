@@ -81,7 +81,8 @@ class Database():
         d_path = source.get(k_path, '')
 
         # Add all channel paths to database
-        for c_path in c_list:
+        for c_dict in c_list:
+            c_path = c_dict.get(k_path, '')
             self.add_path(c_path, d_path)
 
         # if a real dataset and channel paths
