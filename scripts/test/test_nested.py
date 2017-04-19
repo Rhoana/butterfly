@@ -23,8 +23,10 @@ class Maker():
         # Create the file from a path
         with h5py.File(filename, 'w') as fd:
             # Make a random uint array
-            pattern = randint(dmax, size= dsize, dtype= dtype)
-            fd.create_dataset('stack', data= pattern)
+            fd.create_dataset('stack', shape= dsize, dtype= dtype)
+            for z in range(dsize[0]):
+                pattern = randint(dmax, size= dsize[1:], dtype= dtype)
+                fd['stack'][z] = pattern
 
 class Hasher():
     def __init__(self):
@@ -43,10 +45,10 @@ class Hasher():
         return hashed
 
 class Tester():
-    def __init__(self, files, zyx_shape, kji_shape):
-        self.zyx_shape = np.array(zyx_shape)
-        self.kji_shape = np.array(kji_shape)
-        self.int_shape = np.uint32(kji_shape)
+    def __init__(self, files, zyx_slice, kji_slice):
+        self.zyx_slice = np.array(zyx_slice)
+        self.kji_slice = np.array(kji_slice)
+        self.int_shape = np.uint32(kji_slice)
         self.files = files
 
     def load(self, path, start):
@@ -58,9 +60,9 @@ class Tester():
 
     def test(self, kji):
         # Get xyz tile file
-        kji_full = kji * self.kji_shape
-        zyx = np.floor(kji_full / self.zyx_shape)
-        zyx_full = np.uint32(zyx * self.zyx_shape)
+        kji_full = kji * self.kji_slice
+        zyx = np.floor(kji_full / self.zyx_slice)
+        zyx_full = np.uint32(zyx * self.zyx_slice)
         # Get file path and file start
         file_key = str(list(np.uint32(zyx)))
         file_path = self.files.get(file_key)
@@ -70,7 +72,7 @@ class Tester():
         # Load file from path and start
         self.load(file_path, file_start)
 
-def main(in_file, trials, full_shape, block_shape):
+def do_make(in_file, full_shape):
     # Load the model
     with open(in_file,'r') as fd:
         listed = json.load(fd)
@@ -82,16 +84,31 @@ def main(in_file, trials, full_shape, block_shape):
 
     # Get the tile shape
     zyx_shape = full_shape / tile_shape
-    # Get the block shape
-    kji_shape = zyx_shape / block_shape
     dtype = 8
 
     # Make the files
+    message0 = """
+    making {} tiles of shape {}
+    """.format(len(listed), zyx_shape)
+    print(message0)
+
     make = Maker(zyx_shape, dtype)
     map(make.make, listed)
 
+    return tile_shape, model
+
+def do_test(trials, model, full_shape, tile_shape, block_shape):
+
+    # Get the slice shape
+    tile_slice = np.r_[[1,], tile_shape[1:]]
+    full_slice = np.r_[[1,], full_shape[1:]]
+
+    # Get the block shape
+    zyx_slice = full_slice / tile_slice
+    kji_slice = zyx_slice / block_shape
+
     # Get all kji blocks
-    kji_range = full_shape // kji_shape
+    kji_range = full_slice // kji_slice
     kji_count = np.prod(tile_shape*block_shape)
     # Ensure consistencey
     if np.prod(kji_range) != kji_count:
@@ -101,7 +118,13 @@ def main(in_file, trials, full_shape, block_shape):
 
     # Test the files
     time_results = []
-    test = Tester(model, zyx_shape, kji_shape)
+    test = Tester(model, zyx_slice, kji_slice)
+
+    message1 = """
+    loading {} tiles of shape {}
+    """.format(len(all_kji), kji_range)
+    print(message1)
+
     # Run the testing
     for t in range(trials):
         time_start = time.time()
@@ -114,11 +137,10 @@ def main(in_file, trials, full_shape, block_shape):
     return {
         'time': time_results,
         'mean_time': float(np.mean(time_results)),
-        'zyx_shape': map(int, zyx_shape),
-        'kji_shape': map(int, kji_shape),
+        'zyx_shape': map(int, zyx_slice),
+        'kji_shape': map(int, kji_slice),
         'n_files_zyx': map(int, tile_shape),
-        'n_tiles_kji': map(int, kji_range),
-        'in_file': str(in_file),
+        'n_tiles_kji': map(int, kji_range)
     }
 
 
@@ -128,6 +150,7 @@ if __name__ == '__main__':
     in_file = 'dataset.json'
     full_shape = np.uint32([20, 10000, 10000])
 
-    main(in_file, full_shape, block_shape)
+    do_make(in_file, full_shape, block_shape)
+    do_test(in_file, full_shape, block_shape)
 
 

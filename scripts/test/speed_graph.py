@@ -9,7 +9,8 @@ def n_key_filter(n, key):
 
 if __name__ == '__main__':
 
-    full_shape = [8, 8192, 8192]
+    full_shape = [16, 16384, 16384]
+#    full_shape = [2048, 16384, 16384]
     in_fmt = 'speed_{}_{}_{}.json'
     in_file = in_fmt.format(*full_shape)
 
@@ -47,7 +48,7 @@ if __name__ == '__main__':
     # Save to file
     plt.ylabel('time (seconds)')
     plt.xlabel('total number of tiles')
-    title = 'time to load {}x{}x{} hdf5'.format(*full_shape)
+    title = 'Time to load one z-section of {}x{}x{} hdf5'.format(*full_shape)
     plt.title(title)
     plt.xscale('log', basex=2)
     plt.savefig('out.png')

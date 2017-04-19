@@ -10,17 +10,17 @@ def get_filename(tile_shape, group_shape):
     g_n = np.prod(group_shape)
     return '{}_in_{}.json'.format(t_n, g_n)
 
-def make_one(shapes):
-    tile_shape, group_shape = shapes
-    out_file = get_filename(tile_shape, group_shape)
-    return make_nested.main(out_file, tile_shape, [group_shape])
-
-def test_one(shapes, trials, full_shape, file_block):
+def make_one(shapes, full_shape):
     if os.path.exists('data'):
         shutil.rmtree('data')
     tile_shape, group_shape = shapes
-    in_file = get_filename(tile_shape, group_shape)
-    return test_nested.main(in_file, trials, full_shape, file_block)
+    out_file = get_filename(tile_shape, group_shape)
+    make_nested.main(out_file, tile_shape, [group_shape])
+    return test_nested.do_make(out_file, full_shape)
+
+def test_one(trials, model, full_shape, tile_shape, file_block):
+    args = trials, model, full_shape, tile_shape, file_block
+    return test_nested.do_test(*args)
 
 if __name__ == '__main__':
     tile_group_shapes = [
@@ -35,11 +35,9 @@ if __name__ == '__main__':
 #       [ [8,8,8], [1,1,1] ],
     ]
 
-    # Make both json files
-    map(make_one, tile_group_shapes)
-
-    trials = 2
-    full_shape = [8, 8192, 8192]
+    trials = 20
+    full_shape = [16, 16384, 16384]
+    #full_shape = [2048, 16384, 16384]
     file_blocks = [
         [1, 1, 1],
         [1, 1, 2],
@@ -56,13 +54,17 @@ if __name__ == '__main__':
     speeds = []
     # Make and test hdf5 files
     for t_g in tile_group_shapes:
+
+        # Prepare and make an h5 file
+        t_s, model = make_one(t_g, full_shape)
+        print t_s
         for f_b in file_blocks:
             # Set a max cutoff at 1024 blocks
             n_blocks = np.prod(f_b * np.multiply(*t_g))
             if n_blocks > 1024:
                 continue
             # Get the speed for the requested sizes
-            speed = test_one(t_g, trials, full_shape, f_b)
+            speed = test_one(trials, model, full_shape, t_s, f_b)
             if not speed:
                 continue
             speed.update({
