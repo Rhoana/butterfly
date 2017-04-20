@@ -9,8 +9,8 @@ def n_key_filter(n, key):
 
 if __name__ == '__main__':
 
-    full_shape = [16, 16384, 16384]
-#    full_shape = [2048, 16384, 16384]
+    #full_shape = [16, 16384, 16384]
+    full_shape = [2048, 16384, 16384]
     in_fmt = 'speed_{}_{}_{}.json'
     in_file = in_fmt.format(*full_shape)
 

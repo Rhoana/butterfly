@@ -36,8 +36,8 @@ if __name__ == '__main__':
     ]
 
     trials = 20
-    full_shape = [16, 16384, 16384]
-    #full_shape = [2048, 16384, 16384]
+    #full_shape = [16, 16384, 16384]
+    full_shape = [2048, 16384, 16384]
     file_blocks = [
         [1, 1, 1],
         [1, 1, 2],
@@ -50,7 +50,7 @@ if __name__ == '__main__':
         [1, 16, 16],
         [1, 32, 16],
         [1, 32, 32],
-    ]
+    ][::-1]
     speeds = []
     # Make and test hdf5 files
     for t_g in tile_group_shapes:
