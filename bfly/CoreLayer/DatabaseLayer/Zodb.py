@@ -4,7 +4,7 @@ import numpy as np
 import persistent
 import time
 
-class stableList(persistent.list.PersistentList):
+class StableList(persistent.list.PersistentList):
     """ Persistent table
     """
     def __init__(self):
@@ -39,9 +39,9 @@ and contains each table as a separate ZODB key
         # Map all the tables to classes
         k_tables = _runtime.DB.TABLE
         self.tables = {
-            k_tables.BLOCK.NAME: stableList,
-            k_tables.NEURON.NAME: stableList,
-            k_tables.SYNAPSE.NAME: stableList,
+            k_tables.BLOCK.NAME: StableList,
+            k_tables.NEURON.NAME: StableList,
+            k_tables.SYNAPSE.NAME: StableList,
         }
         # Default in-memory database
         storage = None
