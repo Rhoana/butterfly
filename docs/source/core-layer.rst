@@ -51,7 +51,7 @@ You can import ``DatabaseLayer`` from :mod:`bfly` and :mod:`CoreLayer`.
 
 DatabaseLayer classes
 ************************* 
-.. autoclass:: Unqlite
+.. autoclass:: Zodb
     :members:
 
 Database base class
