@@ -10,8 +10,8 @@ import sys
 class SpeedTestCutout(ut.TestCase):
     """ set up tests for `bfly.CoreLayer.Core` cutout logic
     """
-    DB_PATH = ':mem:'
-    DB_TYPE = 'Unqlite'
+    DB_PATH = None
+    DB_TYPE = 'Zodb'
     # path, shape, and type for temp file
     # THIS FILE PATH SHOULD NOT EXIST
     h_path = 'tests/data/25k_noise.h5'
