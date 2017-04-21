@@ -17,7 +17,7 @@ all the string templates for logging
         self.logs = struct
 
     # The actual logging function
-    def logging(self, action, **keys):
+    def logging(self, action, *args, **keys):
         """ Log the action and keys to a template
 
         Calls the logging method in :data:`logs` \
@@ -40,7 +40,7 @@ with the formatted template in :data:`logs`.
         template = field.get('ACT','Error')
         # Try to format the string
         try:
-            message = template.format(**keys)
+            message = template.format(*args, **keys)
         except KeyError:
             message = template
         # Log the message with a status

@@ -8,8 +8,8 @@ class TestWebserver(ut.TestCase):
     """ set up tests for `bfly.Webserver`
     """
     PORT = 2017
-    DB_PATH = ':mem:'
-    DB_TYPE = 'Unqlite'
+    DB_PATH = None
+    DB_TYPE = 'Zodb'
     RUNTIME = bfly.UtilityLayer.RUNTIME()
     # Log to the command line
     log_info = {

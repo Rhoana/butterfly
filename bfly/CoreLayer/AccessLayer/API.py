@@ -348,7 +348,7 @@ with :meth:`sub_data`. N is either 1 or 6.
         feats = self.INPUT.FEATURES
         # Get metadata for database
         k_tables = self.RUNTIME.DB.TABLE
-        k_start, k_stop, k_neurons = k_tables.BLOCK.KEY_LIST
+        k_start, k_stop, k_neurons = k_tables.BLOCK.FULL_LIST
 
         # Shorthand database name, table, key
         db, db_table = self._db_feature(feat)[:2]

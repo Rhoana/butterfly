@@ -1,3 +1,4 @@
+import time
 import json, os
 import numpy as np
 
@@ -13,12 +14,17 @@ class Database():
 
     Attributes
     -----------
+    log: :class:`MakeLog`.``logging``
+        All formats for log messages
     RUNTIME: :class:`RUNTIME`
         With keywords needed to load files and use tables
     """
     def __init__(self, path, _runtime):
         # Get the database keywords
         self.RUNTIME = _runtime
+        # Create info logger
+        log_list = _runtime.ERROR.DB
+        self.log = _runtime.MAKELOG(log_list).logging
 
     def load_config(self, config):
         """ Loads all files from ``config`` into database
@@ -37,9 +43,7 @@ class Database():
         k_files = self.RUNTIME.DB.FILE
         # Get keywords for the BFLY_CONFIG
         k_list = k_files.CONFIG.GROUP_LIST
-        k_path = k_files.CONFIG.PATH.NAME
-        # Get the depth to the channels
-        k_deep = len(k_list) - 1
+        k_range = range(len(k_list) - 1)
 
         # Join lists from config groups
         def cat_lists(groups, level):
@@ -51,55 +55,51 @@ class Database():
             return [g for l in g_lists for g in l]
 
         # Join all lists from within config
-        all_lists = reduce(cat_lists, range(k_deep), [config])
+        all_lists = reduce(cat_lists, k_range, [config])
+        # Load all files for each dataset
+        map(self.load_all, all_lists)
 
-        # Map channel paths to datasource paths
-        def map_paths(all_map, src):
-            # Get the channel key and list
-            c_key = k_list[k_deep]
-            c_list = src.get(c_key,{})
-            # Get the source path
-            path = src.get(k_path)
-            # Add none to map if no path
-            if not path: return all_map
-            # Map new channel paths to path if exists
-            a_map = {c[k_path]: path for c in c_list}
-            return dict(all_map, **a_map)
+        # Save to disk
+        self.commit()
+        return self
 
-        # Create dictionary from each channel in lists
-        all_paths = reduce(map_paths, all_lists, {})
-
-        # Add all paths to the database
-        return self.add_paths(all_paths)
-
-    def add_paths(self, all_paths):
-        """
+    def load_all(self, source):
+        """ Load the tables, synapses, and neuron configs
         Arguments
         ----------
-        all_paths: dict
-            The mapping from channel path to dataset path
-
-        Returns
-        ---------
-        :class:`Database`
-            the derived database class instance
+        source: dict
+            The configuration options for a dataset
         """
-        # Get unique dataset paths
-        dataset_paths = set(all_paths.values())
-        # Add all paths to database
-        for c_path,d_path in all_paths.iteritems():
+        # Get file fields
+        k_files = self.RUNTIME.DB.FILE
+        # Get keywords for the BFLY_CONFIG
+        k_list = k_files.CONFIG.GROUP_LIST
+        k_path = k_files.CONFIG.PATH.NAME
+        # Get the key to the channels
+        k_channel = k_list[-1]
+
+        # Set custom names of files
+        for nf in map(k_files.get, k_files.DB_LIST):
+            nf.VALUE = source.get(nf.NAME, nf.DEFAULT)
+
+        # list of channels for the dataset path
+        c_list = source.get(k_channel, [])
+        d_path = source.get(k_path, '')
+
+        # Add all channel paths to database
+        for c_dict in c_list:
+            c_path = c_dict.get(k_path, '')
             self.add_path(c_path, d_path)
-        # Add all tables for each path
-        for d_path in dataset_paths:
+
+        # if a real dataset and channel paths
+        if d_path and len(c_list):
+            # Add all tables for the dataset path
             self.add_tables(d_path)
             # Load all the blocks
             self.load_blocks(d_path)
             # Load all synapses and neurons
             synapses = self.load_synapses(d_path)
             self.load_neurons(d_path, synapses)
-        # Save to disk
-        self.commit()
-        return self
 
     def add_path(self, c_path, d_path):
         """ store a link from a ``c_path`` to a ``d_path``
@@ -168,7 +168,7 @@ where N is the number of synapses for the ``path``.
         # Get file fields
         k_files = self.RUNTIME.DB.FILE
         # Get keywords for input file
-        k_file = k_files.SYNAPSE.NAME
+        k_file = k_files.SYNAPSE.VALUE
         k_point = k_files.SYNAPSE.POINT.NAME
         k_points_in = k_files.SYNAPSE.POINT.LIST
         k_nodes_in = k_files.SYNAPSE.NEURON_LIST
@@ -210,6 +210,9 @@ where N is the number of synapses for the ``path``.
             The Nx4 array of id, z, y, x values \
 where N is the number of neurons for the ``path``.
         """
+        # return if not synapses
+        if not len(synapses):
+            return synapses
         ####
         # Get neurons from loaded synapses
         ####
@@ -248,7 +251,7 @@ where N is the number of blocks for the ``path``.
         # Get file fields
         k_files = self.RUNTIME.DB.FILE
         # Get name of the block file
-        k_file = k_files.BLOCK.NAME
+        k_file = k_files.BLOCK.VALUE
         # Get boundary keys for the block file
         k_start = k_files.BLOCK.BOUND.START
         k_shape = k_files.BLOCK.BOUND.SHAPE
@@ -299,17 +302,17 @@ and neurons where N is the number of blocks for the ``path``.
         --------
         list
             A list of dicts from each row of ``blocks`` \
-with dictionary keys taken from both ``BLOCK.KEY_LIST``
+with dictionary keys taken from ``BLOCK.FULL_LIST``
 
         """
         # Get database fields
         k_tables = self.RUNTIME.DB.TABLE
         # Get table key_values
-        k_keys = k_tables.BLOCK.KEY_LIST
+        k_keys = k_tables.BLOCK.FULL_LIST
         k_block = k_tables.BLOCK.NAME
 
         # Add entries
-        return self.add_entries(k_block, path, k_keys, blocks)
+        return self.add_entries(k_block, path, k_keys, blocks, 0)
 
     def add_synapses(self, path, synapses):
         """ Add all the synapases to the database
@@ -326,8 +329,8 @@ where N is the number of synapses for the ``path``.
         --------
         list
             A list of dicts from each row of ``synapses`` \
-with dictionary keys taken from both ``SYNAPSE.NEURON_LIST`` \
-and ``ALL.POINT_LIST`` fields of :data:`RUNTIME.DB`
+with dictionary keys taken from ``SYNAPSE.FULL_LIST`` \
+field of :data:`RUNTIME.DB`
 
         """
         # Get database fields
@@ -335,12 +338,10 @@ and ``ALL.POINT_LIST`` fields of :data:`RUNTIME.DB`
         # Get keywords for the database
         k_synapse = k_tables.SYNAPSE.NAME
         # List all the syapse database keys
-        k_nodes_out = k_tables.SYNAPSE.NEURON_LIST
-        k_points_out = k_tables.ALL.POINT_LIST
-        k_keys = k_nodes_out + k_points_out
+        k_keys = k_tables.SYNAPSE.FULL_LIST
 
         # Add entries
-        return self.add_entries(k_synapse, path, k_keys, synapses)
+        return self.add_entries(k_synapse, path, k_keys, synapses, 0)
 
     def add_neurons(self, path, neurons):
         """ Add all the neurons to the database
@@ -357,8 +358,8 @@ where N is the number of neurons for the ``path``.
         --------
         list
             A list of dicts from each row of ``neurons`` \
-with dictionary keys taken from both ``NEURON.KEY.NAME`` \
-and ``ALL.POINT_LIST`` fields of :data:`RUNTIME.DB`
+with dictionary keys from the ``NEURON.FULL_LIST`` \
+field of :data:`RUNTIME.DB`
 
         """
 
@@ -367,51 +368,21 @@ and ``ALL.POINT_LIST`` fields of :data:`RUNTIME.DB`
         # Get keywords for the database
         k_neuron = k_tables.NEURON.NAME
         # List all the syapse database keys
-        k_node_out = k_tables.NEURON.KEY.NAME
-        k_points_out = k_tables.ALL.POINT_LIST
-        k_keys = [k_node_out] + k_points_out
+        k_keys = k_tables.NEURON.FULL_LIST
 
         # Add entries
-        return self.add_entries(k_neuron, path, k_keys, neurons)
+        return self.add_entries(k_neuron, path, k_keys, neurons, 0)
 
-    def add_entries(self, table, path, t_keys, entries):
-        """ Add an numpy.array of entries to a table
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-        t_keys: list
-            All of ``K`` keys for each row of ``entries``
-        entries: numpy.ndarray or list
-            ``N`` by ``K`` array or list where ``N`` is the number \
-of entries to add and ``K`` is the number of keys per entry
-
-        """
-        # Typecast values uniformly
-        def cast(value):
-            # convert if numpy datatype
-            if isinstance(value, np.number):
-                return value.item()
-            return value
-        # Add entries to database
-        def add_entry(entry):
-            # Add a tuple entry as a dict
-            if hasattr(entry, '__len__'):
-                d_entry = dict(zip(t_keys, map(cast,entry)))
-                self.add_entry(table, path, d_entry)
-                return d_entry
-        # add all the entries
-        dict_entries = map(add_entry, entries)
-        # Save to disk
-        self.commit()
-        return dict_entries
-
-    def add_entry(self, table, path, entry):
-        """ and a single entry to a table for a path
+    def add_entries(self, table, path, t_keys, entries, update=1):
+        """ Add an array or list of entries to a table
         Must be overridden by derived class.
+        """
+        k_join = self.RUNTIME.DB.JOIN.NAME
+        return k_join.format(table, path)
+
+    def add_entry(self, table, path, entry, update=1):
+        """ and a single entry to a table for a path
+        Overides :meth:`Database.add_entry`
 
         Arguments
         ----------
@@ -421,14 +392,16 @@ of entries to add and ``K`` is the number of keys per entry
             The dataset path to metadata files
         entry: dict
             The mapping of keys to values for the entry
+        update: int
+            1 to update old entries matching keys, and \
+0 to write new entries ignoring old entries. Default 1.
 
         Returns
         --------
-        str or bool
-            Full database name of the table for a path. \
-The derived classes should return whether the entry was \
-added successfully.
+        dict
+            The value of the entry
         """
+
         k_join = self.RUNTIME.DB.JOIN.NAME
         return k_join.format(table, path)
 

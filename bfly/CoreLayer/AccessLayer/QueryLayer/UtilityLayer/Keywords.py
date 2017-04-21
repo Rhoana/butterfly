@@ -3,6 +3,7 @@ from Settings import MAX_CACHE_SIZE
 from Settings import CONFIG_FILENAME
 from Structures import NamelessStruct
 from Structures import NamedStruct
+from MakeLog import MakeLog
 
 import numpy as np
 
@@ -159,6 +160,8 @@ static NAME that should always be used externally.
     ERROR: :class:`NamelessStruct`
         For :class:`MakeLog`
     """
+    #: An alias for :class:`MakeLog`
+    MAKELOG = MakeLog
 
     def __init__(self):
         # ALL THE TILE RUNTIME TERMS
@@ -207,37 +210,47 @@ static NAME that should always be used externally.
                 LIST = _table_list,
                 NEURON = NamedStruct(_table_list[0],
                     KEY = NamedStruct('neuron'),
+                    FULL_LIST = ['neuron','z','y','x'],
                     KEY_LIST = ['neuron']
                 ),
                 SYNAPSE = NamedStruct(_table_list[1],
                     KEY = NamedStruct('__id'),
                     NEURON_LIST = ['n1','n2'],
-                    KEY_LIST = ['n1','n2']
+                    FULL_LIST = ['n1','n2','z','y','x'],
+                    KEY_LIST = ['n1','n2'],
                 ),
                 BLOCK = NamedStruct(_table_list[2],
                     KEY = NamedStruct('__id'),
                     BOUND_LIST = ['start','stop'],
-                    KEY_LIST = ['start','stop','neurons']
+                    FULL_LIST = ['start','stop','neurons'],
+                    KEY_LIST = ['start','stop']
                 ),
                 ALL = NamelessStruct(
                     POINT_LIST = ['z','y','x']
                 )
             ),
             FILE = NamelessStruct(
-                SYNAPSE = NamedStruct('synapse-connections.json',
+                SYNAPSE = NamedStruct('synapse-connections',
+                    DEFAULT = 'synapse-connections.json',
                     NEURON_LIST = ['neuron_1','neuron_2'],
                     POINT  = NamedStruct('synapse_center',
                         LIST = ['z','y','x']
                     )
                 ),
-                BLOCK = NamedStruct('connectivity-graph.json',
+                BLOCK = NamedStruct('connectivity-graph',
+                    DEFAULT = 'connectivity-graph.json',
                     BOUND = NamedStruct('locations',
                         START = ['z', 'y', 'x',],
                         SHAPE = ['depth', 'height', 'width']
                     ),
                     BLOCK = NamedStruct('volumes')
                 ),
-                CONFIG = NamedStruct(CONFIG_FILENAME,
+                DB_LIST = [
+                    'synapse-connections',
+                    'connectivity-graph'
+                ],
+                CONFIG = NamedStruct('rh-config',
+                    VALUE = CONFIG_FILENAME,
                     GROUP_LIST = _group_list,
                     PATH = NamedStruct('path')
                 )
@@ -290,6 +303,20 @@ Cannot cache {value}. {size} bytes is over max.
                     '''.replace('\n','')
                 )
             ),
+            DB = NamelessStruct(
+                ADD = NamedStruct('add_entries',
+                    LOG = 'info',
+                    ACT = '''
+Adding {0} entries for {1} table.
+                        '''.replace('\n','')
+                ),
+                ADDED = NamedStruct('added_entries',
+                    LOG = 'info',
+                    ACT = '''
+Added {0} entries in {1:06.2f} seconds.
+                        '''.replace('\n','')
+                )
+            )
         )
 
 class OUTPUT():
