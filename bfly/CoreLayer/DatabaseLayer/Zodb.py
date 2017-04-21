@@ -172,7 +172,7 @@ keeping any existing table.
         with self.db.transaction() as connection:
             root = connection.root()
             # Get the list from the collection
-            return root.get(table_path)
+            return list(root.get(table_path))
 
     def get_by_key(self, table, path, key):
         """ Get the entry for the key in the table.

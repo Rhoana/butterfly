@@ -1,5 +1,21 @@
 from Query import Query
+import numpy as np
 import json, yaml
+
+class NumpyEncoder(json.JSONEncoder):
+    """ Encode numpy datatypes in json
+    """
+    def default(self, obj):
+        """ Serialize numpy numbers as usual
+        """
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(MyEncoder, self).default(obj)
 
 class InfoQuery(Query):
     """ Describe ``INPUT.METHODS.INFO_LIST`` requests
@@ -28,8 +44,13 @@ class InfoQuery(Query):
 
     #: Options for all :data:`_write`
     _form = [
-       { 'indent': 4 },
-       { 'default_flow_style': False }
+        {
+            'indent': 4,
+            'cls': NumpyEncoder
+        },
+        {
+            'default_flow_style': False
+        }
     ]
     # All writers for output formats
     _write = [json.dumps, yaml.dump]
@@ -115,4 +136,3 @@ class InfoQuery(Query):
         out = self.get_format
         raw_output = self.result
         return self._write[out](raw_output,**self._form[out])
-
