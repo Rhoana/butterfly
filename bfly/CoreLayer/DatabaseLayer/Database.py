@@ -24,7 +24,7 @@ class Database():
         self.RUNTIME = _runtime
         # Create info logger
         log_list = _runtime.ERROR.DB
-        self.log = _runtime.MakeLog(log_list).logging
+        self.log = _runtime.MAKELOG(log_list).logging
 
     def load_config(self, config):
         """ Loads all files from ``config`` into database
@@ -377,7 +377,8 @@ field of :data:`RUNTIME.DB`
         """ Add an array or list of entries to a table
         Must be overridden by derived class.
         """
-        return []
+        k_join = self.RUNTIME.DB.JOIN.NAME
+        return k_join.format(table, path)
 
     def add_entry(self, table, path, entry, update=1):
         """ and a single entry to a table for a path

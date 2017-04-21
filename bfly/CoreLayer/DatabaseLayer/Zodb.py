@@ -43,9 +43,12 @@ and contains each table as a separate ZODB key
             k_tables.NEURON.NAME: stableList,
             k_tables.SYNAPSE.NAME: stableList,
         }
-        # Create or load the file storage
-        self.storage = FileStorage.FileStorage(path)
-        self.db = DB(self.storage)
+        # Default in-memory database
+        storage = None
+        if path:
+            # Create or load the file storage
+            storage = FileStorage.FileStorage(path)
+        self.db = DB(storage)
 
     def add_path(self,c_path,d_path):
         """ store a link from a ``c_path`` to a ``d_path``
@@ -254,7 +257,7 @@ of entries to add and ``K`` is the number of keys per entry
 
         """
         # Get the name of the table
-        table_path = self.get_table(table, path)
+        table_path = Database.add_entries(self, table, path, t_keys, entries, update=1)
 
         # list or tuple to dict
         def dictionize((index, entry)):

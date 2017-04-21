@@ -161,7 +161,7 @@ static NAME that should always be used externally.
         For :class:`MakeLog`
     """
     #: An alias for :class:`MakeLog`
-    MakeLog = MakeLog
+    MAKELOG = MakeLog
 
     def __init__(self):
         # ALL THE TILE RUNTIME TERMS
