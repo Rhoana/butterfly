@@ -1,3 +1,4 @@
+import time
 import json, os
 import numpy as np
 
@@ -13,12 +14,17 @@ class Database():
 
     Attributes
     -----------
+    log: :class:`MakeLog`.``logging``
+        All formats for log messages
     RUNTIME: :class:`RUNTIME`
         With keywords needed to load files and use tables
     """
     def __init__(self, path, _runtime):
         # Get the database keywords
         self.RUNTIME = _runtime
+        # Create info logger
+        log_list = _runtime.ERROR.DB
+        self.log = _runtime.MakeLog(log_list).logging
 
     def load_config(self, config):
         """ Loads all files from ``config`` into database
@@ -306,7 +312,7 @@ with dictionary keys taken from ``BLOCK.FULL_LIST``
         k_block = k_tables.BLOCK.NAME
 
         # Add entries
-        return self.add_entries(k_block, path, k_keys, blocks)
+        return self.add_entries(k_block, path, k_keys, blocks, 0)
 
     def add_synapses(self, path, synapses):
         """ Add all the synapases to the database
@@ -335,7 +341,7 @@ field of :data:`RUNTIME.DB`
         k_keys = k_tables.SYNAPSE.FULL_LIST
 
         # Add entries
-        return self.add_entries(k_synapse, path, k_keys, synapses)
+        return self.add_entries(k_synapse, path, k_keys, synapses, 0)
 
     def add_neurons(self, path, neurons):
         """ Add all the neurons to the database
@@ -365,46 +371,17 @@ field of :data:`RUNTIME.DB`
         k_keys = k_tables.NEURON.FULL_LIST
 
         # Add entries
-        return self.add_entries(k_neuron, path, k_keys, neurons)
+        return self.add_entries(k_neuron, path, k_keys, neurons, 0)
 
-    def add_entries(self, table, path, t_keys, entries):
-        """ Add an numpy.array of entries to a table
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-        t_keys: list
-            All of ``K`` keys for each row of ``entries``
-        entries: numpy.ndarray or list
-            ``N`` by ``K`` array or list where ``N`` is the number \
-of entries to add and ``K`` is the number of keys per entry
-
-        """
-        # Typecast values uniformly
-        def cast(value):
-            # convert if numpy datatype
-            if isinstance(value, np.number):
-                return value.item()
-            return value
-        # Add entries to database
-        def add_entry(entry):
-            # Add a tuple entry as a dict
-            if hasattr(entry, '__len__'):
-                d_entry = dict(zip(t_keys, map(cast,entry)))
-                self.add_entry(table, path, d_entry)
-                return d_entry
-        # add all the entries
-        dict_entries = map(add_entry, entries)
-        # Save to disk
-        self.commit()
-        return dict_entries
-
-    def add_entry(self, table, path, entry):
-        """ and a single entry to a table for a path
+    def add_entries(self, table, path, t_keys, entries, update=1):
+        """ Add an array or list of entries to a table
         Must be overridden by derived class.
+        """
+        return []
+
+    def add_entry(self, table, path, entry, update=1):
+        """ and a single entry to a table for a path
+        Overides :meth:`Database.add_entry`
 
         Arguments
         ----------
@@ -414,14 +391,16 @@ of entries to add and ``K`` is the number of keys per entry
             The dataset path to metadata files
         entry: dict
             The mapping of keys to values for the entry
+        update: int
+            1 to update old entries matching keys, and \
+0 to write new entries ignoring old entries. Default 1.
 
         Returns
         --------
-        str or bool
-            Full database name of the table for a path. \
-The derived classes should return whether the entry was \
-added successfully.
+        dict
+            The value of the entry
         """
+
         k_join = self.RUNTIME.DB.JOIN.NAME
         return k_join.format(table, path)
 

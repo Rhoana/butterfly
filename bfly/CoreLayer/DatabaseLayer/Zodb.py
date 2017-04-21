@@ -1,6 +1,13 @@
 from Database import Database
 from ZODB import FileStorage, DB
-import transaction
+import persistent
+import time
+
+class stableList(persistent.list.PersistentList):
+    """ Persistent table
+    """
+    def __init__(self):
+        persistent.list.PersistentList.__init__(self)
 
 class Zodb(Database):
     """ Provides a :class:`Database` interface to ``ZODB``
@@ -19,11 +26,22 @@ class Zodb(Database):
     db: ZODB.DB
         Keeps all from ``add_path`` in a simple key-value store \
 and contains each table as a separate ZODB key
+    log: :class:`MakeLog`.``logging``
+        All formats for log messages
+    tables: dict
+        Maps table strings to a persistent class
     """
 
     def __init__(self, path, _runtime):
         # Create or load the database
         Database.__init__(self, path, _runtime)
+        # Map all the tables to classes
+        k_tables = _runtime.DB.TABLE
+        self.tables = {
+            k_tables.BLOCK.NAME: stableList,
+            k_tables.NEURON.NAME: stableList,
+            k_tables.SYNAPSE.NAME: stableList,
+        }
         # Create or load the file storage
         self.storage = FileStorage.FileStorage(path)
         self.db = DB(self.storage)
@@ -46,8 +64,26 @@ and contains each table as a separate ZODB key
             # Map the c_path to the d_path
             root[c_path] = d_path
 
+    def empty_table(self, table_path):
+        """ Add a table to the database \
+overwriting any preexisting table.
+
+        Arguments
+        ----------
+        table_path: str
+            The combined path of the table
+        """
+        # Get the connection
+        with self.db.transaction() as connection:
+            # Create empty table with path name
+            root = connection.root()
+            # Make the correct table
+            t_class = self.tables[table]
+            root[table_path] = t_class()
+
     def add_table(self, table, path):
-        """ Add a table to the database
+        """ Add a table to the database \
+keeping any existing table.
         Overides :meth:`Database.add_table`
 
         Arguments
@@ -65,53 +101,15 @@ and contains each table as a separate ZODB key
         table_path = Database.add_table(self, table, path)
         # Get the connection
         with self.db.transaction() as connection:
-        # Create empty list with table, path name
+            # Create empty table with path name
             root = connection.root()
-            root[table_path] = []
+            # If table is non-existent
+            if table_path not in root:
+                # Make the correct table
+                t_class = self.tables[table]
+                root[table_path] = t_class()
         # return the joint path
         return table_path
-
-    def add_entry(self, table, path, entry):
-        """ and a single entry to a table for a path
-        Overides :meth:`Database.add_entry`
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-        entry: dict
-            The mapping of keys to values for the entry
-
-        Returns
-        --------
-        bool
-            Whether the entry was stored correctly
-        """
-
-        # Get constant keywords
-        k_table = self.RUNTIME.DB.TABLE[table].KEY_LIST
-        Database.add_entry(self, table, path, entry)
-
-        # Get the connection
-        with self.db.transaction() as connection:
-            root = connection.root()
-            # Get the collection of entries
-            table_path = self.get_table(table, path)
-            # Check if not unique in collection
-            find_entry = {k: entry[k] for k in k_table}
-            already = self.get_entry(table, path, **find_entry)
-            # Update value if already exists
-            if len(already):
-                update_id = already[0]['__id']
-                entry['__id'] = update_id
-                root[table_path][update_id] = entry
-                return entry
-            # Add new value if not in collection
-            entry['__id'] = len(root[table_path])
-            root[table_path].append(entry)
-            return entry
 
     def get_path(self, path):
         """ Map a channel path to a dataset path
@@ -173,7 +171,7 @@ and contains each table as a separate ZODB key
         # Get the actual collection from the name
         with self.db.transaction() as connection:
             root = connection.root()
-            # Get the actual collection
+            # Get the list from the collection
             return root.get(table_path)
 
     def get_by_key(self, table, path, key):
@@ -226,18 +224,74 @@ and contains each table as a separate ZODB key
         """
 
         table_path = Database.get_by_fun(self, table, path, fun)
-         # Get the collection from the name
+        # Get the actual collection
+        collect = self.get_all(table, path)
+        # Get the entry from the collection
+        return [c for c in collect if fun(c)]
+
+    ####
+    # Override Database.add_entries
+    ####
+    def add_entries(self, table, path, t_keys, entries, update=1):
+        """ Add an array or list of entries to a table
+        Overrides :meth:`Database.add_entries`
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+        t_keys: list
+            All of ``K`` keys for each row of ``entries``
+        entries: numpy.ndarray or list
+            ``N`` by ``K`` array or list where ``N`` is the number \
+of entries to add and ``K`` is the number of keys per entry
+        update: int
+            1 to update old entries matching keys, and \
+0 to write new entries ignoring old entries. Default 1.
+
+        """
+        # Get the name of the table
+        table_path = self.get_table(table, path)
+
+        # list or tuple to dict
+        def dictionize(entry):
+            if hasattr(entry, '__len__'):
+                d_entry = dict(zip(t_keys, entry))
+                d_entry['__id'] = len(root[table_path])
+                return d_entry
+            return {}
+
+        # Add any new entries
+        if not update:
+            # Return if no more entries than exist
+            existing = self.get_all(table, path)
+            if len(existing) >= len(entries):
+                return []
+            # Otherwise add remaining entries
+            entries = entries[len(existing):]
+        # create fully empty table
+        else:
+            self.empty_table(table_path)
+
+        # Time to add entries
+        start = time.time()
+	count = len(entries)
+        self.log('ADD', count, table)
+
+	#####
+	# Add all the entries
+        #####
+        # Get the database connection
         with self.db.transaction() as connection:
             root = connection.root()
-            # Get the actual collection
-            collect = root.get(table_path)
-            # Get the entry from the collection
-            return [c for c in collect if fun(c)]
+            # Rewrite all the entries as dictionaries
+            dict_entries = map(dictionize, entries)
+            # Add new value if not in collection
+            root[table_path] += dict_entries
 
-    def commit(self):
-        """ Save all database changes to disk.
-        Overrides :meth:`Database.commit`
-        """
-        Database.commit(self)
-        transaction.commit()
-        return ''
+	# Log diff and total time
+	diff = time.time() - start
+        self.log('ADDED', count, diff)
+        return dict_entries

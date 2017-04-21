@@ -3,6 +3,7 @@ from Settings import MAX_CACHE_SIZE
 from Settings import CONFIG_FILENAME
 from Structures import NamelessStruct
 from Structures import NamedStruct
+from MakeLog import MakeLog
 
 import numpy as np
 
@@ -159,6 +160,8 @@ static NAME that should always be used externally.
     ERROR: :class:`NamelessStruct`
         For :class:`MakeLog`
     """
+    #: An alias for :class:`MakeLog`
+    MakeLog = MakeLog
 
     def __init__(self):
         # ALL THE TILE RUNTIME TERMS
@@ -300,6 +303,20 @@ Cannot cache {value}. {size} bytes is over max.
                     '''.replace('\n','')
                 )
             ),
+            DB = NamelessStruct(
+                ADD = NamedStruct('add_entries',
+                    LOG = 'info',
+                    ACT = '''
+Adding {0} entries for {1} table.
+                        '''.replace('\n','')
+                ),
+                ADDED = NamedStruct('added_entries',
+                    LOG = 'info',
+                    ACT = '''
+Added {0} entries in {1:06.2f} seconds.
+                        '''.replace('\n','')
+                )
+            )
         )
 
 class OUTPUT():

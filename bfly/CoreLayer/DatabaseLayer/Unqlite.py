@@ -18,6 +18,8 @@ class Unqlite(Database):
     db: unqlite.UnQLite
         Keeps all from ``add_path`` in a simple key-value store \
 and contains each tables as a separate unqlite.Collection
+    log: :class:`MakeLog`.``logging``
+        All formats for log messages
     """
 
     def __init__(self, path, _runtime):
@@ -61,9 +63,43 @@ and contains each tables as a separate unqlite.Collection
         collect.create()
         return tablepath
 
-    def add_entry(self, table, path, entry):
+    def add_entry(self, table, path, entry, update=1):
         """ and a single entry to a table for a path
         Overides :meth:`Database.add_entry`
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+        entry: dict
+            The mapping of keys to values for the entry
+        update: int
+            1 to update old entries matching keys, and \
+0 to write new entries ignoring old entries. Default 1.
+
+        Returns
+        --------
+        dict
+            The value of the entry
+        """
+
+        # Get constant keywords
+        k_table = self.RUNTIME.DB.TABLE[table].KEY_LIST
+        Database.add_entry(self, table, path, entry, update)
+        # Get the collection
+        collect = self.get_table(table, path)
+        # Check if not unique in collection
+        if update and self.check_keys(entry):
+            # Return the entry if updated
+            return entry
+        # Add new value if not in collection
+        collect.store(entry)
+        return entry
+
+    def check_keys(self, table, path, entry):
+        """ Checks duplicate combinations of keys
 
         Arguments
         ----------
@@ -77,12 +113,8 @@ and contains each tables as a separate unqlite.Collection
         Returns
         --------
         bool
-            Whether the entry was stored correctly
+            whether entry updates an old entry
         """
-
-        # Get constant keywords
-        k_table = self.RUNTIME.DB.TABLE[table].KEY_LIST
-        Database.add_entry(self, table, path, entry)
         # Get the collection
         collect = self.get_table(table, path)
         # Check if not unique in collection
@@ -90,9 +122,10 @@ and contains each tables as a separate unqlite.Collection
         already = self.get_entry(table,path,**find_entry)
         # Update value if already exists
         if len(already):
-            return collect.update(already[0]['__id'], entry)
-        # Add new value if not in collection
-        return collect.store(entry)
+            old_id = already[0]['__id']
+            collect.update(old_id, entry)
+            return True
+        return False
 
     def get_path(self, path):
         """ Map a channel path to a dataset path
@@ -205,3 +238,67 @@ and contains each tables as a separate unqlite.Collection
         Database.commit(self)
         self.db.commit()
         return ''
+
+####
+# Override Database.add_entries
+####
+    def add_entries(self, table, path, t_keys, entries, update=1):
+        """ Add an array or list of entries to a table
+        Overrides :meth:`Database.add_entries`
+
+        Arguments
+        ----------
+        table: str
+            The category of table for the database
+        path: str
+            The dataset path to metadata files
+        t_keys: list
+            All of ``K`` keys for each row of ``entries``
+        entries: numpy.ndarray or list
+            ``N`` by ``K`` array or list where ``N`` is the number \
+of entries to add and ``K`` is the number of keys per entry
+        update: int
+            1 to update old entries matching keys, and \
+0 to write new entries ignoring old entries. Default 1.
+
+        """
+        # Typecast values uniformly
+        def cast(value):
+            # convert if numpy datatype
+            if isinstance(value, np.number):
+                return value.item()
+            return value
+        # Add entries to database
+        def add_entry(entry):
+            # Add a tuple entry as a dict
+            if hasattr(entry, '__len__'):
+                d_entry = dict(zip(t_keys, map(cast,entry)))
+                self.add_entry(table, path, d_entry, update)
+                return d_entry
+
+        # Don't update if update off
+        if not update:
+            # Return if no more entries than exist
+            existing = self.get_all(table, path)
+            print len(existing), len(entries)
+            if len(existing) >= len(entries):
+                return []
+            # Otherwise add remaining entries
+            entries = entries[len(existing):]
+
+        # Time to add entries
+        start = time.time()
+	count = len(entries)
+        self.log('ADD', count, table)
+	#####
+	# Add all the entries
+        #####
+        dict_entries = map(add_entry, entries[:1000])
+
+	# Log diff and total time
+	diff = time.time() - start
+        self.log('ADDED', count, diff)
+        # Save to disk
+        self.commit()
+        return dict_entries
+
