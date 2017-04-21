@@ -1,5 +1,6 @@
 from Database import Database
 from ZODB import FileStorage, DB
+import numpy as np
 import persistent
 import time
 
@@ -256,13 +257,14 @@ of entries to add and ``K`` is the number of keys per entry
         table_path = self.get_table(table, path)
 
         # list or tuple to dict
-        def dictionize(entry):
+        def dictionize((index, entry)):
             if hasattr(entry, '__len__'):
                 d_entry = dict(zip(t_keys, entry))
-                d_entry['__id'] = len(root[table_path])
+                d_entry['__id'] = int(index)
                 return d_entry
             return {}
 
+        old_count = 0
         # Add any new entries
         if not update:
             # Return if no more entries than exist
@@ -270,7 +272,8 @@ of entries to add and ``K`` is the number of keys per entry
             if len(existing) >= len(entries):
                 return []
             # Otherwise add remaining entries
-            entries = entries[len(existing):]
+            old_count = len(existing)
+            entries = entries[old_count:]
         # create fully empty table
         else:
             self.empty_table(table_path)
@@ -279,6 +282,9 @@ of entries to add and ``K`` is the number of keys per entry
         start = time.time()
 	count = len(entries)
         self.log('ADD', count, table)
+        # Get all new id values
+        id_index = np.arange(count)+ old_count
+        id_entries = zip(id_index, entries)
 
 	#####
 	# Add all the entries
@@ -287,7 +293,7 @@ of entries to add and ``K`` is the number of keys per entry
         with self.db.transaction() as connection:
             root = connection.root()
             # Rewrite all the entries as dictionaries
-            dict_entries = map(dictionize, entries)
+            dict_entries = map(dictionize, id_entries)
             # Add new value if not in collection
             root[table_path] += dict_entries
 
