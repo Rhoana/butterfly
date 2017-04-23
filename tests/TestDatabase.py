@@ -65,9 +65,9 @@ and successfully deliver responses at a reasonable speed
                 'experiments': [{
                     'samples': [{
                         'datasets': [{
-                            'path': self.dataset,
+                            'path': cls.dataset,
                             'channels': [{
-                                'path': self.channel
+                                'path': cls.channel
                             }]
                         }]
                     }]
@@ -78,7 +78,7 @@ and successfully deliver responses at a reasonable speed
         # Make a dummy Core
         core = bfly.CoreLayer.Core(db)
         # Load the configuraton json files
-        db.load_config(self._bfly_config)
+        db.load_config(cls._bfly_config)
 
 
     @classmethod
