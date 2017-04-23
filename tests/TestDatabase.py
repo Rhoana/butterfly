@@ -1,4 +1,6 @@
 from numpy.random import randint
+from numpy.random import random
+from numpy.random import choice
 import unittest as ut
 import numpy as np
 import datetime
@@ -15,17 +17,22 @@ def full_path(path):
     here = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(here, path)
 
-class SpeedTestCutout(ut.TestCase):
-    """ set up tests for `bfly.CoreLayer.Core` cutout logic
+class TestDatabase(ut.TestCase):
+    """ set up tests for :class:`DatabaseLayer.Zodb`
     """
     DB_PATH = None
     DB_TYPE = 'Zodb'
+    # Neuron max and count
+    n_count = 100
+    # Synapse count
+    s_count = 1000
     # shape, and type for temp file
     h_shape = [1, 25000, 25000]
     h_type = 32
     RUNTIME = bfly.UtilityLayer.RUNTIME()
     # Set the channel and dataset paths
     channel = full_path('data/channel.h5')
+    dataset = full_path('data')
     # Log to the command line
     log_info = {
         'stream': sys.stdout,
@@ -33,9 +40,9 @@ class SpeedTestCutout(ut.TestCase):
     }
 
     @classmethod
-    def test_core(cls):
-        """ test that `bfly.Core` can start \
-and successfully deliver tiles at a reasonable speed
+    def test_database(cls):
+        """ test that :mod:`DatabaseLayer` can start \
+and successfully deliver responses at a reasonable speed
         """
 
         # Log to command line
@@ -55,6 +62,7 @@ and successfully deliver tiles at a reasonable speed
                 'experiments': [{
                     'samples': [{
                         'datasets': [{
+                            'path': self.dataset,
                             'channels': [{
                                 'path': self.channel
                             }]
@@ -66,8 +74,9 @@ and successfully deliver tiles at a reasonable speed
 
         # Make a dummy Core
         core = bfly.CoreLayer.Core(db)
-        # Store the channel path
+        # Load the configuraton json files
         db.load_config(self._bfly_config)
+
 
     @classmethod
     def make_h5(cls):
@@ -86,6 +95,68 @@ and successfully deliver tiles at a reasonable speed
         cls._log('WRITE', path= cls.channel)
 
     @classmethod
+    def make_dataset(cls):
+        """ make dummy dataset files for database
+        """
+        k_files = cls.RUNTIME.DB.FILE
+        #### 
+        # Make blocks
+        ####
+        k_volume = k_files.BLOCK.BLOCK.NAME
+        k_start = k_files.BLOCK.BOUND.START
+        k_shape = k_files.BLOCK.BOUND.SHAPE
+        # Pair the shape names with values
+        shapes = zip(k_shape, cls.h_shape)
+        # Get full bounds
+        dmax = 2 ** cls.h_type
+        bounds = {k: 0 for k in k_start}
+        bounds.update({k:v for k,v in shapes})
+        # Generate neuron list
+        cls.neurons = choice(dmax, cls.n_count)
+        pairs = zip(*[cls.neurons.tolist()]*2)
+        # Make a random block file
+        blocks = {
+            k_volume : [bounds, pairs]
+        }
+
+        ####
+        # Make synapses
+        ####
+        k_neurons = k_files.SYNAPSE.NEURON_LIST
+        k_center = k_files.SYNAPSE.POINT.NAME
+        k_shape = k_files.SYNAPSE.POINT.LIST
+        # Take random pairs
+        gen = cls.neurons, 2
+        syn = range(cls.s_count)
+        cells = [choice(*gen) for _ in syn]
+        cells = np.uint32(cells).T.tolist()
+        # Put pairs at random coordinates
+        shapes = [cls.s_count, 3]
+        coords = random(shapes)*cls.h_shape
+        coords = np.uint32(coords).T.tolist()
+        # Format neuron pairs and coordinates
+        synapses = dict(zip(k_neurons, cells))
+        synapses.update({
+            k_center: dict(zip(k_shape, coords))
+        })
+
+        ####
+        # Write blocks to file
+        ####
+        k_block = k_files.BLOCK.DEFAULT
+        blockfile = os.path.join(cls.dataset, k_block)
+        with open(blockfile, 'w') as bf:
+            json.dump(blocks, bf)
+
+        ####
+        # Write synapses to file
+        ####
+        k_synapse = k_files.SYNAPSE.DEFAULT
+        synapsefile = os.path.join(cls.dataset, k_synapse)
+        with open(synapsefile, 'w') as sf:
+            json.dump(synapses, sf)
+
+    @classmethod
     def make_log(cls):
         """ make custom log for this test
         """
@@ -97,7 +168,7 @@ and successfully deliver tiles at a reasonable speed
             WRITE = NamedStruct('write',
                 LOG = 'info',
                 ACT = '''
-||| Testing SpeedTestCutout |||
+||| Testing TestDatabase |||
 The h5 file {path} is written.'''
             )
         )

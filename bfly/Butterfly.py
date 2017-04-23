@@ -52,7 +52,8 @@ new :class:`bfly.Webserver`.
         db = self.update_db()
 
         # Start a webserver on given port
-        server = Webserver(db).start(port)
+        server = Webserver(db, self._bfly_config)
+        server = server.start(port)
         server.start()
 
     # Update the database from the config file

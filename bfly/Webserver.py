@@ -14,6 +14,8 @@ class Webserver(object):
     -----------
     db : :data:`bfly.Butterfly._db_type`
         A fully-loaded database
+    config: dict
+        Used in :class:`AccessLayer.RequestHandler`
 
     Attributes
     ------------
@@ -39,7 +41,7 @@ Only set after :meth:`start` starts :data:`_webapp`.
     """
     #: Max bytes of memory for :data:`_webapp`
     _maxbuffer = 1024 * 1024 * 200
-    def __init__(self, db):
+    def __init__(self, db, config):
         # Create a core with a database
         self.RUNTIME = db.RUNTIME
         self._core = Core(db)
@@ -47,8 +49,9 @@ Only set after :meth:`start` starts :data:`_webapp`.
 
         # Arguments for data and info requests
         app_in = {
+            '_config': config,
             '_core': self._core,
-            '_db': self._db
+            '_db': self._db,
         }
         # Arguments for static requests
         stat_in = {

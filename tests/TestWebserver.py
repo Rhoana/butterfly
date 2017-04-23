@@ -30,7 +30,8 @@ class TestWebserver(ut.TestCase):
         db = db_class(cls.DB_PATH, cls.RUNTIME)
 
         # Make a dummy webserver
-        web = bfly.Webserver(db)
+        config = bfly.UtilityLayer.config
+        web = bfly.Webserver(db, config)
         server = web.start(cls.PORT)
 
         # Stop the webserver after 1 second

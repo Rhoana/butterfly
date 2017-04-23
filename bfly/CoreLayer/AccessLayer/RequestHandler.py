@@ -34,23 +34,26 @@ class RequestHandler(web.RequestHandler):
     INPUT = UtilityLayer.INPUT()
     OUTPUT = UtilityLayer.OUTPUT()
     RUNTIME = UtilityLayer.RUNTIME()
-    BFLY_CONFIG = UtilityLayer.BFLY_CONFIG
 
-    def initialize(self, _core, _db):
-        """ Core and database bound on each request
+    def initialize(self, _core, _db, _config):
+        """ Bind Core, database, and configuration
 
         Arguments
         ----------
         _core: :class:`CoreLayer.Core`
             set to :data:`_core`
-        _core: :class:`CoreLayer.Database`
+        _db: :class:`CoreLayer.Database`
             set to :data:`_db`
+        _config: dict
+            set to :data:`BFLY_CONFIG`
         """
         self._ex = ThreadPoolExecutor(max_workers=10)
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header('Access-Control-Allow-Methods', 'GET')
         self._core = _core
         self._db = _db
+        # Set the config dict
+        BFLY_CONFIG = _config
 
         # Create info logger
         log_list = self.RUNTIME.ERROR.REQUEST

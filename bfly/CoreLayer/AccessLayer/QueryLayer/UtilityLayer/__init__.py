@@ -36,7 +36,7 @@ to_argv = Argv.to_argv
 
 # Define all the constants, classes, and methods in UtilityLayer
 __all__ = ['PORT','DB_TYPE','DB_PATH','ALLOWED_PATHS','DEV_MODE']
-__all__ += ['BFLY_CONFIG','to_argv','MakeLog']
+__all__ += ['BFLY_CONFIG','to_argv','rh_config','MakeLog']
 __all__ += ['NamedStruct','NamelessStruct']
 __all__ += ['INPUT','RUNTIME','OUTPUT']
 __all__ += ['BFLY_CONFIG']

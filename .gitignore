@@ -3,8 +3,9 @@
 *.swp
 
 # Testing
-.coveralls.yml
+tests/data/*.json
 tests/data/*.h5
+.coveralls.yml
 .coverage
 *.log
 .tox
