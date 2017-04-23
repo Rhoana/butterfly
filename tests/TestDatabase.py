@@ -53,8 +53,9 @@ and successfully deliver responses at a reasonable speed
         # Make a data directory
         if not os.path.exists(cls.dataset):
             os.makedirs(cls.dataset)
-        # Save a dummy h5 file
+        # Save dummy h5 files and config files
         cls.make_h5()
+        cls.make_dataset()
 
         # Make a dummy database
         db_class = getattr(bfly.DatabaseLayer, cls.DB_TYPE)
@@ -63,11 +64,15 @@ and successfully deliver responses at a reasonable speed
         temp_config = {
             'bfly': {
                 'experiments': [{
+                    'name': 'a',
                     'samples': [{
+                        'name': 'b',
                         'datasets': [{
                             'path': cls.dataset,
+                            'name': 'c',
                             'channels': [{
-                                'path': cls.channel
+                                'path': cls.channel,
+                                'name': 'd'
                             }]
                         }]
                     }]
@@ -79,6 +84,25 @@ and successfully deliver responses at a reasonable speed
         core = bfly.CoreLayer.Core(db)
         # Load the configuraton json files
         db.load_config(temp_config)
+
+        # Get basic database keywords
+        k_tables = cls.RUNTIME.DB.TABLE
+        s_table = k_tables.SYNAPSE.NAME
+        ####
+        # S1 : is_synapse
+        ####
+        # Should all be true
+        for syn in range(cls.s_count):
+            args = s_table, cls.channel, syn
+            res = db.get_entry(*args)
+            # Raise exception if not true
+            cls.assertTrue(not not res)
+        # Should all be false
+        for syn in range(cls.s_count, 2*cls.s_count):
+            args = s_table, cls.channel, syn
+            res = db.get_entry(*args)
+            # Raise exception if not false
+            cls.assertFalse(not not res)
 
 
     @classmethod
