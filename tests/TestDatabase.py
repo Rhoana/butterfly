@@ -50,6 +50,9 @@ and successfully deliver responses at a reasonable speed
         # Make a custom log for this test
         cls._log = cls.make_log()
 
+        # Make a data directory
+        if not os.path.exists(cls.dataset):
+            os.makedirs(cls.dataset)
         # Save a dummy h5 file
         cls.make_h5()
 
