@@ -70,7 +70,7 @@ and successfully deliver tiles at a reasonable speed
         # Make a dummy Core
         core = bfly.CoreLayer.Core(db)
         # Store the channel path
-        db.load_config(cls._bfly_config)
+        db.load_config(temp_config)
 
     @classmethod
     def make_h5(cls):
