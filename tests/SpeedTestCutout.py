@@ -54,19 +54,20 @@ and successfully deliver tiles at a reasonable speed
         db = db_class(self.DB_PATH, self.RUNTIME)
         # Make a dummy config
         temp_config = {
-            'bfly': {
-                'experiments': [{
-                    'samples': [{
-                        'datasets': [{
-                            'channels': [{
-                                'path': self.channel
-                            }]
+            'experiments': [{
+                'name': 'a',
+                'samples': [{
+                    'name': 'b',
+                    'datasets': [{
+                        'name': 'c',
+                        'channels': [{
+                            'path': self.channel,
+                            'name': 'd'
                         }]
                     }]
                 }]
-            }
+            }]
         }
-
         # Make a dummy Core
         core = bfly.CoreLayer.Core(db)
         # Store the channel path

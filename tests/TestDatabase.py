@@ -61,28 +61,27 @@ and successfully deliver responses at a reasonable speed
         db = db_class(self.DB_PATH, self.RUNTIME)
         # Make a dummy config
         temp_config = {
-            'bfly': {
-                'experiments': [{
-                    'name': 'a',
-                    'samples': [{
-                        'name': 'b',
-                        'datasets': [{
-                            'path': self.dataset,
-                            'name': 'c',
-                            'channels': [{
-                                'path': self.channel,
-                                'name': 'd'
-                            }]
+            'experiments': [{
+                'name': 'a',
+                'samples': [{
+                    'name': 'b',
+                    'datasets': [{
+                        'path': self.dataset,
+                        'name': 'c',
+                        'channels': [{
+                            'path': self.channel,
+                            'name': 'd'
                         }]
                     }]
                 }]
-            }
+            }]
         }
 
         # Make a dummy Core
         core = bfly.CoreLayer.Core(db)
         # Load the configuraton json files
         db.load_config(temp_config)
+        self.db = db
 
         # Get basic database keywords
         k_tables = self.RUNTIME.DB.TABLE
@@ -92,16 +91,20 @@ and successfully deliver responses at a reasonable speed
         ####
         # Should all be true
         for syn in range(self.s_count):
-            args = s_table, self.channel, syn
-            res = db.get_entry(*args)
+            res = self.get_entry(s_table, syn)
             # Raise exception if not true
             self.assertTrue(not not res)
         # Should all be false
         for syn in range(self.s_count, 2*self.s_count):
-            args = s_table, self.channel, syn
-            res = db.get_entry(*args)
+            res = self.get_entry(s_table, syn)
             # Raise exception if not false
             self.assertFalse(not not res)
+
+    def get_entry(self, table, value, **keywords):
+        """ return database entry
+        """
+        args = table, self.channel, value
+        return self.db.get_entry(*args, **keywords)
 
     def make_h5(self):
         """ make a dummy h5 file for testing
