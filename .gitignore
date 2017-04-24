@@ -14,7 +14,7 @@ tests/data/*.h5
 docs/build/*
 
 # Database
-*.db
+*.db*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
