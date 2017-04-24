@@ -204,7 +204,7 @@ keeping any existing table.
             # Get the actual collection
             collect = root.get(table_path)
             # If the collect doesn't have the key
-            if not collect or len(collect) < int(key):
+            if not collect or len(collect) <= int(key):
                 return {}
             # Get entry from the collection
             return collect[int(key)]

@@ -142,7 +142,7 @@ and successfully deliver responses at a reasonable speed
         pairs = zip(*[self.neurons.tolist()]*2)
         # Make a random block file
         blocks = {
-            k_volume : [bounds, pairs]
+            k_volume : [[bounds, pairs]]
         }
 
         ####
