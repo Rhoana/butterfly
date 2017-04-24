@@ -203,9 +203,10 @@ keeping any existing table.
             root = connection.root()
             # Get the actual collection
             collect = root.get(table_path)
-            # Get entry from the collection
-            if len(collect) < int(key):
+            # If the collect doesn't have the key
+            if not collect or len(collect) < int(key):
                 return {}
+            # Get entry from the collection
             return collect[int(key)]
 
     def get_by_fun(self, table, path, fun):

@@ -26,32 +26,32 @@ class SpeedTestCutout(ut.TestCase):
     RUNTIME = bfly.UtilityLayer.RUNTIME()
     # Set the channel and dataset paths
     channel = full_path('data/channel.h5')
+    dataset = full_path('data')
     # Log to the command line
     log_info = {
         'stream': sys.stdout,
         'level': logging.INFO
     }
 
-    @classmethod
-    def test_core(cls):
+    def test_core(self):
         """ test that `bfly.Core` can start \
 and successfully deliver tiles at a reasonable speed
         """
 
         # Log to command line
-        logging.basicConfig(**cls.log_info)
+        logging.basicConfig(**self.log_info)
         # Make a custom log for this test
-        cls._log = cls.make_log()
+        self._log = self.make_log()
 
         # Make a data directory
-        if not os.path.exists(cls.dataset):
-            os.makedirs(cls.dataset)
+        if not os.path.exists(self.dataset):
+            os.makedirs(self.dataset)
         # Save a dummy h5 file
-        cls.make_h5()
+        self.make_h5()
 
         # Make a dummy database
-        db_class = getattr(bfly.DatabaseLayer, cls.DB_TYPE)
-        db = db_class(cls.DB_PATH, cls.RUNTIME)
+        db_class = getattr(bfly.DatabaseLayer, self.DB_TYPE)
+        db = db_class(self.DB_PATH, self.RUNTIME)
         # Make a dummy config
         temp_config = {
             'bfly': {
@@ -59,7 +59,7 @@ and successfully deliver tiles at a reasonable speed
                     'samples': [{
                         'datasets': [{
                             'channels': [{
-                                'path': cls.channel
+                                'path': self.channel
                             }]
                         }]
                     }]
@@ -72,24 +72,22 @@ and successfully deliver tiles at a reasonable speed
         # Store the channel path
         db.load_config(temp_config)
 
-    @classmethod
-    def make_h5(cls):
+    def make_h5(self):
         """ make a dummy h5 file for testing
         """
         # Get the datatype, noise range, and size
-        dtype = getattr(np, 'uint{}'.format(cls.h_type))
-        dmax = 2 ** cls.h_type
-        dsize = cls.h_shape
+        dtype = getattr(np, 'uint{}'.format(self.h_type))
+        dmax = 2 ** self.h_type
+        dsize = self.h_shape
         # Create the file from a path
-        with h5py.File(cls.channel, 'w') as fd:
+        with h5py.File(self.channel, 'w') as fd:
             # Make a random array
             pattern = randint(dmax, size= dsize, dtype= dtype)
             fd.create_dataset('stack', data= pattern)
         # Log that the file path was written
-        cls._log('WRITE', path= cls.channel)
+        self._log('WRITE', path= self.channel)
 
-    @classmethod
-    def make_log(cls):
+    def make_log(self):
         """ make custom log for this test
         """
         utilities = bfly.UtilityLayer

@@ -39,27 +39,26 @@ class TestDatabase(ut.TestCase):
         'level': logging.INFO
     }
 
-    @classmethod
-    def test_database(cls):
+    def test_database(self):
         """ test that :mod:`DatabaseLayer` can start \
 and successfully deliver responses at a reasonable speed
         """
 
         # Log to command line
-        logging.basicConfig(**cls.log_info)
+        logging.basicConfig(**self.log_info)
         # Make a custom log for this test
-        cls._log = cls.make_log()
+        self._log = self.make_log()
 
         # Make a data directory
-        if not os.path.exists(cls.dataset):
-            os.makedirs(cls.dataset)
+        if not os.path.exists(self.dataset):
+            os.makedirs(self.dataset)
         # Save dummy h5 files and config files
-        cls.make_h5()
-        cls.make_dataset()
+        # self.make_h5()
+        self.make_dataset()
 
         # Make a dummy database
-        db_class = getattr(bfly.DatabaseLayer, cls.DB_TYPE)
-        db = db_class(cls.DB_PATH, cls.RUNTIME)
+        db_class = getattr(bfly.DatabaseLayer, self.DB_TYPE)
+        db = db_class(self.DB_PATH, self.RUNTIME)
         # Make a dummy config
         temp_config = {
             'bfly': {
@@ -68,10 +67,10 @@ and successfully deliver responses at a reasonable speed
                     'samples': [{
                         'name': 'b',
                         'datasets': [{
-                            'path': cls.dataset,
+                            'path': self.dataset,
                             'name': 'c',
                             'channels': [{
-                                'path': cls.channel,
+                                'path': self.channel,
                                 'name': 'd'
                             }]
                         }]
@@ -86,46 +85,43 @@ and successfully deliver responses at a reasonable speed
         db.load_config(temp_config)
 
         # Get basic database keywords
-        k_tables = cls.RUNTIME.DB.TABLE
+        k_tables = self.RUNTIME.DB.TABLE
         s_table = k_tables.SYNAPSE.NAME
         ####
         # S1 : is_synapse
         ####
         # Should all be true
-        for syn in range(cls.s_count):
-            args = s_table, cls.channel, syn
+        for syn in range(self.s_count):
+            args = s_table, self.channel, syn
             res = db.get_entry(*args)
             # Raise exception if not true
-            cls.assertTrue(not not res)
+            self.assertTrue(not not res)
         # Should all be false
-        for syn in range(cls.s_count, 2*cls.s_count):
-            args = s_table, cls.channel, syn
+        for syn in range(self.s_count, 2*self.s_count):
+            args = s_table, self.channel, syn
             res = db.get_entry(*args)
             # Raise exception if not false
-            cls.assertFalse(not not res)
+            self.assertFalse(not not res)
 
-
-    @classmethod
-    def make_h5(cls):
+    def make_h5(self):
         """ make a dummy h5 file for testing
         """
         # Get the datatype, noise range, and size
-        dtype = getattr(np, 'uint{}'.format(cls.h_type))
-        dmax = 2 ** cls.h_type
-        dsize = cls.h_shape
+        dtype = getattr(np, 'uint{}'.format(self.h_type))
+        dmax = 2 ** self.h_type
+        dsize = self.h_shape
         # Create the file from a path
-        with h5py.File(cls.channel, 'w') as fd:
+        with h5py.File(self.channel, 'w') as fd:
             # Make a random array
             pattern = randint(dmax, size= dsize, dtype= dtype)
             fd.create_dataset('stack', data= pattern)
         # Log that the file path was written
-        cls._log('WRITE', path= cls.channel)
+        self._log('WRITE', path= self.channel)
 
-    @classmethod
-    def make_dataset(cls):
+    def make_dataset(self):
         """ make dummy dataset files for database
         """
-        k_files = cls.RUNTIME.DB.FILE
+        k_files = self.RUNTIME.DB.FILE
         #### 
         # Make blocks
         ####
@@ -133,14 +129,14 @@ and successfully deliver responses at a reasonable speed
         k_start = k_files.BLOCK.BOUND.START
         k_shape = k_files.BLOCK.BOUND.SHAPE
         # Pair the shape names with values
-        shapes = zip(k_shape, cls.h_shape)
+        shapes = zip(k_shape, self.h_shape)
         # Get full bounds
-        dmax = 2 ** cls.h_type
+        dmax = 2 ** self.h_type
         bounds = {k: 0 for k in k_start}
         bounds.update({k:v for k,v in shapes})
         # Generate neuron list
-        cls.neurons = choice(dmax, cls.n_count)
-        pairs = zip(*[cls.neurons.tolist()]*2)
+        self.neurons = choice(dmax, self.n_count)
+        pairs = zip(*[self.neurons.tolist()]*2)
         # Make a random block file
         blocks = {
             k_volume : [bounds, pairs]
@@ -153,13 +149,13 @@ and successfully deliver responses at a reasonable speed
         k_center = k_files.SYNAPSE.POINT.NAME
         k_shape = k_files.SYNAPSE.POINT.LIST
         # Take random pairs
-        gen = cls.neurons, 2
-        syn = range(cls.s_count)
+        gen = self.neurons, 2
+        syn = range(self.s_count)
         cells = [choice(*gen) for _ in syn]
         cells = np.uint32(cells).T.tolist()
         # Put pairs at random coordinates
-        shapes = [cls.s_count, 3]
-        coords = random(shapes)*cls.h_shape
+        shapes = [self.s_count, 3]
+        coords = random(shapes)*self.h_shape
         coords = np.uint32(coords).T.tolist()
         # Format neuron pairs and coordinates
         synapses = dict(zip(k_neurons, cells))
@@ -171,7 +167,7 @@ and successfully deliver responses at a reasonable speed
         # Write blocks to file
         ####
         k_block = k_files.BLOCK.DEFAULT
-        blockfile = os.path.join(cls.dataset, k_block)
+        blockfile = os.path.join(self.dataset, k_block)
         with open(blockfile, 'w') as bf:
             json.dump(blocks, bf)
 
@@ -179,12 +175,11 @@ and successfully deliver responses at a reasonable speed
         # Write synapses to file
         ####
         k_synapse = k_files.SYNAPSE.DEFAULT
-        synapsefile = os.path.join(cls.dataset, k_synapse)
+        synapsefile = os.path.join(self.dataset, k_synapse)
         with open(synapsefile, 'w') as sf:
             json.dump(synapses, sf)
 
-    @classmethod
-    def make_log(cls):
+    def make_log(self):
         """ make custom log for this test
         """
         utilities = bfly.UtilityLayer

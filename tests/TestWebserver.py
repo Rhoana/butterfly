@@ -17,22 +17,21 @@ class TestWebserver(ut.TestCase):
         'level': logging.INFO
     }
 
-    @classmethod
-    def test_web(cls):
+    def test_web(self):
         """ test that `bfly.Webserver` can start and stop.
         """
 
         # Log to command line
-        logging.basicConfig(**cls.log_info)
+        logging.basicConfig(**self.log_info)
 
         # Make a dummy database
-        db_class = getattr(bfly.DatabaseLayer, cls.DB_TYPE)
-        db = db_class(cls.DB_PATH, cls.RUNTIME)
+        db_class = getattr(bfly.DatabaseLayer, self.DB_TYPE)
+        db = db_class(self.DB_PATH, self.RUNTIME)
 
         # Make a dummy webserver
         config = bfly.UtilityLayer.rh_config.config
         web = bfly.Webserver(db, config)
-        server = web.start(cls.PORT)
+        server = web.start(self.PORT)
 
         # Stop the webserver after 1 second
         one_sec = datetime.timedelta(seconds=1)
