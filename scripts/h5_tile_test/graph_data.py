@@ -1,16 +1,21 @@
 import matplotlib.pyplot as plt
+from glob import glob1
 import numpy as np
 import json
 
 if __name__ == '__main__':
 
-    full_shape = [1, 16384, 16384]
-    in_fmt = 'graph_{}_{}_{}.json'
-    in_file = in_fmt.format(*full_shape)
+    # Everything happens from this directory
+    graph_dir = '/n/coxfs01/thejohnhoffer/h5_tiles/2017_04_25'
 
-    # Load the model
-    with open(in_file,'r') as fd:
-        cases = json.load(fd)
+    # Load one case
+    def load_case(in_file):
+        with open(in_file,'r') as fd:
+            return json.load(fd)
+    # Load all the cases
+    cases = map(load_case, glob1(graph_dir,'*.json'))
+    # Get the first full shape
+    full_shape = cases[0]['full_shape']
 
     ##### 
     # TEST 1

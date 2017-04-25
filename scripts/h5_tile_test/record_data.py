@@ -97,6 +97,12 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         array_id = int(sys.argv[1])
 
+    # Output files go to the graph dir   
+    graph_dir = '/n/coxfs01/thejohnhoffer/h5_tiles/2017_04_25'
+    # Temp files go to the noise_dir
+    noise_fmt = '/n/regal/pfister_lab/thejohnhoffer/h5_noise/{}'
+    noise_dir = noise_fmt.format(array_id)
+
     # Set the full shape and file sizes
     full_shape = np.uint32([1, 2048, 2048])
     file_divs = np.uint32([
@@ -122,10 +128,6 @@ if __name__ == '__main__':
     full_bytes = int_type * np.prod(full_shape)
     full_mb = int(full_bytes / (1024 ** 2))
 
-    # Prepend the output directory to all file names
-    noise_fmt = '/n/regal/pfister_lab/thejohnhoffer/h5_noise/{}'
-    graph_dir = '/n/coxfs01/thejohnhoffer/h5_tiles/2017_04_25'
-    noise_dir = noise_fmt.format(array_id)
     # Make the working directory
     if not os.path.exists(graph_dir):
         os.makedirs(graph_dir)
