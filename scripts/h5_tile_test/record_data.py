@@ -122,7 +122,7 @@ if __name__ == '__main__':
     tile_sizes = [
        file_sizes[-1],
     ]
-    trials = 2
+    trials = 20
     int_type = 64
     # Get the total mebibytes
     full_bytes = int_type * np.prod(full_shape)
