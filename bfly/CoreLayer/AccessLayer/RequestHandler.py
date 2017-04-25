@@ -53,7 +53,7 @@ class RequestHandler(web.RequestHandler):
         self._core = _core
         self._db = _db
         # Set the config dict
-        BFLY_CONFIG = _config
+        self.BFLY_CONFIG = _config
 
         # Create info logger
         log_list = self.RUNTIME.ERROR.REQUEST
