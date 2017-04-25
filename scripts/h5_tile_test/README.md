@@ -8,6 +8,8 @@ In `record_data.py`
 
 ## Running the batch job
 
+The array should be the same length as the `len(file_divs)*len(tile_sizes)`
+
 ```
-sbatch --array=1-30 record_data.sbatch
+sbatch --array=0-7 record_data.sbatch
 ```

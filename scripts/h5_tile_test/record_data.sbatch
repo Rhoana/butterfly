@@ -33,7 +33,7 @@ source /n/home05/haehn/nolearncox/bin/activate
 # Make graph directory
 mkdir -p /n/coxfs01/thejohnhoffer/h5_tiles/2017_04_25
 # we are working
-cd /n/coxfs01/thejohnhoffer/2017/butterfly/scripts/h5_tiles
+cd /n/coxfs01/thejohnhoffer/2017/butterfly/scripts/h5_tile_test
 python record_data.py ${SLURM_ARRAY_TASK_ID}
 
 # end of program
