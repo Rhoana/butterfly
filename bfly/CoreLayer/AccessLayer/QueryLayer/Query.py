@@ -92,17 +92,6 @@ and the ``key`` has no default in the struct
         return self.INPUT.METHODS.VALUE in group_methods
 
     @property
-    def has_block(self):
-        """ Checks whether the feature has block data
-
-        Returns
-        -------
-        bool
-        """
-        block_feats = self.INPUT.FEATURES.TABLES.BLOCK.LIST
-        return self.INPUT.FEATURES.VALUE in block_feats
-
-    @property
     def mime_type(self):
         """ Gets the mime type for the file_type
 

@@ -107,12 +107,12 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         feat = self._get_list_query(feats)
 
         # All features that need id
-        if feat not in feats.LABEL_LIST:
+        if feat in feats.ID_LIST:
             id_key = self._get_int_query(in_info.ID)
             # Return names based on id
             names = self._id_feature(feat, path, id_key)
         # All features that need bounds
-        else:
+        if feat in feats.BOX_LIST:
             # get resolution from input
             res_xy = self.INPUT.RESOLUTION.XY
             resolution = self._get_int_query(res_xy)
@@ -124,18 +124,11 @@ from :meth:`_id_feature` or :meth:`_box_feature`
             scale = 2**resolution
             scales = np.tile([1,scale,scale],2)
             bounds = np.uint32(target_bounds) * scales
-            # Check if feature is based on blocks
-            if feat in feats.TABLES.BLOCK.LIST:
-                # Return regions and neurons based on blocks
-                regions, names = self._block_feature(feat, path, bounds)
-                # Rescale the regions like the target bounds
-                target_regions = regions // scales
-                # Data queries for all region
-                for reg in target_regions:
-                    all_queries.append(self.sub_data('data', reg))
-            else:
-                # Return names based on bounds
-                names = self._box_feature(feat, path, bounds)
+            # Return names based on bounds
+            names = self._box_feature(feat, path, bounds)
+        # All features needing no parameters
+        else:
+            names = self._static_feature(feat, path)
 
         # Return an infoquery
         return InfoQuery(**{
@@ -271,7 +264,6 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         # Not yet supported
         return [db_table]
 
-    # Get all features that need bounds
     def _box_feature(self, feat, path, bounds):
         """ Loads a feature list that needs a bounding box
 
@@ -322,8 +314,8 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         # Not yet supported
         return [db_table]
 
-    def _block_feature(self, feat, path, bounds):
-        """ Loads a feature that needs block-level input
+    def _static_feature(self, feat, path):
+        """ Loads a feature list that needs no parameters
 
         Calls :meth:`_db_feature` to access database
 
@@ -333,82 +325,31 @@ from :meth:`_id_feature` or :meth:`_box_feature`
             The name of the feature request
         path : str
             The path to the corresponding image data
-        bounds : list
-            The 6-item list of a volume origin and shape
 
         Returns
         --------
-        list
-            * The the Nx6 array of z,y,x,depth,height,width \
-target-scale region boundaries to make N :class:`DataQuery` \
-with :meth:`sub_data`. N is either 1 or 6.
-            * The list of unique neurons in all full blocks
+        list or dict
+            The feature used to make an :class:`InfoQuery`
         """
+
         # Get input keyword arguments
         feats = self.INPUT.FEATURES
         # Get metadata for database
         k_tables = self.RUNTIME.DB.TABLE
-        k_start, k_stop, k_neurons = k_tables.BLOCK.FULL_LIST
 
         # Shorthand database name, table, key
-        db, db_table = self._db_feature(feat)[:2]
+        db, db_table, db_key = self._db_feature(feat)
         # Do not know
         if not db_table:
             return ['Feature not understood']
 
-        # Get start and stop of bounds
-        start = np.uint32(bounds[:3])
-        stop = start + bounds[3:]
+        # Get the key values
+        def get_key(s):
+            return s[db_key]
 
-        # Bound blocks with start and stop
-        def bounded(block):
-            b_stop = block[k_stop]
-            b_start = block[k_start]
-            return all(b_start >= start) and all(b_stop <= stop)
-
-        # if request for labels in bounds
-        if feat in feats.LABEL_LIST:
-            # Find the center points within the bounds
-            result = db.get_entry(db_table, path, bounded)
-            if not len(result):
-                # return the full bounds and no neurons
-                return [np.uint32([bounds]), []]
-            # Find the minimum start and maximum stop
-            min_start = np.amin([b[k_start] for b in result], axis=0)
-            max_stop = np.amax([b[k_stop] for b in result], axis=0)
-            #####
-            # Find at most six regions needed to query
-            #####
-            # Assume the full bounds for all regions
-            full_b = [list(start)+list(stop)] * 6
-            # Get the smaller bounds for each region
-            out_b = [np.r_[max_stop, min_start]] * 6
-            in_b = [np.r_[min_start, max_stop]] * 6
-            # Fill surround with 6 non-overlapping boundaries
-            out_lim = np.eye(6, dtype = np.uint32)
-            in_lim = np.ones(3, dtype = np.uint32)
-            in_lim = np.tile(np.tril(in_lim, k=-1),(2,2))
-            # Get all limits on the full bounds
-            full_lim = np.uint32(in_lim + out_lim == 0)
-
-            ####
-            # Get the exact boundaries for all six regions
-            ####
-            # Join full boundaries to the outer and inner boundaries
-            regions = full_b*full_lim + out_b*out_lim + in_b*in_lim
-            # Convert the bounding boxes to origin and shape
-            regions[:,3:] = regions[:,3:] - regions[:,:3]
-
-            ####
-            # Find the unique neurons in all returned blocks
-            ####
-            all_unique = [set(s[k_neurons]) for s in result]
-            all_neurons = list(set.union(*all_unique))
-            # Return the regions and the unique neurons
-            return [regions, all_neurons]
-
-        # Not yet supported
-        return [db_table]
+        # Return all keys in the table
+        full_table = db.get_all(db_table, path)
+        return sorted(map(get_key, full_table))
 
     #####
     #Lists values from config for group methods
