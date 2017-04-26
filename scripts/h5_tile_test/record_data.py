@@ -77,7 +77,12 @@ class Manager():
     def rm_all(self):
         # Remove all files in directory
         if os.path.exists(self._dir):
-            shutil.rmtree(self._dir)
+            try:
+                shutil.rmtree(self._dir)
+            except OSError:
+                print """
+        Could not remove {}
+        """.format(self._dir)
 
     def trial(self, f_c, f_s, t_s):
         # Remove all files
@@ -183,6 +188,8 @@ in blocks of {tile_shape}px at {mbps:.1f}Mbps
 """.format(**graph_data)
     graph_data['msg'] = msg
     print(msg)
+    # Allow standard out to print
+    sys.stdout.flush()
 
     # Write the model to json
     with open(graph_file, 'w') as fd:
