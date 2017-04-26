@@ -1,6 +1,10 @@
 ## Setting the parameters
 
-In `graph_data.py` and `record_data.py`, the `graph_dir` should be the same. 
+Set an environment variable for the name of the experiment
+```
+export H5_EXPERIMENT='experiment_94'
+```
+
 In `record_data.py`
     - The `full_shape` should be the total `[z, y, x]` volume to test.
     - The `file_divs` should list ways to divide that volume across files.
@@ -11,5 +15,5 @@ In `record_data.py`
 The array should be the same length as the `len(file_divs)*len(tile_sizes)`
 
 ```
-sbatch --array=0-7 record_data.sbatch
+sbatch --array=0-11 record_data.sbatch
 ```

@@ -103,13 +103,14 @@ if __name__ == '__main__':
         array_id = int(sys.argv[1])
 
     # Output files go to the graph dir   
-    graph_dir = '/n/coxfs01/thejohnhoffer/h5_tiles/2017_04_25'
+    graph_fmt = '/n/coxfs01/thejohnhoffer/h5_tiles/{}'
+    exp = os.getenv('H5_EXPERIMENT', time.strftime('%Y_%m_%d'))
+    graph_dir = graph_fmt.format(exp)
     # Temp files go to the noise_dir
     noise_fmt = '/n/regal/pfister_lab/thejohnhoffer/h5_noise/{}'
     noise_dir = noise_fmt.format(array_id)
-
     # Set the full shape and file sizes
-    full_shape = np.uint32([1, 2048, 2048])
+    full_shape = np.uint32([1, 2**15, 2**15])
     file_divs = np.uint32([
        [1,1,1],
        [1,2,2],
@@ -118,6 +119,10 @@ if __name__ == '__main__':
        [1,16,16],
        [1,32,32],
        [1,64,64],
+       [1,128,128],
+       [1,256,256],
+       [1,512,512],
+       [1,1024,1024],
     ])
     # Get the number of files
     file_counts = np.prod(file_divs, 1)
