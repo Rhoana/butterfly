@@ -2,10 +2,14 @@ from functools import partial
 import numpy as np
 import shutil
 import time
+import math
 import h5py
 import json
 import sys
 import os
+
+MEM_LIMIT = 1000
+MEGA = 1000**2
 
 def load_h(_size, _path, _start):
     # Start timing now
@@ -23,17 +27,43 @@ def load_h(_size, _path, _start):
 def make_h(_type, _size, _path):
     # Get the datatype, noise range, and size
     dtype = getattr(np, 'uint{}'.format(_type))
+    slice_size = np.uint32(_size[1:])
     dmax = 2 ** _type
+    # Calculate the max area for a section
+    max_area = MEM_LIMIT * (8*MEGA) / _type
+    this_area = float(np.prod(slice_size))
+    # Get the tile shape that fits in memory
+    over_area = max(this_area / max_area, 1)
+    tile_size = slice_size / math.sqrt(over_area)
+    tile_size = np.uint32(np.floor(tile_size))
+    # Get all the positions of tiles needed
+    tile_ratio = slice_size / np.float64(tile_size)
+    i_shape = np.uint32(np.ceil(tile_ratio))
+    i_range = np.uint32(range(np.prod(i_shape)))
+    all_tiles = np.unravel_index(i_range, i_shape)
+    all_tiles = np.uint32(all_tiles).T
     # Get keywords for file and slice
     all_keys = dict(shape= _size, dtype= dtype)
-    z_keys = dict(size= _size[1:], dtype= dtype)
+    z_keys = dict(size= tile_size, dtype= dtype)
     # Create the file from a path
     with h5py.File(_path, 'w') as fd:
         # Make a random uint array
         a = fd.create_dataset('all', **all_keys)
         # Fill each z step of that array
         for z in range(_size[0]):
-            a[z] = np.random.randint(dmax, **z_keys)
+            # Fill in each tile of that array
+            for yx in all_tiles:
+                # Get data to fill the tile
+                y1,x1 = np.clip(tile_size*(yx+1), 0, slice_size)
+                y0,x0 = tile_size*(yx)
+                # Fill the tile specifically
+                z_keys['size'] = [y1-y0,x1-x0]
+                a_tile = np.random.randint(dmax, **z_keys)
+                # Print writing this tile
+                print 'writing ', z, y0, x0
+    		sys.stdout.flush()
+                # Write tile to volume
+                a[z,y0:y1,x0:x1] = a_tile
 
 class Manager():
     def __init__(self, _dir, _names):
