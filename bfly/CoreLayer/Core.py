@@ -79,49 +79,6 @@ from the cache or from the properties of a tile.
         self.update_query(i_query)
         return i_query.dump
 
-    def get_blocks(self, i_query):
-        """ read image data to dump answer to ``i_query`` as a string
-
-        Calls :meth:`update_query` with more information\
-from the cache or from the properties of a tile.
-
-        Arguments
-        ----------
-        i_query: :class:`QueryLayer.InfoQuery`
-            A request for information
-
-        Returns
-        --------
-        str
-            Answer for the :class:`QueryLayer.InfoQuery`
-        """
-        # Get all the data queries for all regions
-        all_queries = i_query.OUTPUT.INFO.QUERY.VALUE
-        map(self.update_query, all_queries)
-        # Get all unique sets of neurons for all queries
-        each_unique = map(self.find_unique, all_queries)
-        all_unique = set.union(*each_unique)
-        # Get the union with the block neurons
-        names = set(i_query.result) | all_unique
-        ####
-        # Filter all the neurons from the database
-        ####
-        # Get all needed for the database
-        i_path = i_query.OUTPUT.INFO.PATH.VALUE
-        k_neuron = i_query.RUNTIME.DB.TABLE.NEURON.NAME
-        k_key = i_query.RUNTIME.DB.TABLE.NEURON.KEY.NAME
-        # Get all neruons in the table
-        def get_id(n):
-            return n[k_key]
-        neurons = self._db.get_all(k_neuron, i_path)
-        # Get all the names that are neurons
-        names = names & set(map(get_id, neurons))
-
-        # Write the new list back to the query
-        i_query.OUTPUT.INFO.NAMES.VALUE = list(names)
-        # Return the list in string form
-        return i_query.dump
-
     def get_data(self, d_query):
         """ dumps answer to ``d_query`` as a string
 

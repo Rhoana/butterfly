@@ -70,7 +70,8 @@ data or mask requests.
                 NEURON = NamedStruct(_table_list[0],
                     LIST = [
                         'neuron_keypoint',
-                        'is_neuron'
+                        'all_neurons',
+                        'is_neuron',
                     ]
                 ),
                 SYNAPSE = NamedStruct(_table_list[1],
@@ -79,21 +80,31 @@ data or mask requests.
                         'neuron_children',
                         'synapse_parent',
                         'synapse_ids',
-                        'is_synapse'
+                        'is_synapse',
                     ]
                 ),
-                BLOCK = NamedStruct(_table_list[2],
-                    LIST = [
-                        'neuron_ids'
-                    ]
-                )
             ),
+            # Lists giving parameters needed 
+            ID_LIST = [
+                'synapse_parent',
+                'neuron_children',
+                'synapse_keypoint',
+                'neuron_keypoint',
+                'is_synapse',
+                'is_neuron',
+            ],
+            BOX_LIST = [
+                'synapse_ids',
+                'voxel_list',
+            ],
+            STATIC_LIST = ['all_neurons'],
+            # Specific Lists of features
             SYNAPSE_LINKS = NamedStruct('synapse_parent'),
             NEURON_CHILDREN = NamedStruct('neuron_children'),
             POINT_LIST = ['synapse_keypoint','neuron_keypoint'],
             LINK_LIST = ['synapse_parent','neuron_children'],
-            LABEL_LIST = ['synapse_ids','neuron_ids'],
             BOOL_LIST = ['is_synapse','is_neuron'],
+            LABEL_LIST = ['synapse_ids'],
             VOXEL_LIST = ['voxel_list']
         )
         self.POSITION = NamelessStruct(
