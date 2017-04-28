@@ -43,14 +43,14 @@ def make_h(_type, _size, _path):
     all_tiles = np.unravel_index(i_range, i_shape)
     all_tiles = np.uint32(all_tiles).T
     # Get keywords for file and slice
-    all_keys = dict(shape= _size, dtype= dtype)
+    all_keys = dict(shape= _size, dtype= dtype, chunks=True)
     z_keys = dict(size= tile_size, dtype= dtype)
     # Create the file from a path
     with h5py.File(_path, 'w') as fd:
         # Make a random uint array
         a = fd.create_dataset('all', **all_keys)
         # Fill each z step of that array
-        for z in range(_size[0]):
+        for z in range(int(_size[0])):
             # Fill in each tile of that array
             for yx in all_tiles:
                 # Get data to fill the tile
@@ -60,8 +60,9 @@ def make_h(_type, _size, _path):
                 z_keys['size'] = [y1-y0,x1-x0]
                 a_tile = np.random.randint(dmax, **z_keys)
                 # Print writing this tile
-                print 'writing ', z, y0, x0
-    		sys.stdout.flush()
+                print("""writing {}, {}, {}
+                """.format(z, y0, x0).replace('\n', ''))
+                sys.stdout.flush()
                 # Write tile to volume
                 a[z,y0:y1,x0:x1] = a_tile
 
@@ -70,7 +71,7 @@ class Manager():
         self._dir = _dir
         # Add the output dir to all the names
         join_dir = partial(os.path.join, _dir)
-        self._names = map(join_dir, _names)
+        self._names = list(map(join_dir, _names))
 
     def make_all(self, _count, _shape):
         #####
@@ -84,6 +85,11 @@ class Manager():
         del self._names[:_count]
         # Make files for all file names
         for f_n in f_names:
+            # Writing the full file
+            print("""
+Writing file {}""".format(f_n))
+            sys.stdout.flush()
+            # Write the full file
             make_h(int_type, _shape, f_n)
         # Return file names
         return f_names
@@ -97,6 +103,10 @@ class Manager():
         time = 0
         # Load all files
         for f_n in _files:
+            # Written the full file
+            print("""
+Loading file {}""".format(f_n))
+            sys.stdout.flush()
             # Load all for this file name
             load_fn = partial(load_h, _tsize, f_n)
             # Add the time to load one file
@@ -110,9 +120,10 @@ class Manager():
             try:
                 shutil.rmtree(self._dir)
             except OSError:
-                print """
-        Could not remove {}
-        """.format(self._dir)
+                print("""
+                Could not remove {}
+                """.format(self._dir))
+                sys.stdout.flush()
 
     def trial(self, f_c, f_s, t_s):
         # Remove all files
@@ -196,6 +207,10 @@ if __name__ == '__main__':
     all_times = np.zeros(trials)
     # Repeat for each trial
     for t_index in range(trials):
+        # Written the full file
+        print("""
+Starting trial {}""".format(t_index))
+        sys.stdout.flush()
         # Get the time to load the shape
         trial_time = mgmt.trial(f_c, f_s, t_s)
         all_times[t_index] = trial_time
@@ -221,9 +236,8 @@ if __name__ == '__main__':
 Loaded all {n_files} files of {file_shape}px
 in blocks of {tile_shape}px at {mbps:.1f}Mbps
 """.format(**graph_data)
-    graph_data['msg'] = msg
     print(msg)
-    # Allow standard out to print
+    graph_data['msg'] = msg
     sys.stdout.flush()
 
     # Write the model to json
