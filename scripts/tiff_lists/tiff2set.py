@@ -12,8 +12,9 @@ class Manager():
         # Load the json file
         with open(in_path, 'r') as jd:
             # Get all the filenames
-            bossfile = json.load(jd)
-            print bossfile.keys()
+            boss_file = json.load(jd)
+            all_file = boss_file.get(ALL, {}) 
+            print all_file.keys()
 
 if __name__ == '__main__':
 
