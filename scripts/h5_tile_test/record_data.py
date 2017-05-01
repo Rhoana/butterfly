@@ -43,7 +43,8 @@ def make_h(_type, _size, _path):
     all_tiles = np.unravel_index(i_range, i_shape)
     all_tiles = np.uint32(all_tiles).T
     # Get keywords for file and slice
-    all_keys = dict(shape= _size, dtype= dtype, chunks=True)
+    chunk_size = (1,) + tuple(tile_size)
+    all_keys = dict(shape= _size, dtype= dtype, chunks=chunk_size)
     z_keys = dict(size= tile_size, dtype= dtype)
     # Create the file from a path
     with h5py.File(_path, 'w') as fd:

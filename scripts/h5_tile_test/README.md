@@ -15,5 +15,5 @@ In `record_data.py`
 The array should be the same length as the `len(file_divs)*len(tile_sizes)`
 
 ```
-sbatch --array=0-11 record_data.sbatch
+sbatch --array=0-10 record_data.sbatch
 ```
