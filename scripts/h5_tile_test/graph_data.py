@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from glob import glob1
 import numpy as np
@@ -7,42 +9,41 @@ import os
 if __name__ == '__main__':
 
     # Everything happens from this directory
-    graph_dir = 'results/2017_04_25'
+    graph_dir = '/n/coxfs01/thejohnhoffer/h5_tiles/2017_05_03'
 
-    # Load one case
-    def load_case(in_file):
+    # Load one trial
+    def load_trial(in_file):
         in_path = os.path.join(graph_dir, in_file)
         with open(in_path,'r') as fd:
             return json.load(fd)
-    # Load all the cases
-    cases = map(load_case, glob1(graph_dir,'*.json'))
-    # Get the first full shape
-    full_shape = cases[0]['full_shape']
+    # Load all the trials
+    trials = map(load_trial, glob1(graph_dir,'*.json'))
+    # Get constants from first trial
+    t0 = trials[0]
+    n_t = len(trials)
+    full_shape = t0['full_shape']
+    file_shapes = t0['file_shape']
+    tile_shapes = t0['tile_shape']
+    # Average the trials
+    all_speeds = [t['mbps'] for t in trials]
+    mean_speeds = np.mean(all_speeds, 0)
 
     ##### 
     # TEST 1
     # Plot Mbps over file x dimension
     #####
     # Fix a tile shape
-    tile_shape = np.uint32([1, 32, 32])
-    tile_x = tile_shape[-1]
+    tile_id = 0
+    tile_shape = tile_shapes[tile_id]
     # Set up the plot
     fig, ax = plt.subplots()
-    # Get a size,rate pair
-    def get_pair(d):
-        return map(d.get, ['file_x', 'mbps'])
-    # Limit to cases with same tile_shape
-    def is_tile(d):
-        d_tile = d['tile_shape']
-        return np.any(tile_shape == d_tile)
-    # Filter all cases for same tile_shape
-    tile_cases = filter(is_tile, cases)
-    # Get the size,rate pairs for all cases
-    tile_rates = map(get_pair, tile_cases)
-    all_tr = np.uint32(tile_rates)
-    # Plot the lists sorted by file sizes
-    tr_order = all_tr.T[0].argsort()
-    ax.plot(*all_tr[tr_order].T)
+    # Get all file shape x values
+    all_x = np.uint32(file_shapes).T[2]
+    # Get all rate values
+    all_r = mean_speeds.T[tile_id]
+    print all_x
+    print all_r
+    ax.plot(all_x, all_r)
 
     # Label the graph
     plt.ylabel('Speed (MiB per second)')

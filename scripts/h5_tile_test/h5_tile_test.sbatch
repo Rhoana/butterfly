@@ -2,15 +2,15 @@
 #
 # add all other SBATCH directives here...
 #
-#SBATCH -p cox
+#SBATCH -p holyseasgpu
 #SBATCH -n 1 # Number of cores
 #SBATCH -N 1 # Ensure that all cores are on one machine
 #SBATCH --mem=16000
 #SBATCH -t 10-12:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=john@hoff.in
-#SBATCH -o /n/coxfs01/thejohnhoffer/h5_tiles/h5_%a.out
-#SBATCH -e /n/coxfs01/thejohnhoffer/h5_tiles/h5_%a.err
+#SBATCH -o /n/coxfs01/thejohnhoffer/h5_tiles/seas/h5_%a.out
+#SBATCH -e /n/coxfs01/thejohnhoffer/h5_tiles/seas/h5_%a.err
 
 source new-modules.sh
 module load python/2.7.11-fasrc01

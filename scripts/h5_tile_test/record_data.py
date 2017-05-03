@@ -78,9 +78,6 @@ class Manager():
         #####
         # Make all the folder's files
         #####
-        # Make output directory
-        if not os.path.exists(self._dir):
-            os.makedirs(self._dir)
         # Take some random file names
         f_names = self._names[:_count]
         del self._names[:_count]
@@ -101,7 +98,7 @@ Writing file {}""".format(f_n))
         t_offs = np.where(np.ones(_fsize / _tsize))
         offsets = _tsize * np.uint32(t_offs).T
         # Track the total time
-        time = 0
+        timed = 0
         # Load all files
         for f_n in _files:
             # Written the full file
@@ -111,9 +108,9 @@ Loading file {}""".format(f_n))
             # Load all for this file name
             load_fn = partial(load_h, _tsize, f_n)
             # Add the time to load one file
-            time += sum(map(load_fn, offsets))
+            timed += sum(map(load_fn, offsets))
         # Return time to load all files
-        return time
+        return timed
 
     def rm_all(self):
         # Remove all files in directory
@@ -132,27 +129,35 @@ Loading file {}""".format(f_n))
         # Make all the folder's files
         f_names = self.make_all(f_c, f_s)
         # Load all the folder's files
-        time = self.load_all(f_s, t_s, f_names)
+        timed = self.load_all(f_s, t_s, f_names)
         # Return trial time
-        return time
+        return timed
 
 
 if __name__ == '__main__':
 
     # Get the global array index
-    array_id = 0
+    trial_id = 0
     if len(sys.argv) > 1:
-        array_id = int(sys.argv[1])
+        trial_id = int(sys.argv[1])
 
     # Output files go to the graph dir   
     graph_fmt = '/n/coxfs01/thejohnhoffer/h5_tiles/{}'
     exp = os.getenv('H5_EXPERIMENT', time.strftime('%Y_%m_%d'))
     graph_dir = graph_fmt.format(exp)
+    # Make the working directory
+    if not os.path.exists(graph_dir):
+        os.makedirs(graph_dir)
+
     # Temp files go to the noise_dir
-    noise_fmt = '/n/regal/pfister_lab/thejohnhoffer/h5_noise/{}'
-    noise_dir = noise_fmt.format(array_id)
+    noise_fmt = '/n/regal/pfister_lab/thejohnhoffer/h5_noise/{}/{}'
+    noise_dir = noise_fmt.format(trial_id, np.random.randint(10**9))
+    # Make the temporary directory
+    if not os.path.exists(noise_dir):
+        os.makedirs(noise_dir)
+
     # Set the full shape and file sizes
-    full_shape = np.uint32([1, 2**15, 2**15])
+    full_shape = np.uint32([1, 2**14, 2**14])
     file_divs = np.uint32([
        [1,1,1],
        [1,2,2],
@@ -164,82 +169,75 @@ if __name__ == '__main__':
        [1,128,128],
        [1,256,256],
        [1,512,512],
-       [1,1024,1024],
     ])
     # Get the number of files
     file_counts = np.prod(file_divs, 1)
     # Get the shapes of all the files
     file_sizes = full_shape / file_divs
     # Set the tile sizes, trial count, and datatype
-    tile_sizes = [
+    tile_sizes = np.uint32([
        file_sizes[-1],
-    ]
-    trials = 20
+    ])
+    n_trials = 20
     int_type = 64
     # Get the total mebibytes
     full_bytes = int_type * np.prod(full_shape)
     full_mb = int(full_bytes / (1024 ** 2))
 
-    # Make the working directory
-    if not os.path.exists(graph_dir):
-        os.makedirs(graph_dir)
-
     # Get the file / tile indexes for the array id
     id_shape = [len(file_sizes), len(tile_sizes)]
-    f_id, t_id = np.unravel_index(array_id, id_shape)
-    # Get the file size, file count, and tile size
-    t_s = tile_sizes[t_id]
-    f_s = file_sizes[f_id]
-    f_c = file_counts[f_id]
-
-    # Total count of files
-    total_files = f_c * trials
-    # Random list of file names
-    chosen = np.random.choice(10**9, int(total_files))
-    file_names = map('noise_{:09d}.h5'.format, chosen)
-    # The file for the graph
-    graph_file = '{:09d}.json'.format(array_id)
-    graph_file = os.path.join(graph_dir, graph_file)
-
-    # Manage output directory and file names
-    mgmt = Manager(noise_dir, file_names)
+    id_range = range(np.prod(id_shape))
 
     # record times for all trials
-    all_times = np.zeros(trials)
-    # Repeat for each trial
-    for t_index in range(trials):
-        # Written the full file
-        print("""
-Starting trial {}""".format(t_index))
-        sys.stdout.flush()
+    trial_times = np.zeros(id_shape)
+    trial_rates = np.zeros(id_shape)
+
+    # Random list of file names
+    total_files = np.sum(file_counts) * id_shape[1]
+    chosen = np.random.choice(10**9, int(total_files))
+    file_names = map('noise_{:09d}.h5'.format, chosen)
+
+    # Loop through all combinations of tile and file shapes
+    for f_id, t_id in zip(*np.unravel_index(id_range, id_shape)):
+
+        # Get the file size, file count, and tile size
+        t_s = tile_sizes[t_id]
+        f_s = file_sizes[f_id]
+        f_c = file_counts[f_id]
+
+        # Get all the needed file names
+        f_names = map(file_names.pop, range(f_c)[::-1])
+        # Manage output directory and file names
+        mgmt = Manager(noise_dir, f_names)
+
         # Get the time to load the shape
         trial_time = mgmt.trial(f_c, f_s, t_s)
-        all_times[t_index] = trial_time
-    # Calculate mean time across trials
-    mean_time = np.mean(all_times)
+        trial_rate = -1
+        if trial_time:
+            trial_rate = full_mb / trial_time
+        # Add the time to the output
+        trial_times[f_id, t_id] = trial_time
+        trial_rates[f_id, t_id] = trial_rate
+
+        msg = """***********************
+    Loaded all {} files of {}px
+    in blocks of {}px at {:.1f}Mbps
+    """.format(f_c, f_s, t_s, trial_rate)
+        print(msg)
+        sys.stdout.flush()
+
     # Give feedback
     graph_data = {
-        'n_files': int(f_c),
-        'tile_z': int(t_s[0]),
-        'tile_y': int(t_s[1]),
-        'tile_x': int(t_s[2]),
-        'file_z': int(f_s[0]),
-        'file_y': int(f_s[1]),
-        'file_x': int(f_s[2]),
-        'tile_shape': t_s.tolist(),
-        'file_shape': f_s.tolist(),
+        'n_files': file_counts.tolist(),
+        'tile_shape': tile_sizes.tolist(),
+        'file_shape': file_sizes.tolist(),
         'full_shape': full_shape.tolist(),
-        'mbps': float(full_mb / mean_time),
-        'seconds': float(mean_time),
-        'trials': all_times.tolist(),
+        'seconds': trial_times.tolist(),
+        'mbps': trial_rates.tolist(),
     }
-    msg = """***********************
-Loaded all {n_files} files of {file_shape}px
-in blocks of {tile_shape}px at {mbps:.1f}Mbps
-""".format(**graph_data)
-    print(msg)
-    graph_data['msg'] = msg
-    sys.stdout.flush()
+    # The file for the graph
+    graph_file = '{:04d}.json'.format(trial_id)
+    graph_file = os.path.join(graph_dir, graph_file)
 
     # Write the model to json
     with open(graph_file, 'w') as fd:
