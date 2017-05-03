@@ -147,14 +147,20 @@ if __name__ == '__main__':
     graph_dir = graph_fmt.format(exp)
     # Make the working directory
     if not os.path.exists(graph_dir):
-        os.makedirs(graph_dir)
+        try:
+            os.makedirs(graph_dir)
+        except OSError:
+            pass
 
     # Temp files go to the noise_dir
     noise_fmt = '/n/regal/pfister_lab/thejohnhoffer/h5_noise/{}/{}'
     noise_dir = noise_fmt.format(trial_id, np.random.randint(10**9))
     # Make the temporary directory
     if not os.path.exists(noise_dir):
-        os.makedirs(noise_dir)
+        try:
+            os.makedirs(noise_dir)
+        except OSError:
+            pass
 
     # Set the full shape and file sizes
     full_shape = np.uint32([1, 2**14, 2**14])
