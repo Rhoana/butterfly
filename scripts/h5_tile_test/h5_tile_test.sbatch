@@ -9,8 +9,8 @@
 #SBATCH -t 10-12:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=john@hoff.in
-#SBATCH -o /n/coxfs01/thejohnhoffer/h5_tiles/seas/h5_%a.out
-#SBATCH -e /n/coxfs01/thejohnhoffer/h5_tiles/seas/h5_%a.err
+#SBATCH -o /n/coxfs01/thejohnhoffer/h5_tiles/h5_%a.out
+#SBATCH -e /n/coxfs01/thejohnhoffer/h5_tiles/h5_%a.err
 
 source new-modules.sh
 module load python/2.7.11-fasrc01
@@ -19,8 +19,6 @@ source activate h5_tile
 pip install --upgrade  numpy
 pip install --upgrade h5py
 
-# Make graph directory
-mkdir -p /n/coxfs01/thejohnhoffer/h5_tiles/${H5_EXPERIMENT}
 # we are working
 cd /n/coxfs01/thejohnhoffer/2017/butterfly/scripts/h5_tile_test
 python record_data.py ${SLURM_ARRAY_TASK_ID}
