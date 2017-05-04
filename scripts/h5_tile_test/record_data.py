@@ -1,6 +1,5 @@
 from functools import partial
 import numpy as np
-import shutil
 import time
 import math
 import h5py
@@ -114,14 +113,15 @@ Loading file {}""".format(f_n))
 
     def rm_all(self):
         # Remove all files in directory
-        if os.path.exists(self._dir):
-            try:
-                shutil.rmtree(self._dir)
-            except OSError:
-                print("""
-                Could not remove {}
-                """.format(self._dir))
-                sys.stdout.flush()
+        for _name in self._names:
+            if os.path.exists(_name):
+                try:
+                    os.remove(_name)
+                except OSError:
+                    print("""
+                    Could not remove {}
+                    """.format(_name))
+                    sys.stdout.flush()
 
     def trial(self, f_c, f_s, t_s):
         # Remove all files
@@ -148,17 +148,17 @@ if __name__ == '__main__':
     # Make the working directory
     if not os.path.exists(graph_dir):
         try:
-            os.makedirs(graph_dir)
+            os.mkdir(graph_dir)
         except OSError:
             pass
 
     # Temp files go to the noise_dir
-    noise_fmt = '/n/regal/pfister_lab/thejohnhoffer/h5_noise/{}/{}'
-    noise_dir = noise_fmt.format(trial_id, np.random.randint(10**9))
+    noise_fmt = '/n/regal/pfister_lab/thejohnhoffer/h5_noise/{}'
+    noise_dir = noise_fmt.format(trial_id)
     # Make the temporary directory
     if not os.path.exists(noise_dir):
         try:
-            os.makedirs(noise_dir)
+            os.mkdir(noise_dir)
         except OSError:
             pass
 

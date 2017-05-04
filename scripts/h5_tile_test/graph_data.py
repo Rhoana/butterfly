@@ -41,8 +41,6 @@ if __name__ == '__main__':
     all_x = np.uint32(file_shapes).T[2]
     # Get all rate values
     all_r = mean_speeds.T[tile_id]
-    print all_x
-    print all_r
     ax.plot(all_x, all_r)
 
     # Label the graph
