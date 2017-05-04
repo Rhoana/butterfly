@@ -1,5 +1,6 @@
 import matplotlib
 matplotlib.use('Agg')
+from matplotlib.ticker import FormatStrFormatter
 import matplotlib.pyplot as plt
 from glob import glob1
 import numpy as np
@@ -43,6 +44,9 @@ if __name__ == '__main__':
     all_r = mean_speeds.T[tile_id]
     ax.plot(all_x, all_r)
 
+    # Power of 2 X axis
+    ax.set_xscale('log', basex=2)
+    ax.xaxis.set_major_formatter(FormatStrFormatter('%d'))
     # Label the graph
     plt.ylabel('Speed (MiB per second)')
     plt.xlabel('width of partial hdf5 files')
