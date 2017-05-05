@@ -1,4 +1,5 @@
 import os
+import cv2
 import json
 import h5py
 import time
@@ -41,7 +42,7 @@ class TiffMGMT():
             self.tile_shape = np.uint32((1,) + tile0.shape)
             # The size and datatype of the full volume
             self.full_shape = self.tile_shape * self.size
-            self.slice_shape = self.tile_shape[1:][np.newaxis]
+            self.slice_shape = np.r_[1, self.full_shape[1:]]
             self.dtype = tile0.dtype
             # Sort all paths by ordered offsets
             def make_flat(pair):
@@ -52,7 +53,7 @@ class TiffMGMT():
             self.all_off = np.uint32(self.all_off)
 
     def scale_h5(self, _bounds, _path, _res):
-        """ Return a list of unique ids in a bounding box
+        """ Downsample the tiffs to a h5 file
         
         Arguments
         ----------
@@ -107,6 +108,66 @@ Writing {} volume to {}
                 print("""
             Added layer {} to h5 file
             """.format(z))
+        # Record total writing time
+        sec_diff = time.time() - sec_start
+        print("""
+Wrote {} layers to {} in {} seconds
+""".format(len(scale_bounds), _path, sec_diff))
+
+
+    def scale_png(self, _bounds, _path, _res):
+        """ Downsample the tiffs to a png stack
+        
+        Arguments
+        ----------
+        _bounds : numpy.ndarray
+            2x1 array of scaled z_arg bounds
+        _path : str
+            The path to the output h5 file
+        _res : int
+            Number of times to downsample by 2
+        """
+        # Downsampling constant
+        scale = 2 ** _res
+        # Get the downsampled full / tile shape
+        scale_bounds = _bounds // scale
+        scale_slice = self.slice_shape[1:] // scale
+        scale_tile = self.tile_shape[1:] // scale
+        print("""
+Writing {} volume to {}
+""".format(scale_slice, _path))
+        # Start timing the h5 file writing
+        sec_start = time.time()
+        # Add to the h5 file for the given stack
+        for s_z in range(*scale_bounds):
+            # Scale the z bound
+            z = s_z * scale
+            # Create the png file path
+            png_path = '{:04d}.png'.format(z)
+            png_path = os.path.join(_path, png_path)
+            # Create the slice image
+            a = np.zeros(scale_slice, dtype=self.dtype)
+            # Open all tiff files in the stack
+            for f in range(self.n_xy):
+                # Get tiff file path and offset
+                f_id = int(z * self.n_xy + f)
+                f_path = self.all_path[f_id]
+                f_offset = self.all_off[f_id]
+                # Read the file to a numpy volume
+                f_vol = tiff.imread(f_path)
+                scale_vol = f_vol[::scale,::scale]
+                # Get coordinates to fill the tile
+                y0, x0 = scale_tile * f_offset[1:]
+                y1, x1 = [y0, x0] + np.uint32(scale_vol.shape)
+                # Fill the tile with scaled volume
+                a[y0:y1, x0:x1] = scale_vol
+            # Write the layer to a color or grayscale png file
+            color_shape = a.shape + (-1,)
+            a = a.view(np.uint8).reshape(color_shape)
+            cv2.imwrite(png_path, a[:,:,:3])
+            print("""
+        Wrote layer {} to a png file
+        """.format(z))
         # Record total writing time
         sec_diff = time.time() - sec_start
         print("""
