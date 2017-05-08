@@ -1,6 +1,6 @@
 from Datasource import Datasource
+import tifffile as tiff
 import numpy as np
-import h5py
 import json
 import os
 
@@ -72,54 +72,52 @@ this filname to not give a valid h5 volume.
             * :class:`OUTPUT` ``.INFO.SIZE.NAME``
                 (numpy.ndarray) -- 3x1 for full volume shape
         """
-        return {}
         # Keyword names
         output = t_query.OUTPUT.INFO
         runtime = t_query.RUNTIME.IMAGE
-        k_h5 = runtime.SOURCE.HDF5.NAME
-        # Get the max block size in bytes for a single tile
-        max_bytes = t_query.RUNTIME.CACHE.MAX_BLOCK.VALUE
+        tiff_field = runtime.SOURCE.TIFF
+
+        # Get the name and ending of the target file
+        filename = t_query.OUTPUT.INFO.PATH.VALUE
+        ending = os.path.splitext(filename)[1]
 
         # call superclass
         Datasource.preload_source(t_query)
 
-        # Validate highest in z file name and dataset
-        filename = keywords[k_h5][-1][0]
-        dataset = keywords[k_h5][-1][1]
-        offset = keywords[k_h5][-1][2]
-        # Load properties from H5 dataset
-        with h5py.File(filename,'r') as fd:
-            # Get the volume
-            vol = fd[dataset]
-            # Get a shape for all the files
-            shape = np.uint32(vol.shape)
-            shape[0] += offset
-            ####
-            # Get a blockshape as a flat section
-            ####
-            # Get the bytes for a full slice
-            voxel_bytes = np.uint32(vol.dtype.itemsize)
-            slice_bytes = voxel_bytes * np.prod(shape[1:])
-            # Get the nearest tile size under cache limit
-            square_overage = np.ceil(slice_bytes / max_bytes)
-            side_scalar = np.ceil(np.sqrt(square_overage))
-            # Set the actual blocksize to be under the cache limit
-            plane_shape = np.ceil(shape[1:] / side_scalar)
-            max_block = np.r_[[1], plane_shape]
-            ####
-            # Get max blocksizes for different resolutions
-            ####
-            lo_res = 10
-            # Get all block sizes by halving the max block size
-            all_blocks = [shape/(2**res) for res in range(lo_res)]
-            block_array = np.clip(np.ceil(all_blocks), 1, max_block)
-            # return named keywords
-            keywords.update({
-                runtime.BLOCK.NAME: np.uint32(block_array),
-                output.SIZE.NAME: np.uint32(shape),
-                output.TYPE.NAME: str(vol.dtype),
-            })
-        # Return all canonical keywords
-        return keywords
+        # Return if the ending is not json
+        if ending not in TiffGrid._meta_files:
+            return {}
 
+        # Return if the path does not exist
+        if not os.path.exists(filename):
+            return {}
 
+        # Get function to read the metainfo file
+        order = TiffGrid._meta_files.index(ending)
+        reader = TiffGrid._read[order]
+
+        # Get information from json file
+        with open(filename, 'r') as jd:
+            # Get all the filenames
+            all = reader(jd).get(tiff_field.ALL, [])
+            # Get all the paths
+            def get_path(d):
+                return d.get(tiff_field.PATH, '')
+            all_path = map(get_path, all)
+            # Get all the offsets
+            def get_offset(d):
+                return map(d.get, tiff_field.ZYX)
+            # Get the offsets and the max offset
+            all_off = np.uint32(map(get_offset, all))
+            index_size = np.amax(all_off, 0) + 1
+            # Get the tile size from first tile
+            tile0 = tiff.imread(all_path[0])
+            tile_shape = np.uint32((1,) + tile0.shape)
+            # The size and datatype of the full volume
+            full_shape = tile_shape * index_size
+
+            return {
+                runtime.BLOCK.NAME: tile_shape[np.newaxis],
+                output.SIZE.NAME: np.uint32(full_shape),
+                output.TYPE.NAME: str(tile0.dtype),
+            }

@@ -228,7 +228,7 @@ dataset path will be returned.
                 with h5py.File(h5_file[0],'r') as fd:
                     if h5_file[1] not in fd.keys():
                         h5_file[1] = fd.keys()[0]
-            except IOError:
+            except (TypeError, IOError):
                 return {}
 
         # sort by z start
