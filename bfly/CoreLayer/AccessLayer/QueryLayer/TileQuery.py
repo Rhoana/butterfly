@@ -1,7 +1,5 @@
 from ImageLayer import HDF5
-from ImageLayer import TileSpecs
-from ImageLayer import ImageStack
-from ImageLayer import Mojo
+from ImageLayer import TiffGrid
 from Query import Query
 import numpy as np
 import sys
@@ -25,9 +23,7 @@ class TileQuery(Query):
         from :class:`RUNTIME` ``.IMAGE.SOURCE.LIST``
     SOURCES: dict
         * source_list[0]: :class:`HDF5`
-        * source_list[1]: :class:`TileSpecs`
-        * source_list[2]: :class:`Mojo`
-        * source_list[3]: :class:`ImageStack`
+        * source_list[1]: :class:`TiffGrid`
     """
     def __init__(self, *args, **keywords):
 
@@ -38,9 +34,7 @@ class TileQuery(Query):
 
         self.SOURCES = {
             self.source_list[0]: HDF5,
-            self.source_list[1]: TileSpecs,
-            self.source_list[2]: Mojo,
-            self.source_list[3]: ImageStack
+            self.source_list[1]: TiffGrid,
         }
 
         self.RUNTIME.TILE.ZYX.VALUE = zyx_index

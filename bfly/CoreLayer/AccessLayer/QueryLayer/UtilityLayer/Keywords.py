@@ -186,9 +186,7 @@ static NAME that should always be used externally.
             SOURCE = NamedStruct('source-type',
                 LIST = [
                     'hdf5',
-                    'tilespecs',
-                    'mojo',
-                    'regularimagestack'
+                    'tiff',
                 ],
                 HDF5 = NamedStruct('hdf5',
                     OFF = NamedStruct('z-offset'),
@@ -197,7 +195,12 @@ static NAME that should always be used externally.
                         VALUE = 'main'
                     ),
                 ),
-                VALUE = 'regularimagestack'
+                TIFF = NamedStruct('tiff',
+                    ALL = 'tiles',
+                    PATH = 'location',
+                    ZYX = ['z','row','column'],
+                ),
+                VALUE = 'tiff'
             ),
             BLOCK = NamedStruct('block-size',
                 VALUE = np.uint32([[1, 512, 512]])
