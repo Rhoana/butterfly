@@ -2,6 +2,9 @@
 *.swo
 *.swp
 
+# symbolic link to 3D data
+bfly/static/x3d
+
 # Testing
 tests/data/*.json
 tests/data/*.h5
