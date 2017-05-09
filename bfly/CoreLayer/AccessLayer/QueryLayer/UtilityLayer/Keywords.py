@@ -329,7 +329,11 @@ Adding {0} entries for {1} table.
                     ACT = '''
 Added {0} entries in {1:06.2f} seconds.
                         '''.replace('\n','')
-                )
+                ),
+                ALL = NamedStruct('all',
+                    LOG = 'info',
+                    ACT = '{}'
+                ),
             )
         )
 

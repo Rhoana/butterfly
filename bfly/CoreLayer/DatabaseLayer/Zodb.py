@@ -284,14 +284,14 @@ of entries to add and ``K`` is the number of keys per entry
 
         # Time to add entries
         start = time.time()
-	count = len(entries)
+        count = len(entries)
         self.log('ADD', count, table)
         # Get all new id values
         id_index = np.arange(count)+ old_count
         id_entries = zip(id_index, entries)
 
-	#####
-	# Add all the entries
+        #####
+        # Add all the entries
         #####
         # Get the database connection
         with self.db.transaction() as connection:
@@ -301,7 +301,7 @@ of entries to add and ``K`` is the number of keys per entry
             # Add new value if not in collection
             root[table_path] += dict_entries
 
-	# Log diff and total time
-	diff = time.time() - start
+        # Log diff and total time
+        diff = time.time() - start
         self.log('ADDED', count, diff)
         return dict_entries
