@@ -283,23 +283,31 @@ of entries to add and ``K`` is the number of keys per entry
             k_links.POST.NAME: synapse[2]
         }
 
-    def neuron_children(self, table, path, id_key):
+    def neuron_children(self, table, path, id_key, start, stop):
         """
         Overrides :meth:`Database.neuron_children`
         """
-        table_path = Database.neuron_children(self, table, path, id_key)
+        table_path = Database.neuron_children(self, table, path, id_key, start, stop)
         # Get the array from the collection
         syns = self.db.get(table_path)
+
+        # Get only the coordinates
+        syns_zyx = syns[:, 3:]
+        # Get the indices within the bounds
+        in_zyx = (syns_zyx >= start) & (syns_zyx < stop)
+        in_syns = syns[np.all(in_zyx, axis=1)]
+
         # Get only the lists of neurons
-        post_synaptic = syns[:,1]
-        pre_synaptic = syns[:,2]
-        n_syns = len(syns)
+        neurons_1 = in_syns[:,1]
+        neurons_2 = in_syns[:,2]
+        n_syns = len(in_syns)
+
         # Get neurons matching the id key
-        pre_synaptic = pre_synaptic[pre_synaptic == id_key]
-        post_synaptic = post_synaptic[post_synaptic == id_key]
+        pre_neurons = neurons_1[neurons_2 == id_key]
+        post_neurons = neurons_2[neurons_1 == id_key]
         # Return all synapses in a dictionary
-        syn_dict = dict(zip(post_synaptic, (2,)*n_syns))
-        syn_dict.update(dict(zip(pre_synaptic, (1,)*n_syns)))
+        syn_dict = dict(zip(post_neurons, (2,)*n_syns))
+        syn_dict.update(dict(zip(pre_neurons, (1,)*n_syns)))
         return syn_dict
 
     def all_neurons(self, table, path):

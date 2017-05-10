@@ -398,7 +398,7 @@ object reference to the real table.
         """
         return self.get_table(table, path)
 
-    def neuron_children(self, table, path, id_key):
+    def neuron_children(self, table, path, id_key, start, stop):
         """
         Must be overridden by derived class.
         """

@@ -87,11 +87,13 @@ data or mask requests.
             # Lists giving parameters needed 
             ID_LIST = [
                 'synapse_parent',
-                'neuron_children',
                 'synapse_keypoint',
                 'neuron_keypoint',
                 'is_synapse',
                 'is_neuron',
+            ],
+            ID_BOX_LIST = [
+                'neuron_children',
             ],
             BOX_LIST = [
                 'synapse_ids',

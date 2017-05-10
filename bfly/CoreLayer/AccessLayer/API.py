@@ -108,9 +108,27 @@ from :meth:`_id_feature` or :meth:`_box_feature`
 
         # All features that need id
         if feat in feats.ID_LIST:
+            # get the id
             id_key = self._get_int_query(in_info.ID)
             # Return names based on id
             names = self._id_feature(feat, path, id_key)
+        # All features that need bounds and id
+        elif feat in feats.ID_BOX_LIST:
+            # get the id
+            id_key = self._get_int_query(in_info.ID)
+            # get resolution from input
+            res_xy = self.INPUT.RESOLUTION.XY
+            resolution = self._get_int_query(res_xy)
+            # get bounds from input
+            for key in ['Z','Y','X','DEPTH','HEIGHT','WIDTH']:
+                term = getattr(self.INPUT.POSITION, key)
+                target_bounds.append(self._get_int_query(term))
+            # scale the bounds from resolution
+            scale = 2**resolution
+            scales = np.tile([1,scale,scale],2)
+            bounds = np.uint32(target_bounds) * scales
+            # Return names based on bounds
+            names = self._id_box_feature(feat, path, id_key, bounds)
         # All features that need bounds
         elif feat in feats.BOX_LIST:
             # get resolution from input
@@ -209,11 +227,6 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         if not db_table:
             return ['Voxel List not Supported']
 
-        # Find all synapses where neuron is parent
-        if feat == feats.NEURON_CHILDREN.NAME:
-            # return pre and post results
-            return db.neuron_children(db_table, path, id_key)
-
         # Just check record of an ID
         if feat in feats.BOOL_LIST:
             if feat == k_tables.LIST[0]:
@@ -231,6 +244,51 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         # If the request asks for all links
         if feat == feats.SYNAPSE_LINKS.NAME:
             return db.synapse_parent(db_table, path, id_key)
+
+        # Not yet supported
+        return [db_table]
+
+    def _id_box_feature(self, feat, path, id_key, bounds):
+        """ Loads a feature list that needs a bounding box
+
+        Calls :meth:`_db_feature` to access database
+
+        Arguments
+        -----------
+        feat : str
+            The name of the feature request
+        path : str
+            The path to the corresponding image data
+        id_key : int
+            The key value for a :class:`Database` table
+        bounds : list
+            The 6-item list of a volume origin and shape
+
+        Returns
+        --------
+        list or dict
+            The feature used to make an :class:`InfoQuery`
+        """
+
+        # Get input keyword arguments
+        feats = self.INPUT.FEATURES
+        # Get metadata for database
+        k_tables = self.RUNTIME.DB.TABLE
+
+        # Shorthand database name, table, key
+        db, db_table, db_key = self._db_feature(feat)
+        # Do not know
+        if not db_table:
+            return ['Feature not understood']
+
+        # Get start and end of bounds
+        start = np.uint32(bounds[:3])
+        stop = start + bounds[3:]
+
+        # Find all synapses where neuron is parent
+        if feat == feats.NEURON_CHILDREN.NAME:
+            # return pre and post results
+            return db.neuron_children(db_table, path, id_key, start, stop)
 
         # Not yet supported
         return [db_table]
