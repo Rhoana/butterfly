@@ -112,7 +112,7 @@ from :meth:`_id_feature` or :meth:`_box_feature`
             # Return names based on id
             names = self._id_feature(feat, path, id_key)
         # All features that need bounds
-        if feat in feats.BOX_LIST:
+        elif feat in feats.BOX_LIST:
             # get resolution from input
             res_xy = self.INPUT.RESOLUTION.XY
             resolution = self._get_int_query(res_xy)
