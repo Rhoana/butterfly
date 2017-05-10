@@ -95,11 +95,11 @@ class Database():
         if d_path and len(c_list):
             # Add all tables for the dataset path
             self.add_tables(d_path)
-            # Load all the blocks
-            self.load_blocks(d_path)
             # Load all synapses and neurons
             synapses = self.load_synapses(d_path)
             self.load_neurons(d_path, synapses)
+            # Load all the blocks
+            self.load_blocks(d_path)
 
     def add_path(self, c_path, d_path):
         """ store a link from a ``c_path`` to a ``d_path``

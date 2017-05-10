@@ -293,13 +293,25 @@ of entries to add and ``K`` is the number of keys per entry
         #####
         # Add all the entries
         #####
-        # Get the database connection
-        with self.db.transaction() as connection:
-            root = connection.root()
-            # Rewrite all the entries as dictionaries
-            dict_entries = map(dictionize, id_entries)
-            # Add new value if not in collection
-            root[table_path] += dict_entries
+        # Add entries in groups of 16K
+        group_size = 16384
+        total_size = len(id_entries)
+        n_additions = int(total_size // group_size)
+        # Add all groups of entries
+        for n_add in range(n_additions):
+            # Get the range to store
+            d0 = n_add * group_size
+            d1 = np.clip(d0 + group_size, 0, total_size)
+            self.log('all', """
+            Storing {} from {} to {}
+            """.format(table_path, d0, d1))
+            # Get the database connection
+            with self.db.transaction() as connection:
+                root = connection.root()
+                # Rewrite all the entries as dictionaries
+                dict_entries = map(dictionize, id_entries[d0:d1])
+                # Add new value if not in collection
+                root[table_path] += dict_entries
 
         # Log diff and total time
         diff = time.time() - start
