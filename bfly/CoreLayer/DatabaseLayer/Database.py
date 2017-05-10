@@ -362,6 +362,12 @@ object reference to the real table.
         k_join = self.RUNTIME.DB.JOIN.NAME
         return k_join.format(table, real_path)
 
+    def synapse_ids(self, table, path, start, stop):
+        """
+        Must be overridden by derived class.
+        """
+        return self.get_table(table, path)
+
     def get_entry(self, table, path, key=None, **keywords):
         """ Get an actual entry in the database
 

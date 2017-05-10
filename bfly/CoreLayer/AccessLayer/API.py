@@ -300,16 +300,12 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         start = np.uint32(bounds[:3])
         stop = start + bounds[3:]
 
-        # Bound center in start and end
-        def bounded(s):
-            c = map(s.get, [k_z,k_y,k_x])
-            return all(c > start) and all(c < stop)
-
         # if request for labels in bounds
         if feat in feats.LABEL_LIST:
             # Find the center points within the bounds
-            result = db.get_entry(db_table, path, bounded)
-            return [ str(s[db_key]) for s in result ]
+            result = db.synapse_ids(db_table, path, start, stop)
+            listed = result[:,0].tolist()
+            return listed
 
         # Not yet supported
         return [db_table]

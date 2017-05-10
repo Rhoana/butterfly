@@ -9,7 +9,7 @@ class Nodb(Database):
     ----------
     path: str
         The file path to store and access the database
-    _runtime: :class:`RUNTIME`
+    RUNTIME: :class:`RUNTIME`
         Gets stored as :data:`RUNTIME`
 
     Attributes
@@ -44,43 +44,6 @@ and contains each table as a separate key
         # Map the c_path to the d_path
         self.db[c_path] = d_path
 
-    def empty_table(self, table_path):
-        """ Add a table to the database \
-overwriting any preexisting table.
-
-        Arguments
-        ----------
-        table_path: str
-            The combined path of the table
-        """
-        # Make an empty table as a list
-        self.db[table_path] = []
-
-    def add_table(self, table, path):
-        """ Add a table to the database \
-keeping any existing table.
-        Overides :meth:`Database.add_table`
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-
-        Returns
-        --------
-        bool
-            Whether the table was added correctly
-        """
-        table_path = Database.add_table(self, table, path)
-        # If table is non-existent
-        if table_path not in self.db:
-            # Make the correct table
-            self.empty_table(table_path)
-        # return the joint path
-        return table_path
-
     def get_path(self, path):
         """ Map a channel path to a dataset path
         Overides :meth:`Database.get_path`
@@ -98,25 +61,6 @@ keeping any existing table.
         Database.get_path(self, path)
         # Get the correct path or input path by default
         return self.db.get(path, path)
-
-    def get_table(self, table, path):
-        """ Get the actual table for a given path
-        Overides :meth:`Database.get_table`
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-
-        Returns
-        --------
-        unqlite.Collection
-            The requested :data:`db` ``.collection``
-        """
-
-        return Database.get_table(self, table, path)
 
     def get_all(self, table, path):
         """ Get all the entries in a table path
@@ -218,45 +162,36 @@ of entries to add and ``K`` is the number of keys per entry
         # Get the name of the table
         table_path = Database.add_entries(self, table, path, t_keys, entries, update=1)
 
-        # list or tuple to dict
-        def dictionize((index, entry)):
-            if hasattr(entry, '__len__'):
-                d_entry = dict(zip(t_keys, entry))
-                d_entry['__id'] = int(index)
-                return d_entry
-            return {}
-
-        old_count = 0
-        # Add any new entries
-        if not update:
-            # Return if no more entries than exist
-            existing = self.get_all(table, path)
-            if len(existing) >= len(entries):
-                return []
-            # Otherwise add remaining entries
-            old_count = len(existing)
-            entries = entries[old_count:]
-        # create fully empty table
-        else:
-            self.empty_table(table_path)
-
         # Time to add entries
         start = time.time()
         count = len(entries)
         self.log('ADD', count, table)
-        # Get all new id values
-        id_index = np.arange(count)+ old_count
-        id_entries = zip(id_index, entries)
 
-        #####
-        # Add all the entries
-        #####
-        # Rewrite all the entries as dictionaries
-        dict_entries = map(dictionize, id_entries)
-        # Add new value if not in collection
-        self.db[table_path] += dict_entries
+        # Get information specific to the table
+        table_field = self.RUNTIME.DB.TABLE[table]
+        # Add primary key if not explicit
+        if table_field.KEY.NAME in ['__id']:
+            # create full table
+            keys = range(len(entries))
+            entries = np.c_[keys, entries]
+
+        # Add the entries to database
+        self.db[table_path] = entries
 
         # Log diff and total time
         diff = time.time() - start
         self.log('ADDED', count, diff)
-        return dict_entries
+        return entries
+
+    def synapse_ids(self, table, path, start, stop):
+        """
+        Overrides :meth:`Database.synapse_ids`
+        """
+        table_path = Database.synapse_ids(self, table, path, start, stop)
+        # Get the array from the collection
+        syns = self.db.get(table_path)
+        # Get only the coordinates
+        syns_zyx = syns[:,3:]
+        # Get the indices within the bounds
+        in_zyx = (syns_zyx >= start) & (syns_zyx < stop)
+        return syns[np.all(in_zyx, axis=1)]
