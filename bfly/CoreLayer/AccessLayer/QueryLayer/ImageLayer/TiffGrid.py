@@ -2,6 +2,7 @@ from Datasource import Datasource
 import tifffile as tiff
 import numpy as np
 import json
+import cv2
 import os
 
 class TiffGrid(Datasource):
@@ -111,7 +112,7 @@ this filname to not give a valid h5 volume.
             all_off = np.uint32(map(get_offset, all))
             index_size = np.amax(all_off, 0) + 1
             # Get the tile size from first tile
-            tile0 = tiff.imread(all_path[0])
+            tile0 = TiffGrid.imread(all_path[0])
             tile_shape = np.uint32((1,) + tile0.shape)
             # The size and datatype of the full volume
             full_shape = tile_shape * index_size
@@ -121,3 +122,13 @@ this filname to not give a valid h5 volume.
                 output.SIZE.NAME: np.uint32(full_shape),
                 output.TYPE.NAME: str(tile0.dtype),
             }
+
+    @staticmethod
+    def imread(_path):
+        """ allow loading grayscale pngs as well as tiffs
+        """
+        if os.path.splitext(_path)[1] in ['.tiff', '.tif']:
+            return tiff.imread(_path)
+        else:
+            return cv2.imread(_path,0)
+
