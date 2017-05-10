@@ -95,8 +95,6 @@ class Database():
         if d_path and len(c_list):
             # Add all tables for the dataset path
             self.add_tables(d_path)
-            # Load all the blocks
-            self.load_blocks(d_path)
             # Load all synapses and neurons
             synapses = self.load_synapses(d_path)
             self.load_neurons(d_path, synapses)
@@ -234,86 +232,6 @@ where N is the number of neurons for the ``path``.
         # Add neurons to database
         self.add_neurons(path, neurons)
         return neurons
-
-    def load_blocks(self, path):
-        """ Load all the block information from files
-
-        Arguments
-        ----------
-        path: str
-            The dataset path to metadata files
-
-        Returns
-        --------
-        numpy.ndarray
-            The Nx6 array of z0, y0, x0, z1, y1, x1 values \
-where N is the number of blocks for the ``path``.
-        """
-        # Get file fields
-        k_files = self.RUNTIME.DB.FILE
-        # Get name of the block file
-        k_file = k_files.BLOCK.VALUE
-        # Get boundary keys for the block file
-        k_start = k_files.BLOCK.BOUND.START
-        k_shape = k_files.BLOCK.BOUND.SHAPE
-        # Get neuron keys for the block file
-        k_blocks = k_files.BLOCK.BLOCK.NAME
-        # Get the full path to the block file
-        full_path = os.path.join(path, k_file)
-
-        try:
-            # Load the file with all blocks
-            with open(full_path, 'r') as f:
-                all_dict = json.load(f)
-                all_blocks = all_dict[k_blocks]
-        # Return if not valid file or json
-        except (IOError, ValueError):
-            return []
-
-        # Reformat each of the blocks as needed
-        def reformat_block(block):
-            # Get the bounds for the volume
-            bound_start = map(block[0].get, k_start)
-            bound_shape = map(block[0].get, k_shape)
-            bound_end = list(np.uint32(bound_start) + bound_shape)
-            # Get the actual neuron ids
-            def get_full_id(id_map):
-                return id_map[1]
-            bound_ids = map(get_full_id, block[1])
-            # Return the bounds and neurons
-            return [bound_start, bound_end, bound_ids]
-
-        # Get the list of lists for each block
-        block_list = map(reformat_block, all_blocks)
-        # Add the blocks to the database
-        return self.add_blocks(path, block_list)
-
-    def add_blocks(self, path, blocks):
-        """ Add all the blocks to the database
-
-        Arguments
-        ----------
-        path: str
-            The dataset path to metadata files
-        blocks: list of lists
-            The N lists of three lists with start bounds, end bounds, \
-and neurons where N is the number of blocks for the ``path``.
-
-        Returns
-        --------
-        list
-            A list of dicts from each row of ``blocks`` \
-with dictionary keys taken from ``BLOCK.FULL_LIST``
-
-        """
-        # Get database fields
-        k_tables = self.RUNTIME.DB.TABLE
-        # Get table key_values
-        k_keys = k_tables.BLOCK.FULL_LIST
-        k_block = k_tables.BLOCK.NAME
-
-        # Add entries
-        return self.add_entries(k_block, path, k_keys, blocks, 0)
 
     def add_synapses(self, path, synapses):
         """ Add all the synapases to the database
