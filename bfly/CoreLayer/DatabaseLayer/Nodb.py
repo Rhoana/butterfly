@@ -106,10 +106,22 @@ and contains each table as a separate key
         # Get the list from the collection
         collect = self.db.get(table_path)
         # If the collect doesn't have the key
-        if not collect or len(collect) <= int(key):
-            return {}
-        # Get entry from the collection
-        return collect[int(key)]
+        if len(collect) <= int(key):
+            return []
+        # Get information specific to the table
+        table_field = self.RUNTIME.DB.TABLE[table]
+        # Get primary key directly if possible
+        if table_field.KEY.NAME in ['__id']:
+            # Get entry from the collection
+            return collect[int(key)]
+        else:
+            all_ids = collect[:,0]
+            # Find potential spot for primary key
+            first = np.searchsorted(all_ids, int(key))
+            # Return if key value exists in array
+            if all_ids[first] == int(key):
+                return collect[first]
+            return []
 
     def get_by_fun(self, table, path, fun):
         """ Get the entries where function is true.
@@ -174,6 +186,10 @@ of entries to add and ``K`` is the number of keys per entry
             # create full table
             keys = range(len(entries))
             entries = np.c_[keys, entries]
+        # Sort by explicit primary key
+        else:
+            key_order = entries[:,0].argsort()
+            entries = entries[key_order]
 
         # Add the entries to database
         self.db[table_path] = entries
@@ -194,4 +210,105 @@ of entries to add and ``K`` is the number of keys per entry
         syns_zyx = syns[:,3:]
         # Get the indices within the bounds
         in_zyx = (syns_zyx >= start) & (syns_zyx < stop)
-        return syns[np.all(in_zyx, axis=1)]
+        result = syns[np.all(in_zyx, axis=1)]
+        # Return all keys in the table
+        listed = result[:,0].tolist()
+        return listed
+
+    def is_synapse(self, table, path, id_key):
+        """
+        Overrides :meth:`Database.is_synapse`
+        """
+        table_path = Database.is_synapse(self, table, path, id_key)
+        # Get one value by key
+        synapse = self.get_by_key(table, path, id_key)
+        # Return boolean by length
+        return not not len(synapse)
+
+    def is_neuron(self, table, path, id_key):
+        """
+        Overrides :meth:`Database.is_neuron`
+        """
+        table_path = Database.is_neuron(self, table, path, id_key)
+        # Get one value by key
+        neuron = self.get_by_key(table, path, id_key)
+        # Return boolean by length
+        return not not len(neuron)
+
+    def synapse_keypoint(self, table, path, id_key):
+        """
+        Overrides :meth:`Database.synapse_keypoint`
+        """
+        table_path = Database.synapse_keypoint(self, table, path, id_key)
+        k_z, k_y, k_x = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
+        # Return a dictionary from a single result
+        synapse = self.get_by_key(table, path, id_key)
+        if not len(synapse):
+            return {}
+        return {
+            k_z: synapse[-3],
+            k_y: synapse[-2],
+            k_x: synapse[-1]
+        }
+
+    def neuron_keypoint(self, table, path, id_key):
+        """
+        Overrides :meth:`Database.neuron_keypoint`
+        """
+        table_path = Database.neuron_keypoint(self, table, path, id_key)
+        k_z, k_y, k_x = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
+        # Return a dictionary from a single result
+        neuron = self.get_by_key(table, path, id_key)
+        if not len(neuron):
+            return {}
+        return {
+            k_z: neuron[-3],
+            k_y: neuron[-2],
+            k_x: neuron[-1]
+        }
+
+    def synapse_parent(self, table, path, id_key):
+        """
+        Overrides :meth:`Database.synapse_parent`
+        """
+        table_path = Database.synapse_parent(self, table, path, id_key)
+        k_links = self.RUNTIME.FEATURES.LINKS
+        # Return a dictionary from a single result
+        synapse = self.get_by_key(table, path, id_key)
+        if not len(synapse):
+            return {}
+        return {
+            k_links.ID.NAME: synapse[0],
+            k_links.PRE.NAME: synapse[1],
+            k_links.POST.NAME: synapse[2]
+        }
+
+    def neuron_children(self, table, path, id_key):
+        """
+        Overrides :meth:`Database.neuron_children`
+        """
+        table_path = Database.neuron_children(self, table, path, id_key)
+        # Get the array from the collection
+        syns = self.db.get(table_path)
+        # Get only the lists of neurons
+        post_synaptic = syns[:,1]
+        pre_synaptic = syns[:,2]
+        n_syns = len(syns)
+        # Get neurons matching the id key
+        pre_synaptic = pre_synaptic[pre_synaptic == id_key]
+        post_synaptic = post_synaptic[post_synaptic == id_key]
+        # Return all synapses in a dictionary
+        syn_dict = dict(zip(post_synaptic, (2,)*n_syns))
+        syn_dict.update(dict(zip(pre_synaptic, (1,)*n_syns)))
+        return syn_dict
+
+    def all_neurons(self, table, path):
+        """
+        Overrides :meth:`Database.all_neurons`
+        """
+        table_path = Database.all_neurons(self, table, path)
+
+        # Return all keys in the table
+        result = self.get_all(table, path)
+        listed = result[:,0].tolist()
+        return listed

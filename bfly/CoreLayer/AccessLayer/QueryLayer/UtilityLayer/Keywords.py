@@ -23,7 +23,7 @@ _groupings = {
 # List all groups for the API and the rh-config
 _group_list = [_experiments, _samples, _datasets, _channels]
 # List all tables for the API and the database
-_table_list = ['neuron', 'synapse', 'block']
+_table_list = ['neuron', 'synapse']
 
 class INPUT():
     """ Keywords to read input files and requests
@@ -95,7 +95,6 @@ data or mask requests.
             ],
             BOX_LIST = [
                 'synapse_ids',
-                'voxel_list',
             ],
             STATIC_LIST = ['all_neurons'],
             # Specific Lists of features
@@ -105,7 +104,6 @@ data or mask requests.
             LINK_LIST = ['synapse_parent','neuron_children'],
             BOOL_LIST = ['is_synapse','is_neuron'],
             LABEL_LIST = ['synapse_ids'],
-            VOXEL_LIST = ['voxel_list']
         )
         self.POSITION = NamelessStruct(
             # ALL THE ORIGIN / SHAPE INPUTS
@@ -181,6 +179,14 @@ static NAME that should always be used externally.
             SCALES = NamedStruct('scales'),
             ZYX = NamedStruct('zyx')
         )
+        # ALL THE FEATURE RUNTIME TERMS
+        self.FEATURES = NamelessStruct(
+            LINKS = NamelessStruct(
+                ID = NamedStruct('synapse_id'),
+                PRE = NamedStruct('synapse_parent_pre'),
+                POST = NamedStruct('synapse_parent_post')
+            )
+        )
         # ALL THE IMAGE RUNTIME TERMS
         self.IMAGE = NamelessStruct(
             SOURCE = NamedStruct('source-type',
@@ -233,12 +239,6 @@ static NAME that should always be used externally.
                     FULL_LIST = ['n1','n2','z','y','x'],
                     KEY_LIST = ['n1','n2'],
                 ),
-                BLOCK = NamedStruct(_table_list[2],
-                    KEY = NamedStruct('__id'),
-                    BOUND_LIST = ['start','stop'],
-                    FULL_LIST = ['start','stop','neurons'],
-                    KEY_LIST = ['start','stop']
-                ),
                 ALL = NamelessStruct(
                     POINT_LIST = ['z','y','x']
                 )
@@ -251,17 +251,8 @@ static NAME that should always be used externally.
                         LIST = ['z','y','x']
                     )
                 ),
-                BLOCK = NamedStruct('connectivity-graph',
-                    DEFAULT = 'connectivity-graph.json',
-                    BOUND = NamedStruct('locations',
-                        START = ['z', 'y', 'x',],
-                        SHAPE = ['depth', 'height', 'width']
-                    ),
-                    BLOCK = NamedStruct('volumes')
-                ),
                 DB_LIST = [
                     'synapse-connections',
-                    'connectivity-graph'
                 ],
                 CONFIG = NamedStruct('rh-config',
                     VALUE = CONFIG_FILENAME,
@@ -373,14 +364,6 @@ static NAME that should always be used externally.
                 X = NamedStruct('x'),
                 Y = NamedStruct('y'),
                 Z = NamedStruct('z')
-            )
-        )
-        # ALL THE FEATURE OUTPUT TERMS
-        self.FEATURES = NamelessStruct(
-            LINKS = NamelessStruct(
-                ID = NamedStruct('synapse_id'),
-                PRE = NamedStruct('synapse_parent_pre'),
-                POST = NamedStruct('synapse_parent_post')
             )
         )
 

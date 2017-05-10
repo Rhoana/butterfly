@@ -368,6 +368,48 @@ object reference to the real table.
         """
         return self.get_table(table, path)
 
+    def is_synapse(self, table, path, id_key):
+        """
+        Must be overridden by derived class.
+        """
+        return self.get_table(table, path)
+
+    def is_neuron(self, table, path, id_key):
+        """
+        Must be overridden by derived class.
+        """
+        return self.get_table(table, path)
+
+    def synapse_keypoint(self, table, path, id_key):
+        """
+        Must be overridden by derived class.
+        """
+        return self.get_table(table, path)
+
+    def neuron_keypoint(self, table, path, id_key):
+        """
+        Must be overridden by derived class.
+        """
+        return self.get_table(table, path)
+
+    def synapse_parent(self, table, path, id_key):
+        """
+        Must be overridden by derived class.
+        """
+        return self.get_table(table, path)
+
+    def neuron_children(self, table, path, id_key):
+        """
+        Must be overridden by derived class.
+        """
+        return self.get_table(table, path)
+
+    def all_neurons(self, table, path):
+        """
+        Must be overridden by derived class.
+        """
+        return self.get_table(table, path)
+
     def get_entry(self, table, path, key=None, **keywords):
         """ Get an actual entry in the database
 

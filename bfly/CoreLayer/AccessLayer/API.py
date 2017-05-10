@@ -201,65 +201,36 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         feats = self.INPUT.FEATURES
         # Get metadata for database
         k_tables = self.RUNTIME.DB.TABLE
-        k_nodes = k_tables.SYNAPSE.NEURON_LIST
-        k_z,k_y,k_x = k_tables.ALL.POINT_LIST
-        # Get output keyword arguments
-        k_links = self.OUTPUT.FEATURES.LINKS
 
         # Shorthand database name, table, key
         db, db_table, db_key = self._db_feature(feat)
 
         # Do not have
         if not db_table:
-            return ['Voxel List not Supported yet']
+            return ['Voxel List not Supported']
 
         # Find all synapses where neuron is parent
         if feat == feats.NEURON_CHILDREN.NAME:
-            post_result = db.get_entry(db_table, path, **{
-                k_nodes[0]: id_key
-            })
-            pre_result = db.get_entry(db_table, path, **{
-                k_nodes[1]: id_key
-            })
-            all_results = {}
-            ## Format them in a dictionary
-            for pre in pre_result:
-                all_results[pre[db_key]] = 1
-            for post in post_result:
-                all_results[post[db_key]] = 2
             # return pre and post results
-            return all_results
-
-        # Just look at one result with the ID
-        result = db.get_entry(db_table, path, id_key)
-
-        # Only first result needed
-        if result and isinstance(result, list):
-            result = result[0]
+            return db.neuron_children(db_table, path, id_key)
 
         # Just check record of an ID
         if feat in feats.BOOL_LIST:
-            return not not result
-
-        # Empty features
-        if not result:
-            return {}
+            if feat == k_tables.LIST[0]:
+                return db.is_neuron(db_table, path, id_key)
+            else:
+                return db.is_synapse(db_table, path, id_key)
 
         # If the request gets a keypoint
         if feat in feats.POINT_LIST:
-            return {
-                k_z: result[k_z],
-                k_y: result[k_y],
-                k_x: result[k_x]
-            }
+            if feat == k_tables.LIST[0]:
+                return db.neuron_keypoint(db_table, path, id_key)
+            else:
+                return db.synapse_keypoint(db_table, path, id_key)
 
         # If the request asks for all links
         if feat == feats.SYNAPSE_LINKS.NAME:
-            return {
-                k_links.ID.NAME: result[db_key],
-                k_links.PRE.NAME: result[k_nodes[0]],
-                k_links.POST.NAME: result[k_nodes[1]]
-            }
+            return db.synapse_parent(db_table, path, id_key)
 
         # Not yet supported
         return [db_table]
@@ -288,7 +259,6 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         feats = self.INPUT.FEATURES
         # Get metadata for database
         k_tables = self.RUNTIME.DB.TABLE
-        k_z,k_y,k_x = k_tables.ALL.POINT_LIST
 
         # Shorthand database name, table, key
         db, db_table, db_key = self._db_feature(feat)
@@ -303,9 +273,7 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         # if request for labels in bounds
         if feat in feats.LABEL_LIST:
             # Find the center points within the bounds
-            result = db.synapse_ids(db_table, path, start, stop)
-            listed = result[:,0].tolist()
-            return listed
+            return db.synapse_ids(db_table, path, start, stop)
 
         # Not yet supported
         return [db_table]
@@ -339,13 +307,8 @@ from :meth:`_id_feature` or :meth:`_box_feature`
         if not db_table:
             return ['Feature not understood']
 
-        # Get the key values
-        def get_key(s):
-            return s[db_key]
-
         # Return all keys in the table
-        full_table = db.get_all(db_table, path)
-        return sorted(map(get_key, full_table))
+        return db.all_neurons(db_table, path)
 
     #####
     #Lists values from config for group methods
