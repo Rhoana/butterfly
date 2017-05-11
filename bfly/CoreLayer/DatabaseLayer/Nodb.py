@@ -105,13 +105,13 @@ and contains each table as a separate key
         table_path = Database.get_by_key(self, table, path, key)
         # Get the list from the collection
         collect = self.db.get(table_path)
-        # If the collect doesn't have the key
-        if len(collect) <= int(key):
-            return []
         # Get information specific to the table
         table_field = self.RUNTIME.DB.TABLE[table]
         # Get primary key directly if possible
         if table_field.KEY.NAME in ['__id']:
+            # If the collect doesn't have the key
+            if len(collect) <= int(key):
+                return []
             # Get entry from the collection
             return collect[int(key)]
         else:
