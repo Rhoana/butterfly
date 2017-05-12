@@ -308,8 +308,8 @@ of entries to add and ``K`` is the number of keys per entry
         pre_neurons = syns_ids[neurons_1 == id_key]
         post_neurons = syns_ids[neurons_2 == id_key]
         # Synapses as keys in in a dictionary
-        syn_dict.update(dict(zip(pre_neurons, (1,)*n_syns)))
         syn_dict = dict(zip(post_neurons, (2,)*n_syns))
+        syn_dict.update(dict(zip(pre_neurons, (1,)*n_syns)))
         return syn_dict
 
     def all_neurons(self, table, path):
