@@ -298,16 +298,18 @@ of entries to add and ``K`` is the number of keys per entry
         in_syns = syns[np.all(in_zyx, axis=1)]
 
         # Get only the lists of neurons
-        neurons_1 = in_syns[:,1]
-        neurons_2 = in_syns[:,2]
-        n_syns = len(in_syns)
+        neurons_1 = in_syns[:, 1]
+        neurons_2 = in_syns[:, 2]
+        # Get all synapse id values
+        syns_ids = in_syns[:, 0]
+        n_syns = len(syns_ids)
 
         # Get neurons matching the id key
-        pre_neurons = neurons_1[neurons_2 == id_key]
-        post_neurons = neurons_2[neurons_1 == id_key]
-        # Return all synapses in a dictionary
-        syn_dict = dict(zip(post_neurons, (2,)*n_syns))
+        pre_neurons = syns_ids[neurons_1 == id_key]
+        post_neurons = syns_ids[neurons_2 == id_key]
+        # Synapses as keys in in a dictionary
         syn_dict.update(dict(zip(pre_neurons, (1,)*n_syns)))
+        syn_dict = dict(zip(post_neurons, (2,)*n_syns))
         return syn_dict
 
     def all_neurons(self, table, path):
