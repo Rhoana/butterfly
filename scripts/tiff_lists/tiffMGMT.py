@@ -175,11 +175,53 @@ Wrote {} layers to {} in {} seconds
 """.format(len(scale_bounds), _path, sec_diff))
 
 
-    def bound_set(self, bounds):
+    def unique(self, _bounds, _path):
         """ Return a list of unique ids in a bounding box
         
         Arguments
         ----------
         bounds : numpy.ndarray
             3x2 array of z_arg, y_arg, and x_arg bounds
+        _path : str
+            The path to the output h5 file
         """
+        # Get the full / tile shape
+        scale_bounds = np.array(_bounds[0])
+        scale_slice = np.array(self.slice_shape[1:])
+        scale_tile = np.array(self.tile_shape[1:])
+        # Get the 2d start and end bounds
+        yx_0, yx_1 = _bounds[1:].T
+        print("""
+Writing all values in {} volume to {}
+""".format(scale_slice, _path))
+        # Start timing the h5 file writing
+        sec_start = time.time()
+        # Add to the h5 file for the given stack
+        for z in range(*scale_bounds):
+            # Create the set of unique values
+            a = set()
+            # Open all tiff files in the stack
+            for f in range(self.n_xy):
+                # Get tiff file path and offset
+                f_id = int(z * self.n_xy + f)
+                f_path = self.all_path[f_id]
+                f_offset = self.all_off[f_id][1:]
+                # if the offset is inside bounds
+                if all(f_offset >= yx_0) and all(f_offset < yx_1):
+                    # Get the bounds within the offset
+                    y0, x0 = yx_0 - f_offset
+                    y1, x1 = yx_1 - f_offset
+                    # Read the file to a numpy volume
+                    f_image = tiff.imread(f_path)[y0:y1, x0:x1].flatten()
+                    # Union of unique values with the full set
+                    tile_bins = np.bincount(f_image) > 0
+                    a = a | set(np.where(tile_bins)[0])
+            # Write the unique values to a json file
+        with open(_path, 'w') as fd:
+            json.dump(list(a), fd)
+        # Record total writing time
+        sec_diff = time.time() - sec_start
+        print("""
+Wrote all unique values to {} in {} seconds
+""".format(_path, sec_diff))
+

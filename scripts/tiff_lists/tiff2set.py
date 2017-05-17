@@ -35,4 +35,5 @@ if __name__ == '__main__':
     bounds = np.uint32(map(fmt_bound, ['z_arg','y_arg','x_arg']))
     # Create a file manager
     mgmt = TiffMGMT(in_file)
-
+    # Write the unique values to a text file
+    mgmt.unique(bounds, out_folder)

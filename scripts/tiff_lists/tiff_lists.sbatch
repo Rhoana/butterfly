@@ -20,9 +20,9 @@ pip install --upgrade h5py
 pip install --upgrade tifffile
 pip install --upgrade opencv-python
 
-TOTAL_RUNS=10
-N_RES=4
-OUTPUT_PNG="/n/coxfs01/thejohnhoffer/tiff_lists/2017-04-19_R2B1V3"
+TOTAL_RUNS=80
+N_RES=3
+OUTPUT_PNG="/n/coxfs01/thejohnhoffer/tiff_lists/2017-04-19_R2B1V3/3x"
 TIFF_JSON="/n/coxfs01/leek/results/2017-04-19_R2B1V3/boss/boss.json"
 
 # we are working
