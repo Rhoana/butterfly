@@ -7,7 +7,8 @@ class RTreeDB():
     def __init__(self, file_name):
 
         # Basic parameters
-        file_name = os.path.join(file_name, 'synapse')
+        synapse_spatial = os.path.join(file_name, 'synapse_spatial')
+        os.makedirs(synapse_spatial)
 
         # Make a 3d index
         prop = rtree.index.Property()
@@ -16,7 +17,7 @@ class RTreeDB():
         prop.dimension = 3
 
         # Write to the file name
-        self._db = rtree.index.Index(file_name, properties = prop)
+        self._db = rtree.index.Index(synapse_spatial, properties = prop)
 
     def add_point(self, izyx):
         # Turn the point to a rectangle
