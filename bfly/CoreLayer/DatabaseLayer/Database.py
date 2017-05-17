@@ -1,5 +1,7 @@
+import os
+import csv
 import time
-import json, os
+import json
 import numpy as np
 
 class Database():
@@ -228,6 +230,26 @@ where N is the number of neurons for the ``path``.
         neuron_src = np.delete(synapses[src_keys], 1, 1)
         # Get full neuron list from source and target
         neurons = np.r_[neuron_src, neuron_tgt]
+
+        # Get file fields
+        k_files = self.RUNTIME.DB.FILE
+        # Get keywords for input file
+        k_file = k_files.SOMA.VALUE
+        print k_file
+        if os.path.exists(k_file):
+            # Load the csv
+            with open(k_file, 'r') as cf:
+                # Add each new center point to database
+                for soma in csv.reader(cf):
+                    # Make a numpy uint32 coorinate array
+                    soma_zyx = np.uint32(soma[:3])
+                    soma_id = np.uint32(soma[-1])
+                    # Find the correct ID
+                    neuron_ids = neurons.T[0]
+                    soma_index = np.argwhere(neuron_ids == soma_id)[0]
+                    # Insert into the correct ID
+                    if len(soma_index):
+                        neurons[soma_index[0], 1:] = soma_zyx
 
         # Add neurons to database
         self.add_neurons(path, neurons)

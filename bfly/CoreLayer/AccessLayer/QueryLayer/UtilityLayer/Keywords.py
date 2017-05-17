@@ -253,8 +253,12 @@ static NAME that should always be used externally.
                         LIST = ['z','y','x']
                     )
                 ),
+                SOMA = NamedStruct('neuron-soma',
+                    DEFAULT = 'neuron-soma.json'
+                ),
                 DB_LIST = [
                     'synapse-connections',
+                    'neuron-soma'
                 ],
                 CONFIG = NamedStruct('rh-config',
                     VALUE = CONFIG_FILENAME,
