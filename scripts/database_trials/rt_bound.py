@@ -1,4 +1,5 @@
 import json
+import time
 import argparse
 import numpy as np
 from rtreedb import RTreeDB
@@ -29,5 +30,13 @@ if __name__ == '__main__':
     # Get the start and stop bounds
     start = np.uint32(argd['start'].split(','))
     stop = np.uint32(argd['stop'].split(','))
+    # Start timing rtree lookup
+    t0 = time.time()
     # Check against the rtree
-    print db.check_bounds([start, stop])
+    in_bounds = db.check_bounds([start, stop])
+    t1 = time.time()
+    # Print time taken to check bounds
+    print("""{}
+
+    in {:.2f} seconds
+    """.format(in_bounds, t1-t0))
