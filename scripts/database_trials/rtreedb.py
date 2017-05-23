@@ -8,7 +8,9 @@ class RTreeDB():
 
         # Basic parameters
         synapse_spatial = os.path.join(file_name, 'synapse_spatial')
-        os.makedirs(synapse_spatial)
+        # Make database directory if doesn't exist
+        if not os.path.exists(synapse_spatial):
+            os.makedirs(synapse_spatial)
 
         # Make a 3d index
         prop = rtree.index.Property()
