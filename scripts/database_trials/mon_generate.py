@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # Get argument dictionary
     argd = parse_args()
     # Make the database
-    db = RTreeDB(argd['p'])
+    db = MongoDB(argd['p'])
     # Clear database
     db.reset()
     print('cleared database')
@@ -48,7 +48,6 @@ if __name__ == '__main__':
     print('generated synapses in {:.2f} sec'.format(t1-t0))
 
     # add all entries
-    for entry in all_entries:
-        db.add_point(entry)
+    db.add_points(all_entries)
     t2 = time.time()
     print('wrote db in {:.2f} sec'.format(t2-t1))
