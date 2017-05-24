@@ -2,6 +2,9 @@
 *.swo
 *.swp
 
+# Temporary test rtree file
+scripts/database_trials/database/*
+
 # symbolic link to 3D data
 bfly/static/x3d
 
