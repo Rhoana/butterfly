@@ -1,3 +1,4 @@
+from Settings import DB_PORT
 from Settings import MAX_BLOCK_SIZE
 from Settings import MAX_CACHE_SIZE
 from Settings import CONFIG_FILENAME
@@ -266,7 +267,10 @@ static NAME that should always be used externally.
                     PATH = NamedStruct('path')
                 )
             ),
-            JOIN = NamedStruct('{}://{}')
+            JOIN = NamedStruct('{}://{}'),
+            PORT = NamedStruct('port',
+                VALUE = DB_PORT,
+            )
         )
         # ALL THE ERROR RUNTIME TERMS
         self.ERROR = NamelessStruct(

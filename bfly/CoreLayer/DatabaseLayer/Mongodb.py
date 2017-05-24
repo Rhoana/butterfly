@@ -2,10 +2,11 @@ from Database import Database
 from pymongo import MongoClient
 from pymongo import ASCENDING
 import numpy as np
+import rtree
 import time
 
 class Mongodb(Database):
-    """ Provides a :class:`Database` interface to ``dict``
+    """ Provides a :class:`Database` interface to ``pymongo``
 
     Arguments
     ----------
@@ -28,6 +29,8 @@ and contains each table as a separate key
     def __init__(self, path, _runtime):
         # Create or load the database
         Database.__init__(self, path, _runtime)
+        # Get the port for the mongo server
+        mongo_port = _runtime.DB.PORT.VALUE
         # The database is a dictionary
         self.db = dict()
 

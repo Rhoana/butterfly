@@ -41,6 +41,7 @@ PORT = int(BFLY_CONFIG.get('port', 2001))
 # Path to database and kind of database
 DB_PATH = BFLY_CONFIG.get('db-path', 'bfly.db')
 DB_TYPE = BFLY_CONFIG.get('db-type', 'Nodb')
+DB_PORT = BFLY_CONFIG.get('db-port', 27017)
 # Path to the log file
 LOG_PATH = BFLY_CONFIG.get('log-path', 'bfly.log')
 
