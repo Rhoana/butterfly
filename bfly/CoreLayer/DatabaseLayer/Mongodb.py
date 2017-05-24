@@ -4,6 +4,7 @@ from pymongo import ASCENDING
 import numpy as np
 import rtree
 import time
+import os
 
 class Mongodb(Database):
     """ Provides a :class:`Database` interface to ``pymongo``
@@ -19,9 +20,10 @@ class Mongodb(Database):
     -----------
     RUNTIME: :class:`RUNTIME`
         With keywords needed to load files and use tables
-    db: dict
-        Keeps all from ``add_path`` in a simple key-value store \
-and contains each table as a separate key
+    synapse_rtree: rtree.index.Index
+        Keeps all synapse positions for spatial indexing
+    mongo_db: pymongo.database
+        Keeps all full collections of neurons and synapses
     log: :class:`MakeLog`.``logging``
         All formats for log messages
     """
@@ -31,7 +33,26 @@ and contains each table as a separate key
         Database.__init__(self, path, _runtime)
         # Get the port for the mongo server
         mongo_port = _runtime.DB.PORT.VALUE
-        # The database is a dictionary
+        # Format path as folder, not file
+        rtree_folder = path.replace('.','_')
+        # Make rtree directory if doesn't exist
+        if not os.path.exists(rtree_folder):
+            os.makedirs(rtree_folder)
+
+        # Make a 3d spatial index
+        zyx = rtree.index.Property()
+        zyx.dimension = 3
+
+        # The synapse positions are stored in an rtree
+        self.synapse_rtree = rtree.index.Index(rtree_folder, properties = zyx)
+
+        ########
+        # Connect to the mongo client
+        mongo_client = MongoClient('localhost', mongo_port)
+        # Create or open the root database
+        self.mongo_db = mongo_client['root']
+        # Simple dictionary for paths
+        self.path_db = dict()
         self.db = dict()
 
     def add_path(self,c_path,d_path):
@@ -47,7 +68,7 @@ and contains each table as a separate key
         """
         Database.add_path(self, c_path, d_path)
         # Map the c_path to the d_path
-        self.db[c_path] = d_path
+        self.path_db[c_path] = d_path
 
     def get_path(self, path):
         """ Map a channel path to a dataset path
@@ -65,28 +86,7 @@ and contains each table as a separate key
         """
         Database.get_path(self, path)
         # Get the correct path or input path by default
-        return self.db.get(path, path)
-
-    def get_all(self, table, path):
-        """ Get all the entries in a table path
-        Overides :meth:`Database.get_all`
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-
-        Returns
-        --------
-        object or list
-            A list of all entries in the table.
-        """
-
-        table_path = Database.get_all(self, table, path)
-        # Get the list from the collection
-        return self.db.get(table_path)
+        return self.path_db.get(path, path)
 
     def get_by_key(self, table, path, key):
         """ Get the entry for the key in the table.
@@ -149,9 +149,6 @@ of entries to add and ``K`` is the number of keys per entry
         """
         # Get the name of the table
         table_path = Database.add_entries(self, table, path, t_keys, entries)
-
-        # Print the table
-        self.log('ALL',table)
 
         # Time to add entries
         start = time.time()
@@ -298,6 +295,6 @@ of entries to add and ``K`` is the number of keys per entry
         table_path = Database.all_neurons(self, table, path)
 
         # Return all keys in the table
-        result = self.get_all(table, path)
+        result = self.db.get(table_path)
         listed = result[:,0].tolist()
         return listed

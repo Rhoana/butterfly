@@ -20,6 +20,7 @@ tests/data/*.h5
 docs/build/*
 
 # Database
+bfly_db*
 *.db*
 
 # Byte-compiled / optimized / DLL files

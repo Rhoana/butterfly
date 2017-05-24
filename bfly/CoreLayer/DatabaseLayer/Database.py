@@ -432,26 +432,6 @@ object reference to the real table.
         """
         return self.get_table(table, path)
 
-    def get_all(self, table, path):
-        """ Get all the entries in a table path
-        Must be overridden by derived class.
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-
-        Returns
-        --------
-        object or list
-            The object reference from :meth:`get_table`. \
-The derived class should list all entries in the table.
-        """
-
-        return self.get_table(table, path)
-
     def get_by_key(self, table, path, key):
         """ Get the entry for the key in the table.
         Must be overridden by derived class.

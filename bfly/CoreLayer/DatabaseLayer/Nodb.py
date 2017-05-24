@@ -62,27 +62,6 @@ and contains each table as a separate key
         # Get the correct path or input path by default
         return self.db.get(path, path)
 
-    def get_all(self, table, path):
-        """ Get all the entries in a table path
-        Overides :meth:`Database.get_all`
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-
-        Returns
-        --------
-        object or list
-            A list of all entries in the table.
-        """
-
-        table_path = Database.get_all(self, table, path)
-        # Get the list from the collection
-        return self.db.get(table_path)
-
     def get_by_key(self, table, path, key):
         """ Get the entry for the key in the table.
         Overides :meth:`Database.get_by_key`
@@ -290,6 +269,6 @@ of entries to add and ``K`` is the number of keys per entry
         table_path = Database.all_neurons(self, table, path)
 
         # Return all keys in the table
-        result = self.get_all(table, path)
+        result = self.db.get(table_path)
         listed = result[:,0].tolist()
         return listed
