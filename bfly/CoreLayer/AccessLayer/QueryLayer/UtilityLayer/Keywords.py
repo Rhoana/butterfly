@@ -234,13 +234,11 @@ static NAME that should always be used externally.
                 NEURON = NamedStruct(_table_list[0],
                     KEY = NamedStruct('neuron'),
                     FULL_LIST = ['neuron','z','y','x'],
-                    KEY_LIST = ['neuron']
                 ),
                 SYNAPSE = NamedStruct(_table_list[1],
                     KEY = NamedStruct('__id'),
                     NEURON_LIST = ['n1','n2'],
-                    FULL_LIST = ['n1','n2','z','y','x'],
-                    KEY_LIST = ['n1','n2'],
+                    FULL_LIST = ['__id','n1','n2','z','y','x'],
                 ),
                 ALL = NamelessStruct(
                     POINT_LIST = ['z','y','x']

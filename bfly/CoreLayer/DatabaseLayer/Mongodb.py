@@ -34,17 +34,20 @@ class Mongodb(Database):
         # Get the port for the mongo server
         mongo_port = _runtime.DB.PORT.VALUE
         # Format path as folder, not file
-        rtree_folder = path.replace('.','_')
-        # Make rtree directory if doesn't exist
-        if not os.path.exists(rtree_folder):
-            os.makedirs(rtree_folder)
+        rtree_prefix = path.replace('.','_')
 
         # Make a 3d spatial index
         zyx = rtree.index.Property()
         zyx.dimension = 3
 
+        # Delete all rtree files
+        for ext in ['.idx','.dat']:
+            x_file = rtree_prefix + ext
+            if os.path.exists(x_file):
+                os.remove(x_file)
+
         # The synapse positions are stored in an rtree
-        self.synapse_rtree = rtree.index.Index(rtree_folder, properties = zyx)
+        self.synapse_rtree = rtree.index.Index(rtree_prefix, properties = zyx)
 
         ########
         # Connect to the mongo client
@@ -53,7 +56,6 @@ class Mongodb(Database):
         self.mongo_db = mongo_client['root']
         # Simple dictionary for paths
         self.path_db = dict()
-        self.db = dict()
 
     def add_path(self,c_path,d_path):
         """ store a link from a ``c_path`` to a ``d_path``
@@ -109,24 +111,13 @@ class Mongodb(Database):
 
         table_path = Database.get_by_key(self, table, path, key)
         # Get the list from the collection
-        collect = self.db.get(table_path)
+        collect = self.mongo_db[table_path]
         # Get information specific to the table
         table_field = self.RUNTIME.DB.TABLE[table]
-        # Get primary key directly if possible
-        if table_field.KEY.NAME in ['__id']:
-            # If the collect doesn't have the key
-            if len(collect) <= int(key):
-                return []
-            # Get entry from the collection
-            return collect[int(key)]
-        else:
-            all_ids = collect[:,0]
-            # Find potential spot for primary key
-            first = np.searchsorted(all_ids, int(key))
-            # Return if key value exists in array
-            if all_ids[first] == int(key):
-                return collect[first]
-            return []
+        key_name = table_field.KEY.NAME
+        # Find one value by the key name
+        found = collect.find_one({key_name: key})
+        return found if found else {}
 
     ####
     # Override Database.add_entries
@@ -157,39 +148,65 @@ of entries to add and ``K`` is the number of keys per entry
 
         # Get information specific to the table
         table_field = self.RUNTIME.DB.TABLE[table]
+        key_name = table_field.KEY.NAME
+
         # Add primary key if not explicit
-        if table_field.KEY.NAME in ['__id']:
+        if key_name in ['__id']:
             # create full table
-            keys = range(len(entries))
-            entries = np.c_[keys, entries]
+            indexes = range(len(entries))
+            entries = np.c_[indexes, entries]
         # Sort by explicit primary key
         else:
             key_order = entries[:,0].argsort()
             entries = entries[key_order]
 
+        # Make the dictionaries from the keys
+        def diction(v):
+            return dict(zip(t_keys, v.tolist()))
+        dict_entries = [diction(v) for v in entries]
+
+        ##########
         # Add the entries to database
-        self.db[table_path] = entries
+        collect = self.mongo_db[table_path]
+        # Set update flag
+        updating = False
+        if updating:
+            # Clear the collection
+            collect.remove()
+            # Create the synapse index
+            id_index = [(key_name, ASCENDING)]
+            collect.create_index(id_index, unique=True)
+            # Add all the dictionaries to the collection
+            collect.insert_many(dict_entries)
+        self.log('ALL','Adding to RTree...')
+        ##########
+        # Add the synapses to the rtree
+        k_tables = self.RUNTIME.DB.TABLE
+        if table == k_tables.SYNAPSE.NAME:
+            # Get the coordinates for the rtree
+            coords = k_tables.ALL.POINT_LIST
+            for d in dict_entries:
+                # Insert into the rtree
+                i = d[key_name]
+                zyx = [d[c] for c in coords]*2
+                self.synapse_rtree.insert(i, zyx)
 
         # Log diff and total time
         diff = time.time() - start
         self.log('ADDED', count, diff)
-        return entries
+        return dict_entries
 
     def synapse_ids(self, table, path, start, stop):
         """
         Overrides :meth:`Database.synapse_ids`
         """
         table_path = Database.synapse_ids(self, table, path, start, stop)
-        # Get the array from the collection
-        syns = self.db.get(table_path)
-        # Get only the coordinates
-        syns_zyx = syns[:,3:]
-        # Get the indices within the bounds
-        in_zyx = (syns_zyx >= start) & (syns_zyx < stop)
-        result = syns[np.all(in_zyx, axis=1)]
-        # Return all keys in the table
-        listed = result[:,0].tolist()
-        return listed
+        # Convert from [[z0,y0,x0], [z1,y1,x1]]
+        # to [z0, y0, x0, z1, y1, x1]
+        rect = np.uint32([start, stop]).flatten()
+        # Get all ids in the bounds
+        within = self.synapse_rtree.intersection(rect)
+        return list(within)
 
     def is_synapse(self, table, path, id_key):
         """
@@ -222,9 +239,9 @@ of entries to add and ``K`` is the number of keys per entry
         if not len(synapse):
             return {}
         return {
-            k_z: synapse[-3],
-            k_y: synapse[-2],
-            k_x: synapse[-1]
+            k_z: synapse[k_z],
+            k_y: synapse[k_y],
+            k_x: synapse[k_x]
         }
 
     def neuron_keypoint(self, table, path, id_key):
@@ -238,9 +255,9 @@ of entries to add and ``K`` is the number of keys per entry
         if not len(neuron):
             return {}
         return {
-            k_z: neuron[-3],
-            k_y: neuron[-2],
-            k_x: neuron[-1]
+            k_z: neuron[k_z],
+            k_y: neuron[k_y],
+            k_x: neuron[k_x]
         }
 
     def synapse_parent(self, table, path, id_key):
@@ -249,14 +266,18 @@ of entries to add and ``K`` is the number of keys per entry
         """
         table_path = Database.synapse_parent(self, table, path, id_key)
         k_links = self.RUNTIME.FEATURES.LINKS
+        # Get pre and post-synaptic names
+        k_synapse = self.RUNTIME.DB.TABLE.SYNAPSE
+        n1, n2 = k_synapse.NEURON_LIST
+        key_name = k_synapse.KEY.NAME
         # Return a dictionary from a single result
         synapse = self.get_by_key(table, path, id_key)
         if not len(synapse):
             return {}
         return {
-            k_links.ID.NAME: synapse[0],
-            k_links.PRE.NAME: synapse[1],
-            k_links.POST.NAME: synapse[2]
+            k_links.ID.NAME: synapse[key_name],
+            k_links.PRE.NAME: synapse[n1],
+            k_links.POST.NAME: synapse[n2]
         }
 
     def neuron_children(self, table, path, id_key, start, stop):
@@ -264,28 +285,31 @@ of entries to add and ``K`` is the number of keys per entry
         Overrides :meth:`Database.neuron_children`
         """
         table_path = Database.neuron_children(self, table, path, id_key, start, stop)
-        # Get the array from the collection
-        syns = self.db.get(table_path)
 
-        # Get only the coordinates
-        syns_zyx = syns[:, 3:]
         # Get the indices within the bounds
-        in_zyx = (syns_zyx >= start) & (syns_zyx < stop)
-        in_syns = syns[np.all(in_zyx, axis=1)]
+        in_syns = self.synapse_ids(table, path, start, stop)
 
-        # Get only the lists of neurons
-        neurons_1 = in_syns[:, 1]
-        neurons_2 = in_syns[:, 2]
-        # Get all synapse id values
-        syns_ids = in_syns[:, 0]
-        n_syns = len(syns_ids)
+        # Get the array from the collection
+        collect = self.mongo_db[table_path]
+        # Get pre and post-synaptic names
+        k_synapse = self.RUNTIME.DB.TABLE.SYNAPSE
+        n1, n2 = k_synapse.NEURON_LIST
+        key_name = k_synapse.KEY.NAME
+        # Get pre and post synapses
+        pre_syns = []
+        post_syns = []
+        # Add all bounded pre synapses
+        for pre in collect.find({n1:id_key}):
+            if pre in in_syns:
+                pre_syns.append(pre)
+        # Add all bounded post synapses
+        for post in collect.find({n2:id_key}):
+            if post in in_syns:
+                post_syns.append(post)
 
-        # Get neurons matching the id key
-        pre_neurons = syns_ids[neurons_1 == id_key]
-        post_neurons = syns_ids[neurons_2 == id_key]
         # Synapses as keys in in a dictionary
-        syn_dict = dict(zip(post_neurons, (2,)*n_syns))
-        syn_dict.update(dict(zip(pre_neurons, (1,)*n_syns)))
+        syn_dict = dict(zip(post_syns, (2,)*len(post_syns)))
+        syn_dict.update(dict(zip(pre_syns, (1,)*len(pre_syns))))
         return syn_dict
 
     def all_neurons(self, table, path):
@@ -294,7 +318,9 @@ of entries to add and ``K`` is the number of keys per entry
         """
         table_path = Database.all_neurons(self, table, path)
 
+        # Get information specific to the neuron table
+        neuron_field = self.RUNTIME.DB.TABLE.NEURON
+        key_name = neuron_field.KEY.NAME
         # Return all keys in the table
-        result = self.db.get(table_path)
-        listed = result[:,0].tolist()
+        listed = self.mongo_db[table_path].distinct(key_name)
         return listed
