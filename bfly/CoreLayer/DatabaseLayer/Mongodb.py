@@ -169,7 +169,7 @@ of entries to add and ``K`` is the number of keys per entry
         # Add the entries to database
         collect = self.mongo_db[table_path]
         # Set update flag
-        updating = False
+        updating = True
         if updating:
             # Clear the collection
             collect.remove()
