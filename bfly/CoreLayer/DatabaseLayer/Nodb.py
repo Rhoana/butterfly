@@ -123,35 +123,10 @@ and contains each table as a separate key
                 return collect[first]
             return []
 
-    def get_by_fun(self, table, path, fun):
-        """ Get the entries where function is true.
-        Overrides :meth:`Database.get_by_fun`
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-        fun: int
-            The function to filter the table entries
-
-        Returns
-        --------
-        list
-        All entries where the function returns true
-        """
-
-        table_path = Database.get_by_fun(self, table, path, fun)
-        # Get the actual collection
-        collect = self.get_all(table, path)
-        # Get the entry from the collection
-        return [c for c in collect if fun(c)]
-
     ####
     # Override Database.add_entries
     ####
-    def add_entries(self, table, path, t_keys, entries, update=1):
+    def add_entries(self, table, path, t_keys, entries):
         """ Add an array or list of entries to a table
         Overrides :meth:`Database.add_entries`
 
@@ -166,13 +141,9 @@ and contains each table as a separate key
         entries: numpy.ndarray or list
             ``N`` by ``K`` array or list where ``N`` is the number \
 of entries to add and ``K`` is the number of keys per entry
-        update: int
-            1 to update old entries matching keys, and \
-0 to write new entries ignoring old entries. Default 1.
-
         """
         # Get the name of the table
-        table_path = Database.add_entries(self, table, path, t_keys, entries, update=1)
+        table_path = Database.add_entries(self, table, path, t_keys, entries)
 
         # Time to add entries
         start = time.time()
