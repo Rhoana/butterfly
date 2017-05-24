@@ -322,5 +322,6 @@ of entries to add and ``K`` is the number of keys per entry
         neuron_field = self.RUNTIME.DB.TABLE.NEURON
         key_name = neuron_field.KEY.NAME
         # Return all keys in the table
-        listed = self.mongo_db[table_path].distinct(key_name)
+        collect = self.mongo_db[table_path]
+        listed = collect.distinct(key_name)
         return listed
