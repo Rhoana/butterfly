@@ -235,7 +235,7 @@ where N is the number of neurons for the ``path``.
         k_files = self.RUNTIME.DB.FILE
         # Get keywords for input file
         k_file = k_files.SOMA.VALUE
-        print k_file
+
         if os.path.exists(k_file):
             # Load the csv
             with open(k_file, 'r') as cf:
