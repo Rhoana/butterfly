@@ -116,7 +116,7 @@ class Mongodb(Database):
         table_field = self.RUNTIME.DB.TABLE[table]
         key_name = table_field.KEY.NAME
         # Find one value by the key name
-        found = collect.find_one({key_name: key})
+        found = collect.find_one({key_name: int(key)})
         return found if found else {}
 
     ####
@@ -168,9 +168,9 @@ of entries to add and ``K`` is the number of keys per entry
         ##########
         # Add the entries to database
         collect = self.mongo_db[table_path]
-        # Set update flag
-        updating = True
-        if updating:
+        # Set to update if updating or empty database
+        updating = self.RUNTIME.DB.UPDATE.VALUE
+        if updating or not collect.count():
             # Clear the collection
             collect.remove()
             # Create the synapse index

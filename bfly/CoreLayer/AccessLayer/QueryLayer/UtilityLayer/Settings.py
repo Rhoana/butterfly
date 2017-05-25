@@ -39,6 +39,7 @@ CONFIG_FILENAME = config_filename
 # HTTP port for server
 PORT = int(BFLY_CONFIG.get('port', 2001))
 # Path to database and kind of database
+DB_UPDATE = is_yes(BFLY_CONFIG.get('db-update', True))
 DB_PATH = BFLY_CONFIG.get('db-path', 'bfly.db')
 DB_TYPE = BFLY_CONFIG.get('db-type', 'Nodb')
 DB_PORT = BFLY_CONFIG.get('db-port', 27017)
@@ -56,4 +57,4 @@ MAX_BLOCK_SIZE = int(_max_block) * (1024**2)
 ALLOWED_PATHS = BFLY_CONFIG.get('allowed-paths', [os.sep])
 
 # Whether to restart server on changed source-code
-DEV_MODE = BFLY_CONFIG.get('developer-mode')
+DEV_MODE = is_yes(BFLY_CONFIG.get('developer-mode', False))

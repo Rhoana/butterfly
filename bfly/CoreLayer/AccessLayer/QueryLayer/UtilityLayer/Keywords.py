@@ -1,4 +1,5 @@
 from Settings import DB_PORT
+from Settings import DB_UPDATE
 from Settings import MAX_BLOCK_SIZE
 from Settings import MAX_CACHE_SIZE
 from Settings import CONFIG_FILENAME
@@ -229,6 +230,9 @@ static NAME that should always be used externally.
         )
         # ALL THE DATABASE RUNTIME TERMS
         self.DB = NamelessStruct(
+            UPDATE = NamedStruct('update',
+                VALUE = DB_UPDATE,
+            ),
             TABLE = NamelessStruct(
                 LIST = _table_list,
                 NEURON = NamedStruct(_table_list[0],
