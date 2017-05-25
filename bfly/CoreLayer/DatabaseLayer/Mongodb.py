@@ -116,7 +116,7 @@ class Mongodb(Database):
         table_field = self.RUNTIME.DB.TABLE[table]
         key_name = table_field.KEY.NAME
         # Find one value by the key name
-        found = collect.find_one({key_name: int(key)})
+        found = collect.find_one({key_name: key})
         return found if found else {}
 
     ####

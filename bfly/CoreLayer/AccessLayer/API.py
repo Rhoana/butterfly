@@ -613,7 +613,7 @@ has the path to data in the requested group from \
         qparam: str
             The name of the ``result`` property
         result: anything
-            The value to try to convert to ``numpy.uint32``
+            The value to try to convert to ``int``
 
         Returns
         ---------
@@ -622,7 +622,7 @@ has the path to data in the requested group from \
         """
         k_term = self.RUNTIME.ERROR.TERM.NAME
         k_check = self.RUNTIME.ERROR.CHECK.NAME
-        return self._try_condition(result, np.uint32, {
+        return self._try_condition(result, int, {
             k_check : 'a number',
             k_term : qparam
         })
