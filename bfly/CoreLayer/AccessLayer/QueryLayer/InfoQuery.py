@@ -15,7 +15,7 @@ class NumpyEncoder(json.JSONEncoder):
         elif isinstance(obj, np.ndarray):
             return obj.tolist()
         else:
-            return super(MyEncoder, self).default(obj)
+            return super(NumpyEncoder, self).default(obj)
 
 class InfoQuery(Query):
     """ Describe ``INPUT.METHODS.INFO_LIST`` requests
