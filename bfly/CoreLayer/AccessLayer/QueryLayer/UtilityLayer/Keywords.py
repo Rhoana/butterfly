@@ -240,6 +240,7 @@ static NAME that should always be used externally.
                     FULL_LIST = ['neuron','z','y','x'],
                 ),
                 SYNAPSE = NamedStruct(_table_list[1],
+                    YX = NamedStruct('yx'),
                     KEY = NamedStruct('__id'),
                     NEURON_LIST = ['n1','n2'],
                     FULL_LIST = ['__id','n1','n2','z','y','x'],

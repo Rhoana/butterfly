@@ -11,7 +11,6 @@ INSTALL_REQ = [
     'pyaml>=16.12.2',
     'tifffile>=0.11.1',
     'pymongo>=3.4.0',
-    'rtree>=0.8.3',
 ]
 
 setup(

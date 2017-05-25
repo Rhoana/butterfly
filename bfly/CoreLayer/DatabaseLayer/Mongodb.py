@@ -1,6 +1,7 @@
 from Database import Database
 from pymongo import MongoClient
 from pymongo import ASCENDING
+from pymongo import GEO2D
 import numpy as np
 import rtree
 import time
@@ -35,22 +36,6 @@ class Mongodb(Database):
         mongo_port = _runtime.DB.PORT.VALUE
         # Format path as folder, not file
         rtree_prefix = path.replace('.','_')
-
-        # Delete all rtree files
-#        for ext in ['.idx','.dat']:
-#            x_file = rtree_prefix + ext
-#            if os.path.exists(x_file):
-#                os.remove(x_file)
-
-        if os.path.exists(rtree_prefix+'.idx'):
-            # The synapse positions are stored in an rtree
-            self.synapse_rtree = rtree.index.Rtree(rtree_prefix)
-        else:
-            # Make a 3d spatial index
-            zyx = rtree.index.Property()
-            zyx.dimension = 3
-            # Store the synapse positions in an rtree
-            self.synapse_rtree = rtree.index.Index(rtree_prefix, properties = zyx)
 
         ########
         # Connect to the mongo client
@@ -163,53 +148,90 @@ of entries to add and ``K`` is the number of keys per entry
             key_order = entries[:,0].argsort()
             entries = entries[key_order]
 
-        # Make the dictionaries from the keys
-        def diction(v):
-            return dict(zip(t_keys, v.tolist()))
-        dict_entries = [diction(v) for v in entries]
+        # Simple dictionary function
+        def easy_dictionize(v):
+            # Get the core dictionary
+            t_vals = v.tolist()
+            return dict(zip(t_keys, t_vals))
+
+        # Dictionary function with extra yx key
+        def yx_dictionize(v):
+            # Get the core dictionary
+            t_vals = v.tolist()
+            core = dict(zip(t_keys, t_vals))
+            # Get the extra yx key
+            k_yx = table_field.YX.NAME
+            core[k_yx] = t_vals[-2:]
+            return core
 
         ##########
         # Add the entries to database
         collect = self.mongo_db[table_path]
-        # Set to update if updating or empty database
         updating = self.RUNTIME.DB.UPDATE.VALUE
+        # if updating or empty database
         if updating or not collect.count():
-            # Clear the collection
-            collect.remove()
+            # Drop the collection
+            collect.drop()
             # Create the synapse index
             id_index = [(key_name, ASCENDING)]
             collect.create_index(id_index, unique=True)
+
+            # Check if there are extra keys
+            if 'YX' in table_field:
+                # Make the dictionaries from the keys
+                dict_entries = [yx_dictionize(v) for v in entries]
+                # Add the geospatial 2D index if needed
+                geo_index = [(table_field.YX.NAME, GEO2D)]
+                min_max = {
+                    'min': 0,
+                    'max': entries.T[-2:].max(),
+                }
+                # Create the geospatial index
+                collect.create_index(geo_index, **min_max)
+                # 
+            else:
+                # Make the dictionaries from the keys
+                dict_entries = [easy_dictionize(v) for v in entries]
+
             # Add all the dictionaries to the collection
             collect.insert_many(dict_entries)
-        self.log('ALL','Adding to RTree...')
-        ##########
-        # Add the synapses to the rtree
-        k_tables = self.RUNTIME.DB.TABLE
-        if table == k_tables.SYNAPSE.NAME:
-            # Get the coordinates for the rtree
-            coords = k_tables.ALL.POINT_LIST
-            for d in dict_entries:
-                # Insert into the rtree
-                i = d[key_name]
-                zyx = [d[c] for c in coords]*2
-                self.synapse_rtree.insert(i, zyx)
+            # Log diff and total time
+            diff = time.time() - start
+            self.log('ADDED', count, diff)
 
-        # Log diff and total time
-        diff = time.time() - start
-        self.log('ADDED', count, diff)
-        return dict_entries
+        return entries
 
     def synapse_ids(self, table, path, start, stop):
         """
         Overrides :meth:`Database.synapse_ids`
         """
         table_path = Database.synapse_ids(self, table, path, start, stop)
-        # Convert from [[z0,y0,x0], [z1,y1,x1]]
-        # to [z0, y0, x0, z1, y1, x1]
-        rect = np.uint32([start, stop]).flatten()
+        # Get the constant keys for the indexes
+        k_tables = self.RUNTIME.DB.TABLE
+        k_z, k_y, k_x = k_tables.ALL.POINT_LIST
+        key_name = k_tables[table].KEY.NAME
+        k_yx = k_tables[table].YX.NAME
+        # Make the query for 2D geospatial index
+        geo_query = {
+            k_yx: {
+                '$within': {
+                    '$box': [
+                        start[-2:].tolist(),
+                        stop[-2:].tolist(),
+                    ],
+                },
+            },
+            k_z: {
+                '$gte': int(start[0]),
+                '$lt': int(stop[0]),
+            },
+        }
+        # Get the collection from the database
+        collect = self.mongo_db[table_path]
         # Get all ids in the bounds
-        within = self.synapse_rtree.intersection(rect)
-        return list(within)
+        all_in = collect.find(geo_query)
+        # Get only the Synapse ID values
+        return [a[key_name] for a in all_in]
 
     def is_synapse(self, table, path, id_key):
         """
@@ -290,25 +312,20 @@ of entries to add and ``K`` is the number of keys per entry
         table_path = Database.neuron_children(self, table, path, id_key, start, stop)
 
         # Get the indices within the bounds
-        in_syns = self.synapse_ids(table, path, start, stop)
+        in_syns = set(self.synapse_ids(table, path, start, stop))
 
-        # Get the array from the collection
+        # Get the collection from the database
         collect = self.mongo_db[table_path]
         # Get pre and post-synaptic names
         k_synapse = self.RUNTIME.DB.TABLE.SYNAPSE
         n1, n2 = k_synapse.NEURON_LIST
         key_name = k_synapse.KEY.NAME
-        # Get pre and post synapses
-        pre_syns = []
-        post_syns = []
         # Add all bounded pre synapses
-        for pre in collect.find({n1:id_key}):
-            if pre in in_syns:
-                pre_syns.append(pre)
+        pre_list = collect.distinct(key_name, {n1:id_key})
+        pre_syns = list(set(pre_list) & in_syns)
         # Add all bounded post synapses
-        for post in collect.find({n2:id_key}):
-            if post in in_syns:
-                post_syns.append(post)
+        post_list = collect.distinct(key_name, {n2:id_key})
+        post_syns = list(set(post_list) & in_syns)
 
         # Synapses as keys in in a dictionary
         syn_dict = dict(zip(post_syns, (2,)*len(post_syns)))
@@ -326,6 +343,5 @@ of entries to add and ``K`` is the number of keys per entry
         key_name = neuron_field.KEY.NAME
         # Return all keys in the table
         collect = self.mongo_db[table_path]
-        #listed = [d[key_name] for d in collect.find({})]
-        listed = collect.find({})
+        listed = collect.distinct(key_name, {})
         return listed
