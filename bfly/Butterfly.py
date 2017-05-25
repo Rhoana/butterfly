@@ -53,8 +53,13 @@ new :class:`bfly.Webserver`.
 
         # Start a webserver on given port
         server = Webserver(db, self._bfly_config)
-        server = server.start(port)
-        server.start()
+        # Try to start the server
+        try:
+            ioloop = server.start(port)
+            ioloop.start()
+        except KeyboardInterrupt:
+            server.stop()
+
 
     # Update the database from the config file
     def update_db(self):

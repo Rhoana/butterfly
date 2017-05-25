@@ -36,18 +36,21 @@ class Mongodb(Database):
         # Format path as folder, not file
         rtree_prefix = path.replace('.','_')
 
-        # Make a 3d spatial index
-        zyx = rtree.index.Property()
-        zyx.dimension = 3
-
         # Delete all rtree files
-        for ext in ['.idx','.dat']:
-            x_file = rtree_prefix + ext
-            if os.path.exists(x_file):
-                os.remove(x_file)
+#        for ext in ['.idx','.dat']:
+#            x_file = rtree_prefix + ext
+#            if os.path.exists(x_file):
+#                os.remove(x_file)
 
-        # The synapse positions are stored in an rtree
-        self.synapse_rtree = rtree.index.Index(rtree_prefix, properties = zyx)
+        if os.path.exists(rtree_prefix+'.idx'):
+            # The synapse positions are stored in an rtree
+            self.synapse_rtree = rtree.index.Rtree(rtree_prefix)
+        else:
+            # Make a 3d spatial index
+            zyx = rtree.index.Property()
+            zyx.dimension = 3
+            # Store the synapse positions in an rtree
+            self.synapse_rtree = rtree.index.Index(rtree_prefix, properties = zyx)
 
         ########
         # Connect to the mongo client
@@ -323,5 +326,6 @@ of entries to add and ``K`` is the number of keys per entry
         key_name = neuron_field.KEY.NAME
         # Return all keys in the table
         collect = self.mongo_db[table_path]
-        listed = collect.distinct(key_name)
+        #listed = [d[key_name] for d in collect.find({})]
+        listed = collect.find({})
         return listed
