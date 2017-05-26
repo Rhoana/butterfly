@@ -136,5 +136,5 @@ a valid mojo directory.
         if os.path.splitext(_path)[1] in ['.tiff', '.tif']:
             return tiff.imread(_path)
         else:
-            return cv2.imread(_path)
+            return cv2.imread(_path,0)
 
