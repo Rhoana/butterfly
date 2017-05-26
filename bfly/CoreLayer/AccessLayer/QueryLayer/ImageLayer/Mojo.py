@@ -11,7 +11,18 @@ class Mojo(Datasource):
         -----------
         t_query: :class:`TileQuery`
             With file path and image position
+
+        Returns
+        -----------
+        np.ndarray
+            An image array that may be as large \
+as an entire full resolution slice of \
+the whole hdf5 volume. Based on the value \
+of :meth:`TileQuery.all_scales`, this array \
+will likely be downsampled by to a small fraction \
+of the full tile resolution.
         """
+
         return None
 
     @staticmethod
@@ -26,11 +37,14 @@ class Mojo(Datasource):
         Returns
         --------
         dict
-            * :data:`OUTPUT.INFO`.``TYPE.NAME`` -- \
-numpy datatype of any given tile
-            * :data:`RUNTIME.IMAGE`.``BLOCK.NAME`` -- \
-numpy 3x1 array of any given tile shape
-            * :data:`OUTPUT.INFO`.``SIZE.NAME`` -- \
-numpy 3x1 array of full volume shape
+            Will be empty if filename does not give \
+a valid mojo directory.
+
+            * :class:`RUNTIME` ``.IMAGE.BLOCK.NAME``
+                (numpy.ndarray) -- 3x1 for any give tile shape
+            * :class:`OUTPUT` ``.INFO.TYPE.NAME``
+                (str) -- numpy dtype of any given tile
+            * :class:`OUTPUT` ``.INFO.SIZE.NAME``
+                (numpy.ndarray) -- 3x1 for full volume shape
         """
         return {}

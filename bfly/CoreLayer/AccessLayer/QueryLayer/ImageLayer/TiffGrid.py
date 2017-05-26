@@ -49,9 +49,6 @@ volume from :meth:`TileQuery.all_scales`, \
     def preload_source(t_query):
         """load info from example tile (image)
 
-        Calls :meth:`valid_path` to get filename and \
-inner dataset path for the full h5 image volume.
-
         Then gets three needed values from the given \
 path from the :class:`TileQuery` t_query
 
@@ -63,8 +60,8 @@ path from the :class:`TileQuery` t_query
         Returns
         --------
         dict
-            Will be empty if :meth:`valid_path` finds\
-this filname to not give a valid h5 volume.
+            Will be empty if filename does not give \
+a valid json file pointing to the tiff grid.
 
             * :class:`RUNTIME` ``.IMAGE.BLOCK.NAME``
                 (numpy.ndarray) -- 3x1 for any give tile shape
