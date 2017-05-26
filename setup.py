@@ -4,13 +4,13 @@ from setuptools import setup
 
 VERSION = 2.0
 INSTALL_REQ = [
-    'ZODB>=5.2.3',
     'h5py>=2.6.0',
     'numpy>=1.12.0',
     'tornado>=4.4.2',
     'futures>=3.0.5',
     'pyaml>=16.12.2',
     'tifffile>=0.11.1',
+    'pymongo>=3.4.0',
 ]
 
 setup(

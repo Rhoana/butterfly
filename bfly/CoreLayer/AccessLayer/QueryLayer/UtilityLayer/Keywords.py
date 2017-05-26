@@ -1,3 +1,5 @@
+from Settings import DB_PORT
+from Settings import DB_UPDATE
 from Settings import MAX_BLOCK_SIZE
 from Settings import MAX_CACHE_SIZE
 from Settings import CONFIG_FILENAME
@@ -235,18 +237,20 @@ static NAME that should always be used externally.
         )
         # ALL THE DATABASE RUNTIME TERMS
         self.DB = NamelessStruct(
+            UPDATE = NamedStruct('update',
+                VALUE = DB_UPDATE,
+            ),
             TABLE = NamelessStruct(
                 LIST = _table_list,
                 NEURON = NamedStruct(_table_list[0],
                     KEY = NamedStruct('neuron'),
                     FULL_LIST = ['neuron','z','y','x'],
-                    KEY_LIST = ['neuron']
                 ),
                 SYNAPSE = NamedStruct(_table_list[1],
+                    YX = NamedStruct('yx'),
                     KEY = NamedStruct('__id'),
                     NEURON_LIST = ['n1','n2'],
-                    FULL_LIST = ['n1','n2','z','y','x'],
-                    KEY_LIST = ['n1','n2'],
+                    FULL_LIST = ['__id','n1','n2','z','y','x'],
                 ),
                 ALL = NamelessStruct(
                     POINT_LIST = ['z','y','x']
@@ -273,7 +277,10 @@ static NAME that should always be used externally.
                     PATH = NamedStruct('path')
                 )
             ),
-            JOIN = NamedStruct('{}://{}')
+            JOIN = NamedStruct('{}://{}'),
+            PORT = NamedStruct('port',
+                VALUE = DB_PORT,
+            )
         )
         # ALL THE ERROR RUNTIME TERMS
         self.ERROR = NamelessStruct(

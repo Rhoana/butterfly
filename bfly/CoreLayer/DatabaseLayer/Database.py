@@ -282,7 +282,7 @@ field of :data:`RUNTIME.DB`
         k_keys = k_tables.SYNAPSE.FULL_LIST
 
         # Add entries
-        return self.add_entries(k_synapse, path, k_keys, synapses, 0)
+        return self.add_entries(k_synapse, path, k_keys, synapses)
 
     def add_neurons(self, path, neurons):
         """ Add all the neurons to the database
@@ -312,9 +312,9 @@ field of :data:`RUNTIME.DB`
         k_keys = k_tables.NEURON.FULL_LIST
 
         # Add entries
-        return self.add_entries(k_neuron, path, k_keys, neurons, 0)
+        return self.add_entries(k_neuron, path, k_keys, neurons)
 
-    def add_entries(self, table, path, t_keys, entries, update=1):
+    def add_entries(self, table, path, t_keys, entries):
         """ Add an array or list of entries to a table
         Must be overridden by derived class.
         """
@@ -432,69 +432,6 @@ object reference to the real table.
         """
         return self.get_table(table, path)
 
-    def get_entry(self, table, path, key=None, **keywords):
-        """ Get an actual entry in the database
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-        key: int or callable
-            Either the primary key value for any entry \
-or a filter function to get multiple entries
-        keywords: dict
-            The entry field values to filter entries
-
-        Returns
-        --------
-        dict or list
-            A single entry given as a dict or multiple \
-entries given as a list of dict entries.
-        """
-
-        # Get the necessary keywords
-        k_tables = self.RUNTIME.DB.TABLE
-        # Use key if no keywords
-        if not len(keywords):
-            # Return all if no key
-            if key is None:
-                return self.get_all(table, path)
-            # Filter by filter fun if callable
-            if callable(key):
-                result = self.get_by_fun(table, path, key)
-                return result if result else []
-            # Filter by a secondary key
-            if table == k_tables.NEURON.NAME:
-                keywords[k_tables.NEURON.KEY.NAME] = key
-            # Treat the key as the primary key
-            else:
-                return self.get_by_key(table, path, key)
-        # Filter the database by keywords
-        result = self.get_by_keywords(table, path, **keywords)
-        return result if result else []
-
-    def get_all(self, table, path):
-        """ Get all the entries in a table path
-        Must be overridden by derived class.
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-
-        Returns
-        --------
-        object or list
-            The object reference from :meth:`get_table`. \
-The derived class should list all entries in the table.
-        """
-
-        return self.get_table(table, path)
-
     def get_by_key(self, table, path, key):
         """ Get the entry for the key in the table.
         Must be overridden by derived class.
@@ -515,57 +452,6 @@ The derived class should list all entries in the table.
 The derived class should give an entry in the table.
         """
         return  self.get_table(table, path)
-
-    def get_by_fun(self, table, path, fun):
-        """ Get the entries where function is true.
-        Must be overridden by derived class.
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-        fun: int
-            The function to filter the table entries
-
-        Returns
-        --------
-        object or list
-            The object reference from :meth:`get_table`. \
-The derived class should list all entries that make the \
-function return a true value.
-        """
-        return  self.get_table(table, path)
-
-    def get_by_keywords(self, table, path, **keys):
-        """ Get the entries where the fields match ``keys``.
-        Must be overridden by derived class.
-
-        Arguments
-        ----------
-        table: str
-            The category of table for the database
-        path: str
-            The dataset path to metadata files
-        keys: dict
-            The keywords to filter the table entries
-
-        Returns
-        --------
-        object or list
-            The object reference from :meth:`get_table`. \
-The derived class should list all entries that match the \
-keyword value paris given in ``keys``.
-        """
-        # Make keyword filter
-        def key_filter(v):
-            values = map(v.get, keys.keys())
-            # Compare all values with keywords
-            compare = zip(values, keys.values())
-            return all(a==b for a,b in compare)
-        # Filter table by keywords
-        return self.get_by_fun(table, path, key_filter)
 
     def commit(self):
         """ Save all database changes to the database file.
