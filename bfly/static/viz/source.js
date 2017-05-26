@@ -13,6 +13,11 @@ window.DOJO.Source.prototype = {
   init: function(src_terms){
     var sourcer = this.share(this.tileSource,{});
     var source = this.share(src_terms, sourcer);
+    // Calculate default max level if none given
+    if (source.maxLevel <= 0){
+      var maxLevel = source.width/source.tileSize;
+      source.maxLevel = Math.floor(Math.log2(maxLevel));
+    }
     if (source.target){
       source.datapath += "&format=zip";
     }
@@ -24,7 +29,7 @@ window.DOJO.Source.prototype = {
     server: "",
     datapath: "",
     minLevel: 0,
-    maxLevel: 1,
+    maxLevel: -1,
     width: 8192,
     height: 8192,
     tileSize: 1024,
