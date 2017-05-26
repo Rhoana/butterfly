@@ -113,15 +113,20 @@ class InfoQuery(Query):
 
         info_out = self.OUTPUT.INFO
         methods = self.INPUT.METHODS
+        source_field = self.RUNTIME.IMAGE.SOURCE
+        # Return a list of all group naems
         if methods.VALUE in methods.GROUP_LIST:
             return info_out.NAMES.VALUE
+        # Return dictionary created here
         if methods.VALUE == methods.META.NAME:
             return {
+                source_field.NAME: source_field.VALUE,
                 info_out.PATH.NAME: info_out.PATH.VALUE,
                 info_out.TYPE.NAME: info_out.TYPE.VALUE,
                 info_out.SIZE.NAME: info_out.SIZE.VALUE,
-                info_out.CHANNEL.NAME: info_out.CHANNEL.VALUE
+                info_out.CHANNEL.NAME: info_out.CHANNEL.VALUE,
             }
+        # Return dictionary from database
         return info_out.NAMES.VALUE
 
     @property

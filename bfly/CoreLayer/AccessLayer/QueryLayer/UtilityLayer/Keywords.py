@@ -195,6 +195,7 @@ static NAME that should always be used externally.
                 LIST = [
                     'hdf5',
                     'tiff',
+                    'mojo',
                 ],
                 HDF5 = NamedStruct('hdf5',
                     OFF = NamedStruct('z-offset'),
@@ -202,6 +203,12 @@ static NAME that should always be used externally.
                     INNER = NamedStruct('dataset-path',
                         VALUE = 'main'
                     ),
+                ),
+                MOJO = NamedStruct('mojo',
+                    FORMAT = NamedStruct('format',
+                        VALUE = 'jpg',
+                        H5_LIST = ['h5','hdf5'],
+                    )
                 ),
                 TIFF = NamedStruct('tiff',
                     ALL = 'tiles',

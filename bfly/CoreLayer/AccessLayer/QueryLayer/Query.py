@@ -173,10 +173,16 @@ otherwise.
             output.SIZE.X.NAME: int(full_size[2])
         }
 
+        ##############
         # Optional keywords by source
+
+        # HDF5
         h5_field = runtime.SOURCE.HDF5
-        # Assign all optional keywords
         h5_field.VALUE = keywords.get(h5_field.NAME)
+
+        # Mojo
+        mojo_format = runtime.SOURCE.MOJO.FORMAT
+        mojo_format.VALUE = keywords.get(mojo_format.NAME)
 
     def check_any(self, is_good, message, value, term):
         """ Calls :mod:`raise_error` if check doesn't pass

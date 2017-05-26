@@ -86,8 +86,8 @@ window.DOJO.Setup.prototype = {
       });
       return Promise.all(promises);
     }
-      var sources = [target,this.parse(result.old),result.out];
-      return build(sources);
+    var sources = [target,this.parse(result.old),result.out];
+    return build(sources);
   },
   find: function(hash,depth){
     var where = this.plural(this.ask[depth])+"?";

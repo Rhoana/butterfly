@@ -48,6 +48,10 @@ window.DOJO.Write.prototype = {
     var old = source.old.replace(/&channel=([^&]+)/,"&channel="+channel);
     var [w,h,d] = [Math.max(size.x,512),Math.max(size.y,512),size.z];
     var path = "viz.html?depth="+d+"&width="+w+"&height="+h;
+    // Fix the maxLevel if not mojo data source
+    if (source['source-type'] != 'mojo'){
+      path += '&maxLevel=1';
+    }
     // Get the path for this channel
     var this_path = path + "&" + old;
     var this_channel = "," + channel;
@@ -68,7 +72,7 @@ window.DOJO.Write.prototype = {
     ancestor.children[0].checked = false;
     var factsheet = [
       ["description", source["short-description"] || source["name"]],
-      ["datasource", source.datasource || "unknown"],
+      ["datasource", source["source-type"] || "unknown"],
       ["path", source.path || "unknown"]
     ];
     factsheet.forEach(function(items){

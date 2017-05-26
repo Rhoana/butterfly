@@ -36,6 +36,7 @@ volume from :meth:`TileQuery.all_scales`, \
             With file path and image position
 
         Returns
+        -----------
         np.ndarray
             An image array that may be as large \
 as an entire full resolution slice of \

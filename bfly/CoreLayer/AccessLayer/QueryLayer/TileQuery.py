@@ -1,4 +1,5 @@
 from ImageLayer import HDF5
+from ImageLayer import Mojo
 from ImageLayer import TiffGrid
 from Query import Query
 import numpy as np
@@ -35,6 +36,7 @@ class TileQuery(Query):
         self.SOURCES = {
             self.source_list[0]: HDF5,
             self.source_list[1]: TiffGrid,
+            self.source_list[2]: Mojo,
         }
 
         self.RUNTIME.TILE.ZYX.VALUE = zyx_index
@@ -61,6 +63,16 @@ class TileQuery(Query):
         query_h5 = query.RUNTIME.IMAGE.SOURCE.HDF5
         self_h5 = self.RUNTIME.IMAGE.SOURCE.HDF5
         self_h5.VALUE = query_h5.VALUE
+
+        # Only applies to Mojo datasource
+        query_format = query.RUNTIME.IMAGE.SOURCE.MOJO.FORMAT
+        self_format = self.RUNTIME.IMAGE.SOURCE.MOJO.FORMAT
+        self_format.VALUE = query_format.VALUE
+
+        # Get the XY resolution for Mojo
+        query_xy = query.INPUT.RESOLUTION.XY
+        self_xy = self.INPUT.RESOLUTION.XY
+        self_xy.VALUE = query_xy.VALUE
 
     @property
     def key(self):
