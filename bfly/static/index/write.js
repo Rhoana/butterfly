@@ -68,7 +68,7 @@ window.DOJO.Write.prototype = {
     ancestor.children[0].checked = false;
     var factsheet = [
       ["description", source["short-description"] || source["name"]],
-      ["datasource", source.datasource || "unknown"],
+      ["datasource", source["source-type"] || "unknown"],
       ["path", source.path || "unknown"]
     ];
     factsheet.forEach(function(items){
