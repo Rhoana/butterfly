@@ -1,0 +1,182 @@
+INPUT:                                                   | RUNTIME:                                                 | OUTPUT:                                                 
+  FEATURES:                                              |   CACHE:                                                 |   FEATURES:                                             
+    BOOL_LIST:                                           |     LIST:                                                |     LINKS:                                              
+    - is_synapse                                         |     - max-cache-size                                     |       ID:                                               
+    - is_neuron                                          |     - meta-size                                          |         NAME: synapse_id                                
+    LABEL_LIST:                                          |     MAX:                                                 |       LIST:                                             
+    - synapse_ids                                        |       NAME: max-cache-size                               |       - synapse_parent_pre                              
+    - neuron_ids                                         |       VALUE: 1073741824                                  |       - synapse_parent_post                             
+    LINK_LIST:                                           |     META:                                                |       - synapse_id                                      
+    - synapse_parent                                     |       NAME: meta-size                                    |       POST:                                             
+    - neuron_children                                    |       VALUE: 567                                         |         NAME: synapse_parent_post                       
+    LIST:                                                |   DB:                                                    |       PRE:                                              
+    - neuron_children                                    |     FILE:                                                |         NAME: synapse_parent_pre                        
+    - synapse_ids                                        |       CONFIG:                                            |   INFO:                                                 
+    - neuron_ids                                         |         GROUP_LIST:                                      |     CHANNEL:                                            
+    - synapse_keypoint                                   |         - experiments                                    |       NAME: name                                        
+    - neuron_keypoint                                    |         - samples                                        |     LIST:                                               
+    - voxel_list                                         |         - datasets                                       |     - path                                              
+    - is_synapse                                         |         - channels                                       |     - data-type                                         
+    - is_neuron                                          |         LIST:                                            |     - list                                              
+    - synapse_parent                                     |         - path                                           |     - name                                              
+    NAME: feature                                        |         - experiments                                    |     - dimensions                                        
+    NEURON_CHILDREN:                                     |         - samples                                        |     NAMES:                                              
+      NAME: neuron_children                              |         - datasets                                       |       NAME: list                                        
+    POINT_LIST:                                          |         - channels                                       |     PATH:                                               
+    - synapse_keypoint                                   |         NAME: /home/john/.rh-config.yaml                 |       NAME: path                                        
+    - neuron_keypoint                                    |         PATH:                                            |     SIZE:                                               
+    SYNAPSE_LINKS:                                       |           NAME: path                                     |       LIST:                                             
+      NAME: synapse_parent                               |       LIST:                                              |       - y                                               
+    TABLES:                                              |       - synapse-connections.json                         |       - x                                               
+      LIST:                                              |       - /home/john/.rh-config.yaml                       |       - z                                               
+      - synapse                                          |       SYNAPSE:                                           |       NAME: dimensions                                  
+      - neuron                                           |         LIST:                                            |       X:                                                
+      NEURON:                                            |         - neuron_1                                       |         NAME: x                                         
+        LIST:                                            |         - neuron_2                                       |       Y:                                                
+        - neuron_keypoint                                |         - synapse_center                                 |         NAME: y                                         
+        - neuron_ids                                     |         NAME: synapse-connections.json                   |       Z:                                                
+        - is_neuron                                      |         NEURON_LIST:                                     |         NAME: z                                         
+        NAME: neuron                                     |         - neuron_1                                       |     TYPE:                                               
+      SYNAPSE:                                           |         - neuron_2                                       |       ID_LIST:                                          
+        LIST:                                            |         POINT:                                           |       - uint16                                          
+        - synapse_keypoint                               |           LIST:                                          |       - uint32                                          
+        - neuron_children                                |           - z                                            |       LIST:                                             
+        - synapse_parent                                 |           - y                                            |       - uint16                                          
+        - synapse_ids                                    |           - x                                            |       - uint32                                          
+        - is_synapse                                     |           NAME: synapse_center                           |       - uint8                                           
+        NAME: synapse                                    |     JOIN:                                                |       - float32                                         
+    VOXEL_LIST:                                          |       NAME: '{}://{}'                                    |       NAME: data-type                                   
+    - voxel_list                                         |     LIST:                                                |       RAW_LIST:                                         
+  GROUP:                                                 |     - '{}://{}'                                          |       - uint8                                           
+    LIST:                                                |     TABLE:                                               |       - float32                                         
+    - experiment                                         |       ALL:                                               |       VALUE: uint8                                      
+    - sample                                             |         LIST:                                            |                                                         
+    - dataset                                            |         - z                                              |                                                         
+    - channel                                            |         - y                                              |                                                         
+    NAME: name                                           |         - x                                              |                                                         
+  IMAGE:                                                 |         POINT_LIST:                                      |                                                         
+    FORMAT:                                              |         - z                                              |                                                         
+      COLOR_LIST:                                        |         - y                                              |                                                         
+      - png                                              |         - x                                              |                                                         
+      - jpg                                              |       LIST:                                              |                                                         
+      - bmp                                              |       - neuron                                           |                                                         
+      LIST:                                              |       - synapse                                          |                                                         
+      - zip                                              |       NEURON:                                            |                                                         
+      - png                                              |         KEY:                                             |                                                         
+      - jpg                                              |           NAME: neuron                                   |                                                         
+      - bmp                                              |         KEY_LIST:                                        |                                                         
+      - tif                                              |         - neuron                                         |                                                         
+      - tiff                                             |         LIST:                                            |                                                         
+      NAME: format                                       |         - neuron                                         |                                                         
+      TIF_LIST:                                          |         NAME: neuron                                     |                                                         
+      - tif                                              |       SYNAPSE:                                           |                                                         
+      - tiff                                             |         KEY:                                             |                                                         
+      VALUE: png                                         |           NAME: __id                                     |                                                         
+      ZIP_LIST:                                          |         KEY_LIST:                                        |                                                         
+      - zip                                              |         - n1                                             |                                                         
+    LIST:                                                |         - n2                                             |                                                         
+    - view                                               |         LIST:                                            |                                                         
+    - format                                             |         - n1                                             |                                                         
+    VIEW:                                                |         - n2                                             |                                                         
+      COLOR:                                             |         - __id                                           |                                                         
+        NAME: colormap                                   |         NAME: synapse                                    |                                                         
+      GRAY:                                              |         NEURON_LIST:                                     |                                                         
+        NAME: grayscale                                  |         - n1                                             |                                                         
+      LIST:                                              |         - n2                                             |                                                         
+      - colormap                                         |   ERROR:                                                 |                                                         
+      - grayscale                                        |     CACHE:                                               |                                                         
+      - rgb                                              |       ADD:                                               |                                                         
+      NAME: view                                         |         ACT: 'Add {value} to cache.                      |                                                         
+      RGB:                                               |           Cache now {size} bytes.                    '   |                                                         
+        NAME: rgb                                        |         LOG: info                                        |                                                         
+      VALUE: grayscale                                   |         NAME: add_query                                  |                                                         
+  INFO:                                                  |       LIST:                                              |                                                         
+    FORMAT:                                              |       - over_max                                         |                                                         
+      LIST:                                              |       - add_query                                        |                                                         
+      - json                                             |       MAX:                                               |                                                         
+      - yaml                                             |         ACT: 'Cannot cache {value}.                      |                                                         
+      NAME: format                                       |           {size} bytes is over max.                    ' |                                                         
+      VALUE: json                                        |         LOG: warning                                     |                                                         
+    ID:                                                  |         NAME: over_max                                   |                                                         
+      NAME: id                                           |     CHECK:                                               |                                                         
+    LIST:                                                |       NAME: check                                        |                                                         
+    - id                                                 |     LIST:                                                |                                                         
+    - format                                             |     - term                                               |                                                         
+  METHODS:                                               |     - value                                              |                                                         
+    FEAT:                                                |     - check                                              |                                                         
+      NAME: entity_feature                               |     - size                                               |                                                         
+    GROUP_LIST:                                          |     OUT:                                                 |                                                         
+    - experiments                                        |       NAME: value                                        |                                                         
+    - samples                                            |     REQUEST:                                             |                                                         
+    - datasets                                           |       CHECK:                                             |                                                         
+    - channels                                           |         ACT: 'The {term} {value} is                      |                                                         
+    IMAGE_LIST:                                          |           not {check}.                    '              |                                                         
+    - data                                               |         LOG: info                                        |                                                         
+    - mask                                               |         NAME: bad_check                                  |                                                         
+    INFO_LIST:                                           |       LIST:                                              |                                                         
+    - channel_metadata                                   |       - bad_check                                        |                                                         
+    - entity_feature                                     |     SERVER:                                              |                                                         
+    LIST:                                                |       LIST:                                              |                                                         
+    - entity_feature                                     |       - start                                            |                                                         
+    - channel_metadata                                   |       - stop                                             |                                                         
+    - data                                               |       START:                                             |                                                         
+    - mask                                               |         ACT: "\n*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*\n\       |                                                         
+    - experiments                                        |           \ Start server on port {value}.\n\             |                                                         
+    - samples                                            |           _______________________________\n\             |                                                         
+    - datasets                                           |           \                    "                         |                                                         
+    - channels                                           |         LOG: info                                        |                                                         
+    META:                                                |         NAME: start                                      |                                                         
+      NAME: channel_metadata                             |       STOP:                                              |                                                         
+    NAME: method                                         |         ACT: "\n|||||||||||||||||||||||||||||||\n\       |                                                         
+  POSITION:                                              |           \ Stop server on port {value}.\n\              |                                                         
+    DEPTH:                                               |           *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*\n\             |                                                         
+      NAME: depth                                        |           \                    "                         |                                                         
+      VALUE: 1                                           |         LOG: info                                        |                                                         
+    HEIGHT:                                              |         NAME: stop                                       |                                                         
+      NAME: height                                       |     SIZE:                                                |                                                         
+    LIST:                                                |       NAME: size                                         |                                                         
+    - height                                             |     TERM:                                                |                                                         
+    - width                                              |       NAME: term                                         |                                                         
+    - depth                                              |   IMAGE:                                                 |                                                         
+    - y                                                  |     BLOCK:                                               |                                                         
+    - x                                                  |       LIST:                                              |                                                         
+    - z                                                  |       - 1                                                |                                                         
+    WIDTH:                                               |       - 512                                              |                                                         
+      NAME: width                                        |       NAME: block-size                                   |                                                         
+    X:                                                   |       VALUE:                                             |                                                         
+      NAME: x                                            |       - 1                                                |                                                         
+    Y:                                                   |       - 512                                              |                                                         
+      NAME: y                                            |       - 512                                              |                                                         
+    Z:                                                   |     LIST:                                                |                                                         
+      NAME: z                                            |     - source-type                                        |                                                         
+  RESOLUTION:                                            |     - block-size                                         |                                                         
+    LIST:                                                |     SOURCE:                                              |                                                         
+    - y-res                                              |       HDF5:                                              |                                                         
+    - x-res                                              |         INNER:                                           |                                                         
+    - z-res                                              |           NAME: dataset-path                             |                                                         
+    - resolution                                         |           VALUE: main                                    |                                                         
+    X:                                                   |         LIST:                                            |                                                         
+      NAME: x-res                                        |         - filename                                       |                                                         
+    XY:                                                  |         - dataset-path                                   |                                                         
+      NAME: resolution                                   |         NAME: hdf5                                       |                                                         
+      VALUE: 0                                           |         OUTER:                                           |                                                         
+    Y:                                                   |           NAME: filename                                 |                                                         
+      NAME: y-res                                        |       LIST:                                              |                                                         
+    Z:                                                   |       - hdf5                                             |                                                         
+      NAME: z-res                                        |       - tilespecs                                        |                                                         
+                                                         |       - mojo                                             |                                                         
+                                                         |       - regularimagestack                                |                                                         
+                                                         |       NAME: source-type                                  |                                                         
+                                                         |       VALUE: regularimagestack                           |                                                         
+                                                         |   TILE:                                                  |                                                         
+                                                         |     KJI:                                                 |                                                         
+                                                         |       NAME: kji                                          |                                                         
+                                                         |     LIST:                                                |                                                         
+                                                         |     - kji                                                |                                                         
+                                                         |     - zyx                                                |                                                         
+                                                         |     - scales                                             |                                                         
+                                                         |     SCALES:                                              |                                                         
+                                                         |       NAME: scales                                       |                                                         
+                                                         |     ZYX:                                                 |                                                         
+                                                         |       NAME: zyx                                          |                                                         
+                                                         |                                                          |                                                         

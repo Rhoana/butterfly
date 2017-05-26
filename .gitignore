@@ -1,10 +1,26 @@
 # vim 
 *.swo
 *.swp
+
+# Temporary test rtree file
+scripts/database_trials/database/*
+
+# symbolic link to 3D data
+bfly/static/x3d
+
+# Testing
+tests/data/*.json
+tests/data/*.h5
+.coveralls.yml
+.coverage
 *.log
+.tox
+
+# Docs
+docs/build/*
 
 # Database
-*.db
+*.db*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

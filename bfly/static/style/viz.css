@@ -1,0 +1,25 @@
+#viaWebGL {
+  background-color:black;
+  position:absolute;
+  height:100%;
+  width:100%;
+  left:0px;
+  top:0px;
+}
+
+#proto {
+  display:none;
+}
+
+#findings {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: .5em .5em 0em 1em;
+    font-family: sans-serif;
+    color: white;
+    height: 3em;
+    width: 8em;
+}
+
+#findings li{
+  list-style: none;
+}
