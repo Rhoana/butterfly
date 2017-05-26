@@ -3,7 +3,6 @@ from pymongo import MongoClient
 from pymongo import ASCENDING
 from pymongo import GEO2D
 import numpy as np
-import rtree
 import time
 import os
 
