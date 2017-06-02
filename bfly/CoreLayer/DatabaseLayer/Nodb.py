@@ -235,36 +235,36 @@ of entries to add and ``K`` is the number of keys per entry
         # Return boolean by length
         return not not len(neuron)
 
-    def synapse_keypoint(self, table, path, id_key):
+    def synapse_keypoint(self, table, path, id_key, scales):
         """
         Overrides :meth:`Database.synapse_keypoint`
         """
-        table_path = Database.synapse_keypoint(self, table, path, id_key)
+        table_path = Database.synapse_keypoint(self, table, path, id_key, scales)
         k_z, k_y, k_x = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
         # Return a dictionary from a single result
         synapse = self.get_by_key(table, path, id_key)
         if not len(synapse):
             return {}
         return {
-            k_z: synapse[-3],
-            k_y: synapse[-2],
-            k_x: synapse[-1]
+            k_z: synapse[-3] // scales,
+            k_y: synapse[-2] // scales,
+            k_x: synapse[-1] // scales
         }
 
-    def neuron_keypoint(self, table, path, id_key):
+    def neuron_keypoint(self, table, path, id_key, scales):
         """
         Overrides :meth:`Database.neuron_keypoint`
         """
-        table_path = Database.neuron_keypoint(self, table, path, id_key)
+        table_path = Database.neuron_keypoint(self, table, path, id_key, scales)
         k_z, k_y, k_x = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
         # Return a dictionary from a single result
         neuron = self.get_by_key(table, path, id_key)
         if not len(neuron):
             return {}
         return {
-            k_z: neuron[-3],
-            k_y: neuron[-2],
-            k_x: neuron[-1]
+            k_z: neuron[-3] // scales,
+            k_y: neuron[-2] // scales,
+            k_x: neuron[-1] // scales
         }
 
     def synapse_parent(self, table, path, id_key):

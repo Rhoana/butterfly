@@ -236,10 +236,15 @@ from :meth:`_id_feature` or :meth:`_box_feature`
 
         # If the request gets a keypoint
         if feat in feats.POINT_LIST:
+            # Get the resolution parameter
+            res_xy = self.INPUT.RESOLUTION.XY
+            resolution = self._get_int_query(res_xy)
+            scales = 2**resolution
+            # Load from either table
             if feat == k_tables.LIST[0]:
-                return db.neuron_keypoint(db_table, path, id_key)
+                return db.neuron_keypoint(db_table, path, id_key, scales)
             else:
-                return db.synapse_keypoint(db_table, path, id_key)
+                return db.synapse_keypoint(db_table, path, id_key, scales)
 
         # If the request asks for all links
         if feat == feats.SYNAPSE_LINKS.NAME:

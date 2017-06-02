@@ -402,13 +402,13 @@ object reference to the real table.
         """
         return self.get_table(table, path)
 
-    def synapse_keypoint(self, table, path, id_key):
+    def synapse_keypoint(self, table, path, id_key, scales):
         """
         Must be overridden by derived class.
         """
         return self.get_table(table, path)
 
-    def neuron_keypoint(self, table, path, id_key):
+    def neuron_keypoint(self, table, path, id_key, scales):
         """
         Must be overridden by derived class.
         """
