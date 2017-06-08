@@ -142,39 +142,38 @@ if __name__ == '__main__':
         trial_id = int(sys.argv[1])
 
     # Output files go to the graph dir   
-    graph_fmt = '/n/coxfs01/thejohnhoffer/h5_tiles/{}'
+    graph_fmt = '/n/coxfs01/thejohnhoffer/2017/butterfly/scripts/h5_tile_test/results/{}'
     exp = os.getenv('H5_EXPERIMENT', time.strftime('%Y_%m_%d'))
     graph_dir = graph_fmt.format(exp)
     # Make the working directory
     if not os.path.exists(graph_dir):
         try:
-            os.mkdir(graph_dir)
+            os.makedirs(graph_dir)
         except OSError:
             pass
 
     # Temp files go to the noise_dir
-    noise_fmt = '/n/regal/pfister_lab/thejohnhoffer/h5_noise/{}'
-    noise_dir = noise_fmt.format(trial_id)
+    noise_fmt = '/n/regal/pfister_lab/thejohnhoffer/h5_noise/{}/{}'
+    noise_dir = noise_fmt.format(exp, trial_id)
     # Make the temporary directory
     if not os.path.exists(noise_dir):
         try:
-            os.mkdir(noise_dir)
+            os.makedirs(noise_dir)
         except OSError:
             pass
 
     # Set the full shape and file sizes
     full_shape = np.uint32([1, 2**14, 2**14])
     file_divs = np.uint32([
-       [1,1,1],
-       [1,2,2],
-       [1,4,4],
-       [1,8,8],
-       [1,16,16],
-       [1,32,32],
-       [1,64,64],
-       [1,128,128],
-       [1,256,256],
-       [1,512,512],
+      [1,1,1],
+      [1,2,2],
+      [1,4,4],
+      [1,8,8],
+      [1,16,16],
+      [1,32,32],
+      [1,64,64],
+      [1,128,128],
+      [1,256,256],
     ])
     # Get the number of files
     file_counts = np.prod(file_divs, 1)
@@ -182,10 +181,14 @@ if __name__ == '__main__':
     file_sizes = full_shape / file_divs
     # Set the tile sizes, trial count, and datatype
     tile_sizes = np.uint32([
-       file_sizes[-1],
+      [1, 32, 32],
+      [1, 64, 64],
+      [1, 128, 128],
+      [1, 512, 512],
+      [1, 1024, 1024],
     ])
-    n_trials = 20
-    int_type = 64
+    trial_start = 0
+    int_type = 8
     # Get the total mebibytes
     full_bytes = int_type * np.prod(full_shape)
     full_mb = int(full_bytes / (1024 ** 2))
@@ -210,6 +213,14 @@ if __name__ == '__main__':
         t_s = tile_sizes[t_id]
         f_s = file_sizes[f_id]
         f_c = file_counts[f_id]
+
+        # Continue if tile size > file size
+        if np.any(t_s > f_s):
+          msg = """***********************
+      Cannot load files of {}px in {}px blocks
+      """.format(f_s, t_s)
+          print(msg)
+          continue
 
         # Get all the needed file names
         f_names = map(file_names.pop, range(f_c)[::-1])
@@ -242,7 +253,7 @@ if __name__ == '__main__':
         'mbps': trial_rates.tolist(),
     }
     # The file for the graph
-    graph_file = '{:04d}.json'.format(trial_id)
+    graph_file = '{:04d}.json'.format(trial_start + trial_id)
     graph_file = os.path.join(graph_dir, graph_file)
 
     # Write the model to json

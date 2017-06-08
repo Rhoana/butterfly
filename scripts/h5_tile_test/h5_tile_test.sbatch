@@ -9,8 +9,8 @@
 #SBATCH -t 10-12:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=john@hoff.in
-#SBATCH -o /n/coxfs01/thejohnhoffer/h5_tiles/h5_%a.out
-#SBATCH -e /n/coxfs01/thejohnhoffer/h5_tiles/h5_%a.err
+#SBATCH -o /n/coxfs01/thejohnhoffer/2017/butterfly/scripts/h5_tile_test/results/full_h5_%a.out
+#SBATCH -e /n/coxfs01/thejohnhoffer/2017/butterfly/scripts/h5_tile_test/results/full_h5_%a.err
 
 source new-modules.sh
 module load python/2.7.11-fasrc01
@@ -21,7 +21,7 @@ pip install --upgrade h5py
 
 # we are working
 cd /n/coxfs01/thejohnhoffer/2017/butterfly/scripts/h5_tile_test
-python record_data.py ${SLURM_ARRAY_TASK_ID}
+python -u record_data.py ${SLURM_ARRAY_TASK_ID}
 
 # end of program
 exit 0;

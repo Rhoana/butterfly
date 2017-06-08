@@ -12,8 +12,6 @@ In `record_data.py`
 
 ## Running the batch job
 
-The array should be the same length as the `n_trials`
-
 ```
 sbatch --array=0-19 h5_tile_test.sbatch
 ```
