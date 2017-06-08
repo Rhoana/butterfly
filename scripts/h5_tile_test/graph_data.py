@@ -51,11 +51,8 @@ if __name__ == '__main__':
     plt.ylabel('Speed (MiB per second)')
     plt.xlabel('width of partial hdf5 files')
     title_fmt = 'Rate to load {}x{}x{} voxels'
-    sub_fmt = 'in blocks of {}x{}x{} pixels'
-    # Make a big title with a subtitle
-    small = dict(fontsize=14)
-    big = dict(fontsize=18)
-    plt.suptitle(title_fmt.format(*full_shape), **big)
-    plt.title(sub_fmt.format(*tile_shape), **small)
+    # Make a big title
+    title_font = dict(fontsize=18)
+    plt.title(title_fmt.format(*full_shape), **title_font)
     # Write to file
     plt.savefig('out.png')
