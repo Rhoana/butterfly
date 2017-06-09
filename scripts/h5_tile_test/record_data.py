@@ -23,13 +23,15 @@ def load_h(_size, _path, _start):
     # Return the time difference
     return time.time() - start
 
-def make_h(_type, _size, _path):
+def make_h(_bytes, _size, _path):
+    # Get number of bits
+    n_bits = 8 * _bytes
     # Get the datatype, noise range, and size
-    dtype = getattr(np, 'uint{}'.format(_type))
+    dtype = getattr(np, 'uint{}'.format(n_bits))
     slice_size = np.uint32(_size[1:])
-    dmax = 2 ** _type
+    dmax = 2 ** n_bits
     # Calculate the max area for a section
-    max_area = MEM_LIMIT * MEGABYTE / _type
+    max_area = MEM_LIMIT * MEGABYTE / _bytes
     this_area = float(np.prod(slice_size))
     # Get the tile shape that fits in memory
     over_area = max(this_area / max_area, 1)
@@ -87,7 +89,7 @@ class Manager():
 Writing file {}""".format(f_n))
             sys.stdout.flush()
             # Write the full file
-            make_h(int_type, _shape, f_n)
+            make_h(voxel_bytes, _shape, f_n)
         # Return file names
         return f_names
 
@@ -145,6 +147,11 @@ if __name__ == '__main__':
     full_scale = 14
     if len(sys.argv) > 2:
         full_scale = int(sys.argv[2])
+    
+    # Get the number of bytes per voxel
+    voxel_bytes = 1
+    if len(sys.argv) > 3:
+        voxel_bytes = int(sys.argv[3])
 
     # Output files go to the graph dir   
     graph_fmt = '/n/coxfs01/thejohnhoffer/2017/butterfly/scripts/h5_tile_test/results/{}'
@@ -200,10 +207,8 @@ if __name__ == '__main__':
       [1, 8192, 8192],
       [1, 2**14, 2**14],
     ])
-    trial_start = 0
-    int_type = 8
     # Get the total mebibytes
-    full_bytes = int_type * np.prod(full_shape)
+    full_bytes = voxel_bytes * np.prod(full_shape)
     full_mb = int(full_bytes / MEGABYTE)
 
     # Get the file / tile indexes for the array id
@@ -266,7 +271,7 @@ if __name__ == '__main__':
         'mbps': trial_rates.tolist(),
     }
     # The file for the graph
-    graph_file = '{:04d}.json'.format(trial_start + trial_id)
+    graph_file = '{:04d}.json'.format(trial_id)
     graph_file = os.path.join(graph_dir, graph_file)
 
     # Write the model to json
