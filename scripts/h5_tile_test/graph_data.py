@@ -34,22 +34,29 @@ if __name__ == '__main__':
     mean_speeds = np.mean(all_speeds, 0)
 
     ##### 
-    # Plot rate by h5 file width
-    # Plot lines for all tile widths
+    # Plot rate by h5 tile width
+    # Plot lines for all file widths
     #####
     # Set up the plot
     fig, ax = plt.subplots()
-    for tile_i, tile_x in enumerate(tiles_x):
+    for file_i, file_x in enumerate(files_x):
         # Get rates for given tile shape
-        tile_rates = mean_speeds[:, tile_i]
-
+        file_rates = mean_speeds[file_i, :]
+        
+        # Find only where values are nonzero
+        real_rates = np.nonzero(file_rates)[0]
+        if not len(real_rates) > 1:
+            continue
+        # Filter tiles_x and rates by nonzero
+        real_tiles_x = tiles_x[real_rates]
+        real_files_r = file_rates[real_rates]
         # Plot the rates for this tile shape
-        tile_label = '{}px tile width'.format(tile_x)
-        ax.plot(files_x, tile_rates, label=tile_label)
+        file_label = '{}px file size'.format(file_x)
+        ax.plot(real_tiles_x, real_files_r, label=file_label)
 
     # Power of 2 X axis
     ax.set_xscale('log', basex=2)
-    ax.set_yscale('log', basey=2)
+#    ax.set_yscale('log', basey=2)
     ax.xaxis.set_major_formatter(FormatStrFormatter('%d'))
     ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
 
@@ -68,7 +75,7 @@ if __name__ == '__main__':
 
     # Label the graph
     plt.ylabel('Speed (MiB per second)')
-    plt.xlabel('width of partial hdf5 files')
+    plt.xlabel('Tile size')
     title_fmt = 'Rate to load {}x{}x{} voxels'
     # Make a big title
     title_font = dict(fontsize=18)

@@ -102,10 +102,6 @@ Writing file {}""".format(f_n))
         timed = 0
         # Load all files
         for f_n in _files:
-            # Written the full file
-            print("""
-Loading file {}""".format(f_n))
-            sys.stdout.flush()
             # Load all for this file name
             load_fn = partial(load_h, _tsize, f_n)
             # Add the time to load one file
@@ -206,6 +202,7 @@ if __name__ == '__main__':
       [1, 4096, 4096],
       [1, 8192, 8192],
       [1, 2**14, 2**14],
+      [1, 2**15, 2**15],
     ])
     # Get the total mebibytes
     full_bytes = voxel_bytes * np.prod(full_shape)
