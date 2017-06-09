@@ -61,10 +61,6 @@ def make_h(_bytes, _size, _path):
                 # Fill the tile specifically
                 z_keys['size'] = [y1-y0,x1-x0]
                 a_tile = np.random.randint(dmax, **z_keys)
-                # Print writing this tile
-                print("""writing {}, {}, {}
-                """.format(z, y0, x0).replace('\n', ''))
-                sys.stdout.flush()
                 # Write tile to volume
                 a[z,y0:y1,x0:x1] = a_tile
 
@@ -143,6 +139,10 @@ if __name__ == '__main__':
     full_scale = 14
     if len(sys.argv) > 2:
         full_scale = int(sys.argv[2])
+
+    # Get the minimum tile and file size
+    min_tile_scale = 8
+    min_file_scale = 8
     
     # Get the number of bytes per voxel
     voxel_bytes = 1
@@ -170,40 +170,23 @@ if __name__ == '__main__':
         except OSError:
             pass
 
-    # Set the full shape and file sizes
+    # Set the full shape
     full_width = 2 ** full_scale
-    full_shape = np.uint32([1, full_width, full_width])
+    full_shape = np.uint32([full_width, full_width])
     print("full shape {}".format(full_shape))
-    file_divs = np.uint32([
-      [1,1,1],
-      [1,2,2],
-      [1,4,4],
-      [1,8,8],
-      [1,16,16],
-      [1,32,32],
-      [1,64,64],
-      [1,128,128],
-      [1,256,256],
-      [1,512,512],
-    ])
+    # Get the range of scales
+    tile_scales = range(min_tile_scale, full_scale+1)
+    file_scales = range(min_file_scale, full_scale+1)
+    # Set the tile sizes and file sizes
+    tile_sizes = np.uint32([(2**i)*2 for i in tile_scales])
+    file_sizes = np.uint32([(2**i)*2 for i in file_scales])
     # Get the number of files
-    file_counts = np.prod(file_divs, 1)
-    # Get the shapes of all the files
-    file_sizes = full_shape / file_divs
-    # Set the tile sizes, trial count, and datatype
-    tile_sizes = np.uint32([
-#      [1, 32, 32],
-#      [1, 64, 64],
-#      [1, 128, 128],
-      [1, 256, 256],
-      [1, 512, 512],
-      [1, 1024, 1024],
-      [1, 2048, 2048],
-      [1, 4096, 4096],
-      [1, 8192, 8192],
-      [1, 2**14, 2**14],
-      [1, 2**15, 2**15],
-    ])
+    file_counts = np.prod(full_shape / file_sizes, 1)
+
+    print """
+      file sizes: {}
+      file counts: {}
+    """.format(file_sizes, file_counts)
     # Get the total mebibytes
     full_bytes = voxel_bytes * np.prod(full_shape)
     full_mb = int(full_bytes / MEGABYTE)
