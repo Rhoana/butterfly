@@ -8,7 +8,7 @@ import sys
 import os
 
 MEM_LIMIT = 1000
-MEGA = 1000**2
+MEGABYTE = 1024**2
 
 def load_h(_size, _path, _start):
     # Start timing now
@@ -29,7 +29,7 @@ def make_h(_type, _size, _path):
     slice_size = np.uint32(_size[1:])
     dmax = 2 ** _type
     # Calculate the max area for a section
-    max_area = MEM_LIMIT * (8*MEGA) / _type
+    max_area = MEM_LIMIT * MEGABYTE / _type
     this_area = float(np.prod(slice_size))
     # Get the tile shape that fits in memory
     over_area = max(this_area / max_area, 1)
@@ -141,6 +141,11 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         trial_id = int(sys.argv[1])
 
+    # Get the size of the volume
+    full_scale = 14
+    if len(sys.argv) > 2:
+        full_scale = int(sys.argv[2])
+
     # Output files go to the graph dir   
     graph_fmt = '/n/coxfs01/thejohnhoffer/2017/butterfly/scripts/h5_tile_test/results/{}'
     exp = os.getenv('H5_EXPERIMENT', time.strftime('%Y_%m_%d'))
@@ -153,7 +158,7 @@ if __name__ == '__main__':
             pass
 
     # Temp files go to the noise_dir
-    noise_fmt = '/n/regal/pfister_lab/thejohnhoffer/h5_noise/{}/{}'
+    noise_fmt = '/n/coxfs01/thejohnhoffer/h5_noise/{}/{}'
     noise_dir = noise_fmt.format(exp, trial_id)
     # Make the temporary directory
     if not os.path.exists(noise_dir):
@@ -163,7 +168,9 @@ if __name__ == '__main__':
             pass
 
     # Set the full shape and file sizes
-    full_shape = np.uint32([1, 2**14, 2**14])
+    full_width = 2 ** full_scale
+    full_shape = np.uint32([1, full_width, full_width])
+    print("full shape {}".format(full_shape))
     file_divs = np.uint32([
       [1,1,1],
       [1,2,2],
@@ -174,6 +181,7 @@ if __name__ == '__main__':
       [1,64,64],
       [1,128,128],
       [1,256,256],
+      [1,512,512],
     ])
     # Get the number of files
     file_counts = np.prod(file_divs, 1)
@@ -181,17 +189,22 @@ if __name__ == '__main__':
     file_sizes = full_shape / file_divs
     # Set the tile sizes, trial count, and datatype
     tile_sizes = np.uint32([
-      [1, 32, 32],
-      [1, 64, 64],
-      [1, 128, 128],
+#      [1, 32, 32],
+#      [1, 64, 64],
+#      [1, 128, 128],
+      [1, 256, 256],
       [1, 512, 512],
       [1, 1024, 1024],
+      [1, 2048, 2048],
+      [1, 4096, 4096],
+      [1, 8192, 8192],
+      [1, 2**14, 2**14],
     ])
     trial_start = 0
     int_type = 8
     # Get the total mebibytes
     full_bytes = int_type * np.prod(full_shape)
-    full_mb = int(full_bytes / (1024 ** 2))
+    full_mb = int(full_bytes / MEGABYTE)
 
     # Get the file / tile indexes for the array id
     id_shape = [len(file_sizes), len(tile_sizes)]
