@@ -310,6 +310,9 @@ of entries to add and ``K`` is the number of keys per entry
         # Synapses as keys in in a dictionary
         syn_dict = dict(zip(post_neurons, (2,)*n_syns))
         syn_dict.update(dict(zip(pre_neurons, (1,)*n_syns)))
+        # Get and update bidirectional neurons
+        both_neurons = list(set(pre_neurons) & set(post_neurons))
+        syn_dict.update(dict(zip(both_neurons, (3,)*n_syns)))
         return syn_dict
 
     def all_neurons(self, table, path):
