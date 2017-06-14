@@ -118,6 +118,9 @@ and contains each table as a separate key
             all_ids = collect[:,0]
             # Find potential spot for primary key
             first = np.searchsorted(all_ids, int(key))
+            # Return empty if key is not in array
+            if len(all_ids) <= int(first):
+                return []
             # Return if key value exists in array
             if all_ids[first] == int(key):
                 return collect[first]
