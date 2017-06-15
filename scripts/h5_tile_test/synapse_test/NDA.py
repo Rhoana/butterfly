@@ -43,6 +43,27 @@ class NDA():
             }
         }
 
+    def check_synapse(self, id):
+        """ Get neuron pairs and coordinates
+        """
+        if self.is_synapse(id):
+            # Get the neuron pairs
+            parents = self.synapse_parent(id)['parent_neurons']
+            # Reverse the dictionary
+            parents = {i[1]:i[0] for i in parents.items()}
+            # If bidirectionl synapse
+            if 3 in parents:
+                neurons = [parents[3], parents[3]]
+            # If two neuron parents
+            else:
+                neurons = [parents[1], parents[2]]
+            # Get the synapse coordinates
+            keypoint = self.synapse_keypoint(0, id)['keypoint']
+            # Return all neuron ids and cooridnates
+            return np.uint64(neurons + keypoint)
+        # Return nothing if non-existent
+        return np.uint64([])
+
     def stringify(self, arg):
         """ Convert arguments to strings
         """
