@@ -249,7 +249,7 @@ of entries to add and ``K`` is the number of keys per entry
         if not len(synapse):
             return {}
         return {
-            k_z: synapse[-3] // scales,
+            k_z: synapse[-3],
             k_y: synapse[-2] // scales,
             k_x: synapse[-1] // scales
         }
@@ -265,7 +265,7 @@ of entries to add and ``K`` is the number of keys per entry
         if not len(neuron):
             return {}
         return {
-            k_z: neuron[-3] // scales,
+            k_z: neuron[-3],
             k_y: neuron[-2] // scales,
             k_x: neuron[-1] // scales
         }
