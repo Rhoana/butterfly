@@ -140,8 +140,8 @@ from :meth:`_id_feature` or :meth:`_box_feature`
                 target_bounds.append(self._get_int_query(term))
             # scale the bounds from resolution
             scale = 2**resolution
-            scales = np.tile([1,scale,scale],2)
-            bounds = np.uint32(target_bounds) * scales
+            scales = np.tile([1.0/scale ,scale, scale], 2)
+            bounds = (np.array(target_bounds) * scales).astype(np.uint32)
             # Return names based on bounds
             names = self._box_feature(feat, path, bounds)
         # All features needing no parameters
