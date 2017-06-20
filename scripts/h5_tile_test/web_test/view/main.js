@@ -65,7 +65,7 @@ function main(){
             var rando = String(Math.floor(Math.random()*10**14));
             // Make the request
             return "/tile/?scale=" + (this.maxLevel - level) 
-            + "&y=" + y + "&x=" + x + "&r=" rando;
+            + "&y=" + y + "&x=" + x + "&r=" + rando;
       }
     }
   });

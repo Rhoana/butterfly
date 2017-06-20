@@ -11,7 +11,8 @@ import os
 class Experiment():
 
     TRIALS = 10
-    OUT_FMT = time.strftime('%Y_%m_%d')+'_x{}_{}x{}.json'
+    NAME = 'cache_block'
+    OUT_FMT = time.strftime('%Y_%m_%d')+'_{}_x{}_{}x{}.json'
 
     MEGABYTE = 1024**2
 
@@ -25,7 +26,7 @@ class Experiment():
         self._steps = self.TRIALS * n_tiles
         self._step = 0
         # Make the output filename
-        out_file = self.OUT_FMT.format(_tiles[0], *_shape)
+        out_file = self.OUT_FMT.format(self.NAME, _tiles[0], *_shape)
         self._output = os.path.join(_output, out_file)
         # Make an array to store the results
         self._results = [[] for i in range(n_tiles)]
