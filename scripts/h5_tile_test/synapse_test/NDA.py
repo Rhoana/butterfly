@@ -46,6 +46,11 @@ class NDA():
     def check_synapse(self, id):
         """ Get neuron pairs and coordinates
         """
+        # Get the resolution and the scale
+        res = 0
+        sc = 0.5**res
+        scales = np.array([sc, sc, 1])
+        # If synapse exists
         if self.is_synapse(id):
             # Get the neuron pairs
             parents = self.synapse_parent(id)['parent_neurons']
@@ -58,11 +63,30 @@ class NDA():
             else:
                 neurons = [parents[1], parents[2]]
             # Get the synapse coordinates
-            keypoint = self.synapse_keypoint(0, id)['keypoint']
+            keypoint = self.synapse_keypoint(res, id)['keypoint']
+            full_keypoint = np.uint64(keypoint / scales).tolist()
             # Return all neuron ids and cooridnates
-            return np.uint64(neurons + keypoint)
+            return np.uint64(neurons + full_keypoint)
         # Return nothing if non-existent
         return np.uint64([])
+
+    def check_bounds(self, keypoint):
+        """ Get synapse ids in bounds
+        """
+        # Get the resolution and the scale
+        res = 2
+        sc = 0.5**res
+        scale = np.array([sc, sc])
+        scales = np.array([scale, scale, [1,1]])
+        # Get the full-resolution bounds
+        bounds = np.c_[keypoint,keypoint]+[0,1/sc]
+        # Get the scaled bounds
+        bounds = np.uint32(bounds * scales)
+        
+        # Get the synapses in bounds
+        id_list = self.synapse_ids(res, *bounds)['ids']
+        # Return list of synapses
+        return id_list
 
     def stringify(self, arg):
         """ Convert arguments to strings

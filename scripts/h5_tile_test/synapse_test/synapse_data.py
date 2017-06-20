@@ -44,6 +44,44 @@ def check_synapses(syn, nda):
     msg = "Checked all synapses. Found {} errors.".format(ERRORS)
     print(msg)
 
+def check_bounds(syn, nda):
+    """ Check all synapses in syn against the bounds
+    """
+    ERRORS = 0
+    COUNT = len(syn)
+    # Loop through all system synapses
+    for id in range(COUNT):
+        # Get the keypoint
+        xyz = syn[id][-3:]
+        # Get the file system and NDA data
+        id, id_list = id, nda.check_bounds(xyz)
+        # Check if the id is in the id list
+        if str(id) not in id_list:
+            msg = """
+            Error for synapse {}!
+        Expected {}
+        NDA gave {}
+            """.format(id, id, id_list)
+            print(msg)
+            # Check position of first wrong synapse
+            if len(id_list):
+                bad_id = int(id_list[0])
+                # Get position of wrong id
+                bad_xyz = syn[bad_id][-3:]
+                msg = """
+                Found id {} at {} instead of
+                id {} at {}
+                """.format(bad_id, bad_xyz, id, xyz)
+                print(msg)
+            # Show an error
+            ERRORS += 1
+        # Print nice percentages
+        if id%100 == 0:
+            msg = "{:d}%".format(100*id//COUNT)
+            print(msg)
+    msg = "Checked all bounds. Found {} errors.".format(ERRORS)
+    print(msg)
+
 if __name__ == "__main__":
 
     # The raw synapse data path on the file system
@@ -64,5 +102,6 @@ if __name__ == "__main__":
     # Set up access to the file system
     syn = synapse_data(SYNAPSE)
 
-    # Check all synapses
+    # Check all bounds
+    # check_bounds(syn, nda)
     check_synapses(syn, nda)
