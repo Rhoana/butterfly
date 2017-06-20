@@ -1,37 +1,39 @@
 print = console.log
 
 function openWorld(e_add){
+  // Record starting time
+  var t0 = performance.now();
   // Record when the loaded state changes
   function loadChange(e_load){
     // If the tiles are loaded at full resolution
     if (e_load.fullyLoaded) {
+      // Record time of full load
+      var t1 = performance.now();
+      var load_time = Math.floor(t1 - t0).toString();
       // Get the image and the source
-      full_image = e_load.eventSource;
-      full_source = full_image.source;
-      // Increase the minimum zoom level
-      print([full_source.minLevel, full_source.maxLevel])
-      full_source.minLevel += 1;
-      // Send the data and reload the page if at highest resolution
-      if (full_source.minLevel == full_source.maxLevel){
-        // Reload the page
-        var newPage = function(){
-          if (reboot.readyState == XMLHttpRequest.DONE ) {
-            if (reboot.status == 200) {
-              print(reboot.responseText)
+      var full_image = e_load.eventSource;
+      var full_source = full_image.source;
+      // Reload the page
+      var newPage = function(){
+        if (reboot.readyState == XMLHttpRequest.DONE ) {
+          if (reboot.status == 200) {
+            // Reload if instructed
+            var command = reboot.responseText
+            if (command == "continue") {
               // Reload the page
               window.location.reload(true);
             }
           }
         }
-        // Reconfigure the server
-        var reboot = new XMLHttpRequest();
-        reboot.onreadystatechange = newPage;
-        reboot.open("GET", "reboot", true);
-        reboot.send();
       }
-    }
-    // Send the data and reload the page
-    else {
+      // Reconfigure the server
+      var reboot = new XMLHttpRequest();
+      reboot.onreadystatechange = newPage;
+      // Send the time until fully loaded
+      var request = "reboot?time="+load_time;
+      reboot.open("GET", request, true);
+      print (request)
+      reboot.send();
     }
   }
   // Get the full image

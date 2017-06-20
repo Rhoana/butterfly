@@ -2,51 +2,184 @@ from mimetypes import types_map
 import tornado.ioloop
 import tornado.web
 import numpy as np
+import json
 import time
 import cv2
 import sys
 import os
 
-class BootHandler(tornado.web.RequestHandler):
+class Experiment():
 
-    FORMAT = '.txt'
+    TRIALS = 2
+    OUT_FMT = time.strftime('%Y_%m_%d')+'_{}_{}x{}.json'
 
-    def initialize(self):
-        pass
+    def __init__(self, _shape, _dtype, _levels, _tiles, _output):
+        self._shape = _shape
+        self._dtype = _dtype
+        self._levels = _levels
+        self._tiles = _tiles
+        # Record number of steps
+        n_tiles = len(_tiles)
+        self._steps = self.TRIALS * n_tiles
+        self._step = 0
+        # Make the output filename
+        out_file = self.OUT_FMT.format(_tiles[0], *_shape)
+        self._output = os.path.join(_output, out_file)
+        # Make an array to store the results
+        self._results = [[] for i in range(n_tiles)]
+        # Create new images
+        self.new_images()
 
-    def get(self, request):
-        # Set the mime type and no cache
-        mime = types_map.get(self.FORMAT)
-        self.set_header("Content-Type", mime)
+    @property
+    def tile_id(self):
+        # Get the tile id for this step
+        n_tiles = len(self._tiles)
+        return self._step % n_tiles
+
+    def get_tile(self):
+        # Get the tile id for this step
+        return self._tiles[self.tile_id]
+
+    def save_data(self, _results):
+        # Get the mean of the trials
+        mean_results = np.mean(_results, 1).tolist()
+        # Combine all the constants together
+        output = {
+            'mean_results': mean_results,
+            'results': _results,
+            'tiles': self._tiles,
+            'shape': self._shape,
+            'dtype': self._dtype,
+            'levels': self._levels,
+        }
+        # Write the model to json
+        with open(self._output, 'w') as fd:
+            json.dump(output, fd, indent=4)
+
+    def add_step(self, _time):
+        # Add time to results
+        self.add_time(_time)
+        # Move to the next steep
+        if self._step + 1 < self._steps:
+            self._step += 1
+            command = "continue"
+        else:
+            # Save the data
+            self.save_data(self._results)
+            # Reset the step count
+            self._step = 0
+            # Kill the program
+            command = "stop"
+        # Create new images
+        self.new_images()
+        return command
+
+    def add_time(self, time):
+        # Add the time to the results
+        self._results[self.tile_id].append(time)
+
+    def add_server(self, _server):
+        self._server = _server
+
+    # Create all the images
+    def new_images(self):
+        """ Make a volume for each resolution
+        """
+        vols = []
+        # Get all variables
+        _shape = self._shape
+        _dtype = self._dtype
+        _levels = self._levels
+        _tile = self.get_tile()
+        # Noise max value
+        dmax = np.iinfo(_dtype).max
+        # Define grid by even multiple of tiles
+        _grid = np.floor_divide(_shape, _tile)
+        # Square the tile dimensions
+        tile_shape = (_tile,) * 2
+        # Add a volume for each resolution
+        for level in range(_levels):
+            # Double the number of tiles per scale
+            scale_grid = np.floor_divide(_grid, 2**level)
+            # Make a volume stack of all tiles
+            full_shape = np.r_[scale_grid, tile_shape]
+            msg = """Making {} of {} noise... for scale {}"""
+            print msg.format(full_shape, _dtype, level)
+
+            # Add the volume to the list of all resolutions
+            vols.append(np.random.randint(0, dmax, full_shape, _dtype))
+        # Return all volumes
+        self._images = vols
+
+class ExperimentHandler(tornado.web.RequestHandler):
+
+    @property
+    def _tile(self):
+        return self._exp.get_tile()
+
+    @property
+    def _shape(self):
+        return self._exp._shape
+
+    @property
+    def _dtype(self):
+        return self._exp._dtype
+
+    @property
+    def _levels(self):
+        return self._exp._levels
+
+    @property
+    def _images(self):
+        return self._exp._images
+
+    @property
+    def _tile_shape(self):
+        return self._images[0].shape[2:]
+
+    def set_extra_headers(self, path):
+        # Disable cache
         self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-        # Parse result
-        self.write(self.parse())
 
-    def parse(self):
-        return 'hi'
 
-class ImageHandler(tornado.web.RequestHandler):
+class ImageHandler(ExperimentHandler):
 
+    # Tile constants
     SCALE = ("scale", 0)
     X = ("x", 0)
     Y = ("y", 0)
 
-    FORMAT = ".png"
+    IMAGE_TYPE = ".png"
 
-    def initialize(self, _images):
+    # Boot constants
+    REBOOT_TYPE = ".txt"
+    TIME = ("time", 0)
 
-        self._images = _images
-        self._tile_shape = _images[0].shape[2:]
+    def initialize(self, _exp):
+        # Store the expriment
+        self._exp = _exp
 
     def get(self, request):
-        # Set the mime type and no cache
-        mime = types_map.get(self.FORMAT)
+        # Reboot server
+        if request == 'reboot':
+            # Set the mime type
+            mime = types_map.get(self.REBOOT_TYPE)
+            # Save the given time
+            time = self.get_int_query(*self.TIME)
+            # Load images for the next step
+            result = self._exp.add_step(time)
+        # Get a tile
+        else:
+            # Set the mime type
+            mime = types_map.get(self.IMAGE_TYPE)
+            # Give the requested tile
+            result = self.parse_tile()
+        # Set mime type
         self.set_header("Content-Type", mime)
-        self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-        # Parse result
-        self.write(self.parse())
+        # Write result
+        self.write(result)
 
-    def parse(self):
+    def parse_tile(self):
         """ Get a tile at a scaled X,Y offset
         """
         # Get the tile size and scale
@@ -59,12 +192,12 @@ class ImageHandler(tornado.web.RequestHandler):
         msg = """Loading a {}px tile at {},{}
         at resolution {}
         """.format(self._tile_shape, y_offset, x_offset, tile_scale)
-        # print(msg)
+        #print(msg)
 
         # Get the tile from the matrix
         tile = self._images[tile_scale][y_offset, x_offset, :, :]
         # Return the tile as a png image
-        image = cv2.imencode(self.FORMAT, tile)
+        image = cv2.imencode(self.IMAGE_TYPE, tile)
         return image[1].tostring()
 
     def get_int_query(self, name, default):
@@ -79,17 +212,14 @@ class ImageHandler(tornado.web.RequestHandler):
             """.format(name, result)
             raise tornado.web.HTTPError(400, msg)
 
-class HTMLHandler(tornado.web.RequestHandler):
+class HTMLHandler(ExperimentHandler):
 
-    def initialize(self, _path, _tile, _shape, _levels):
+    def initialize(self, _exp, _path):
         """ Prepare to render HTML paths
         """
-        # Store the tile width and base path
+        # Store experiment and path
+        self._exp = _exp
         self._path = _path
-        self._tile = _tile
-        # Store the full shape and number of levels
-        self._shape = _shape
-        self._levels = _levels
 
     def get(self, request):
         if not request:
@@ -106,81 +236,54 @@ class HTMLHandler(tornado.web.RequestHandler):
         }
         self.render(path, **keywords)
 
-    def set_extra_headers(self, path):
-        # Disable cache
-        self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+def start_server(_port, _shape, _tile, _dtype, _levels, _output):
 
-def start_server(_port, _tile, _shape, _levels):
+    # Test all possible tile sizes
+    min_max = np.log2([_tile, min(*_shape)])+[0, 2-_levels]
+    # Create a range of tiles
+    tiles = np.uint64(2**np.arange(*min_max)).tolist()
 
-    BITS = 8
-    DTYPE = np.uint8
-    # Noise max value
-    DMAX = 2 ** BITS
+    # Create the experiment
+    experiment = Experiment(_shape, _dtype, _levels, tiles, _output)
 
-    def make_app():
-
-        # Define grid by even multiple of tiles
-        grid_size = np.floor_divide(_shape, _tile)
-
-        # Create the full images
-        def full_images(_grid):
-            """ Make a volume for each resolution
-            """
-            vols = []
-            # Square the tile dimensions
-            tile_shape = (_tile,) * 2
-            # Add a volume for each resolution
-            for level in range(_levels):
-                # Double the number of tiles per scale
-                scale_grid = np.floor_divide(_grid, 2**level)
-                # Make a volume stack of all tiles
-                full_shape = np.r_[scale_grid, tile_shape]
-                msg = """Making {} of {} noise... for scale {}"""
-                print msg.format(full_shape, DTYPE, level)
-
-                # Add the volume to the list of all resolutions
-                vols.append(np.random.randint(0, DMAX, full_shape, DTYPE))
-            # Return all volumes
-            return vols
-
-        # For rebooting
-        boot_info = {
-        }
-        # Serve images
-        image_info = {
-            "_images": full_images(grid_size)
-        }
-        # Serve HTML templates
-        html_info = {
-            "_path": os.path.join(os.getcwd(),"view"),
-            "_levels": _levels,
-            "_shape": _shape,
-            "_tile": _tile,
-        }
-        # Serve static files
-        static_info = {
-            "path": os.path.join(os.getcwd(),"view"),
-        }
-        # Define the Web App
-        return tornado.web.Application([
-            (r"/?()", HTMLHandler, html_info),
-            (r"/(.*\.html)", HTMLHandler, html_info),
-            (r"/tile/?()", ImageHandler, image_info),
-            (r"/reboot/?()", BootHandler, boot_info),
-            (r"/(.*)", tornado.web.StaticFileHandler, static_info),
-        ], autoreload=True)
+    # Serve images
+    image_info = {
+        "_exp": experiment,
+    }
+    # Serve HTML templates
+    html_info = {
+        "_path": os.path.join(os.getcwd(),"view"),
+        "_exp": experiment,
+    }
+    # Serve static files
+    static_info = {
+        "path": os.path.join(os.getcwd(),"view"),
+    }
+    # Define the Web App
+    web_app = tornado.web.Application([
+        (r"/?()", HTMLHandler, html_info),
+        (r"/(.*\.html)", HTMLHandler, html_info),
+        (r"/(tile)/?.*", ImageHandler, image_info),
+        (r"/(reboot)/?.*", ImageHandler, image_info),
+        (r"/(.*)", tornado.web.StaticFileHandler, static_info),
+    ], autoreload=True)
 
     # Start the Web App
-    make_app().listen(_port)
+    web_app.listen(_port)
     print "serving on port {}".format(_port)
     tornado.ioloop.IOLoop.current().start()
 
 if __name__ == "__main__":
 
     PORT = 8383
-    TILE = 2**8
     SHAPE = [2**12, 2**12]
-    LEVELS = 3
+    TILE = 2**8
+    DTYPE = np.uint8
+    LEVELS = 1
+
+    # Results directory
+    OUTPUT = '/n/coxfs01/thejohnhoffer/web_test/'
+
     # End if shape less than tile
     if min(*SHAPE) < TILE:
         msg = """
@@ -189,8 +292,12 @@ if __name__ == "__main__":
         print msg
         sys.exit()
     # Make sure there aren't too many levels
-    ratio = int(np.log2(min(*SHAPE) / TILE) + 1)
-    LEVELS = min(max(1, LEVELS), ratio)
+    max_level = int(np.log2(min(*SHAPE) / TILE) + 1)
+    # Negative of zero less than max level
+    if LEVELS <= 0:
+        LEVELS += max_level
+    # Level may never be greater than max
+    LEVELS = np.clip(LEVELS, 1, max_level)
 
     # Start the server
-    start_server(PORT, TILE, SHAPE, LEVELS)
+    start_server(PORT, SHAPE, TILE, DTYPE, LEVELS, OUTPUT)
