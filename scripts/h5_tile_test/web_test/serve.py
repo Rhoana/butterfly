@@ -10,8 +10,10 @@ import os
 
 class Experiment():
 
-    TRIALS = 2
-    OUT_FMT = time.strftime('%Y_%m_%d')+'_{}_{}x{}.json'
+    TRIALS = 10
+    OUT_FMT = time.strftime('%Y_%m_%d')+'_x{}_{}x{}.json'
+
+    MEGABYTE = 1024**2
 
     def __init__(self, _shape, _dtype, _levels, _tiles, _output):
         self._shape = _shape
@@ -41,20 +43,36 @@ class Experiment():
         return self._tiles[self.tile_id]
 
     def save_data(self, _results):
+        # Get the bytes per each voxel
+        voxel_bytes = np.iinfo(self._dtype).bits // 8
+        # Get the total mebibytes of the slice
+        full_bytes = voxel_bytes * np.prod(self._shape)
+        full_mb = int(full_bytes / self.MEGABYTE)
+        
         # Get the mean of the trials
-        mean_results = np.mean(_results, 1).tolist()
+        mean_times = np.mean(_results, 1)
+        # Get the mean and all of the rates
+        mean_rates = full_mb / mean_times
+        all_rates = full_mb / np.array(_results)
         # Combine all the constants together
         output = {
-            'mean_results': mean_results,
-            'results': _results,
+            'mean_times': mean_times.tolist(),
+            'mean_rates': mean_rates.tolist(),
+            'all_rates': all_rates.tolist(),
+            'all_times': _results,
             'tiles': self._tiles,
             'shape': self._shape,
-            'dtype': self._dtype,
             'levels': self._levels,
+            'dtype': np.dtype(self._dtype).name,
         }
         # Write the model to json
         with open(self._output, 'w') as fd:
             json.dump(output, fd, indent=4)
+        # Notify
+        msg = """Done!
+    Wrote {}
+        """.format(self._output)
+        print(msg)
 
     def add_step(self, _time):
         # Add time to results
@@ -75,8 +93,10 @@ class Experiment():
         return command
 
     def add_time(self, time):
+        # Milliseconds to seconds
+        seconds = float(time) / 1000.0
         # Add the time to the results
-        self._results[self.tile_id].append(time)
+        self._results[self.tile_id].append(seconds)
 
     def add_server(self, _server):
         self._server = _server
@@ -103,8 +123,10 @@ class Experiment():
             scale_grid = np.floor_divide(_grid, 2**level)
             # Make a volume stack of all tiles
             full_shape = np.r_[scale_grid, tile_shape]
+            # Get name of data type used to make noise
+            dname = np.dtype(_dtype).name
             msg = """Making {} of {} noise... for scale {}"""
-            print msg.format(full_shape, _dtype, level)
+            print msg.format(full_shape, dname, level)
 
             # Add the volume to the list of all resolutions
             vols.append(np.random.randint(0, dmax, full_shape, _dtype))
@@ -275,7 +297,7 @@ def start_server(_port, _shape, _tile, _dtype, _levels, _output):
 
 if __name__ == "__main__":
 
-    PORT = 8383
+    PORT = 8487
     SHAPE = [2**12, 2**12]
     TILE = 2**8
     DTYPE = np.uint8
