@@ -11,7 +11,7 @@ import os
 if __name__ == '__main__':
 
     # Get the file name
-    infile = "2017_06_20_x256_4096x4096.json"
+    infile = "2017_06_20_x512_8192x8192.json"
     outfile = infile.replace('json','png')
 
     # Input files from the graph file   

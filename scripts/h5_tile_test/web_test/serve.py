@@ -298,8 +298,8 @@ def start_server(_port, _shape, _tile, _dtype, _levels, _output):
 if __name__ == "__main__":
 
     PORT = 8487
-    SHAPE = [2**12, 2**12]
-    TILE = 2**8
+    SHAPE = [2**13, 2**13]
+    TILE = 2**9
     DTYPE = np.uint8
     LEVELS = 1
 

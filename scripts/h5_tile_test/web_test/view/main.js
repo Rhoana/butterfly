@@ -61,8 +61,11 @@ function main(){
       tileSize: get_var('tile'),
       maxLevel: get_var('level'),
       getTileUrl: function( level, x, y ){
+            // Get a random number
+            var rando = String(Math.floor(Math.random()*10**14));
+            // Make the request
             return "/tile/?scale=" + (this.maxLevel - level) 
-            + "&y=" + y + "&x=" + x;
+            + "&y=" + y + "&x=" + x + "&r=" rando;
       }
     }
   });
