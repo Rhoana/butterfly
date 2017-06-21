@@ -17,9 +17,9 @@ def load_h(_size, _path, _start):
     with h5py.File(_path, 'r') as fd:
         d = fd[fd.keys()[0]]
         # Get subvolume in d
-        z0, y0, x0 = _start
-        z1, y1, x1 = _start + _size
-        subvol = d[z0:z1, y0:y1, x0:x1]
+        y0, x0 = _start
+        y1, x1 = _start + _size
+        subvol = d[y0:y1, x0:x1]
     # Return the time difference
     return time.time() - start
 
@@ -28,7 +28,7 @@ def make_h(_bytes, _size, _path):
     n_bits = 8 * _bytes
     # Get the datatype, noise range, and size
     dtype = getattr(np, 'uint{}'.format(n_bits))
-    slice_size = np.uint32(_size[1:])
+    slice_size = np.uint32(_size)
     dmax = 2 ** n_bits
     # Calculate the max area for a section
     max_area = MEM_LIMIT * MEGABYTE / _bytes
@@ -44,25 +44,23 @@ def make_h(_bytes, _size, _path):
     all_tiles = np.unravel_index(i_range, i_shape)
     all_tiles = np.uint32(all_tiles).T
     # Get keywords for file and slice
-    chunk_size = (1,) + tuple(tile_size)
+    chunk_size = tuple(tile_size)
     all_keys = dict(shape= _size, dtype= dtype, chunks=chunk_size)
     z_keys = dict(size= tile_size, dtype= dtype)
     # Create the file from a path
     with h5py.File(_path, 'w') as fd:
         # Make a random uint array
         a = fd.create_dataset('all', **all_keys)
-        # Fill each z step of that array
-        for z in range(int(_size[0])):
-            # Fill in each tile of that array
-            for yx in all_tiles:
-                # Get data to fill the tile
-                y1,x1 = np.clip(tile_size*(yx+1), 0, slice_size)
-                y0,x0 = tile_size*(yx)
-                # Fill the tile specifically
-                z_keys['size'] = [y1-y0,x1-x0]
-                a_tile = np.random.randint(dmax, **z_keys)
-                # Write tile to volume
-                a[z,y0:y1,x0:x1] = a_tile
+        # Fill in each tile of that array
+        for yx in all_tiles:
+            # Get data to fill the tile
+            y1,x1 = np.clip(tile_size*(yx+1), 0, slice_size)
+            y0,x0 = tile_size*(yx)
+            # Fill the tile specifically
+            z_keys['size'] = [y1-y0,x1-x0]
+            a_tile = np.random.randint(dmax, **z_keys)
+            # Write tile to volume
+            a[y0:y1,x0:x1] = a_tile
 
 class Manager():
     def __init__(self, _dir, _names):
