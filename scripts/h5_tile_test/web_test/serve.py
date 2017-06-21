@@ -10,11 +10,15 @@ import os
 
 class Experiment():
 
-    TRIALS = 10
-    NAME = 'cache_block'
+    TRIALS = 500
+    NAME = 'R0_500_jpg'
     OUT_FMT = time.strftime('%Y_%m_%d')+'_{}_x{}_{}x{}.json'
 
     MEGABYTE = 1024**2
+
+    # Whether to use real data or noise
+    FILE_NAME = "/n/coxfs01/thejohnhoffer/R0/images/256_2_2_raw/00007.jpg"
+    NOISE = False
 
     def __init__(self, _shape, _dtype, _levels, _tiles, _output):
         self._shape = _shape
@@ -120,17 +124,53 @@ class Experiment():
         tile_shape = (_tile,) * 2
         # Add a volume for each resolution
         for level in range(_levels):
+            # Get the scale
+            scale = 2**level
             # Double the number of tiles per scale
-            scale_grid = np.floor_divide(_grid, 2**level)
+            scale_grid = np.floor_divide(_grid, scale)
             # Make a volume stack of all tiles
             full_shape = np.r_[scale_grid, tile_shape]
-            # Get name of data type used to make noise
-            dname = np.dtype(_dtype).name
-            msg = """Making {} of {} noise... for scale {}"""
-            print msg.format(full_shape, dname, level)
+            #
+            # Make random noise
+            # 
+            if self.NOISE:
+                # Get name of data type used to make noise
+                dname = np.dtype(_dtype).name
+                msg = """Making {} of {} noise... for scale {}"""
+                print msg.format(full_shape, dname, level)
+
+                # Create all tiles for the random noise
+                scaled_vol = np.random.randint(0, dmax, full_shape, _dtype)
+            #
+            # Load from a file
+            #
+            else:
+                # Get name of data type used to load image
+                dname = np.dtype(_dtype).name
+                msg = """Loading {} of {} image... for scale {}"""
+                print msg.format(full_shape, dname, level)
+
+                # Load from the file
+                raw_image = cv2.imread(self.FILE_NAME, 0)
+                # Convert to correct size and crop
+                base_image  = _dtype(raw_image[:_shape[0], :_shape[1]])
+                # Halve the image resolution per scale
+                scaled_image = base_image[::scale, ::scale]
+
+                # Reshape the image into tiles
+                scaled_vol = np.zeros(full_shape, dtype=_dtype)
+                # Format all the tiles
+                for ty in range(scale_grid[0]):
+                    for tx in range(scale_grid[1]):
+                        # Get coordinates from image
+                        y0, y1 = tile_shape[0] * np.uint64([ty, ty+1])
+                        x0, x1 = tile_shape[1] * np.uint64([tx, tx+1])
+                        # Add subvolume to tile list
+                        scaled_vol[ty,tx] = scaled_image[y0:y1,x0:x1] 
 
             # Add the volume to the list of all resolutions
-            vols.append(np.random.randint(0, dmax, full_shape, _dtype))
+            vols.append(scaled_vol)
+
         # Return all volumes
         self._images = vols
 
@@ -172,7 +212,7 @@ class ImageHandler(ExperimentHandler):
     X = ("x", 0)
     Y = ("y", 0)
 
-    IMAGE_TYPE = ".png"
+    IMAGE_TYPE = ".jpg"
 
     # Boot constants
     REBOOT_TYPE = ".txt"
@@ -219,7 +259,7 @@ class ImageHandler(ExperimentHandler):
 
         # Get the tile from the matrix
         tile = self._images[tile_scale][y_offset, x_offset, :, :]
-        # Return the tile as a png image
+        # Return the tile as an image
         image = cv2.imencode(self.IMAGE_TYPE, tile)
         return image[1].tostring()
 
@@ -299,7 +339,7 @@ def start_server(_port, _shape, _tile, _dtype, _levels, _output):
 if __name__ == "__main__":
 
     PORT = 8487
-    SHAPE = [2**13, 2**13]
+    SHAPE = [2**12, 2**12]
     TILE = 2**9
     DTYPE = np.uint8
     LEVELS = 1

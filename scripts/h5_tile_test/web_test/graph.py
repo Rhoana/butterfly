@@ -11,7 +11,7 @@ import os
 if __name__ == '__main__':
 
     # Get the file name
-    infile = "2017_06_20_x512_8192x8192.json"
+    infile = "2017_06_21_R0_500_jpg_x512_4096x4096.json"
     outfile = infile.replace('json','png')
 
     # Input files from the graph file   
@@ -32,6 +32,8 @@ if __name__ == '__main__':
     tiles_x = all_data['tiles']
     # Get the average rates for each trial
     mean_rates = all_data['mean_rates']
+    # Get all the rates for each trial
+    all_rates = all_data['all_rates']
 
     ##### 
     # Plot rate by h5 tile width
@@ -42,6 +44,15 @@ if __name__ == '__main__':
     
     # Plot the rates for all tile shapes
     ax.plot(tiles_x, mean_rates)
+
+    # Line up all trial rates in a single list
+    flat_rates = np.array(all_rates).flatten()
+    # Copy the tiles to match the trial rates
+    n_trials = int(len(flat_rates) / len(tiles_x))
+    flat_tiles = np.repeat(tiles_x, n_trials)
+
+    # Plot the scatter plot
+    ax.scatter(flat_tiles, flat_rates)
 
     # Power of 2 X axis
     ax.set_xscale('log', basex=2)
