@@ -2,7 +2,7 @@
 #
 # add all other SBATCH directives here...
 #
-#SBATCH -p cox
+#SBATCH -p holyseasgpu
 #SBATCH -n 1 # Number of cores
 #SBATCH -N 1 # Ensure that all cores are on one machine
 #SBATCH --mem=16000
@@ -16,11 +16,11 @@ source new-modules.sh
 module load python/2.7.11-fasrc01
 conda create -n h5_tile --clone="$PYTHON_HOME"
 source activate h5_tile
-pip install --upgrade  numpy
+pip install --upgrade numpy
 pip install --upgrade h5py
 
 # Export name
-export H5_EXPERIMENT=2017_06_09_64K
+export H5_EXPERIMENT=2017_06_21_64K_10trial
 
 # we are working
 cd /n/coxfs01/thejohnhoffer/2017/butterfly/scripts/h5_tile_test

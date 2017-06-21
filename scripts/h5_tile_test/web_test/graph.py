@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     # Get the file name
     infile = "2017_06_21_R0_500_jpg_x512_4096x4096.json"
-    outfile = infile.replace('json','png')
+    outfile = infile.replace('json','pdf')
 
     # Input files from the graph file   
     root_folder = '/n/coxfs01/thejohnhoffer/web_test'

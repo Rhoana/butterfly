@@ -7,7 +7,7 @@ import json
 import sys
 import os
 
-MEM_LIMIT = 1000
+MEM_LIMIT = 10000
 MEGABYTE = 1024**2
 
 def load_h(_size, _path, _start):
@@ -178,8 +178,8 @@ if __name__ == '__main__':
     tile_scales = range(min_tile_scale, full_scale+1)
     file_scales = range(min_file_scale, full_scale+1)
     # Set the tile sizes and file sizes
-    tile_sizes = np.uint32([(2**i)*2 for i in tile_scales])
-    file_sizes = np.uint32([(2**i)*2 for i in file_scales])
+    tile_sizes = np.uint32([(2**i,)*2 for i in tile_scales])
+    file_sizes = np.uint32([(2**i,)*2 for i in file_scales])
     # Get the number of files
     file_counts = np.prod(full_shape / file_sizes, 1)
 

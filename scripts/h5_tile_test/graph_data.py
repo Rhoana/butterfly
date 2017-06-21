@@ -42,7 +42,11 @@ if __name__ == '__main__':
     for file_i, file_x in enumerate(files_x):
         # Get rates for given tile shape
         file_rates = mean_speeds[file_i, :]
-        
+
+        # Temp only show small file sizes
+        if file_x > 16384:
+            continue    
+
         # Find only where values are nonzero
         real_rates = np.nonzero(file_rates)[0]
         if not len(real_rates) > 1:
@@ -61,15 +65,7 @@ if __name__ == '__main__':
     ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
 
     # Set the legend fontsize
-    legend = ax.legend(loc='upper left')
-    for label in legend.get_texts():
-        label.set_fontsize('large')
-
-    # Label the graph
-    plt.ylabel('Speed (MiB per second)')
-
-    # Set the legend fontsize
-    legend = ax.legend(loc='upper left')
+    legend = ax.legend(loc='lower right')
     for label in legend.get_texts():
         label.set_fontsize('large')
 
@@ -81,4 +77,4 @@ if __name__ == '__main__':
     title_font = dict(fontsize=18)
     plt.title(title_fmt.format(*full_shape), **title_font)
     # Write to file
-    plt.savefig('out.png')
+    plt.savefig('out.pdf')
