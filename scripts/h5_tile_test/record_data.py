@@ -7,7 +7,7 @@ import json
 import sys
 import os
 
-MEM_LIMIT = 10000
+MEM_LIMIT = 1000
 MEGABYTE = 1024**2
 
 def load_h(_size, _path, _start):
@@ -44,7 +44,9 @@ def make_h(_bytes, _size, _path):
     all_tiles = np.unravel_index(i_range, i_shape)
     all_tiles = np.uint32(all_tiles).T
     # Get keywords for file and slice
-    chunk_size = tuple(tile_size)
+    #chunk_size = tuple(tile_size)
+    # Autochunk
+    chunk_size = True
     all_keys = dict(shape= _size, dtype= dtype, chunks=chunk_size)
     z_keys = dict(size= tile_size, dtype= dtype)
     # Create the file from a path
@@ -173,7 +175,9 @@ if __name__ == '__main__':
     full_shape = np.uint32([full_width, full_width])
     print("full shape {}".format(full_shape))
     # Get the range of scales
-    tile_scales = range(min_tile_scale, full_scale+1)
+    #tile_scales = range(min_tile_scale, full_scale+1)
+    tile_scales = range(10, 12)
+
     file_scales = range(min_file_scale, full_scale+1)
     # Set the tile sizes and file sizes
     tile_sizes = np.uint32([(2**i,)*2 for i in tile_scales])
