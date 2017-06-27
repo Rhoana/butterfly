@@ -25,46 +25,72 @@ if __name__ == '__main__':
 
     # Load all the input data from json
     all_data = load_all(input_path)
-
-    # Get constants from first trial
-    full_shape = all_data['shape']
-    # Get all file and tile shapes in X
-    tiles_x = all_data['tiles']
-    # Get the average rates for each trial
-    mean_rates = all_data['mean_rates']
-    # Get all the rates for each trial
-    all_rates = all_data['all_rates']
-
-    ##### 
-    # Plot rate by h5 tile width
-    # Plot lines for all file widths
-    #####
     # Set up the plot
-    fig, ax = plt.subplots()
-    
-    # Plot the rates for all tile shapes
-    ax.plot(tiles_x, mean_rates)
+    fig, axes = plt.subplots(1, 2, figsize=(15, 5))
 
-    # Line up all trial rates in a single list
-    flat_rates = np.array(all_rates).flatten()
-    # Copy the tiles to match the trial rates
-    n_trials = int(len(flat_rates) / len(tiles_x))
-    flat_tiles = np.repeat(tiles_x, n_trials)
+    for ploti in [0,1]:
+        
+        ax = axes[ploti]
 
-    # Plot the scatter plot
-    ax.scatter(flat_tiles, flat_rates)
+        # Get constants from first trial
+        full_shape = all_data['shape']
+        # Get all file and tile shapes in X
+        tiles_x = all_data['tiles']
+        # Get the average rates for each trial
+        mean_times = all_data['mean_times']
+        # Get all the rates for each trial
+        all_times = all_data['all_times']
 
-    # Power of 2 X axis
-    ax.set_xscale('log', basex=2)
-    ax.xaxis.set_major_formatter(FormatStrFormatter('%d'))
-    ax.yaxis.set_major_formatter(FormatStrFormatter('%d'))
+        title_fmt = 'Time to serve full image'
+        y_axis_label = 'Time (seconds)'
+        y_format = '%.1f'
 
-    # Label the graph
-    plt.ylabel('Speed (MiB per second)')
-    plt.xlabel('Tile size')
-    title_fmt = 'Rate to serve {}x{} pixels'
-    # Make a big title
-    title_font = dict(fontsize=18)
-    plt.title(title_fmt.format(*full_shape), **title_font)
+        ###
+        # Get the number of tiles
+        n_tiles = np.prod(full_shape / np.c_[tiles_x, tiles_x], 1)
+        # Divide the total times by the number of tiles
+        if ploti == 0:
+            # Get the average and full time data
+            mean_times = all_data['mean_times']
+            all_times = all_data['all_times']
+            # Change the type of the graph
+            title_fmt = 'Mean time to serve one image tile'
+            # Divide all the times by the number of tiles
+            all_times = all_times / n_tiles[:,np.newaxis]
+            mean_times = mean_times / n_tiles
+
+        print mean_times
+        ##### 
+        # Plot rate by h5 tile width
+        # Plot lines for all file widths
+        #####
+        # Limit y to zero
+        ax.set_ylim(ymin = 0, ymax = 2)
+
+        # Plot the rates for all tile shapes
+        ax.plot(tiles_x, mean_times)
+
+        # Line up all trial rates in a single list
+        flat_times = np.array(all_times).flatten()
+        # Copy the tiles to match the trial rates
+        n_trials = int(len(flat_times) / len(tiles_x))
+        flat_tiles = np.repeat(tiles_x, n_trials)
+
+        # Plot the scatter plot
+        ax.scatter(flat_tiles, flat_times)
+
+        #ax.set_xscale('log', basex=2)
+        ax.xaxis.set_major_formatter(FormatStrFormatter('%d'))
+        ax.yaxis.set_major_formatter(FormatStrFormatter(y_format))
+
+        # Power of 2 X axis
+        ax.set_xticks(tiles_x)
+        # Make a big title
+        title_font = dict(fontsize=18)
+        ax.set_title(title_fmt.format(*full_shape), **title_font)
+        # Label the graph
+        ax.set_xlabel('Tile size (side length in pixels)')
+        ax.set_ylabel(y_axis_label)
+
     # Write to file
     plt.savefig(output_path)

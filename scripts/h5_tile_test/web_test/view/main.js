@@ -48,6 +48,8 @@ function main(){
   function get_var (s){
     return Number(tile_el.getAttribute(s));
   }
+  // Get the number for preload flags
+  var should_hide = Number(get_var('hide'))
   // Start the OpenSeadragon
   window.osd = OpenSeadragon({
     id:	tile_id,
@@ -56,10 +58,12 @@ function main(){
     minPixelRatio: 0,
     tileSources: {
       minLevel: 0,
+      preload: true,
       height: get_var('h'),
       width:  get_var('w'),
       tileSize: get_var('tile'),
       maxLevel: get_var('level'),
+      opacity: !!(should_hide),
       getTileUrl: function( level, x, y ){
             // Get a random number
             var rando = String(Math.floor(Math.random()*10**14));

@@ -1,8 +1,8 @@
 from functools import partial
+import tifffile as tiff
 import numpy as np
 import time
 import math
-import h5py
 import json
 import sys
 import os
@@ -14,12 +14,11 @@ def load_h(_size, _path, _start):
     # Start timing now
     start = time.time()
     # Load a tile from a path
-    with h5py.File(_path, 'r') as fd:
-        d = fd[fd.keys()[0]]
-        # Get subvolume in d
-        y0, x0 = _start
-        y1, x1 = _start + _size
-        subvol = d[y0:y1, x0:x1]
+    d = tiff.imread(_path)
+    # Get subvolume in d
+    y0, x0 = _start
+    y1, x1 = _start + _size
+    subvol = d[y0:y1, x0:x1]
     # Return the time difference
     return time.time() - start
 
@@ -30,39 +29,12 @@ def make_h(_bytes, _size, _path):
     dtype = getattr(np, 'uint{}'.format(n_bits))
     slice_size = np.uint32(_size)
     dmax = 2 ** n_bits
-    # Calculate the max area for a section
-    max_area = MEM_LIMIT * MEGABYTE / _bytes
-    this_area = float(np.prod(slice_size))
-    # Get the tile shape that fits in memory
-    over_area = max(this_area / max_area, 1)
-    tile_size = slice_size / math.sqrt(over_area)
-    tile_size = np.uint32(np.floor(tile_size))
-    # Get all the positions of tiles needed
-    tile_ratio = slice_size / np.float64(tile_size)
-    i_shape = np.uint32(np.ceil(tile_ratio))
-    i_range = np.uint32(range(np.prod(i_shape)))
-    all_tiles = np.unravel_index(i_range, i_shape)
-    all_tiles = np.uint32(all_tiles).T
-    # Get keywords for file and slice
-    #chunk_size = tuple(tile_size)
-    # Autochunk
-    chunk_size = True
-    all_keys = dict(shape= _size, dtype= dtype, chunks=chunk_size)
-    z_keys = dict(size= tile_size, dtype= dtype)
-    # Create the file from a path
-    with h5py.File(_path, 'w') as fd:
-        # Make a random uint array
-        a = fd.create_dataset('all', **all_keys)
-        # Fill in each tile of that array
-        for yx in all_tiles:
-            # Get data to fill the tile
-            y1,x1 = np.clip(tile_size*(yx+1), 0, slice_size)
-            y0,x0 = tile_size*(yx)
-            # Fill the tile specifically
-            z_keys['size'] = [y1-y0,x1-x0]
-            a_tile = np.random.randint(dmax, **z_keys)
-            # Write tile to volume
-            a[y0:y1,x0:x1] = a_tile
+    # Get keywords for random noise
+    noise_keys = dict(size= slice_size, dtype= dtype)
+    # Make a random uint array
+    a_tile = np.random.randint(dmax, **noise_keys)
+    # Write tile to volume
+    tiff.imsave(_path, a_tile)
 
 class Manager():
     def __init__(self, _dir, _names):
@@ -80,10 +52,6 @@ class Manager():
         del self._names[:_count]
         # Make files for all file names
         for f_n in f_names:
-            # Writing the full file
-            print("""
-Writing file {}""".format(f_n))
-            sys.stdout.flush()
             # Write the full file
             make_h(voxel_bytes, _shape, f_n)
         # Return file names
@@ -141,8 +109,8 @@ if __name__ == '__main__':
         full_scale = int(sys.argv[2])
 
     # Get the minimum tile and file size
-    min_tile_scale = 8
-    min_file_scale = 8
+    min_tile_scale = 9
+    min_file_scale = 9
     
     # Get the number of bytes per voxel
     voxel_bytes = 1
@@ -175,8 +143,8 @@ if __name__ == '__main__':
     full_shape = np.uint32([full_width, full_width])
     print("full shape {}".format(full_shape))
     # Get the range of scales
-    #tile_scales = range(min_tile_scale, full_scale+1)
-    tile_scales = range(10, 12)
+    tile_scales = range(min_tile_scale, full_scale+1)
+    #tile_scales = range(10, 12)
 
     file_scales = range(min_file_scale, full_scale+1)
     # Set the tile sizes and file sizes
@@ -186,9 +154,12 @@ if __name__ == '__main__':
     file_counts = np.prod(full_shape / file_sizes, 1)
 
     print """
-      file sizes: {}
+      tile sizes: 
+        {}
+      file sizes:
+        {}
       file counts: {}
-    """.format(file_sizes, file_counts)
+    """.format(tile_sizes, file_sizes, file_counts)
     # Get the total mebibytes
     full_bytes = voxel_bytes * np.prod(full_shape)
     full_mb = int(full_bytes / MEGABYTE)
@@ -204,7 +175,7 @@ if __name__ == '__main__':
     # Random list of file names
     total_files = np.sum(file_counts) * id_shape[1]
     chosen = np.random.choice(10**9, int(total_files))
-    file_names = map('noise_{:09d}.h5'.format, chosen)
+    file_names = map('noise_{:09d}.tiff'.format, chosen)
 
     # Loop through all combinations of tile and file shapes
     for f_id, t_id in zip(*np.unravel_index(id_range, id_shape)):

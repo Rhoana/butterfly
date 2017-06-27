@@ -277,12 +277,14 @@ class ImageHandler(ExperimentHandler):
 
 class HTMLHandler(ExperimentHandler):
 
-    def initialize(self, _exp, _path):
+    def initialize(self, _exp, _path, _hide):
         """ Prepare to render HTML paths
         """
         # Store experiment and path
         self._exp = _exp
         self._path = _path
+        # Should hide drawing?
+        self._hide = _hide
 
     def get(self, request):
         if not request:
@@ -291,6 +293,7 @@ class HTMLHandler(ExperimentHandler):
         path = os.path.join(self._path, request)
         # Render the html page
         keywords = {
+            'HIDE': self._hide,
             'TILE_WIDTH': self._tile,
             'FULL_WIDTH': self._shape[1],
             'FULL_HEIGHT': self._shape[0],
@@ -299,7 +302,7 @@ class HTMLHandler(ExperimentHandler):
         }
         self.render(path, **keywords)
 
-def start_server(_port, _shape, _tile, _dtype, _levels, _output):
+def start_server(_port, _shape, _tile, _dtype, _levels, _output, _hide):
 
     # Test all possible tile sizes
     min_max = np.log2([_tile, min(*_shape)])+[0, 2-_levels]
@@ -316,6 +319,7 @@ def start_server(_port, _shape, _tile, _dtype, _levels, _output):
     # Serve HTML templates
     html_info = {
         "_path": os.path.join(os.getcwd(),"view"),
+        "_hide": str(int(_hide)),
         "_exp": experiment,
     }
     # Serve static files
@@ -344,6 +348,9 @@ if __name__ == "__main__":
     DTYPE = np.uint8
     LEVELS = 1
 
+    # Should hide drawing?
+    HIDE = True
+
     # Results directory
     OUTPUT = '/n/coxfs01/thejohnhoffer/web_test/'
 
@@ -363,4 +370,4 @@ if __name__ == "__main__":
     LEVELS = np.clip(LEVELS, 1, max_level)
 
     # Start the server
-    start_server(PORT, SHAPE, TILE, DTYPE, LEVELS, OUTPUT)
+    start_server(PORT, SHAPE, TILE, DTYPE, LEVELS, OUTPUT, HIDE)
