@@ -238,18 +238,28 @@ where N is the number of neurons for the ``path``.
 
         if os.path.exists(k_file):
             # Load the csv
-            with open(k_file, 'r') as cf:
+            with open(k_file, 'r') as jf:
+                # Keep a list of synapseless soma
+                new_neurons = []
                 # Add each new center point to database
-                for soma in csv.reader(cf):
+                for soma in json.load(jf):
                     # Make a numpy uint32 coorinate array
-                    soma_zyx = np.uint32(soma[:3])
-                    soma_id = np.uint32(soma[-1])
+                    k_soma = ['neuron_id', 'z', 'y', 'x']
+                    new_soma = np.uint32(map(soma.get, k_soma))
+                    soma_id = new_soma[0]
                     # Find the correct ID
                     neuron_ids = neurons.T[0]
-                    soma_index = np.argwhere(neuron_ids == soma_id)[0]
-                    # Insert into the correct ID
-                    if len(soma_index):
-                        neurons[soma_index[0], 1:] = soma_zyx
+                    # If the soma has a synapse
+                    if soma_id in neuron_ids:
+                        # Insert into the correct ID
+                        soma_index = np.argwhere(neuron_ids == soma_id)[0][0]
+                        neurons[soma_index] = new_soma
+                    else:
+                        # Add new synapseless neuron
+                        new_neurons.append(new_soma)
+
+                # Add new neurons to full neurons list
+                neurons = np.r_[neurons, new_neurons]
 
         # Add neurons to database
         self.add_neurons(path, neurons)
