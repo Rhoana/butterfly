@@ -263,7 +263,8 @@ static NAME that should always be used externally.
                 CONFIG = NamedStruct('rh-config',
                     VALUE = CONFIG_FILENAME,
                     GROUP_LIST = _group_list,
-                    PATH = NamedStruct('path')
+                    PATH = NamedStruct('path'),
+                    DPATH = NamedStruct('dpath')
                 )
             ),
             JOIN = NamedStruct('{}://{}')

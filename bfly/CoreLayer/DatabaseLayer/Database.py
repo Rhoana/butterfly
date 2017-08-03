@@ -76,6 +76,7 @@ class Database():
         k_files = self.RUNTIME.DB.FILE
         # Get keywords for the BFLY_CONFIG
         k_list = k_files.CONFIG.GROUP_LIST
+        k_dpath = k_files.CONFIG.DPATH.NAME
         k_path = k_files.CONFIG.PATH.NAME
         # Get the key to the channels
         k_channel = k_list[-1]
@@ -88,18 +89,26 @@ class Database():
         c_list = source.get(k_channel, [])
         d_path = source.get(k_path, '')
 
+        # List used paths
+        done_paths = ['']
+
         # Add all channel paths to database
         for c_dict in c_list:
+            # Get paths to map to data
             c_path = c_dict.get(k_path, '')
-            self.add_path(c_path, d_path)
-
-        # if a real dataset and channel paths
-        if d_path and len(c_list):
-            # Add all tables for the dataset path
-            self.add_tables(d_path)
-            # Load all synapses and neurons
-            synapses = self.load_synapses(d_path)
-            self.load_neurons(d_path, synapses)
+            c_dpath = c_dict.get(k_dpath, d_path)
+            if c_dpath:
+                # Map the path to the data path
+                self.add_path(c_path, c_dpath)
+            # if we found a new data path
+            if c_dpath not in done_paths:
+                # Add all tables for the dataset path
+                self.add_tables(c_dpath)
+                # Load all synapses and neurons
+                synapses = self.load_synapses(c_dpath)
+                self.load_neurons(c_dpath, synapses)
+                # Mark the dataset path as fully loaded
+                done_paths.append(c_dpath)
 
     def add_path(self, c_path, d_path):
         """ store a link from a ``c_path`` to a ``d_path``
