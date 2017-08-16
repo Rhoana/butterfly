@@ -252,11 +252,11 @@ of entries to add and ``K`` is the number of keys per entry
         # Return boolean by length
         return not not len(neuron)
 
-    def synapse_keypoint(self, table, path, id_key):
+    def synapse_keypoint(self, table, path, id_key, scales):
         """
         Overrides :meth:`Database.synapse_keypoint`
         """
-        table_path = Database.synapse_keypoint(self, table, path, id_key)
+        table_path = Database.synapse_keypoint(self, table, path, id_key, scales)
         k_z, k_y, k_x = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
         # Return a dictionary from a single result
         synapse = self.get_by_key(table, path, id_key)
@@ -264,15 +264,15 @@ of entries to add and ``K`` is the number of keys per entry
             return {}
         return {
             k_z: synapse[k_z],
-            k_y: synapse[k_y],
-            k_x: synapse[k_x]
+            k_y: synapse[k_y] // scales,
+            k_x: synapse[k_x] // scales
         }
 
-    def neuron_keypoint(self, table, path, id_key):
+    def neuron_keypoint(self, table, path, id_key, scales):
         """
         Overrides :meth:`Database.neuron_keypoint`
         """
-        table_path = Database.neuron_keypoint(self, table, path, id_key)
+        table_path = Database.neuron_keypoint(self, table, path, id_key, scales)
         k_z, k_y, k_x = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
         # Return a dictionary from a single result
         neuron = self.get_by_key(table, path, id_key)
@@ -280,8 +280,8 @@ of entries to add and ``K`` is the number of keys per entry
             return {}
         return {
             k_z: neuron[k_z],
-            k_y: neuron[k_y],
-            k_x: neuron[k_x]
+            k_y: synapse[k_y] // scales,
+            k_x: synapse[k_x] // scales
         }
 
     def synapse_parent(self, table, path, id_key):
@@ -329,6 +329,9 @@ of entries to add and ``K`` is the number of keys per entry
         # Synapses as keys in in a dictionary
         syn_dict = dict(zip(post_syns, (2,)*len(post_syns)))
         syn_dict.update(dict(zip(pre_syns, (1,)*len(pre_syns))))
+        # Get and update bidirectional neurons
+        both_syns = list(set(pre_syns) & set(post_syns))
+        syn_dict.update(dict(zip(both_syns, (3,)*n_syns)))
         return syn_dict
 
     def all_neurons(self, table, path):
