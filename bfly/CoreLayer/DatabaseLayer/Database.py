@@ -76,6 +76,7 @@ class Database():
         k_files = self.RUNTIME.DB.FILE
         # Get keywords for the BFLY_CONFIG
         k_list = k_files.CONFIG.GROUP_LIST
+        k_dpath = k_files.CONFIG.DPATH.NAME
         k_path = k_files.CONFIG.PATH.NAME
         # Get the key to the channels
         k_channel = k_list[-1]
@@ -88,18 +89,26 @@ class Database():
         c_list = source.get(k_channel, [])
         d_path = source.get(k_path, '')
 
+        # List used paths
+        done_paths = ['']
+
         # Add all channel paths to database
         for c_dict in c_list:
+            # Get paths to map to data
             c_path = c_dict.get(k_path, '')
-            self.add_path(c_path, d_path)
-
-        # if a real dataset and channel paths
-        if d_path and len(c_list):
-            # Add all tables for the dataset path
-            self.add_tables(d_path)
-            # Load all synapses and neurons
-            synapses = self.load_synapses(d_path)
-            self.load_neurons(d_path, synapses)
+            c_dpath = c_dict.get(k_dpath, d_path)
+            if c_dpath:
+                # Map the path to the data path
+                self.add_path(c_path, c_dpath)
+            # if we found a new data path
+            if c_dpath not in done_paths:
+                # Add all tables for the dataset path
+                self.add_tables(c_dpath)
+                # Load all synapses and neurons
+                synapses = self.load_synapses(c_dpath)
+                self.load_neurons(c_dpath, synapses)
+                # Mark the dataset path as fully loaded
+                done_paths.append(c_dpath)
 
     def add_path(self, c_path, d_path):
         """ store a link from a ``c_path`` to a ``d_path``
@@ -238,18 +247,28 @@ where N is the number of neurons for the ``path``.
 
         if os.path.exists(k_file):
             # Load the csv
-            with open(k_file, 'r') as cf:
+            with open(k_file, 'r') as jf:
+                # Keep a list of synapseless soma
+                new_neurons = []
                 # Add each new center point to database
-                for soma in csv.reader(cf):
+                for soma in json.load(jf):
                     # Make a numpy uint32 coorinate array
-                    soma_zyx = np.uint32(soma[:3])
-                    soma_id = np.uint32(soma[-1])
+                    k_soma = ['neuron_id', 'z', 'y', 'x']
+                    new_soma = np.uint32(map(soma.get, k_soma))
+                    soma_id = new_soma[0]
                     # Find the correct ID
                     neuron_ids = neurons.T[0]
-                    soma_index = np.argwhere(neuron_ids == soma_id)[0]
-                    # Insert into the correct ID
-                    if len(soma_index):
-                        neurons[soma_index[0], 1:] = soma_zyx
+                    # If the soma has a synapse
+                    if soma_id in neuron_ids:
+                        # Insert into the correct ID
+                        soma_index = np.argwhere(neuron_ids == soma_id)[0][0]
+                        neurons[soma_index] = new_soma
+                    else:
+                        # Add new synapseless neuron
+                        new_neurons.append(new_soma)
+
+                # Add new neurons to full neurons list
+                neurons = np.r_[neurons, new_neurons]
 
         # Add neurons to database
         self.add_neurons(path, neurons)
@@ -402,13 +421,13 @@ object reference to the real table.
         """
         return self.get_table(table, path)
 
-    def synapse_keypoint(self, table, path, id_key):
+    def synapse_keypoint(self, table, path, id_key, scales):
         """
         Must be overridden by derived class.
         """
         return self.get_table(table, path)
 
-    def neuron_keypoint(self, table, path, id_key):
+    def neuron_keypoint(self, table, path, id_key, scales):
         """
         Must be overridden by derived class.
         """

@@ -97,6 +97,9 @@ and contains each table as a separate key
             all_ids = collect[:,0]
             # Find potential spot for primary key
             first = np.searchsorted(all_ids, int(key))
+            # Return empty if key is not in array
+            if len(all_ids) <= int(first):
+                return []
             # Return if key value exists in array
             if all_ids[first] == int(key):
                 return collect[first]
@@ -185,11 +188,11 @@ of entries to add and ``K`` is the number of keys per entry
         # Return boolean by length
         return not not len(neuron)
 
-    def synapse_keypoint(self, table, path, id_key):
+    def synapse_keypoint(self, table, path, id_key, scales):
         """
         Overrides :meth:`Database.synapse_keypoint`
         """
-        table_path = Database.synapse_keypoint(self, table, path, id_key)
+        table_path = Database.synapse_keypoint(self, table, path, id_key, scales)
         k_z, k_y, k_x = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
         # Return a dictionary from a single result
         synapse = self.get_by_key(table, path, id_key)
@@ -197,15 +200,15 @@ of entries to add and ``K`` is the number of keys per entry
             return {}
         return {
             k_z: synapse[-3],
-            k_y: synapse[-2],
-            k_x: synapse[-1]
+            k_y: synapse[-2] // scales,
+            k_x: synapse[-1] // scales
         }
 
-    def neuron_keypoint(self, table, path, id_key):
+    def neuron_keypoint(self, table, path, id_key, scales):
         """
         Overrides :meth:`Database.neuron_keypoint`
         """
-        table_path = Database.neuron_keypoint(self, table, path, id_key)
+        table_path = Database.neuron_keypoint(self, table, path, id_key, scales)
         k_z, k_y, k_x = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
         # Return a dictionary from a single result
         neuron = self.get_by_key(table, path, id_key)
@@ -213,8 +216,8 @@ of entries to add and ``K`` is the number of keys per entry
             return {}
         return {
             k_z: neuron[-3],
-            k_y: neuron[-2],
-            k_x: neuron[-1]
+            k_y: neuron[-2] // scales,
+            k_x: neuron[-1] // scales
         }
 
     def synapse_parent(self, table, path, id_key):
@@ -260,6 +263,9 @@ of entries to add and ``K`` is the number of keys per entry
         # Synapses as keys in in a dictionary
         syn_dict = dict(zip(post_neurons, (2,)*n_syns))
         syn_dict.update(dict(zip(pre_neurons, (1,)*n_syns)))
+        # Get and update bidirectional neurons
+        both_neurons = list(set(pre_neurons) & set(post_neurons))
+        syn_dict.update(dict(zip(both_neurons, (3,)*n_syns)))
         return syn_dict
 
     def all_neurons(self, table, path):

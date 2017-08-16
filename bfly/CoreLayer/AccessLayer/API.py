@@ -125,8 +125,8 @@ from :meth:`_id_feature` or :meth:`_box_feature`
                 target_bounds.append(self._get_int_query(term))
             # scale the bounds from resolution
             scale = 2**resolution
-            scales = np.tile([1,scale,scale],2)
-            bounds = np.uint32(target_bounds) * scales
+            scales = np.tile([1 ,scale, scale], 2)
+            bounds = np.uint32(target_bounds * scales)
             # Return names based on bounds
             names = self._id_box_feature(feat, path, id_key, bounds)
         # All features that need bounds
@@ -140,8 +140,8 @@ from :meth:`_id_feature` or :meth:`_box_feature`
                 target_bounds.append(self._get_int_query(term))
             # scale the bounds from resolution
             scale = 2**resolution
-            scales = np.tile([1,scale,scale],2)
-            bounds = np.uint32(target_bounds) * scales
+            scales = np.tile([1 ,scale, scale], 2)
+            bounds = np.uint32(target_bounds * scales)
             # Return names based on bounds
             names = self._box_feature(feat, path, bounds)
         # All features needing no parameters
@@ -236,10 +236,15 @@ from :meth:`_id_feature` or :meth:`_box_feature`
 
         # If the request gets a keypoint
         if feat in feats.POINT_LIST:
+            # Get the resolution parameter
+            res_xy = self.INPUT.RESOLUTION.XY
+            resolution = self._get_int_query(res_xy)
+            scales = 2**resolution
+            # Load from either table
             if feat == k_tables.LIST[0]:
-                return db.neuron_keypoint(db_table, path, id_key)
+                return db.neuron_keypoint(db_table, path, id_key, scales)
             else:
-                return db.synapse_keypoint(db_table, path, id_key)
+                return db.synapse_keypoint(db_table, path, id_key, scales)
 
         # If the request asks for all links
         if feat == feats.SYNAPSE_LINKS.NAME:
