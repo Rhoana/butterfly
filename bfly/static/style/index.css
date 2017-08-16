@@ -18,16 +18,20 @@ svg {
 
 label {
   transition: .25s all;
-	overflow: hidden;
-	cursor: pointer;
+  overflow: hidden;
+  cursor: pointer;
   display: block;
   font-size: 1em;
   color: #FFF;
 }
 
+li {
+  display: block;
+}
+
 div > ul {
   padding-left: 0px;
-	margin: 0px;
+  margin: 0px;
 }
 
 path {
@@ -35,17 +39,17 @@ path {
 }
 
 label a[href] {
-	color: #FF0;
+  color: #FF0;
 }
 
 label a:after {
-	content: ':'
+  content: ':'
 }
 
 input + label span span {
   padding-left: 0.75em;
   font-size: 0.7em;
-	color: #CCC;
+  color: #CCC;
 }
 
 input + label span span:before {
@@ -61,8 +65,8 @@ label:first-child > span {
 }
 
 input[type="checkbox"] {
-	position: absolute;
-	opacity: 0;
+  position: absolute;
+  opacity: 0;
 }
 
 input[type="checkbox"]:checked + label svg {
@@ -74,7 +78,7 @@ input[type="checkbox"]:checked + label + ul label{
 }
 
 input[type="checkbox"]:not(:checked) + label + ul label{
-	max-height:0em;
+  max-height:0em;
 }
 
  /* Entirely for Keyboad Navigation Purposes */
@@ -84,9 +88,9 @@ input[type="checkbox"]:focus + label svg path {
 }
 
 input[type="checkbox"]:not(:checked) + label + ul input{
-	visibility:hidden;
+  visibility:hidden;
 }
 
 input[type="checkbox"]:not(:checked) + label + ul label{
-	visibility:hidden;
+  visibility:hidden;
 }
