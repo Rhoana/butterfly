@@ -9,7 +9,7 @@ class TestWebserver(ut.TestCase):
     """
     PORT = 2017
     DB_PATH = None
-    DB_TYPE = 'Zodb'
+    DB_TYPE = 'Nodb'
     RUNTIME = bfly.UtilityLayer.RUNTIME()
     # Log to the command line
     log_info = {
