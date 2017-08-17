@@ -131,7 +131,7 @@ Also sets the class attribute :data:`_port`
         # Send the stop message
         msg = """
 |||||||||||||||||||||||||||||||
- Stop server on port {value}.
+ Stop server on port {0}.
 *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
         """
         log.info(msg.format(self._port))
