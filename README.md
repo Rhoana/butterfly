@@ -5,7 +5,7 @@
 ### Test Updates:
 [![V2][V2.IMAGE.CI]][V2.LINK.CI] [![V2][V2.IMAGE.COVER]][V2.LINK.COVER]
 
-[![V2][V2.IMAGE.CODACY]][V2.LINK.CODACY] [![V2][V2.IMAGE.QC]][V2.LINK.QC] 
+[![V2][V2.IMAGE.CODACY]][V2.LINK.CODACY] 
 
 ### Master:
 [![V1][V1.IMAGE.CI]][V1.LINK.CI]
@@ -17,8 +17,6 @@
 [V2.LINK.CI]: https://circleci.com/gh/Rhoana/butterfly/tree/tests
 [V2.IMAGE.COVER]: https://img.shields.io/coveralls/Rhoana/butterfly/tests.svg
 [V2.LINK.COVER]: https://coveralls.io/github/Rhoana/butterfly?branch=tests
-[V2.IMAGE.QC]: https://www.quantifiedcode.com/api/v1/project/2ec68224940e403ab129befc98da67b0/snapshot/origin:tests:HEAD/badge.svg
-[V2.LINK.QC]: https://www.quantifiedcode.com/app/project/2ec68224940e403ab129befc98da67b0?branch=origin%2Ftests
 [V2.IMAGE.CODACY]: https://img.shields.io/codacy/grade/64cd27791fca49949ba1ffa285884202/tests.svg
 [V2.LINK.CODACY]: https://www.codacy.com/app/rhoana/butterfly/dashboard
 
