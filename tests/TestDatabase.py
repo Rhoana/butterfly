@@ -87,20 +87,14 @@ and successfully deliver responses at a reasonable speed
         ####
         # Should all be true
         for syn in range(self.s_count):
-            res = self.get_entry(s_table, syn)
+            res = self.db.is_synapse(s_table, self.channel, syn)
             # Raise exception if not true
             self.assertTrue(not not res)
         # Should all be false
         for syn in range(self.s_count, 2*self.s_count):
-            res = self.get_entry(s_table, syn)
+            res = self.db.is_synapse(s_table, self.channel, syn)
             # Raise exception if not false
             self.assertFalse(not not res)
-
-    def get_entry(self, table, value, **keywords):
-        """ return database entry
-        """
-        args = table, self.channel, value
-        return self.db.get_entry(*args, **keywords)
 
     def make_h5(self):
         """ make a dummy h5 file for testing
@@ -124,26 +118,12 @@ The h5 file {} is written.
     def make_dataset(self):
         """ make dummy dataset files for database
         """
+        # Get constants
         k_files = self.RUNTIME.DB.FILE
-        #### 
-        # Make blocks
-        ####
-        k_volume = k_files.BLOCK.BLOCK.NAME
-        k_start = k_files.BLOCK.BOUND.START
-        k_shape = k_files.BLOCK.BOUND.SHAPE
-        # Pair the shape names with values
-        shapes = zip(k_shape, self.h_shape)
-        # Get full bounds
+        # Get max data value
         dmax = 2 ** self.h_type
-        bounds = {k: 0 for k in k_start}
-        bounds.update({k:v for k,v in shapes})
         # Generate neuron list
         self.neurons = choice(dmax, self.n_count)
-        pairs = zip(*[self.neurons.tolist()]*2)
-        # Make a random block file
-        blocks = {
-            k_volume : [[bounds, pairs]]
-        }
 
         ####
         # Make synapses
@@ -165,14 +145,6 @@ The h5 file {} is written.
         synapses.update({
             k_center: dict(zip(k_shape, coords))
         })
-
-        ####
-        # Write blocks to file
-        ####
-        k_block = k_files.BLOCK.DEFAULT
-        blockfile = os.path.join(self.dataset, k_block)
-        with open(blockfile, 'w') as bf:
-            json.dump(blocks, bf)
 
         ####
         # Write synapses to file
