@@ -46,8 +46,6 @@ and successfully deliver responses at a reasonable speed
 
         # Log to command line
         log.basicConfig(**self.log_info)
-        # Start logging
-
 
         # Make a data directory
         if not os.path.exists(self.dataset):
@@ -77,8 +75,6 @@ and successfully deliver responses at a reasonable speed
             }]
         }
 
-        # Make a dummy Core
-        core = bfly.CoreLayer.Core(db)
         # Load the configuraton json files
         db.load_config(temp_config)
         self.db = db
@@ -185,24 +181,6 @@ The h5 file {} is written.
         synapsefile = os.path.join(self.dataset, k_synapse)
         with open(synapsefile, 'w') as sf:
             json.dump(synapses, sf)
-
-    def make_log(self):
-        """ make custom log for this test
-        """
-        utilities = bfly.UtilityLayer
-        NamedStruct = utilities.NamedStruct
-        NamelessStruct = utilities.NamelessStruct
-        # Write all the formats for the logs
-        formats = NamelessStruct(
-            WRITE = NamedStruct('write',
-                LOG = 'info',
-                ACT = '''
-||| Testing TestDatabase |||
-The h5 file {path} is written.'''
-            )
-        )
-        # Return the custom logging function
-        return bfly.UtilityLayer.MakeLog(formats).logging
 
 if __name__ == '__main__':
     ut.main()
