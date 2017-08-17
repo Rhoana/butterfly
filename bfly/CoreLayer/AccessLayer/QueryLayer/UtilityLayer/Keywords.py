@@ -5,7 +5,6 @@ from Settings import MAX_CACHE_SIZE
 from Settings import CONFIG_FILENAME
 from Structures import NamelessStruct
 from Structures import NamedStruct
-from MakeLog import MakeLog
 
 import numpy as np
 
@@ -170,11 +169,7 @@ static NAME that should always be used externally.
         For :class:`CoreLayer.Cache`
     DB: :class:`NamelessStruct`
         For :mod:`DatabaseLayer`
-    ERROR: :class:`NamelessStruct`
-        For :class:`MakeLog`
     """
-    #: An alias for :class:`MakeLog`
-    MAKELOG = MakeLog
 
     def __init__(self):
         # ALL THE TILE RUNTIME TERMS
@@ -281,20 +276,6 @@ static NAME that should always be used externally.
             JOIN = NamedStruct('{}://{}'),
             PORT = NamedStruct('port',
                 VALUE = DB_PORT,
-            )
-        )
-        # ALL THE ERROR RUNTIME TERMS
-        self.ERROR = NamelessStruct(
-            TERM = NamedStruct('term'),
-            OUT = NamedStruct('value'),
-            CHECK = NamedStruct('check'),
-            REQUEST = NamelessStruct(
-                CHECK = NamedStruct('bad_check',
-                    LOG = 'info',
-                    ACT = '''
-The {term} {value} is not {check}.
-                    '''.replace('\n','')
-                )
             )
         )
 

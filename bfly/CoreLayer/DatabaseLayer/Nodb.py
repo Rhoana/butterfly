@@ -81,6 +81,10 @@ and contains each table as a separate key
         """
 
         table_path = Database.get_by_key(self, table, path, key)
+
+        # If no data for the table
+        if table_path not in self.db:
+            return []
         # Get the list from the collection
         collect = self.db.get(table_path)
         # Get information specific to the table

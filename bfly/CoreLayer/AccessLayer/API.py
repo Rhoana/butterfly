@@ -540,82 +540,12 @@ has the path to data in the requested group from \
     # Handles Logs and Exceptions
     ####
 
-    def _except(self, result, detail):
-        """ raises a 400 URLError for logging
-
-        Arguments
-        ----------
-        result: anything
-            the failed ``result`` value
-        detail: dict
-            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \
-(str) -- description of failure
-            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \
-(str) -- the failed property name
-
-        Raises
-        -------
-        URLError
-            Contains all ``detail`` needed for log
-        """
-        k_out = self.RUNTIME.ERROR.OUT.NAME
-        detail[k_out] = result
-        raise URLError(['CHECK', 400, detail])
-
-    def _match_condition(self, result, checked, detail):
-        """ Calls :meth:`_except` given condition is false
-
-        Arguments
-        -----------
-        result: anything
-            The value checked in the ``checked`` condition
-        checked: bool
-            Raises an exception if false
-        detail: dict
-            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \
-(str) -- description of possible failure
-            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \
-(str) -- the name of ``result`` property
-
-        Returns
-        --------
-        anything:
-            The ``result`` value if ``checked`` true
-        """
-        if not checked: self._except(result, detail)
-        return result
-
-    def _try_condition(self, result, check, detail):
-        """ Calls :meth:`_except` if a function fails to run
-
-        Arguments
-        -----------
-        result: anything
-            The value to pass to the ``checked`` function
-        checked: callable
-            The function to try to call on ``result``
-        detail: dict
-            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \
-(str) -- description of possible failure
-            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \
-(str) -- the name of ``result`` property
-
-        Returns
-        --------
-        anything:
-            The ``result`` value if ``checked`` returns
-        """
-        try: return check(result)
-        # Except main errors for known checks
-        except (TypeError, ValueError):
-            self._except(result, detail)
-
-    def _try_typecast_int(self, qparam, result):
+    def _try_typecast_int(self, name, result):
         """ Try to convert a query result to an integer
 
         Arguments
         -----------
-        qparam: str
+        name: str
             The name of the ``result`` property
         result: anything
             The value to try to convert to ``int``
@@ -625,15 +555,15 @@ has the path to data in the requested group from \
         numpy.uint32
             If the ``result`` can convert to an integer
         """
-        k_term = self.RUNTIME.ERROR.TERM.NAME
-        k_check = self.RUNTIME.ERROR.CHECK.NAME
-        return self._try_condition(result, int, {
-            k_check : 'a number',
-            k_term : qparam
-        })
+        try:
+            return int(result)
+        except (TypeError, ValueError):
+            msg = "The {0} {1} is not an integer."
+            msg = msg.format(name, result)
+            raise URLError([msg, 400])
 
     def _match_list(self, name, result, whitelist):
-        """ Try to convert a query result to an integer
+        """ Check if the query result is in a whitelist
 
         Arguments
         -----------
@@ -649,14 +579,14 @@ has the path to data in the requested group from \
         anything
             If the ``result`` is in the ``whitelist``
         """
-        k_term = self.RUNTIME.ERROR.TERM.NAME
-        k_check = self.RUNTIME.ERROR.CHECK.NAME
         # Check if the result is in the list
-        in_list = result in whitelist
-        return self._match_condition(result, in_list, {
-            k_check : 'one of {}'.format(whitelist),
-            k_term : name
-        })
+        if result in whitelist:
+            return result
+
+        # Create the error message
+        msg = "The {0} {1} is not in {2}."
+        msg = msg.format(name, result, whitelist)
+        raise URLError([msg, 400])
 
     def _get_list_query(self, field):
         """ Call :meth:`_match_list` for a given structure

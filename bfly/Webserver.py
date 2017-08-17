@@ -97,8 +97,6 @@ Only set after :meth:`start` starts :data:`_webapp`.
             'max_buffer_size': self._maxbuffer
         }
         self._port = _port
-        # Keyword constants
-        k_val = self.RUNTIME.ERROR.OUT.NAME
         # Begin to serve the web application
         self._webapp.listen(_port, **app_start)
         self._server = IOLoop.instance()
@@ -130,8 +128,6 @@ Also sets the class attribute :data:`_port`
         # Ask tornado to stop
         ioloop = self._server
         ioloop.add_callback(ioloop.stop)
-        # Keyword constants
-        k_val = self.RUNTIME.ERROR.OUT.NAME
         # Send the stop message
         msg = """
 |||||||||||||||||||||||||||||||

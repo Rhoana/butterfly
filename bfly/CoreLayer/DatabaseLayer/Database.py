@@ -54,6 +54,7 @@ class Database():
 
         # Join all lists from within config
         all_lists = reduce(cat_lists, k_range, [config])
+
         # Load all files for each dataset
         map(self.load_all, all_lists)
 

@@ -1,3 +1,4 @@
+import logging as log
 from tornado import web, gen
 from urllib2 import URLError
 from QueryLayer import UtilityLayer
@@ -23,10 +24,6 @@ class RequestHandler(web.RequestHandler):
         Converts a request into a response
     _db: :class:`DatabaseLayer.Database`
         Loads data for :class:`INPUT` ``.METHODS.FEATURE``
-
-    _log: :class:`UtilityLayer.MakeLog`
-        Log strings from :class:`RUNTIME` ``.ERROR.SERVER.REQUEST``
-
 
     :h:`Methods`
 
@@ -54,10 +51,6 @@ class RequestHandler(web.RequestHandler):
         self._db = _db
         # Set the config dict
         self.BFLY_CONFIG = _config
-
-        # Create info logger
-        log_list = self.RUNTIME.ERROR.REQUEST
-        self.log = UtilityLayer.MakeLog(log_list).logging
 
     def parse(self, request):
         """ Extract details from any of the methods
@@ -94,10 +87,12 @@ asynchronously to :meth:`handle`.
             yield self._ex.submit(self.handle, query)
         except URLError, u_error:
             # Get error information
-            action, status, details = u_error.args[0]
+            msg, status = u_error.args[0]
             self.set_status(int(status))
             self.set_header('Content-Type', 'text/plain')
-            self.write(self.log(action, **details))
+            # Log and write the error message
+            log.warning(msg)
+            self.write(msg)
 
     def handle(self, _query):
         """ Sends response of :data:`_core` to ``_query``
