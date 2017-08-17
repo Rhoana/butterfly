@@ -2,7 +2,7 @@ from CoreLayer import UtilityLayer
 from CoreLayer import DatabaseLayer
 from Webserver import Webserver
 import sys, argparse
-import logging
+import logging as log
 
 class Butterfly():
     """Starts :class:`bfly.Webserver` and runs :meth:`update_db`.
@@ -27,7 +27,7 @@ new :class:`bfly.Webserver`.
     #: path to log and the log priority level
     _log_info = {
         'filename': UtilityLayer.LOG_PATH,
-        'level': logging.INFO
+        'level': log.INFO
     }
     #: class of :mod:`DatabaseLayer`
     _db_type = UtilityLayer.DB_TYPE
@@ -46,7 +46,7 @@ new :class:`bfly.Webserver`.
         port = args['port']
 
         # Start to write to log files
-        logging.basicConfig(**self._log_info)
+        log.basicConfig(**self._log_info)
 
         # Populate the database
         db = self.update_db()
