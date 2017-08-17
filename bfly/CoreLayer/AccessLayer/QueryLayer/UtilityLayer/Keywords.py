@@ -287,7 +287,6 @@ static NAME that should always be used externally.
         self.ERROR = NamelessStruct(
             TERM = NamedStruct('term'),
             OUT = NamedStruct('value'),
-            SIZE = NamedStruct('size'),
             CHECK = NamedStruct('check'),
             REQUEST = NamelessStruct(
                 CHECK = NamedStruct('bad_check',
@@ -295,24 +294,6 @@ static NAME that should always be used externally.
                     ACT = '''
 The {term} {value} is not {check}.
                     '''.replace('\n','')
-                )
-            ),
-            SERVER = NamelessStruct(
-                START = NamedStruct('start',
-                    LOG = 'info',
-                    ACT = '''
-*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
- Start server on port {value}.
-_______________________________
-                    '''
-                ),
-                STOP = NamedStruct('stop',
-                    LOG = 'info',
-                    ACT = '''
-|||||||||||||||||||||||||||||||
- Stop server on port {value}.
-*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
-                    '''
                 )
             )
         )

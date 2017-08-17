@@ -1,3 +1,4 @@
+import logging as log
 from CoreLayer import Core
 from tornado.ioloop import IOLoop
 from CoreLayer import AccessLayer
@@ -26,8 +27,6 @@ class Webserver(object):
     RUNTIME: :class:`RUNTIME`
         Shared runtime instance with :data:`_db`
 
-    _log: :class:`UtilityLayer.MakeLog`
-        Log strings from :class:`RUNTIME` ``.ERROR.SERVER``
     _webapp: :class:`tornado.web.Application`
         Allow access to content at /api and /ocp \
 with :class:`API` and :class:`OCP`
@@ -76,11 +75,6 @@ Only set after :meth:`start` starts :data:`_webapp`.
             (r'/(x3d/.*)', StaticHandler, stat_in),
         ], **app_set)
 
-        # Create info logger
-        log_list = self.RUNTIME.ERROR.SERVER
-        # Has all Webserver log strings from UtilityLayer
-        self._log = UtilityLayer.MakeLog(log_list).logging
-
     def start(self, _port):
         """ Starts the :data:`_webapp` on the given port
 
@@ -108,7 +102,13 @@ Only set after :meth:`start` starts :data:`_webapp`.
         # Begin to serve the web application
         self._webapp.listen(_port, **app_start)
         self._server = IOLoop.instance()
-        self._log('START', **{k_val: _port})
+        # Send the logging message
+        msg = """
+*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
+ Start server on port {0}.
+_______________________________
+        """
+        log.info(msg.format(_port))
         # Return the webserver
         return self._server
 
@@ -132,6 +132,12 @@ Also sets the class attribute :data:`_port`
         ioloop.add_callback(ioloop.stop)
         # Keyword constants
         k_val = self.RUNTIME.ERROR.OUT.NAME
-        self._log('STOP', **{k_val: self._port})
+        # Send the stop message
+        msg = """
+|||||||||||||||||||||||||||||||
+ Stop server on port {value}.
+*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
+        """
+        log.info(msg.format(self._port))
 
 
