@@ -314,20 +314,6 @@ _______________________________
 *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
                     '''
                 )
-            ),
-            CACHE = NamelessStruct(
-                ADD = NamedStruct('add_query',
-                    LOG = 'info',
-                    ACT = '''
-Add {value} to cache. Cache now {size} bytes.
-                    '''.replace('\n','')
-                ),
-                MAX = NamedStruct('over_max',
-                    LOG = 'warning',
-                    ACT = '''
-Cannot cache {value}. {size} bytes is over max.
-                    '''.replace('\n','')
-                )
             )
         )
 

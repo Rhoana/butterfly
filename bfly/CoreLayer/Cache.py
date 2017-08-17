@@ -23,26 +23,12 @@ the key for the size of cached keywords
     _now_memory: int
         The current bytes of memory used
 
-    log: :class:`UtilityLayer.MakeLog`
-        Log strings from :class:`RUNTIME` ``.ERROR.SERVER``
-    k_size: str
-        The key used for logging the size of an item
-    k_val: str
-        The key used to log the name of an item
-
     """
     def __init__(self, _runtime):
         self._max_memory = _runtime.CACHE.MAX.VALUE
         self._cache_meta = _runtime.CACHE.META.NAME
         self._cache = collections.OrderedDict()
         self._now_memory = 0
-
-        # Get MakeLog Keyword Arguments
-        self.k_size = _runtime.ERROR.SIZE.NAME
-        self.k_val = _runtime.ERROR.OUT.NAME
-        # Create info logger
-        log_list = _runtime.ERROR.CACHE
-        self.log = UtilityLayer.MakeLog(log_list).logging
 
     def get(self, key):
         """ Get a value from the cache by key
@@ -85,10 +71,8 @@ the key for the size of cached keywords
         # Do not cache if value more than total memory
         if value_memory > self._max_memory:
             # Log Value over Max Cache
-            self.log('MAX',**{
-                self.k_val: key,
-                self.k_size: value_memory
-            })
+            msg = "Cannot cache {0}. {1} bytes is over max."
+            log.warning(msg.format(key, value_memory))
             return -1
         # Add new item to cache memory count
         self._now_memory += value_memory
@@ -102,10 +86,8 @@ the key for the size of cached keywords
         # Add new item to the cache
         self._cache[key] = value
         # Log successful add
-        self.log('ADD',**{
-            self.k_val: key,
-            self.k_size: self._now_memory
-        })
+        msg = "Add {0} to cache. Cache now {1} bytes."
+        log.info(msg.format(key, self._now_memory))
         return 0
 
     def value_size(self, value):
