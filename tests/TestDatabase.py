@@ -21,7 +21,7 @@ class TestDatabase(ut.TestCase):
     """ set up tests for :class:`DatabaseLayer.Zodb`
     """
     DB_PATH = None
-    DB_TYPE = 'Zodb'
+    DB_TYPE = 'Nodb'
     # Neuron max and count
     n_count = 100
     # Synapse count

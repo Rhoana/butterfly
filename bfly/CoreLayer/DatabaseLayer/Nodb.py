@@ -1,4 +1,5 @@
 from Database import Database
+import logging as log
 import numpy as np
 import time
 
@@ -19,8 +20,6 @@ class Nodb(Database):
     db: dict
         Keeps all from ``add_path`` in a simple key-value store \
 and contains each table as a separate key
-    log: :class:`MakeLog`.``logging``
-        All formats for log messages
     """
 
     def __init__(self, path, _runtime):
@@ -130,7 +129,9 @@ of entries to add and ``K`` is the number of keys per entry
         # Time to add entries
         start = time.time()
         count = len(entries)
-        self.log('ADD', count, table)
+        # Log adding
+        msg = "Adding {0} entries for {1} table."
+        log.info(msg.format(count, table))
 
         # Get information specific to the table
         table_field = self.RUNTIME.DB.TABLE[table]
@@ -149,7 +150,10 @@ of entries to add and ``K`` is the number of keys per entry
 
         # Log diff and total time
         diff = time.time() - start
-        self.log('ADDED', count, diff)
+        # Log time added
+        msg = "Added {0} entries in {1:06.2f} seconds."
+        log.info(msg.format(count, diff))
+
         return entries
 
     def synapse_ids(self, table, path, start, stop):

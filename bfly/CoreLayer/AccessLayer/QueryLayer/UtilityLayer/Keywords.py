@@ -328,24 +328,6 @@ Add {value} to cache. Cache now {size} bytes.
 Cannot cache {value}. {size} bytes is over max.
                     '''.replace('\n','')
                 )
-            ),
-            DB = NamelessStruct(
-                ADD = NamedStruct('add_entries',
-                    LOG = 'info',
-                    ACT = '''
-Adding {0} entries for {1} table.
-                        '''.replace('\n','')
-                ),
-                ADDED = NamedStruct('added_entries',
-                    LOG = 'info',
-                    ACT = '''
-Added {0} entries in {1:06.2f} seconds.
-                        '''.replace('\n','')
-                ),
-                ALL = NamedStruct('all',
-                    LOG = 'info',
-                    ACT = '{}'
-                ),
             )
         )
 

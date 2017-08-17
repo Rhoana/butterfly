@@ -16,17 +16,13 @@ class Database():
 
     Attributes
     -----------
-    log: :class:`MakeLog`.``logging``
-        All formats for log messages
     RUNTIME: :class:`RUNTIME`
         With keywords needed to load files and use tables
     """
+
     def __init__(self, path, _runtime):
         # Get the database keywords
         self.RUNTIME = _runtime
-        # Create info logger
-        log_list = _runtime.ERROR.DB
-        self.log = _runtime.MAKELOG(log_list).logging
 
     def load_config(self, config):
         """ Loads all files from ``config`` into database
