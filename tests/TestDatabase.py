@@ -2,9 +2,9 @@ from numpy.random import randint
 from numpy.random import random
 from numpy.random import choice
 import unittest as ut
+import logging as log
 import numpy as np
 import datetime
-import logging
 import h5py
 import bfly
 import json
@@ -36,7 +36,7 @@ class TestDatabase(ut.TestCase):
     # Log to the command line
     log_info = {
         'stream': sys.stdout,
-        'level': logging.INFO
+        'level': log.INFO
     }
 
     def test_database(self):
@@ -45,9 +45,9 @@ and successfully deliver responses at a reasonable speed
         """
 
         # Log to command line
-        logging.basicConfig(**self.log_info)
-        # Make a custom log for this test
-        self._log = self.make_log()
+        log.basicConfig(**self.log_info)
+        # Start logging
+
 
         # Make a data directory
         if not os.path.exists(self.dataset):
@@ -119,7 +119,11 @@ and successfully deliver responses at a reasonable speed
             pattern = randint(dmax, size= dsize, dtype= dtype)
             fd.create_dataset('stack', data= pattern)
         # Log that the file path was written
-        self._log('WRITE', path= self.channel)
+        msg = """
+||| Testing TestDatabase |||
+The h5 file {} is written.
+""".format(self.channel)
+        log.info(msg)
 
     def make_dataset(self):
         """ make dummy dataset files for database
