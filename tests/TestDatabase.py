@@ -115,7 +115,9 @@ and successfully deliver responses at a reasonable speed
         ####
         # S3 : synapse_keypoint
         ####
-        msg = "synapse_keypoint: id {} {}={} instead of {} at scale {}"
+        msg = """synapse_keypoint: id {0} returns {1}={2}.
+        It should have {1}={3} at scale {4}.
+        """
         # Should match centers
         for syn, cen in enumerate(synapse_centers):
             # Use an arbitrary scale
@@ -135,7 +137,9 @@ and successfully deliver responses at a reasonable speed
         ####
         # S7 : neuron_keypoint
         ####
-        msg = "neuron_keypoint: id {} {}={} instead of {} at scale {}"
+        msg = """neuron_keypoint: id {0} returns {1}={2}.
+        It should have {1}={3} at scale {4}.
+        """
         # Should match centers
         for nrn, cen in zip(neuron_ids, neuron_centers):
             # Use an arbitrary scale
@@ -153,6 +157,47 @@ and successfully deliver responses at a reasonable speed
             # Assert all axes are expected
             map(asserter, range(3))
 
+        k_links = self.RUNTIME.FEATURES.LINKS
+        k_sides = [k_links.PRE.NAME, k_links.POST.NAME]
+        ####
+        # S3 : synapse_parent
+        ####
+        msg = """synapse_parent: id {0} returns {1}={2}.
+        It should have {1}={3}.
+        """
+        for syn, pair in enumerate(synapse_pairs):
+            result = db.synapse_parent(s_table, channel_path, syn)
+            # Error checker
+            def asserter(i):
+                real = pair[i]
+                side = k_sides[i]
+                res = result[side]
+                # Assert result has real value
+                error = msg.format(syn, side, res, real)
+                self.assertEqual(res, real, error)
+            # Assert all axes are expected
+            map(asserter, range(2))
+        ####
+        # S8 : neuron_children
+        ####
+        msg = """synapse_parent: id {0} in synapse {1} is {2}.
+        Id {0} should be {3} for this synapse.
+        """
+        k_kinds = ['none','first','second','both']
+        for nrn in neuron_ids:
+            start = [0,0,0]
+            stop = zyx_shape
+            result = db.neuron_children(s_table, channel_path, nrn, start, stop)
+            # Check all child synapses
+            for syn, kind in result.items():
+                pair = synapse_pairs[syn]
+                # Get the real and resulting labels
+                real_kind = sum(np.where(pair == nrn)[0]+1)
+                real_label = k_kinds[real_kind]
+                res_label = k_kinds[kind]
+                # Assert both labels are equal
+                error = msg.format(nrn, syn, res_label, real_label)
+                self.assertEqual(res_label, real_label, error)
 
 if __name__ == '__main__':
     ut.main()
