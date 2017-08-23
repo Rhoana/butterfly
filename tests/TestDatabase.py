@@ -1,124 +1,14 @@
+from MakeData import full_path
+from MakeData import write_synapses
+from MakeData import write_neurons
+from MakeData import make_neurons
+from MakeData import make_synapses
+from MakeData import make_centers
 import unittest as ut
 import logging as log
-import numpy.random as npr
 import numpy as np
-import datetime
-import h5py
 import bfly
-import json
 import sys
-import os
-
-def full_path(path):
-    """ Prepend this file's directory to the path
-    """
-    here = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(here, path)
-
-def label_synapses(k_files, synapse_pairs, synapse_centers):
-    """ make dummy dataset files
-
-    Arguments
-    ------------
-        k_files: NamedStruct
-            The constants for a synapse file
-        synapse_pairs: np.ndarray
-            All neuron pairs for all synapses
-        synapse_centers: np.ndarray
-            All vectors of synapse locations
-
-    Returns
-    ---------
-        dict
-            Ready to be written
-    """
-    # Get constant keywords
-    k_neurons = k_files.SYNAPSE.NEURON_LIST
-    k_center = k_files.SYNAPSE.POINT.NAME
-    k_shape = k_files.SYNAPSE.POINT.LIST
-    # Format neuron pairs and coordinates
-    synapses = dict(zip(k_neurons, synapse_pairs.tolist()))
-    synapses.update({
-        k_center: dict(zip(k_shape, synapse_centers.tolist()))
-    })
-    return synapses
-
-def make_neurons(neuron_n, info, seed):
-    """ Make a number of neurons of a given data type
-
-    Arguments
-    ----------
-    neuron_n: int
-        The number of neurons to make
-    info: np.iinfo
-        Contains the dtype max and value
-    seed: int
-        The seed for predictable noise
-
-    Returns
-    --------
-    np.ndarray:
-        All the neurons
-    """
-
-    # Neuron ids
-    npr.seed(seed)
-    ids = npr.choice(info.max, neuron_n, True)
-    return ids.astype(info.dtype)
-
-def make_synapses(synapse_n, neuron_ids, info, seed):
-    """ Make neuron pairs of a given data type
-
-    Arguments
-    ----------
-    synapse_n: int
-        The number of neuron pairs to make
-    neuron_ids: np.ndarray
-        All the neurosn to choose from
-    info: np.iinfo
-        Contains the dtype max and value
-    seed: int
-        The seed for predictable noise
-
-    Returns
-    --------
-    np.ndarray:
-        3xsynapse_n array of all pairs
-    """
-
-    pairs = np.zeros([2, synapse_n], dtype=info.dtype)
-    # Both pairs
-    for i in range(2):
-        npr.seed(seed + i)
-        pairs[i] = npr.choice(neuron_ids, synapse_n)
-    return pairs
-
-def make_centers(n_centers, zyx_shape, info, seed):
-    """ Make many 3D vectors of a given data type
-
-    Arguments
-    ----------
-    n_centers: int
-        The number of centers to make
-    zyx_shape: list
-        The 3 dimensions of the volume
-    info: np.iinfo
-        Contains the dtype max and value
-    seed: int
-        The seed for predictable noise
-
-    Returns
-    --------
-    np.ndarray:
-        3xn_centers array of all vectors
-    """
-
-    zyx = np.zeros([3, n_centers], dtype=info.dtype)
-    # All three dimensions
-    for i in range(3):
-        npr.seed(seed + i)
-        zyx[i] = npr.choice(zyx_shape[i], n_centers)
-    return zyx
 
 class TestDatabase(ut.TestCase):
     """ set up tests for :class:`DatabaseLayer.Zodb`
@@ -145,27 +35,25 @@ and successfully deliver responses at a reasonable speed
         neuron_seed = 8675309
         synapse_seed = 525600
         # Set the channel and dataset paths
-        channel = full_path('data/channel.h5')
-        dataset = full_path('data')
+        channel_path = full_path('data/channel.h5')
+        data_path = full_path('data')
         # shape, and type for temp file
         zyx_shape = [250, 2500, 2500]
         ids_info = np.iinfo(np.uint32)
         zyx_info = np.iinfo(np.uint32)
 
-        # Make all the synapses and coordinates
-        neuron_ids = make_neurons(neuron_n, ids_info, neuron_seed)
+        # Make neurons
+        neuron_ids, other_ids = make_neurons(neuron_n, ids_info, neuron_seed)
+        neuron_centers = make_centers(neuron_n, zyx_shape, zyx_info, neuron_seed)
+        # Make synapses
         synapse_pairs = make_synapses(synapse_n, neuron_ids, ids_info, synapse_seed)
         synapse_centers = make_centers(synapse_n, zyx_shape, zyx_info, synapse_seed)
         # Get constants for input files
         k_files = self.RUNTIME.DB.FILE
-        k_synapse = k_files.SYNAPSE.DEFAULT
-        # Make a data directory
-        if not os.path.exists(dataset):
-            os.makedirs(dataset)
         # Save synapse-connections.json
-        synapse_dict = label_synapses(k_files, synapse_pairs, synapse_centers)
-        with open(os.path.join(dataset, k_synapse), 'w') as sf:
-            json.dump(synapse_dict, sf)
+        write_synapses(k_files, data_path, synapse_pairs, synapse_centers)
+        # Save neuron-soma.json
+        write_neurons(k_files, data_path, neuron_ids, neuron_centers)
 
         # Make a dummy database
         db_class = getattr(bfly.DatabaseLayer, self.DB_TYPE)
@@ -177,10 +65,10 @@ and successfully deliver responses at a reasonable speed
                 'samples': [{
                     'name': 'b',
                     'datasets': [{
-                        'path': dataset,
+                        'path': data_path,
                         'name': 'c',
                         'channels': [{
-                            'path': channel,
+                            'path': channel_path,
                             'name': 'd'
                         }]
                     }]
@@ -194,19 +82,77 @@ and successfully deliver responses at a reasonable speed
         # Get constants for the database
         k_tables = self.RUNTIME.DB.TABLE
         s_table = k_tables.SYNAPSE.NAME
+        n_table = k_tables.NEURON.NAME
+
         ####
         # S1 : is_synapse
         ####
-        # Should all be true
-        for syn in range(synapse_n):
-            res = db.is_synapse(s_table, channel, syn)
-            # Raise exception if not true
-            self.assertTrue(not not res)
-        # Should all be false
+        msg = "is_synapse: ID {} returns {}"
+        # Should be synapses
+        for syn in range(0, synapse_n):
+            res = db.is_synapse(s_table, channel_path, syn)
+            self.assertTrue(res, msg.format(syn, res))
+        # Should not be synapses
         for syn in range(synapse_n, 2*synapse_n):
-            res = db.is_synapse(s_table, channel, syn)
-            # Raise exception if not false
-            self.assertFalse(not not res)
+            res = db.is_synapse(s_table, channel_path, syn)
+            self.assertFalse(res, msg.format(syn, res))
+        ####
+        # S5 : is_neuron
+        ####
+        msg = "is_neuron: ID {} returns {}"
+        # Should be neruons
+        for nrn in neuron_ids:
+            res = db.is_neuron(n_table, channel_path, nrn)
+            self.assertTrue(res, msg.format(nrn, res))
+        # Should not be neurons
+        for nrn in other_ids:
+            res = db.is_neuron(n_table, channel_path, nrn)
+            self.assertFalse(res, msg.format(nrn, res))
+
+        # Get the list of keys for coordinates
+        k_axes = k_tables.ALL.POINT_LIST
+        MAX_SCALE = 10
+        ####
+        # S3 : synapse_keypoint
+        ####
+        msg = "synapse_keypoint: id {} {}={} instead of {} at scale {}"
+        # Should match centers
+        for syn, cen in enumerate(synapse_centers):
+            # Use an arbitrary scale
+            scale = 2 ** (syn % MAX_SCALE)
+            center = cen // [1, scale, scale]
+            result = db.synapse_keypoint(s_table, channel_path, syn, scale)
+            # Error checker
+            def asserter(i):
+                real = center[i]
+                axis = k_axes[i]
+                res = result[axis]
+                # Assert result has real value
+                error = msg.format(syn, axis, res, real, scale)
+                self.assertEqual(res, real, error)
+            # Assert all axes are expected
+            map(asserter, range(3))
+        ####
+        # S7 : neuron_keypoint
+        ####
+        msg = "neuron_keypoint: id {} {}={} instead of {} at scale {}"
+        # Should match centers
+        for nrn, cen in zip(neuron_ids, neuron_centers):
+            # Use an arbitrary scale
+            scale = 2 ** (nrn % MAX_SCALE)
+            center = cen // [1, scale, scale]
+            result = db.neuron_keypoint(n_table, channel_path, nrn, scale)
+            # Error checker
+            def asserter(i):
+                real = center[i]
+                axis = k_axes[i]
+                res = result[axis]
+                # Assert result has real value
+                error = msg.format(nrn, axis, res, real, scale)
+                self.assertEqual(res, real, error)
+            # Assert all axes are expected
+            map(asserter, range(3))
+
 
 if __name__ == '__main__':
     ut.main()
