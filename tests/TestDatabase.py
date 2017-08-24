@@ -4,6 +4,7 @@ from MakeData import write_neurons
 from MakeData import make_neurons
 from MakeData import make_synapses
 from MakeData import make_centers
+from MakeData import make_bounds
 import unittest as ut
 import logging as log
 import numpy as np
@@ -46,6 +47,7 @@ and successfully deliver responses at a reasonable speed
         neuron_ids, other_ids = make_neurons(neuron_n, ids_info, neuron_seed)
         neuron_centers = make_centers(neuron_n, zyx_shape, zyx_info, neuron_seed)
         # Make synapses
+        synapse_ids = np.arange(synapse_n, dtype=ids_info.dtype)
         synapse_pairs = make_synapses(synapse_n, neuron_ids, ids_info, synapse_seed)
         synapse_centers = make_centers(synapse_n, zyx_shape, zyx_info, synapse_seed)
         # Get constants for input files
@@ -89,11 +91,11 @@ and successfully deliver responses at a reasonable speed
         ####
         msg = "is_synapse: ID {} returns {}"
         # Should be synapses
-        for syn in range(0, synapse_n):
+        for syn in synapse_ids:
             res = db.is_synapse(s_table, channel_path, syn)
             self.assertTrue(res, msg.format(syn, res))
         # Should not be synapses
-        for syn in range(synapse_n, 2*synapse_n):
+        for syn in range(synapse_ids[-1]+1, 2*synapse_n):
             res = db.is_synapse(s_table, channel_path, syn)
             self.assertFalse(res, msg.format(syn, res))
         ####
@@ -115,29 +117,29 @@ and successfully deliver responses at a reasonable speed
         ####
         # S3 : synapse_keypoint
         ####
-        msg = """synapse_keypoint: id {0} returns {1}={2}.
+        msg = """synapse_keypoint: ID {0} returns {1}={2}.
         It should have {1}={3} at scale {4}.
         """
         # Should match centers
-        for syn, cen in enumerate(synapse_centers):
+        for syn, cen in zip(synapse_ids, synapse_centers):
             # Use an arbitrary scale
             scale = 2 ** (syn % MAX_SCALE)
             center = cen // [1, scale, scale]
             result = db.synapse_keypoint(s_table, channel_path, syn, scale)
             # Error checker
             def asserter(i):
-                real = center[i]
+                ideal = center[i]
                 axis = k_axes[i]
                 res = result[axis]
-                # Assert result has real value
-                error = msg.format(syn, axis, res, real, scale)
-                self.assertEqual(res, real, error)
+                # Assert result has ideal value
+                error = msg.format(syn, axis, res, ideal, scale)
+                self.assertEqual(res, ideal, error)
             # Assert all axes are expected
             map(asserter, range(3))
         ####
         # S7 : neuron_keypoint
         ####
-        msg = """neuron_keypoint: id {0} returns {1}={2}.
+        msg = """neuron_keypoint: ID {0} returns {1}={2}.
         It should have {1}={3} at scale {4}.
         """
         # Should match centers
@@ -148,12 +150,12 @@ and successfully deliver responses at a reasonable speed
             result = db.neuron_keypoint(n_table, channel_path, nrn, scale)
             # Error checker
             def asserter(i):
-                real = center[i]
+                ideal = center[i]
                 axis = k_axes[i]
                 res = result[axis]
-                # Assert result has real value
-                error = msg.format(nrn, axis, res, real, scale)
-                self.assertEqual(res, real, error)
+                # Assert result has ideal value
+                error = msg.format(nrn, axis, res, ideal, scale)
+                self.assertEqual(res, ideal, error)
             # Assert all axes are expected
             map(asserter, range(3))
 
@@ -162,42 +164,65 @@ and successfully deliver responses at a reasonable speed
         ####
         # S3 : synapse_parent
         ####
-        msg = """synapse_parent: id {0} returns {1}={2}.
+        msg = """synapse_parent: ID {0} returns {1}={2}.
         It should have {1}={3}.
         """
-        for syn, pair in enumerate(synapse_pairs):
+        for syn, pair in zip(synapse_ids, synapse_pairs):
             result = db.synapse_parent(s_table, channel_path, syn)
             # Error checker
             def asserter(i):
-                real = pair[i]
+                ideal = pair[i]
                 side = k_sides[i]
                 res = result[side]
-                # Assert result has real value
-                error = msg.format(syn, side, res, real)
-                self.assertEqual(res, real, error)
+                # Assert result has ideal value
+                error = msg.format(syn, side, res, ideal)
+                self.assertEqual(res, ideal, error)
             # Assert all axes are expected
             map(asserter, range(2))
         ####
         # S8 : neuron_children
         ####
-        msg = """synapse_parent: id {0} in synapse {1} is {2}.
-        Id {0} should be {3} for this synapse.
+        msg = """synapse_parent: In bounds from {4} to {5},
+        ID {0} has {2} part of synapse {1}, but
+        ID {0} should have {3} part of synapse {1}.
         """
-        k_kinds = ['none','first','second','both']
+        # Keywords for logging
+        k_words = ['no','the 1st','the 2nd','every']
+        # Check for all neurons
         for nrn in neuron_ids:
-            start = [0,0,0]
-            stop = zyx_shape
-            result = db.neuron_children(s_table, channel_path, nrn, start, stop)
-            # Check all child synapses
-            for syn, kind in result.items():
-                pair = synapse_pairs[syn]
-                # Get the real and resulting labels
-                real_kind = sum(np.where(pair == nrn)[0]+1)
-                real_label = k_kinds[real_kind]
-                res_label = k_kinds[kind]
-                # Assert both labels are equal
-                error = msg.format(nrn, syn, res_label, real_label)
-                self.assertEqual(res_label, real_label, error)
+            # Get all synapses with neuron
+            is_nrn = synapse_pairs == nrn
+            is_syn = is_nrn.any(1)
+            ideal_nrn = is_nrn[is_syn]*[1,2]
+            # Get synapse relations to neuron
+            ideal_ids = synapse_ids[is_syn]
+            ideal_kinds = np.sum(ideal_nrn, 1)
+            ideal_centers = synapse_centers[is_syn]
+            # Combine ids with kind of relation
+            ideal_syns = np.c_[ideal_ids, ideal_kinds]
+            # Error checker
+            def asserter(start, stop):
+                # Get ideal values within bounds
+                above = ideal_centers >= start
+                below = ideal_centers < stop
+                # Get synapse ids and kinds 
+                bound = (above & below).all(1)
+                ideal = dict(ideal_syns[bound])
+                # Get results from the database
+                res = db.neuron_children(s_table, channel_path, nrn, start, stop)
+                # Test all keys in ideal or result
+                for syn in set(ideal.keys()) | set(res.keys()):
+                    # Get both keywords
+                    res_word = k_words[res.get(syn, 0)]
+                    ideal_word = k_words[ideal.get(syn, 0)]
+                    # Assert both labels are equal
+                    error = msg.format(nrn, syn, res_word, ideal_word, start, stop)
+                    self.assertEqual(res_word, ideal_word, error)
+
+            # Test whole image and random bounds
+            any_bounds = make_bounds(zyx_shape, zyx_info, nrn)
+            asserter([0,0,0], zyx_shape)
+            asserter(*any_bounds)
 
 if __name__ == '__main__':
     ut.main()

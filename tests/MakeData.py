@@ -111,8 +111,8 @@ def make_neurons(neuron_n, info, seed):
 
     npr.seed(seed)
     # Choice within max without replacement
-    ids = npr.choice(info.max, 2*neuron_n, True)
-    ids = ids.astype(info.dtype)
+    ids = npr.choice(info.max, 2*neuron_n)
+    ids = np.unique(ids).astype(info.dtype)
     # Return all neurons and all others
     neurons, others = np.split(ids, 2)
     # Make sure 0 is not a neuron
@@ -168,12 +168,12 @@ def make_centers(n_centers, zyx_shape, info, seed):
         Nx3 array of all vectors
     """
 
-    zyx = np.zeros([3, n_centers], dtype=info.dtype)
+    zyx = np.zeros([n_centers, 3], dtype=info.dtype)
     # All three dimensions
     for i in range(3):
         npr.seed(seed + i)
-        zyx[i] = npr.choice(zyx_shape[i], n_centers)
-    return zyx.T
+        zyx[:, i] = npr.choice(zyx_shape[i], n_centers)
+    return zyx
 
 def write_h5(channel_path, volume):
     """ write a dummy volume to an h5 file
@@ -211,3 +211,30 @@ def make_volume(zyx_shape, info, seed):
     # Make a random array
     npr.seed(seed)
     return npr.randint(0, info.max, zyx_shape, info.dtype)
+
+def make_bounds(zyx_shape, info, seed):
+    """ Make a 3D bounding box of a given data type
+
+    Arguments
+    ----------
+    zyx_shape: list
+        The 3 dimensions of the volume
+    info: np.iinfo
+        Contains the dtype max and value
+    seed: int
+        The seed for predictable noise
+
+    Returns
+    --------
+    np.ndarray:
+        2x3 array of all vectors
+    """
+
+    zyx = np.zeros([2, 3], dtype=info.dtype)
+    # All three dimensions
+    for i in range(3):
+        npr.seed(seed + i)
+        zyx[:, i] = npr.choice(zyx_shape[i], 2)
+    # Sort all coordinates
+    zyx.sort(0)
+    return zyx
