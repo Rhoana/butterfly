@@ -1,7 +1,7 @@
 import bfly
 import unittest as ut
+import logging as log
 import datetime
-import logging
 import sys
 
 class TestWebserver(ut.TestCase):
@@ -9,12 +9,12 @@ class TestWebserver(ut.TestCase):
     """
     PORT = 2017
     DB_PATH = None
-    DB_TYPE = 'Zodb'
+    DB_TYPE = 'Nodb'
     RUNTIME = bfly.UtilityLayer.RUNTIME()
     # Log to the command line
     log_info = {
         'stream': sys.stdout,
-        'level': logging.INFO
+        'level': log.INFO
     }
 
     def test_web(self):
@@ -22,7 +22,7 @@ class TestWebserver(ut.TestCase):
         """
 
         # Log to command line
-        logging.basicConfig(**self.log_info)
+        log.basicConfig(**self.log_info)
 
         # Make a dummy database
         db_class = getattr(bfly.DatabaseLayer, self.DB_TYPE)

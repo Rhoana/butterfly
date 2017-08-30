@@ -3,6 +3,7 @@ from UtilityLayer import INPUT
 from UtilityLayer import RUNTIME
 from UtilityLayer import OUTPUT
 from urllib2 import URLError
+import logging as log
 import numpy as np
 
 class Query():
@@ -149,17 +150,17 @@ otherwise.
         self.check_list(runtime.SOURCE.LIST, source_val, 'source')
         self.check_list(output.TYPE.LIST, type_val, 'type')
         # Make sure the size has a length of 3
-        self.check_length(3, full_size, 'full size')
-        # Make sure the blocksize is a list of any length
-        self.check_length('*', block, 'blocksize')
+        self.check_vector(full_size, 'volume', 3)
         # Make sure all blocks are valid
         for block_i in block:
             msg = 'bigger than {}'.format(block_i)
             # Make sure each blocksize has length 3
-            self.check_length(3, block_i, 'blocksize')
+            self.check_vector(block_i, 'block', 3)
             # Make sure size is bigger than each blocksize
-            within = np.all(np.uint32(block_i) <= full_size)
-            self.check_any(within, msg, full_size, 'full size')
+            if not np.all(np.uint32(block_i) <= full_size):
+                msg = 'A {} block will not fit in a {} volume'
+                msg = msg.format(block_i, full_size)
+                raise URLError([msg, 503])
 
         # Set all the clean values
         output.TYPE.VALUE = type_val
@@ -184,33 +185,6 @@ otherwise.
         mojo_format = runtime.SOURCE.MOJO.FORMAT
         mojo_format.VALUE = keywords.get(mojo_format.NAME)
 
-    def check_any(self, is_good, message, value, term):
-        """ Calls :mod:`raise_error` if check doesn't pass
-
-        Arguments
-        ----------
-        is_good: bool
-            The result of the tested condition
-        message: str
-            description of possible failure
-        value: anything
-            the tested property value
-        term: str
-            the tested property name
-
-        """
-        errors = self.RUNTIME.ERROR
-        k_check = errors.CHECK.NAME
-        k_term = errors.TERM.NAME
-        k_out = errors.OUT.NAME
-
-        if not is_good:
-            self.raise_error('CHECK',{
-                k_check: message,
-                k_out: str(value),
-                k_term: term
-            })
-
     def check_list(self, whitelist, value, term):
         """ Checks that a value is in a given list
 
@@ -223,53 +197,31 @@ otherwise.
         term: str
             The name of the attribute to test
         """
-        in_list = value in whitelist
-        msg = 'in {}'.format(whitelist)
-        self.check_any(in_list,msg,value,term)
+        if not value in whitelist:
+            msg = 'The {} {} is not in {}'.format(term, value, whitelist)
+            raise URLError([msg, 503])
 
-    def check_length(self, length, value, term):
-        """ Checks that a value has a given length
+    def check_vector(self, value, term='list', dims=3):
+        """ Checks that a vector has three dimensions
 
         Arguments
         -----------
-        length: int
-            The desired length of the value
-        value: list-like
-            The value should be a list or array
         term: str
             The name of the attribute to test
+        value: list-like
+            The value should be a list or array
+        dims: int
+            The desired number of dimensions
         """
-        msg0 = 'a list or array'
-        has_len = hasattr(value, '__len__')
-        self.check_any(has_len, msg0, value, term)
+        try:
+            return int(value[0])
+        except (TypeError, ValueError, IndexError):
+            msg = 'The {} {} is not a vector'
+            msg = msg.format(term, value)
+            raise URLError([msg, 503])
 
         # Check length if length given
-        if isinstance(length, int):
-            msg1 = 'of length {}'.format(length)
-            is_length = len(value) == length
-            self.check_any(is_length, msg1, value, term)
-
-    @staticmethod
-    def raise_error(status, detail):
-        """ raises a 503 URLError for logging
-
-        Arguments
-        ----------
-        status: str
-            The name of the log template
-        detail: dict
-            * :data:`RUNTIME` ``.ERROR.CHECK.NAME`` \
-(str) -- description of failure
-            * :data:`RUNTIME` ``.ERROR.TERM.NAME`` \
-(str) -- the failed property name
-            * :data:`RUNTIME` ``.ERROR.OUT.NAME`` \
-(str) -- the failed property value
-
-        Raises
-        -------
-        URLError
-            Contains all ``detail`` needed for log
-        """
-        raise URLError([status, 503, detail])
-
-
+        if len(value) != dims:
+            msg = 'The {} {} does not have {} dimensions'
+            msg = msg.format(term, value, dims)
+            raise URLError([msg, 503])

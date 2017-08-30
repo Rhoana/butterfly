@@ -5,7 +5,6 @@ from Settings import MAX_CACHE_SIZE
 from Settings import CONFIG_FILENAME
 from Structures import NamelessStruct
 from Structures import NamedStruct
-from MakeLog import MakeLog
 
 import numpy as np
 
@@ -170,11 +169,7 @@ static NAME that should always be used externally.
         For :class:`CoreLayer.Cache`
     DB: :class:`NamelessStruct`
         For :mod:`DatabaseLayer`
-    ERROR: :class:`NamelessStruct`
-        For :class:`MakeLog`
     """
-    #: An alias for :class:`MakeLog`
-    MAKELOG = MakeLog
 
     def __init__(self):
         # ALL THE TILE RUNTIME TERMS
@@ -281,71 +276,6 @@ static NAME that should always be used externally.
             JOIN = NamedStruct('{}://{}'),
             PORT = NamedStruct('port',
                 VALUE = DB_PORT,
-            )
-        )
-        # ALL THE ERROR RUNTIME TERMS
-        self.ERROR = NamelessStruct(
-            TERM = NamedStruct('term'),
-            OUT = NamedStruct('value'),
-            SIZE = NamedStruct('size'),
-            CHECK = NamedStruct('check'),
-            REQUEST = NamelessStruct(
-                CHECK = NamedStruct('bad_check',
-                    LOG = 'info',
-                    ACT = '''
-The {term} {value} is not {check}.
-                    '''.replace('\n','')
-                )
-            ),
-            SERVER = NamelessStruct(
-                START = NamedStruct('start',
-                    LOG = 'info',
-                    ACT = '''
-*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
- Start server on port {value}.
-_______________________________
-                    '''
-                ),
-                STOP = NamedStruct('stop',
-                    LOG = 'info',
-                    ACT = '''
-|||||||||||||||||||||||||||||||
- Stop server on port {value}.
-*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
-                    '''
-                )
-            ),
-            CACHE = NamelessStruct(
-                ADD = NamedStruct('add_query',
-                    LOG = 'info',
-                    ACT = '''
-Add {value} to cache. Cache now {size} bytes.
-                    '''.replace('\n','')
-                ),
-                MAX = NamedStruct('over_max',
-                    LOG = 'warning',
-                    ACT = '''
-Cannot cache {value}. {size} bytes is over max.
-                    '''.replace('\n','')
-                )
-            ),
-            DB = NamelessStruct(
-                ADD = NamedStruct('add_entries',
-                    LOG = 'info',
-                    ACT = '''
-Adding {0} entries for {1} table.
-                        '''.replace('\n','')
-                ),
-                ADDED = NamedStruct('added_entries',
-                    LOG = 'info',
-                    ACT = '''
-Added {0} entries in {1:06.2f} seconds.
-                        '''.replace('\n','')
-                ),
-                ALL = NamedStruct('all',
-                    LOG = 'info',
-                    ACT = '{}'
-                ),
             )
         )
 

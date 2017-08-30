@@ -1,60 +1,61 @@
-from numpy.random import randint
-from numpy.random import random
-from numpy.random import choice
+from MakeData import full_path
+from MakeData import write_synapses
+from MakeData import write_neurons
+from MakeData import make_neurons
+from MakeData import make_synapses
+from MakeData import make_centers
+from MakeData import make_bounds
 import unittest as ut
+import logging as log
 import numpy as np
-import datetime
-import logging
-import h5py
 import bfly
-import json
 import sys
-import os
-
-def full_path(path):
-    """ Prepend this file's directory to the path
-    """
-    here = os.path.dirname(os.path.abspath(__file__))
-    return os.path.join(here, path)
 
 class TestDatabase(ut.TestCase):
     """ set up tests for :class:`DatabaseLayer.Zodb`
     """
     DB_PATH = None
-    DB_TYPE = 'Zodb'
-    # Neuron max and count
-    n_count = 100
-    # Synapse count
-    s_count = 1000
-    # shape, and type for temp file
-    h_shape = [1, 25000, 25000]
-    h_type = 32
+    DB_TYPE = 'Nodb'
     RUNTIME = bfly.UtilityLayer.RUNTIME()
-    # Set the channel and dataset paths
-    channel = full_path('data/channel.h5')
-    dataset = full_path('data')
     # Log to the command line
     log_info = {
         'stream': sys.stdout,
-        'level': logging.INFO
+        'level': log.INFO
     }
 
     def test_database(self):
         """ test that :mod:`DatabaseLayer` can start \
 and successfully deliver responses at a reasonable speed
         """
-
         # Log to command line
-        logging.basicConfig(**self.log_info)
-        # Make a custom log for this test
-        self._log = self.make_log()
+        log.basicConfig(**self.log_info)
+        # Neuron and synapse counts
+        neuron_n = 100
+        synapse_n = 1000
+        # Random seeds
+        neuron_seed = 8675309
+        synapse_seed = 525600
+        # Set the channel and dataset paths
+        channel_path = full_path('data/channel.h5')
+        data_path = full_path('data')
+        # shape, and type for temp file
+        zyx_shape = [250, 2500, 2500]
+        ids_info = np.iinfo(np.uint32)
+        zyx_info = np.iinfo(np.uint32)
 
-        # Make a data directory
-        if not os.path.exists(self.dataset):
-            os.makedirs(self.dataset)
-        # Save dummy h5 files and config files
-        # self.make_h5()
-        self.make_dataset()
+        # Make neurons
+        neuron_ids, other_ids = make_neurons(neuron_n, ids_info, neuron_seed)
+        neuron_centers = make_centers(neuron_n, zyx_shape, zyx_info, neuron_seed)
+        # Make synapses
+        synapse_ids = np.arange(synapse_n, dtype=ids_info.dtype)
+        synapse_pairs = make_synapses(synapse_n, neuron_ids, ids_info, synapse_seed)
+        synapse_centers = make_centers(synapse_n, zyx_shape, zyx_info, synapse_seed)
+        # Get constants for input files
+        k_files = self.RUNTIME.DB.FILE
+        # Save synapse-connections.json
+        write_synapses(k_files, data_path, synapse_pairs, synapse_centers)
+        # Save neuron-soma.json
+        write_neurons(k_files, data_path, neuron_ids, neuron_centers)
 
         # Make a dummy database
         db_class = getattr(bfly.DatabaseLayer, self.DB_TYPE)
@@ -66,10 +67,10 @@ and successfully deliver responses at a reasonable speed
                 'samples': [{
                     'name': 'b',
                     'datasets': [{
-                        'path': self.dataset,
+                        'path': data_path,
                         'name': 'c',
                         'channels': [{
-                            'path': self.channel,
+                            'path': channel_path,
                             'name': 'd'
                         }]
                     }]
@@ -77,128 +78,153 @@ and successfully deliver responses at a reasonable speed
             }]
         }
 
-        # Make a dummy Core
-        core = bfly.CoreLayer.Core(db)
         # Load the configuraton json files
         db.load_config(temp_config)
-        self.db = db
 
-        # Get basic database keywords
+        # Get constants for the database
         k_tables = self.RUNTIME.DB.TABLE
         s_table = k_tables.SYNAPSE.NAME
+        n_table = k_tables.NEURON.NAME
+
         ####
         # S1 : is_synapse
         ####
-        # Should all be true
-        for syn in range(self.s_count):
-            res = self.get_entry(s_table, syn)
-            # Raise exception if not true
-            self.assertTrue(not not res)
-        # Should all be false
-        for syn in range(self.s_count, 2*self.s_count):
-            res = self.get_entry(s_table, syn)
-            # Raise exception if not false
-            self.assertFalse(not not res)
+        msg = "is_synapse: ID {} returns {}"
+        # Should be synapses
+        for syn in synapse_ids:
+            res = db.is_synapse(s_table, channel_path, syn)
+            self.assertTrue(res, msg.format(syn, res))
+        # Should not be synapses
+        for syn in range(synapse_ids[-1]+1, 2*synapse_n):
+            res = db.is_synapse(s_table, channel_path, syn)
+            self.assertFalse(res, msg.format(syn, res))
+        ####
+        # S5 : is_neuron
+        ####
+        msg = "is_neuron: ID {} returns {}"
+        # Should be neruons
+        for nrn in neuron_ids:
+            res = db.is_neuron(n_table, channel_path, nrn)
+            self.assertTrue(res, msg.format(nrn, res))
+        # Should not be neurons
+        for nrn in other_ids:
+            res = db.is_neuron(n_table, channel_path, nrn)
+            self.assertFalse(res, msg.format(nrn, res))
 
-    def get_entry(self, table, value, **keywords):
-        """ return database entry
+        # Get the list of keys for coordinates
+        k_axes = k_tables.ALL.POINT_LIST
+        MAX_SCALE = 10
+        ####
+        # S3 : synapse_keypoint
+        ####
+        msg = """synapse_keypoint: ID {0} returns {1}={2}.
+        It should have {1}={3} at scale {4}.
         """
-        args = table, self.channel, value
-        return self.db.get_entry(*args, **keywords)
-
-    def make_h5(self):
-        """ make a dummy h5 file for testing
+        # Should match centers
+        for syn, cen in zip(synapse_ids, synapse_centers):
+            # Use an arbitrary scale
+            scale = 2 ** (syn % MAX_SCALE)
+            center = cen // [1, scale, scale]
+            result = db.synapse_keypoint(s_table, channel_path, syn, scale)
+            # Error checker
+            def asserter(i):
+                ideal = center[i]
+                axis = k_axes[i]
+                res = result[axis]
+                # Assert result has ideal value
+                error = msg.format(syn, axis, res, ideal, scale)
+                self.assertEqual(res, ideal, error)
+            # Assert all axes are expected
+            map(asserter, range(3))
+        ####
+        # S7 : neuron_keypoint
+        ####
+        msg = """neuron_keypoint: ID {0} returns {1}={2}.
+        It should have {1}={3} at scale {4}.
         """
-        # Get the datatype, noise range, and size
-        dtype = getattr(np, 'uint{}'.format(self.h_type))
-        dmax = 2 ** self.h_type
-        dsize = self.h_shape
-        # Create the file from a path
-        with h5py.File(self.channel, 'w') as fd:
-            # Make a random array
-            pattern = randint(dmax, size= dsize, dtype= dtype)
-            fd.create_dataset('stack', data= pattern)
-        # Log that the file path was written
-        self._log('WRITE', path= self.channel)
+        # Should match centers
+        for nrn, cen in zip(neuron_ids, neuron_centers):
+            # Use an arbitrary scale
+            scale = 2 ** (nrn % MAX_SCALE)
+            center = cen // [1, scale, scale]
+            result = db.neuron_keypoint(n_table, channel_path, nrn, scale)
+            # Error checker
+            def asserter(i):
+                ideal = center[i]
+                axis = k_axes[i]
+                res = result[axis]
+                # Assert result has ideal value
+                error = msg.format(nrn, axis, res, ideal, scale)
+                self.assertEqual(res, ideal, error)
+            # Assert all axes are expected
+            map(asserter, range(3))
 
-    def make_dataset(self):
-        """ make dummy dataset files for database
+        k_links = self.RUNTIME.FEATURES.LINKS
+        k_sides = [k_links.PRE.NAME, k_links.POST.NAME]
+        ####
+        # S3 : synapse_parent
+        ####
+        msg = """synapse_parent:
+        ID {0} shows a {1} of {2}, but
+        ID {0} should have {1} of {3}.
         """
-        k_files = self.RUNTIME.DB.FILE
-        #### 
-        # Make blocks
+        for syn, pair in zip(synapse_ids, synapse_pairs):
+            result = db.synapse_parent(s_table, channel_path, syn)
+            # Error checker
+            def asserter(i):
+                ideal = pair[i]
+                side = k_sides[i]
+                res = result[side]
+                # Assert result has ideal value
+                error = msg.format(syn, side, res, ideal)
+                self.assertEqual(res, ideal, error)
+            # Assert all axes are expected
+            map(asserter, range(2))
         ####
-        k_volume = k_files.BLOCK.BLOCK.NAME
-        k_start = k_files.BLOCK.BOUND.START
-        k_shape = k_files.BLOCK.BOUND.SHAPE
-        # Pair the shape names with values
-        shapes = zip(k_shape, self.h_shape)
-        # Get full bounds
-        dmax = 2 ** self.h_type
-        bounds = {k: 0 for k in k_start}
-        bounds.update({k:v for k,v in shapes})
-        # Generate neuron list
-        self.neurons = choice(dmax, self.n_count)
-        pairs = zip(*[self.neurons.tolist()]*2)
-        # Make a random block file
-        blocks = {
-            k_volume : [[bounds, pairs]]
-        }
-
+        # S8 : neuron_children
         ####
-        # Make synapses
-        ####
-        k_neurons = k_files.SYNAPSE.NEURON_LIST
-        k_center = k_files.SYNAPSE.POINT.NAME
-        k_shape = k_files.SYNAPSE.POINT.LIST
-        # Take random pairs
-        gen = self.neurons, 2
-        syn = range(self.s_count)
-        cells = [choice(*gen) for _ in syn]
-        cells = np.uint32(cells).T.tolist()
-        # Put pairs at random coordinates
-        shapes = [self.s_count, 3]
-        coords = random(shapes)*self.h_shape
-        coords = np.uint32(coords).T.tolist()
-        # Format neuron pairs and coordinates
-        synapses = dict(zip(k_neurons, cells))
-        synapses.update({
-            k_center: dict(zip(k_shape, coords))
-        })
-
-        ####
-        # Write blocks to file
-        ####
-        k_block = k_files.BLOCK.DEFAULT
-        blockfile = os.path.join(self.dataset, k_block)
-        with open(blockfile, 'w') as bf:
-            json.dump(blocks, bf)
-
-        ####
-        # Write synapses to file
-        ####
-        k_synapse = k_files.SYNAPSE.DEFAULT
-        synapsefile = os.path.join(self.dataset, k_synapse)
-        with open(synapsefile, 'w') as sf:
-            json.dump(synapses, sf)
-
-    def make_log(self):
-        """ make custom log for this test
+        msg = """neuron_children:
+        In bounds from {4} to {5},
+        ID {0} has \033[91m{2}\033[0m part of synapse {1}, but
+        ID {0} should have \033[92m{3}\033[0m part of synapse {1}.
         """
-        utilities = bfly.UtilityLayer
-        NamedStruct = utilities.NamedStruct
-        NamelessStruct = utilities.NamelessStruct
-        # Write all the formats for the logs
-        formats = NamelessStruct(
-            WRITE = NamedStruct('write',
-                LOG = 'info',
-                ACT = '''
-||| Testing TestDatabase |||
-The h5 file {path} is written.'''
-            )
-        )
-        # Return the custom logging function
-        return bfly.UtilityLayer.MakeLog(formats).logging
+        # Keywords for logging
+        k_words = ['no','the 1st','the 2nd','each']
+        # Check for all neurons
+        for nrn in neuron_ids:
+            # Get all synapses with neuron
+            is_nrn = synapse_pairs == nrn
+            is_syn = is_nrn.any(1)
+            ideal_nrn = is_nrn[is_syn]*[1,2]
+            # Get synapse relations to neuron
+            ideal_ids = synapse_ids[is_syn]
+            ideal_kinds = np.sum(ideal_nrn, 1)
+            ideal_centers = synapse_centers[is_syn]
+            # Combine ids with kind of relation
+            ideal_syns = np.c_[ideal_ids, ideal_kinds]
+            # Error checker
+            def asserter(start, stop):
+                # Get ideal values within bounds
+                above = ideal_centers >= start
+                below = ideal_centers < stop
+                # Get synapse ids and kinds 
+                bound = (above & below).all(1)
+                ideal = dict(ideal_syns[bound])
+                # Get results from the database
+                res = db.neuron_children(s_table, channel_path, nrn, start, stop)
+                # Test all keys in ideal or result
+                for syn in set(ideal.keys()) | set(res.keys()):
+                    # Get both keywords
+                    res_word = k_words[res.get(syn, 0)]
+                    ideal_word = k_words[ideal.get(syn, 0)]
+                    # Assert both labels are equal
+                    error = msg.format(nrn, syn, res_word, ideal_word, start, stop)
+                    self.assertEqual(res_word, ideal_word, error)
+
+            # Test whole image and random bounds
+            any_bounds = make_bounds(zyx_shape, zyx_info, nrn)
+            asserter([0,0,0], zyx_shape)
+            asserter(*any_bounds)
 
 if __name__ == '__main__':
     ut.main()

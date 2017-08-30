@@ -276,9 +276,10 @@ can find this filname to give a valid volume.
         k_path = self.OUTPUT.INFO.PATH.NAME
         v_path = self.OUTPUT.INFO.PATH.VALUE
         # Make sure we have a valid pathname
-        is_path = os.path.exists(v_path)
-        msg = 'a valid path for butterfly'
-        self.check_any(is_path,msg,v_path,k_path)
+        if not os.path.exists(v_path):
+            msg = 'The {} {} does not exist on the server.'
+            msg.format(k_path, v_path)
+            raise URLError([msg, 503])
         # Get the default source
         my_source = self.RUNTIME.IMAGE.SOURCE
         # Validate the source of self.path

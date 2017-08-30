@@ -3,6 +3,7 @@ import csv
 import time
 import json
 import numpy as np
+import logging as log
 
 class Database():
     """ Stores tables to respond to :meth:`API._feature_info`
@@ -16,17 +17,13 @@ class Database():
 
     Attributes
     -----------
-    log: :class:`MakeLog`.``logging``
-        All formats for log messages
     RUNTIME: :class:`RUNTIME`
         With keywords needed to load files and use tables
     """
+
     def __init__(self, path, _runtime):
         # Get the database keywords
         self.RUNTIME = _runtime
-        # Create info logger
-        log_list = _runtime.ERROR.DB
-        self.log = _runtime.MAKELOG(log_list).logging
 
     def load_config(self, config):
         """ Loads all files from ``config`` into database
@@ -58,6 +55,7 @@ class Database():
 
         # Join all lists from within config
         all_lists = reduce(cat_lists, k_range, [config])
+
         # Load all files for each dataset
         map(self.load_all, all_lists)
 
@@ -244,8 +242,11 @@ where N is the number of neurons for the ``path``.
         k_files = self.RUNTIME.DB.FILE
         # Get keywords for input file
         k_file = k_files.SOMA.VALUE
+        k_file = os.path.join(path, k_file)
 
         if os.path.exists(k_file):
+            msg = "Loading neuron centers from {}"
+            log.info(msg.format(k_file))
             # Load the csv
             with open(k_file, 'r') as jf:
                 # Keep a list of synapseless soma
@@ -268,7 +269,8 @@ where N is the number of neurons for the ``path``.
                         new_neurons.append(new_soma)
 
                 # Add new neurons to full neurons list
-                neurons = np.r_[neurons, new_neurons]
+                if len(new_neurons):
+                    neurons = np.r_[neurons, new_neurons]
 
         # Add neurons to database
         self.add_neurons(path, neurons)

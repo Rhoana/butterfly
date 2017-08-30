@@ -1,6 +1,6 @@
 import bfly
 import unittest as ut
-import logging
+import logging as log
 import sys
 
 class TestArgv(ut.TestCase):
@@ -10,7 +10,7 @@ class TestArgv(ut.TestCase):
     # Log to the command line
     log_info = {
         'stream': sys.stdout,
-        'level': logging.INFO
+        'level': log.INFO
     }
     # List some test cases and results
     TESTS = [
@@ -49,7 +49,7 @@ class TestArgv(ut.TestCase):
         """ Test the ``UtilityLayer.to_argv``
         """
         # Log to command line
-        logging.basicConfig(**self.log_info)
+        log.basicConfig(**self.log_info)
 
         # Length Error
         def same_length(output, expected):

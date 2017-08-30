@@ -2,6 +2,7 @@ from Database import Database
 from pymongo import MongoClient
 from pymongo import ASCENDING
 from pymongo import GEO2D
+import logging as log
 import numpy as np
 import time
 import os
@@ -24,8 +25,6 @@ class Mongodb(Database):
         Keeps all synapse positions for spatial indexing
     mongo_db: pymongo.database
         Keeps all full collections of neurons and synapses
-    log: :class:`MakeLog`.``logging``
-        All formats for log messages
     """
 
     def __init__(self, path, _runtime):
@@ -131,7 +130,9 @@ of entries to add and ``K`` is the number of keys per entry
         # Time to add entries
         start = time.time()
         count = len(entries)
-        self.log('ADD', count, table)
+        # Log adding
+        msg = "Adding {0} entries for {1} table."
+        log.info(msg.format(count, table))
 
         # Get information specific to the table
         table_field = self.RUNTIME.DB.TABLE[table]
@@ -196,7 +197,9 @@ of entries to add and ``K`` is the number of keys per entry
             collect.insert_many(dict_entries)
             # Log diff and total time
             diff = time.time() - start
-            self.log('ADDED', count, diff)
+            # Log time added
+            msg = "Added {0} entries in {1:06.2f} seconds."
+            log.info(msg.format(count, diff))
 
         return entries
 
