@@ -164,8 +164,9 @@ and successfully deliver responses at a reasonable speed
         ####
         # S3 : synapse_parent
         ####
-        msg = """synapse_parent: ID {0} returns {1}={2}.
-        It should have {1}={3}.
+        msg = """synapse_parent:
+        ID {0} shows a {1} of {2}, but
+        ID {0} should have {1} of {3}.
         """
         for syn, pair in zip(synapse_ids, synapse_pairs):
             result = db.synapse_parent(s_table, channel_path, syn)
@@ -182,12 +183,13 @@ and successfully deliver responses at a reasonable speed
         ####
         # S8 : neuron_children
         ####
-        msg = """synapse_parent: In bounds from {4} to {5},
-        ID {0} has {2} part of synapse {1}, but
-        ID {0} should have {3} part of synapse {1}.
+        msg = """neuron_children:
+        In bounds from {4} to {5},
+        ID {0} has \033[91m{2}\033[0m part of synapse {1}, but
+        ID {0} should have \033[92m{3}\033[0m part of synapse {1}.
         """
         # Keywords for logging
-        k_words = ['no','the 1st','the 2nd','every']
+        k_words = ['no','the 1st','the 2nd','each']
         # Check for all neurons
         for nrn in neuron_ids:
             # Get all synapses with neuron
