@@ -1,6 +1,7 @@
 from ImageLayer import HDF5
 from ImageLayer import Mojo
 from ImageLayer import TiffGrid
+from urllib2 import URLError
 from Query import Query
 import numpy as np
 import sys

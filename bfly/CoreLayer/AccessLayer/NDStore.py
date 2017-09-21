@@ -16,7 +16,11 @@ class NDStore(RequestHandler):
 
     """
     SD = [
-        'method',
+        'token',
+        'action'
+    ]
+
+    SLICE_XY = [
         'token',
         'channel',
         'plane',
@@ -31,34 +35,36 @@ class NDStore(RequestHandler):
         """ Extract details from any of the methods
         Overrides :meth:`Database.parse`
 
-        Calls :meth:`_meta_info`, :meth:`_feature_info`, \
-:meth:`_get_group`, or :meth:`_get_data` to return \
-an :class:`InfoQuery` or :class:`DataQuery` as a \
-response to the given ``method``
-
         Arguments
         ----------
         request: str
-            The single method requested in the URL
+            The full request
 
         Returns
         ---------
         :class:`QueryLayer.Query`
             contains standard details for each request
         """
-        METHODS = ['sd']
+        TARGETS = ['sd']
 
         super(NDStore, self).parse(request)
         # Store the request
         args = request.split('/')
+        target = args.pop(0)
         # Get the method
-        method = self._match_list('method', args[0], METHODS)
+        target = self._match_list('target', target, TARGETS)
 
-        # Only slice API supported
+        # XY Slice API supported
         # http://docs.neurodata.io/ndstore/api/slice_api.html
-        if method == 'sd':
-            # Make keywords for SD method
-            keywords = dict(zip(self.SD, args))
+        if target == 'sd':
+            # Interpret first arguments
+            info_keys = dict(zip(self.SD, args)) 
+            # Handle the info action
+            if info_keys['action'] == 'info':
+                return self.get_info(info_keys)
+
+            # Handle keywords for SD XY target
+            keywords = dict(zip(self.SLICE_XY, args))
             return self.get_data(keywords)
 
         return 'Unsupported Request Category'
@@ -95,13 +101,15 @@ response to the given ``method``
 
         return zip(group_methods, group_queries)
 
-    def _get_group_dict(self, _keywords):
+    def _get_group_dict(self, _keywords, _channel=False):
         """ get the config dictionary for the requested method
 
         Arguments
         ----------
         _keywords: dict
             All URL parameters
+        _channel: bool
+            Get Specific Channel information if true
 
         Returns
         --------
@@ -114,9 +122,14 @@ response to the given ``method``
         # Get all the input token groups
         tokens = _keywords.get('token','').split(',')
         tokens.append(_keywords.get('channel',''))
+
+        # Ignore channel information
+        if not _channel:
+            group_keys.pop(-1)
+
         # Make dictionary of all input token groups
         token_groups = dict(zip(group_keys, tokens))
-
+  
         # validate each group in token
         for g_key in group_keys:
             # Get all valid group names
@@ -131,6 +144,33 @@ response to the given ``method``
 
         # Return info for full token
         return configured
+
+    #####
+    #Loads info from tiles for image methods
+    #####
+    def get_info(self, _keywords):
+        """ Loads :class:`InfoQuery` for ``INPUT.METHODS.META``
+
+        Returns
+        --------
+        :class:`InfoQuery`
+            made with info from :meth:`_get_group_dict`
+        """
+        # Parse all the group terms
+        meta_dict = self._get_group_dict(_keywords)
+
+        # Get keys for interface
+        channels_key = self.OUTPUT.INFO.CHANNELS.NAME
+        dataset_key = self.OUTPUT.INFO.DATASET.NAME
+        format_key = self.INPUT.INFO.FORMAT.NAME
+        method_key = self.INPUT.METHODS.NAME
+
+        return InfoQuery(**{
+            dataset_key: self.get_name(meta_dict),
+            channels_key: meta_dict['channels'],
+            method_key: 'project_info',
+            format_key: 'json',
+        })
 
     #####
     #Loads data from tiles for image methods
@@ -183,12 +223,9 @@ the bounds requested for a data query
         Returns
         --------
         :class:`DataQuery`
-            The :data:`OUTPUT.INFO` ``.Path.NAME`` keyword \
-has the path to data in the requested group from \
-:meth:`_get_group_dict`
         """
         # Parse all the group terms
-        meta_dict = self._get_group_dict(_keywords)
+        meta_dict = self._get_group_dict(_keywords, _channel=True)
 
         # Get keys for interface
         resolution_key = self.INPUT.RESOLUTION.XY.NAME

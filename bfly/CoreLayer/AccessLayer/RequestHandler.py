@@ -113,6 +113,9 @@ based on the type of the query from :meth:`Query.is_data`
         elif _query.is_group:
             # get a list of groups formatted as a string
             content = self._core.get_groups(_query)
+        elif _query.is_dataset:
+            # Get all the info for the dataset
+            content = {}
         else:
             # get a list or dict of information as a string
             content = self._core.get_info(_query)

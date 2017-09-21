@@ -295,6 +295,8 @@ static NAME that should always be used externally.
     def __init__(self):
         # ALL THE INFO OUTPUT TERMS
         self.INFO = NamelessStruct(
+            CHANNELS = NamedStruct('channels'),
+            DATASET = NamedStruct('dataset'),
             CHANNEL = NamedStruct('name'),
             QUERY = NamedStruct('query'),
             NAMES  = NamedStruct('list'),

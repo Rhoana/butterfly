@@ -93,6 +93,17 @@ and the ``key`` has no default in the struct
         return self.INPUT.METHODS.VALUE in group_methods
 
     @property
+    def is_dataset(self):
+        """ Checks if requesting dataset info
+
+        Returns
+        -------
+        bool
+        """
+        dataset_list = ['project_info']
+        return self.INPUT.METHODS.VALUE in dataset_list
+
+    @property
     def mime_type(self):
         """ Gets the mime type for the file_type
 
