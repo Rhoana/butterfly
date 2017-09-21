@@ -63,7 +63,7 @@ Only set after :meth:`start` starts :data:`_webapp`.
         # Create the webapp with both access layers
         self._webapp = Application([
             (r'/api/(.*)', AccessLayer.API, app_in),
-            (r'/ocp/(.*)', AccessLayer.OCP, app_in),
+            (r'/nd/(.*)', AccessLayer.NDStore, app_in),
             # A file requested from root of static,
             # Or a file requested from a static folder
             (r'/([^/]*\..*)?', StaticHandler, stat_in),

@@ -15,6 +15,18 @@ class NDStore(RequestHandler):
     :h:`Methods`
 
     """
+    SD = [
+        'method',
+        'token',
+        'channel',
+        'plane',
+        'resolution',
+        'xmin,xmax',
+        'ymin,ymax',
+        'zslice',
+        'tslice',
+    ]
+
     def parse(self, request):
         """ Extract details from any of the methods
         Overrides :meth:`Database.parse`
@@ -34,13 +46,20 @@ response to the given ``method``
         :class:`QueryLayer.Query`
             contains standard details for each request
         """
+        METHODS = ['sd']
 
         super(NDStore, self).parse(request)
+        # Store the request
+        args = request.split('/')
+        # Get the method
+        method = self._match_list('method', args[0], METHODS)
 
-        a = request.split('/')
-        print a
-        # Always get data
-        return self.get_data(command)
+        # Only slice API supported
+        # http://docs.neurodata.io/ndstore/api/slice_api.html
+        if method == 'sd':
+            # Make keywords for SD method
+            keywords = dict(zip(self.SD, args))
+            return self.get_data(keywords)
 
         return 'Unsupported Request Category'
 
@@ -48,7 +67,7 @@ response to the given ``method``
     #Lists values from config for group methods
     #####
 
-    def get_value(self, g):
+    def get_name(self, g):
         """ get the name of a group
 
         Arguments
@@ -63,13 +82,8 @@ response to the given ``method``
         """
         return g.get(self.INPUT.GROUP.NAME,'')
 
-    def _find_all_groups(self, _method):
+    def _find_all_groups(self):
         """ Pairs all groups needed for the ``_method``
-
-        Arguments
-        ----------
-        _method: str
-            The name of the group method requested
 
         Returns
         --------
@@ -78,21 +92,16 @@ response to the given ``method``
         """
         group_methods = self.INPUT.METHODS.GROUP_LIST
         group_queries = self.INPUT.GROUP.LIST
-        # List all parent methods of _method
-        if _method in group_methods:
-            group_index = group_methods.index(_method)
-            group_methods = group_methods[:group_index]
-            group_queries = group_queries[:group_index]
 
         return zip(group_methods, group_queries)
 
-    def _get_group_dict(self, _method):
+    def _get_group_dict(self, _keywords):
         """ get the config dictionary for the requested method
 
         Arguments
         ----------
-        _method: str
-            The name of the method requesting group information
+        _keywords: dict
+            All URL parameters
 
         Returns
         --------
@@ -100,79 +109,76 @@ response to the given ``method``
             The requested sub-dictionary from :data:`BFLY_CONFIG`
         """
         configured = self.BFLY_CONFIG
-        # validate each query value in each configured level
-        for method, query in self._find_all_groups(_method):
-            valid_groups = configured.get(method,[])
-            valid_values = map(self.get_value, valid_groups)
-            # Check query value against all valid query values
-            query_value = self.get_query_argument(query,'')
-            self._match_list(query, query_value, valid_values)
-            # Continue matching query_value from list of valid groups
-            configured = valid_groups[valid_values.index(query_value)]
+        group_keys = self.INPUT.METHODS.GROUP_LIST
+
+        # Get all the input token groups
+        tokens = _keywords.get('token','').split(',')
+        tokens.append(_keywords.get('channel',''))
+        # Make dictionary of all input token groups
+        token_groups = dict(zip(group_keys, tokens))
+
+        # validate each group in token
+        for g_key in group_keys:
+            # Get all valid group names
+            valid_groups = configured.get(g_key, [])
+            valid_names = map(self.get_name, valid_groups)
+            # Check group against all valid group names
+            group_name = token_groups.get(g_key, '')
+            self._match_list(g_key, group_name, valid_names)
+            # Check next group name in the token
+            group_index = valid_names.index(group_name)   
+            configured = valid_groups[group_index]
+
+        # Return info for full token
         return configured
-
-    def _get_group(self, _method):
-        """ Make :class:`InfoQuery` for groups in the requested group
-
-        Arguments
-        ----------
-        _method: str
-            The name of the method requesting group information
-
-        Returns
-        --------
-        :class:`InfoQuery`
-            The :data:`OUTPUT.INFO` ``.NAMES.NAME`` keyword \
-has the list of groups in the requested group from \
-:meth:`_get_group_dict`
-        """
-        out_format = self._get_list_query(self.INPUT.INFO.FORMAT)
-        group_list = self._get_group_dict(_method).get(_method,[])
-        group_values = map(self.get_value, group_list)
-
-        # Return an empty query
-        return InfoQuery(**{
-            self.INPUT.METHODS.NAME: _method,
-            self.INPUT.INFO.FORMAT.NAME: out_format,
-            self.OUTPUT.INFO.NAMES.NAME: group_values
-        })
 
     #####
     #Loads data from tiles for image methods
     #####
 
-    def get_data(self, _method):
+    def get_data(self, _keywords):
         """ Make :class:`DataQuery` for an image at request path
 
         Arguments
         ----------
-        _method: str
-            The name of the method requesting image information
+        _keywords: dict
+            All URL parameters
 
         Returns
         --------
         :class:`DataQuery`
             Created with the :meth:`sub_data` for the full request
         """
-        k_pos = self.INPUT.POSITION
-        positions = map(k_pos.get, k_pos.LIST)
-        # get integer bounds from POSITION LIST
-        bounds = map(self._get_int_query, positions)
-
+        # Get the input terms
+        xmin, xmax = self._get_ints(_keywords, 'xmin,xmax', '0,512') 
+        ymin, ymax = self._get_ints(_keywords, 'ymin,ymax', '0,512') 
+        resolution = self._get_int(_keywords, 'resolution', '0')
+        zslice = self._get_int(_keywords, 'zslice', '0') 
+        # Compute standard bounds
+        bounds = [
+            zslice,
+            ymin,
+            xmin,
+            1,
+            ymax - ymin,
+            xmax - xmin,
+        ]
+ 
         # Create the data query for the full bounds
-        return self.sub_data(_method, bounds)
+        return self.sub_data(_keywords, bounds, resolution)
 
-
-    def sub_data(self, _method, bounds):
+    def sub_data(self, _keywords, bounds, resolution):
         """ Make :class:`DataQuery` for any subregion or request
 
         Arguments
         ----------
-        _method: str
-            The name of the method requesting image information
+        _keywords: dict
+            All URL parameters
         bounds: numpy.ndarray
             The 6x1 array of z,y,x,depth,width,height values for \
 the bounds requested for a data query
+        resolution: int
+            the number of halvings along the X and Y axes
 
         Returns
         --------
@@ -182,28 +188,28 @@ has the path to data in the requested group from \
 :meth:`_get_group_dict`
         """
         # Parse all the group terms
-        meta_dict = self._get_group_dict('')
+        meta_dict = self._get_group_dict(_keywords)
+
+        # Get keys for interface
+        resolution_key = self.INPUT.RESOLUTION.XY.NAME
+        format_key = self.INPUT.IMAGE.FORMAT.NAME
+        view_key = self.INPUT.IMAGE.VIEW.NAME
         path_key = self.OUTPUT.INFO.PATH.NAME
+        method_key = self.INPUT.METHODS.NAME
 
         # Begin building needed keywords
         terms = {
             path_key: meta_dict[path_key],
-            self.INPUT.METHODS.NAME: _method
+            resolution_key: resolution,
+            view_key: 'grayscale',
+            method_key: 'data',
+            format_key: 'tif',
         }
-
-        # get terms from IMAGE
-        for key in ['VIEW','FORMAT']:
-            term = getattr(self.INPUT.IMAGE, key)
-            terms[term.NAME] = self._get_list_query(term)
 
         # get integers from bounds
         for order in range(6):
             key = self.INPUT.POSITION.LIST[order]
             terms[key] = bounds[order]
-
-        # get integers from RESOLUTION
-        term = self.INPUT.RESOLUTION.XY
-        terms[term.NAME] = self._get_int_query(term)
 
         return DataQuery(**terms)
 
@@ -211,7 +217,7 @@ has the path to data in the requested group from \
     # Handles Logs and Exceptions
     ####
 
-    def _try_typecast_int(self, name, result):
+    def _try_int(self, name, result):
         """ Try to convert a query result to an integer
 
         Arguments
@@ -259,43 +265,67 @@ has the path to data in the requested group from \
         msg = msg.format(name, result, whitelist)
         raise URLError([msg, 400])
 
-    def _get_list_query(self, field):
-        """ Call :meth:`_match_list` for a given structure
-
-        Get a ``result`` from the URL parameter for the ``field``\
-using :meth:`get_query_argument`
+    def _get_list(self, keywords, name, whitelist, value=''):
+        """ Call :meth:`_match_list` on the keywords
 
         Arguments
         ----------
-        field: :class:`NamedStruct`
-            * NAME (str) -- the name of the property
-            * VALUE (anything) -- the default property value
-            * LIST (list) -- the list of valid property values
+        keywords: dict
+            All URL parameters
+        name: str
+            the name of the property
+        whitelist: list
+            the valid property values
+        value: anything
+            the default property value
 
         Returns
         ---------
         anything
-            If the ``result`` is in the ``field.LIST``
+            If the ``result`` is in the ``whitelist``
         """
-        result = self.get_query_argument(field.NAME, field.VALUE)
-        return self._match_list(field.NAME, result, field.LIST)
+        result = keywords.get(name, value)
+        return self._match_list(name, result, whitelist)
 
-    def _get_int_query(self, field):
-        """ Call :meth:`_try_typecast_int` for a structure
-
-        Get a ``result`` from the URL parameter for the ``field``\
-using :meth:`get_query_argument`
+    def _get_int(self, keywords, name, value=''):
+        """ Call :meth:`_try_int` on the keywords
 
         Arguments
         ----------
-        field: :class:`NamedStruct`
-            * NAME (str) -- the name of the property
-            * VALUE (anything) -- the default property value
+        keywords: dict
+            All URL parameters
+        name: str
+            the name of the property
+        value: anything
+            the default property value
 
         Returns
         ---------
-        np.uint32
+        int
             If the ``result`` can be converted to an integer
         """
-        result = self.get_query_argument(field.NAME, field.VALUE)
-        return self._try_typecast_int(field.NAME, result)
+        result = keywords.get(name, value)
+        return self._try_int(name, result)
+
+    def _get_ints(self, keywords, name, value=''):
+        """ Call :meth:`_try_ints` on the keywords
+
+        Arguments
+        ----------
+        keywords: dict
+            All URL parameters
+        name: str
+            the name of the property
+        value: anything
+            the default property value
+
+        Returns
+        ---------
+        [int]
+            If the ``result`` can be converted to an integer list
+        """
+        result = keywords.get(name, value)
+        def try_int(i):
+            return self._try_int(name, i)
+        # Try int on all results
+        return map(try_int, result.split(','))
