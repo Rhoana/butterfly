@@ -45,8 +45,19 @@ keys each match a `NAME` of a :class:`NamedStruct`in \
         queries = keywords.get(self.OUTPUT.INFO.QUERY.NAME,'')
         self.OUTPUT.INFO.QUERY.VALUE = queries
 
-        # Set instance keywords
-        self.keywords = keywords
+        # Permanently store the keywords
+        self.keywords = {}
+        self.update_keys(keywords)
+
+    def update_keys(self, keywords):
+        """ Update stored keywords
+
+        Arguments
+        ----------
+        keywords: dict
+            Updates stored keywords
+        """
+        self.keywords.update(keywords)
 
     def set_key(self, struct, key, empty=''):
         """ Copy the key from keywords to the structure
@@ -195,6 +206,31 @@ otherwise.
         # Mojo
         mojo_format = runtime.SOURCE.MOJO.FORMAT
         mojo_format.VALUE = keywords.get(mojo_format.NAME)
+
+
+    def update_dataset(self, keywords):
+        """ Set all attribute values to match keywords
+
+        Arguments
+        ----------
+        keywords: dict
+            * :class:`RUNTIME` ``.IMAGE.SOURCE.NAME``
+                (str) -- The subclass of :class:`Datasource`
+            * :class:`RUNTIME` ``.IMAGE.BLOCK.NAME``
+                (numpy.ndarray) -- 3x1 for any given tile shape
+            * :class:`OUTPUT` ``.INFO.TYPE.NAME``
+                (str) -- numpy dtype of any given tile
+            * :class:`OUTPUT` ``.INFO.SIZE.NAME``
+                (numpy.ndarray) -- 3x1 for full volume shape
+
+            Keyword arguments only for :class:`HDF5`
+
+            * :class:`RUNTIME` ``.IMAGE.SOURCE.HDF5.OUTER.NAME``
+                (str) -- The direct filename to an hdf5 file
+            * :class:`RUNTIME` ``.IMAGE.SOURCE.HDF5.INNER.NAME``
+                (str) -- The dataset in the file with image data
+        """
+        pass
 
     def check_list(self, whitelist, value, term):
         """ Checks that a value is in a given list

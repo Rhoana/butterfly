@@ -64,6 +64,22 @@ class InfoQuery(Query):
 
         self.set_key(self.INPUT.INFO,'FORMAT')
 
+        # For the dataset queries
+        self.set_key(self.OUTPUT.INFO, 'CHANNELS')
+        self.set_key(self.OUTPUT.INFO, 'DATASET')
+
+    @property
+    def channels(self):
+        """ return the list of channels
+
+        Returns
+        -------
+        list
+            All channel dictionaries
+        """
+        return self.OUTPUT.INFO.CHANNELS.VALUE
+
+
     @property
     def key(self):
         """ return the key for the database
@@ -141,3 +157,30 @@ class InfoQuery(Query):
         out = self.get_format
         raw_output = self.result
         return self._write[out](raw_output,**self._form[out])
+
+    @property
+    def dump_dataset(self):
+        """ format :meth:`result` with :data:`write`
+
+        Returns
+        --------
+        str
+            The :meth:`result` formatted as a string
+        """
+        out = self.get_format
+        # Get all info for dataset
+        raw_output = {
+            'a': 'b'
+        }
+        return self._write[out](raw_output,**self._form[out])
+
+    def set_channel(self, channel):
+        """ Change the query to a given channel
+        
+        channel: dict
+            ``self.OUTPUT.INFO.CHANNEL``: str
+            ``self.OUTPUT.INFO.PATH``: str
+        """
+        self.update_keys(channel)
+        for key in ['PATH','CHANNEL']:
+            self.set_key(self.OUTPUT.INFO,key)

@@ -74,10 +74,41 @@ from the cache or from the properties of a tile.
         Returns
         --------
         str
-            Answer for the :class:`QueryLayer.InfoQuery`
+            Channel info for :class:`QueryLayer.InfoQuery`
         """
-        self.update_query(i_query)
+        keywords = self.update_query(i_query)
+        # Update current query with preloaded terms
+        i_query.update_source(keywords)
+        # Return the i_query info
         return i_query.dump
+
+    def get_dataset(self, i_query):
+        """ dumps dataset from ``i_query`` as a string
+
+        Calls :meth:`update_query` with more information\
+from the cache or from the properties of a tile.
+
+        Arguments
+        ----------
+        i_query: :class:`QueryLayer.InfoQuery`
+            A request for information
+
+        Returns
+        --------
+        str
+            Dataset info for :class:`QueryLayer.InfoQuery`
+        """
+        all_keywords = {}
+        print 'b', i_query.channels
+        # Update all the channels in the dataset
+        for channel in i_query.channels:
+            # Set the i_query to a given channel
+            i_query.set_channel(channel)
+            # Update the info for the channel
+            keywords = self.update_query(i_query)
+        # Update current query with preloaded terms
+        i_query.update_dataset(all_keywords)
+        return i_query.dump_dataset
 
     def get_data(self, d_query):
         """ dumps answer to ``d_query`` as a string
@@ -99,6 +130,9 @@ image needed to answer the ``d_query``.
         """
 
         self.update_query(d_query)
+        # Update current query with preloaded terms
+        d_query.update_source(keywords)
+        # Get the image for the d_query
         image = self.find_tiles(d_query)
         return self.write_image(d_query, image)
 
@@ -126,7 +160,7 @@ image needed to answer the ``d_query``.
         })
 
     @staticmethod
-    def make_tile_query(d_query, t_index):
+    def make_tile_query(d_query, t_index=np.uint32([0,0,0])):
         """ Make a :class:`TileQuery` from :class:`DataQuery`
 
         Arguments
@@ -147,14 +181,19 @@ image needed to answer the ``d_query``.
     def update_query(self, query):
         """ Finds missing query details from cache or tile
 
-        Calls :meth:`Query.update_source` with ``keywords`` \
-taken from either the :data:`_cache` or from a new \
-:class:`TileQuery` to update the given ``query``
+        Makes ``keywords`` from either the :data:`_cache` or \
+from a new :class:`TileQuery` to update the given ``query``
 
         Arguments
         ----------
         query: :class:`Query`
             Either an :class:`InfoQuery` or a :class:`DataQuery`
+
+        Returns
+        --------
+        keywords: dict
+            Can pass to :meth:`Query.update_source` or combine \
+to pass to :meth:`Query.update_dataset`.
         """
         keywords = self._cache.get(query.key)
         if not len(keywords):
@@ -163,13 +202,12 @@ taken from either the :data:`_cache` or from a new \
             if not isinstance(query, DataQuery):
                 d_query = self.make_data_query(query)
             # Create a preparatory tile_query
-            t0_index = np.uint32([0,0,0])
-            t0_query = self.make_tile_query(d_query, t0_index)
+            t0_query = self.make_tile_query(d_query)
             # Update keywords and set the cache
             keywords = t0_query.preload_source
             self._cache.set(query.key, keywords)
-        # Update current query with preloaded terms
-        query.update_source(keywords)
+        # Return the updated keywords
+        return keywords
 
     #####
     # Image Specific Methods

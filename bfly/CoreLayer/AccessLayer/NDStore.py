@@ -117,7 +117,7 @@ class NDStore(RequestHandler):
             The requested sub-dictionary from :data:`BFLY_CONFIG`
         """
         configured = self.BFLY_CONFIG
-        group_keys = self.INPUT.METHODS.GROUP_LIST
+        group_keys = list(self.INPUT.METHODS.GROUP_LIST)
 
         # Get all the input token groups
         tokens = _keywords.get('token','').split(',')
@@ -165,9 +165,10 @@ class NDStore(RequestHandler):
         format_key = self.INPUT.INFO.FORMAT.NAME
         method_key = self.INPUT.METHODS.NAME
 
+        print 'a', meta_dict
         return InfoQuery(**{
             dataset_key: self.get_name(meta_dict),
-            channels_key: meta_dict['channels'],
+            channels_key: meta_dict.get(channels_key, []),
             method_key: 'project_info',
             format_key: 'json',
         })
