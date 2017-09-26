@@ -214,6 +214,11 @@ class NDStore(RequestHandler):
         zmin, zmax = self._get_ints(_keywords, 'zmin,zmax', '0,1') 
         resolution = self._get_int(_keywords, 'resolution', '0')
         zslice = self._get_int(_keywords, 'zslice', '0') 
+
+        # Get format parameters
+        formats = self.INPUT.IMAGE.FORMAT.LIST
+        img_fmt = self._get_list(_keywords, 'format', formats, 'npz')
+ 
         # Compute standard bounds
         bounds = [
             zmin,
@@ -224,10 +229,6 @@ class NDStore(RequestHandler):
             xmax - xmin,
         ]
 
-        # Get format parameters
-        formats = self.INPUT.IMAGE.FORMAT.LIST
-        img_fmt = self._get_list(_keywords, 'format', formats, 'npz')
- 
         # Create the data query for the full bounds
         return self.sub_data(_keywords, bounds, resolution, img_fmt)
 

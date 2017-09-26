@@ -118,7 +118,7 @@ data or mask requests.
             DEPTH = NamedStruct('depth',
                 VALUE = 1
             ),
-            LIST = ['z','y','x','depth','width','height']
+            LIST = ['z','y','x','depth','height','width']
         )
         # ALL THE RESOLUTION INPUTS
         self.RESOLUTION = NamelessStruct(
