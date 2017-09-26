@@ -15,12 +15,14 @@ class NDStore(RequestHandler):
     :h:`Methods`
 
     """
-    SD = [
+    # http://docs.neurodata.io/ndstore/api/info_api.html
+    INFO_API = [
         'token',
         'action'
     ]
 
-    SLICE_XY = [
+    # http://docs.neurodata.io/ndstore/api/slice_api.html
+    SLICE_API = [
         'token',
         'channel',
         'plane',
@@ -29,6 +31,18 @@ class NDStore(RequestHandler):
         'ymin,ymax',
         'zslice',
         'tslice',
+    ]
+
+    # http://docs.neurodata.io/ndstore/api/data_api.html
+    DATA_API = [
+        'token',
+        'channel',
+        'format',
+        'resolution',
+        'xmin,xmax',
+        'ymin,ymax',
+        'zmin,zmax',
+        'unknown',
     ]
 
     def parse(self, request):
@@ -55,17 +69,22 @@ class NDStore(RequestHandler):
         target = self._match_list('target', target, TARGETS)
 
         # XY Slice API supported
-        # http://docs.neurodata.io/ndstore/api/slice_api.html
+        # ALl SD APIs
         if target == 'sd':
             # Interpret first arguments
-            info_keys = dict(zip(self.SD, args)) 
-            # Handle the info action
-            if info_keys['action'] == 'info':
-                return self.get_info(info_keys)
+            keywords = dict(zip(self.INFO_API, args)) 
+            # Handle the info API
+            if keywords['action'] == 'info':
+                return self.get_info(keywords)
 
-            # Handle keywords for SD XY target
-            keywords = dict(zip(self.SLICE_XY, args))
-            return self.get_data(keywords)
+            # Handle slice API
+            keywords = dict(zip(self.SLICE_API, args))
+            if keywords['plane'] in ['xy', 'XY']:
+                return self.get_slice(keywords)
+
+            # Handle volume API
+            keywords = dict(zip(self.DATA_API, args))
+            return self.get_vol(keywords)
 
         return 'Unsupported Request Category'
 
@@ -165,7 +184,6 @@ class NDStore(RequestHandler):
         format_key = self.INPUT.INFO.FORMAT.NAME
         method_key = self.INPUT.METHODS.NAME
 
-        print 'a', meta_dict
         return InfoQuery(**{
             dataset_key: self.get_name(meta_dict),
             channels_key: meta_dict.get(channels_key, []),
@@ -177,7 +195,44 @@ class NDStore(RequestHandler):
     #Loads data from tiles for image methods
     #####
 
-    def get_data(self, _keywords):
+    def get_vol(self, _keywords):
+        """ Make :class:`DataQuery` for an image at request path
+
+        Arguments
+        ----------
+        _keywords: dict
+            All URL parameters
+
+        Returns
+        --------
+        :class:`DataQuery`
+            Created with the :meth:`sub_data` for the full request
+        """
+        # Get the input terms
+        xmin, xmax = self._get_ints(_keywords, 'xmin,xmax', '0,512') 
+        ymin, ymax = self._get_ints(_keywords, 'ymin,ymax', '0,512') 
+        zmin, zmax = self._get_ints(_keywords, 'zmin,zmax', '0,1') 
+        resolution = self._get_int(_keywords, 'resolution', '0')
+        zslice = self._get_int(_keywords, 'zslice', '0') 
+        # Compute standard bounds
+        bounds = [
+            zmin,
+            ymin,
+            xmin,
+            zmax - zmin,
+            ymax - ymin,
+            xmax - xmin,
+        ]
+
+        # Get format parameters
+        formats = self.INPUT.IMAGE.FORMAT.LIST
+        img_fmt = self._get_list(_keywords, 'format', formats, 'npz')
+ 
+        # Create the data query for the full bounds
+        return self.sub_data(_keywords, bounds, resolution, img_fmt)
+
+
+    def get_slice(self, _keywords):
         """ Make :class:`DataQuery` for an image at request path
 
         Arguments
@@ -208,7 +263,7 @@ class NDStore(RequestHandler):
         # Create the data query for the full bounds
         return self.sub_data(_keywords, bounds, resolution)
 
-    def sub_data(self, _keywords, bounds, resolution):
+    def sub_data(self, _keywords, bounds, resolution, img_fmt='tif'):
         """ Make :class:`DataQuery` for any subregion or request
 
         Arguments
@@ -239,9 +294,9 @@ the bounds requested for a data query
         terms = {
             path_key: meta_dict[path_key],
             resolution_key: resolution,
+            format_key: img_fmt,
             view_key: 'grayscale',
             method_key: 'data',
-            format_key: 'tif',
         }
 
         # get integers from bounds

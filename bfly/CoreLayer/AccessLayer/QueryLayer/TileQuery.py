@@ -279,7 +279,7 @@ can find this filname to give a valid volume.
         # Make sure we have a valid pathname
         if not os.path.exists(v_path):
             msg = 'The {} {} does not exist on the server.'
-            msg.format(k_path, v_path)
+            msg = msg.format(k_path, v_path)
             raise URLError([msg, 503])
         # Get the default source
         my_source = self.RUNTIME.IMAGE.SOURCE
@@ -288,9 +288,12 @@ can find this filname to give a valid volume.
             source = self.get_source(name)
             # Ask if source can load self path
             keywords = source.preload_source(self)
+            # If sucessfully loaded
             if len(keywords):
                 # Set valid source
                 keywords[my_source.NAME] = name
+                # Set channel path
+                keywords[k_path] = v_path
                 return keywords
         # return empty
         return {}

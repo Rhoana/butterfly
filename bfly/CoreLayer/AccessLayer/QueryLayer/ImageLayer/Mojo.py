@@ -122,8 +122,16 @@ a valid mojo directory.
         full_y = meta_info['numVoxelsY']
         full_x = meta_info['numVoxelsX']
 
+        ####
+        # Get max blocksizes for different resolutions
+        ####
+        lo_res = int(meta_info['numTilesW'])
+        block_size = [block_z, block_y, block_x]
+        # Specify block_size for all resolutions
+        block_array = [block_size for res in range(lo_res)]
+
         return {
-            runtime.BLOCK.NAME: np.uint32([[block_z, block_y, block_x]]),
+            runtime.BLOCK.NAME: np.uint32(block_array),
             output.SIZE.NAME: np.uint32([full_z, full_y, full_x]),
             output.TYPE.NAME: dtype,
             k_format: file_ext,

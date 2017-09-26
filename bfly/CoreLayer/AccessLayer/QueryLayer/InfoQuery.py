@@ -154,25 +154,126 @@ class InfoQuery(Query):
         str
             The :meth:`result` formatted as a string
         """
-        out = self.get_format
         raw_output = self.result
-        return self._write[out](raw_output,**self._form[out])
+        # Write as JSON or YAML
+        out = self.get_format
+        writer = self._write[out]
+        return writer(raw_output,**self._form[out])
 
-    @property
-    def dump_dataset(self):
+    def dump_dataset(self, all_channels):
         """ format :meth:`result` with :data:`write`
+        
+        Arguments
+        ----------
+        all_channels: list
+            Contains keywords for each channel
 
         Returns
         --------
         str
             The :meth:`result` formatted as a string
         """
-        out = self.get_format
+
+        # Get keys for interface
+        name_key = self.OUTPUT.INFO.CHANNEL.NAME
+        type_key = self.OUTPUT.INFO.TYPE.NAME
+        # Get interface constants
+        annotation_list = self.OUTPUT.INFO.TYPE.ID_LIST
+        # Get interface values
+        dataset = self.OUTPUT.INFO.DATASET.VALUE
+ 
+        # Format channel for this output
+        def fmt_channel(chans, ch):
+            # Get data type and channel type
+            channel_type = 'image'
+            data_type = ch[type_key]
+            if data_type in annotation_list:
+                channel_type = 'annotation'
+            # Update channels dictionary
+            chans.update({
+                ch[name_key]: {
+                    'datatype': data_type,
+                    'channel_type': channel_type,
+                    'description': ch[name_key],
+                    "exceptions": 0,
+                    "propagate": 2,
+                    "readonly": 1,
+                    "resolution": 0,
+                    "windowrange": [
+                        0,
+                        0
+                    ]
+                }
+            })
+            return chans
+
+        # Get keys for interface
+        block_key = self.RUNTIME.IMAGE.BLOCK.NAME
+        size_key = self.OUTPUT.INFO.SIZE.NAME
+
+        # Get example channel
+        channel0 = all_channels[0]
+        # Get the number of scled levels
+        block_list = channel0[block_key]
+        n_levels = len(block_list)
+        level_ids = range(n_levels)
+
+        # Get constants
+        k_offset = [0,0,0]
+        k_fullsize = channel0[size_key]
+
+        # Get scale for resolution
+        def xyz_scale(i):
+            return [2**i, 2**i, 1]
+        xyz_scales = np.uint64(map(xyz_scale, level_ids))
+
+        # Get voxel, block, and full sizes
+        xyz_blocklist = np.fliplr(block_list)
+        xyz_voxelres = np.uint64([30, 4, 4][::-1] * xyz_scales)
+        xyz_fullsize =  np.uint64(k_fullsize[::-1] // xyz_scales)
+
+        # Make a dictionary for all levels
+        def level_dict(values):
+            return dict(zip(level_ids, values))
+
         # Get all info for dataset
         raw_output = {
-            'a': 'b'
+            'channels': reduce(fmt_channel, all_channels, {}),
+            'dataset': {
+                'scaling': 'zslices',
+                'description': dataset,
+                'scalinglevels': n_levels,
+                'resolutions': level_ids,
+                'offset': level_dict((k_offset,)*n_levels),
+                'neariso_scaledown': level_dict((1,)*n_levels),
+                'cube_dimension': level_dict(xyz_blocklist),
+                'imagesize': level_dict(xyz_fullsize),
+                'voxelres': level_dict(xyz_voxelres),
+                'neariso_voxelres': level_dict(xyz_voxelres),
+                'timerange': [
+                    0,
+                    0
+                ],
+            },
+            'metadata': {},
+            'project': {
+                'description': dataset,
+                'name': dataset,
+                'version': '0.0'
+            },
         }
-        return self._write[out](raw_output,**self._form[out])
+        # Undocumented in NDStore v0.7
+        def dataset_shim(d):
+            d['neariso_offset'] = d['offset']
+            d['neariso_voxelres'] = d['voxelres']
+            d['neariso_imagesize'] = d['imagesize']
+        
+        dataset_shim(raw_output['dataset'])
+
+        # Write as JSON or YAML
+        out = self.get_format
+        writer = self._write[out]
+        return writer(raw_output,**self._form[out])
 
     def set_channel(self, channel):
         """ Change the query to a given channel

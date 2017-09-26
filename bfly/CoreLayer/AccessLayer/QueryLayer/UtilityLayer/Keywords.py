@@ -140,7 +140,8 @@ data or mask requests.
         # ALL THE IMAGE INPUTS
         self.IMAGE = NamelessStruct(
             FORMAT = NamedStruct('format',
-                COLOR_LIST = ['png','jpg','bmp'],
+                COLOR_LIST = ['png','jpg','jpeg','bmp'],
+                VOL_LIST = ['npz'],
                 TIF_LIST = ['tif', 'tiff'],
                 ZIP_LIST = ['zip'],
                 VALUE = 'png'

@@ -98,17 +98,22 @@ from the cache or from the properties of a tile.
         str
             Dataset info for :class:`QueryLayer.InfoQuery`
         """
-        all_keywords = {}
-        print 'b', i_query.channels
+        all_channels = []
         # Update all the channels in the dataset
         for channel in i_query.channels:
             # Set the i_query to a given channel
             i_query.set_channel(channel)
             # Update the info for the channel
             keywords = self.update_query(i_query)
+            # Add additionl keywords if needed
+            channel_key = i_query.OUTPUT.INFO.CHANNEL.NAME
+            keywords[channel_key] = channel[channel_key]
+            # Add to list of channels
+            all_channels.append(keywords)
+        # Clear the channel data
+        i_query.set_channel({})
         # Update current query with preloaded terms
-        i_query.update_dataset(all_keywords)
-        return i_query.dump_dataset
+        return i_query.dump_dataset(all_channels)
 
     def get_data(self, d_query):
         """ dumps answer to ``d_query`` as a string
@@ -129,7 +134,7 @@ image needed to answer the ``d_query``.
             Answer for the :class:`QueryLayer.InfoQuery`
         """
 
-        self.update_query(d_query)
+        keywords = self.update_query(d_query)
         # Update current query with preloaded terms
         d_query.update_source(keywords)
         # Get the image for the d_query
@@ -355,8 +360,20 @@ to pass to :meth:`Query.update_dataset`.
             if is_big_int and no_big_int_gray:
                 img_view.VALUE = img_view.COLOR.NAME
 
+        # If Multiple slices cannot be formatted
+        if img_format.VALUE not in img_format.VOL_LIST:
+            shape = volume.shape
+            if shape[0] > 1:
+                # Flatten the volume to image
+                volume = volume.reshape(1, -1, shape[-1])
         # Use colormap / RGB style encoding of ID data
         vol = self.view_volume(img_view, volume)
+
+        if img_format.VALUE in ['npz']:
+            output = StringIO.StringIO()
+            np.save(output, vol[np.newaxis])
+            vol_string = output.getvalue()
+            return zlib.compress(vol_string)
 
         if img_format.VALUE in img_format.ZIP_LIST:
             output = StringIO.StringIO()
