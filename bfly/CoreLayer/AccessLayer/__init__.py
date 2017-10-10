@@ -4,6 +4,7 @@ import QueryLayer
 # Get all classes
 from API import API
 from NDStore import NDStore
+from Websocket import Websocket
 from StaticHandler import StaticHandler
 from RequestHandler import RequestHandler
 

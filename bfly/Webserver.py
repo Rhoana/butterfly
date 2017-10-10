@@ -64,6 +64,7 @@ Only set after :meth:`start` starts :data:`_webapp`.
         self._webapp = Application([
             (r'/api/(.*)', AccessLayer.API, app_in),
             (r'/nd/(.*)', AccessLayer.NDStore, app_in),
+            (r'/ws/(.*)', AccessLayer.Websocket, app_in),
             # A file requested from root of static,
             # Or a file requested from a static folder
             (r'/([^/]*\..*)?', StaticHandler, stat_in),
