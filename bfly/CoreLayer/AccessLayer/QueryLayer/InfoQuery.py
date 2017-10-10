@@ -103,6 +103,19 @@ class InfoQuery(Query):
         fmt_val = self.INPUT.INFO.FORMAT.VALUE
         return self.INPUT.INFO.FORMAT.LIST.index(fmt_val)
 
+    def websocket_result(self, action):
+        # Standard results
+        result = {
+            'action': action,
+        }
+        if action == 'info':
+            # take named keywords
+            merge_field = self.RUNTIME.IMAGE.MERGE
+            return dict({
+                merge_field.NAME: merge_field.VALUE,
+            }, **result)
+        return result
+
     @property
     def result(self):
         """ get the answer to the info query
@@ -142,7 +155,11 @@ class InfoQuery(Query):
                 info_out.SIZE.NAME: info_out.SIZE.VALUE,
                 info_out.CHANNEL.NAME: info_out.CHANNEL.VALUE,
             }
-        # Return dictionary from database
+        # Handle websocket events
+        scope = methods.VALUE.split(':')
+        if scope[0] == methods.WEBSOCKET.NAME:
+            return self.websocket_result(*scope[1:])
+        # Return list of groups
         return info_out.NAMES.VALUE
 
     @property

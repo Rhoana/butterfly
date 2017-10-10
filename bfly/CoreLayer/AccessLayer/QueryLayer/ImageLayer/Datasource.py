@@ -1,3 +1,5 @@
+import os
+
 class Datasource(object):
     """ Loads images from files on the server
     """
@@ -31,4 +33,12 @@ class Datasource(object):
             * :class:`OUTPUT` ``.INFO.SIZE.NAME``
                 (numpy.ndarray) -- 3x1 for full volume shape
         """
-        return {}
+        # take named keywords
+        RUNTIME = t_query.RUNTIME
+        k_merge = RUNTIME.IMAGE.MERGE.NAME
+        # Get the parent folder of the source
+        parent_dir = os.path.dirname(t_query.path)
+        # Look up merges from common source
+        return {
+            k_merge : [],
+        }

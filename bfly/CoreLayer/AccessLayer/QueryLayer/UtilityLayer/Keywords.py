@@ -57,6 +57,7 @@ data or mask requests.
         # ALL THE METHOD NAMES
         self.METHODS = NamedStruct('method',
             INFO_LIST = ['channel_metadata', 'entity_feature'],
+            WEBSOCKET = NamedStruct('websocket'),
             META = NamedStruct('channel_metadata'),
             FEAT = NamedStruct('entity_feature'),
             IMAGE_LIST = ['data', 'mask'],
@@ -217,7 +218,10 @@ static NAME that should always be used externally.
             ),
             BLOCK = NamedStruct('block-size',
                 VALUE = np.uint32([[1, 512, 512]])
-            )
+            ),
+            MERGE = NamedStruct('merge',
+                VALUE = []
+            ),
         )
         # ALL THE CACHE RUNTIME TERMS
         self.CACHE = NamelessStruct(

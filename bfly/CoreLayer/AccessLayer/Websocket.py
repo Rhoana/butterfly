@@ -25,7 +25,7 @@ class Websocket(tornado.websocket.WebSocketHandler):
 
         # Initializae empty query
         self.query = InfoQuery(**{
-            method_key: 'websocket',
+            method_key: 'websocket:info',
             format_key: 'json',
         }) 
 
@@ -41,10 +41,9 @@ class Websocket(tornado.websocket.WebSocketHandler):
         config = get_config(self.BFLY_CONFIG, keywords, True)
         # Update the query with the parameters
         self.query.update_keys(config)
-        # Complete message in the core
-        message = {'TYPE': 'WELCOME'}
-        #content = self.core.get_websocket(self.query, message)
-        #self.send(content)
+        # Get message from the core
+        content = self.core.get_info(self.query)
+        self.send(content)
 
         # Add to list
         if self not in websockets:

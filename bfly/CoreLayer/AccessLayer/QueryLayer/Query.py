@@ -49,8 +49,8 @@ keys each match a `NAME` of a :class:`NamedStruct`in \
         self.keywords.update(keywords)
 
         # Get method and feature
-        method = keywords.get(self.INPUT.METHODS.NAME,'')
-        feature = keywords.get(self.INPUT.FEATURES.NAME,'')
+        method = self.keywords.get(self.INPUT.METHODS.NAME,'')
+        feature = self.keywords.get(self.INPUT.FEATURES.NAME,'')
         # Set method and feature
         self.INPUT.METHODS.VALUE = method
         self.INPUT.FEATURES.VALUE = feature
@@ -155,6 +155,10 @@ otherwise.
                 (str) -- The direct filename to an hdf5 file
             * :class:`RUNTIME` ``.IMAGE.SOURCE.HDF5.INNER.NAME``
                 (str) -- The dataset in the file with image data
+
+            Keyword arguments if editable
+            * :class:`RUNTIME` ``.IMAGE.MERGE.NAME``
+                (set[]) -- The list of merged sets
         """
         # take named keywords
         output = self.OUTPUT.INFO
@@ -194,6 +198,11 @@ otherwise.
             output.SIZE.Y.NAME: int(full_size[1]),
             output.SIZE.X.NAME: int(full_size[2])
         }
+
+        ##############
+        # Optional keywords for editing
+        merge_field = runtime.MERGE
+        merge_field.value = keywords.get(merge_field.NAME)
 
         ##############
         # Optional keywords by source
