@@ -35,8 +35,9 @@ class DataQuery(Query):
     #: default mime type for HTTP response
     _basic_mime = 'image/{}'
 
-    def __init__(self,*args,**keywords):
-        Query.__init__(self, **keywords)
+    def update_keys(self, keywords):
+
+        Query.update_keys(self, keywords)
 
         for key in ['Z','Y','X']:
             self.set_key(self.INPUT.POSITION, key, 0)

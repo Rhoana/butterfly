@@ -55,9 +55,9 @@ class InfoQuery(Query):
     # All writers for output formats
     _write = [json.dumps, yaml.dump]
 
-    def __init__(self,*args,**keywords):
+    def update_keys(self, keywords):
 
-        Query.__init__(self, **keywords)
+        Query.update_keys(self, keywords)
 
         for key in ['NAMES','PATH','SIZE','CHANNEL']:
             self.set_key(self.OUTPUT.INFO,key)

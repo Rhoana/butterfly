@@ -34,17 +34,6 @@ keys each match a `NAME` of a :class:`NamedStruct`in \
         self.RUNTIME = RUNTIME()
         self.OUTPUT = OUTPUT()
 
-        # Get method and feature
-        method = keywords.get(self.INPUT.METHODS.NAME,'')
-        feature = keywords.get(self.INPUT.FEATURES.NAME,'')
-        # Set method and feature
-        self.INPUT.METHODS.VALUE = method
-        self.INPUT.FEATURES.VALUE = feature
-
-        # Get and set the linked list of queries
-        queries = keywords.get(self.OUTPUT.INFO.QUERY.NAME,'')
-        self.OUTPUT.INFO.QUERY.VALUE = queries
-
         # Permanently store the keywords
         self.keywords = {}
         self.update_keys(keywords)
@@ -58,6 +47,12 @@ keys each match a `NAME` of a :class:`NamedStruct`in \
             Updates stored keywords
         """
         self.keywords.update(keywords)
+
+        # Update method and feature
+        self.set_key(self.INPUT, 'FEATURES')
+        self.set_key(self.INPUT, 'METHODS')
+        # Update the linked list of queries
+        self.set_key(self.OUTPUT.INFO, 'QUERY')
 
     def set_key(self, struct, key, empty=''):
         """ Copy the key from keywords to the structure
