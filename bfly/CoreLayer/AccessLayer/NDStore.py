@@ -4,6 +4,97 @@ from QueryLayer import DataQuery
 from urllib2 import URLError
 import numpy as np
 
+def get_name(g):
+    """ get the name of a group
+
+    Arguments
+    ----------
+    g: dict
+        The group from :data:`BFLY_CONFIG`
+
+    Returns
+    --------
+    str
+        the name of `g`
+    """
+    k_name = RequestHandler.INPUT.GROUP.NAME
+    return g.get(k_name, '')
+
+def match_list(name, result, whitelist):
+    """ Check if the query result is in a whitelist
+
+    Arguments
+    -----------
+    name: str
+        The name of the ``result`` property
+    result: anything
+        The value to check for in the ``whitelist``
+    whitelist: list
+        The list of all accepted ``result``
+
+    Returns
+    ---------
+    anything
+        If the ``result`` is in the ``whitelist``
+    """
+    # Check if the result is in the list
+    if result in whitelist:
+        return result
+
+    # Create the error message
+    msg = "The {0} {1} is not in {2}."
+    msg = msg.format(name, result, whitelist)
+    raise URLError([msg, 400])
+
+def get_config(_config, _keywords, _channel=False):
+    """ get the config dictionary for the requested method
+
+    Arguments
+    ----------
+    _config: dict
+        Root configuration of experiments
+    _keywords: dict
+        All URL parameters
+    _channel: bool
+        Get Specific Channel information if true
+
+    Returns
+    --------
+    dict
+        The requested sub-dictionary from :data:`BFLY_CONFIG`
+    """
+    configured = dict(_config)
+    group_keys = list(RequestHandler.INPUT.METHODS.GROUP_LIST)
+
+    # Get all the input token groups
+    tokens = _keywords.get('token','').split(',')
+    tokens.append(_keywords.get('channel',''))
+
+    # Ignore channel information
+    if not _channel:
+        group_keys.pop(-1)
+
+    # Make dictionary of all input token groups
+    token_groups = dict(zip(group_keys, tokens))
+
+    # validate each group in token
+    for g_key in group_keys:
+        # Get all valid group names
+        valid_groups = configured.get(g_key, [])
+        valid_names = map(get_name, valid_groups)
+        # Check group against all valid group names
+        group_name = token_groups.get(g_key, '')
+        match_list(g_key, group_name, valid_names)
+        # Check next group name in the token
+        group_index = valid_names.index(group_name) 
+        configured = valid_groups[group_index]
+
+    # Return info for full token
+    return configured
+
+############
+# Actual NDStore class
+####
 class NDStore(RequestHandler):
     """ Responds to :data:`bfly.Webserver._webapp` /nd endpoint
 
@@ -66,7 +157,7 @@ class NDStore(RequestHandler):
         args = request.split('/')
         target = args.pop(0)
         # Get the method
-        target = self._match_list('target', target, TARGETS)
+        target = match_list('target', target, TARGETS)
 
         # XY Slice API supported
         # ALl SD APIs
@@ -89,82 +180,6 @@ class NDStore(RequestHandler):
         return 'Unsupported Request Category'
 
     #####
-    #Lists values from config for group methods
-    #####
-
-    def get_name(self, g):
-        """ get the name of a group
-
-        Arguments
-        ----------
-        g: dict
-            The group from :data:`BFLY_CONFIG`
-
-        Returns
-        --------
-        str
-            the name of `g`
-        """
-        return g.get(self.INPUT.GROUP.NAME,'')
-
-    def _find_all_groups(self):
-        """ Pairs all groups needed for the ``_method``
-
-        Returns
-        --------
-        list
-            list of pairs of group query terms and values
-        """
-        group_methods = self.INPUT.METHODS.GROUP_LIST
-        group_queries = self.INPUT.GROUP.LIST
-
-        return zip(group_methods, group_queries)
-
-    def _get_group_dict(self, _keywords, _channel=False):
-        """ get the config dictionary for the requested method
-
-        Arguments
-        ----------
-        _keywords: dict
-            All URL parameters
-        _channel: bool
-            Get Specific Channel information if true
-
-        Returns
-        --------
-        dict
-            The requested sub-dictionary from :data:`BFLY_CONFIG`
-        """
-        configured = self.BFLY_CONFIG
-        group_keys = list(self.INPUT.METHODS.GROUP_LIST)
-
-        # Get all the input token groups
-        tokens = _keywords.get('token','').split(',')
-        tokens.append(_keywords.get('channel',''))
-
-        # Ignore channel information
-        if not _channel:
-            group_keys.pop(-1)
-
-        # Make dictionary of all input token groups
-        token_groups = dict(zip(group_keys, tokens))
-  
-        # validate each group in token
-        for g_key in group_keys:
-            # Get all valid group names
-            valid_groups = configured.get(g_key, [])
-            valid_names = map(self.get_name, valid_groups)
-            # Check group against all valid group names
-            group_name = token_groups.get(g_key, '')
-            self._match_list(g_key, group_name, valid_names)
-            # Check next group name in the token
-            group_index = valid_names.index(group_name)   
-            configured = valid_groups[group_index]
-
-        # Return info for full token
-        return configured
-
-    #####
     #Loads info from tiles for image methods
     #####
     def get_info(self, _keywords):
@@ -173,10 +188,10 @@ class NDStore(RequestHandler):
         Returns
         --------
         :class:`InfoQuery`
-            made with info from :meth:`_get_group_dict`
+            made with info from ``get_config``
         """
         # Parse all the group terms
-        meta_dict = self._get_group_dict(_keywords)
+        meta_dict = get_config(self.BFLY_CONFIG, _keywords)
 
         # Get keys for interface
         channels_key = self.OUTPUT.INFO.CHANNELS.NAME
@@ -185,7 +200,7 @@ class NDStore(RequestHandler):
         method_key = self.INPUT.METHODS.NAME
 
         return InfoQuery(**{
-            dataset_key: self.get_name(meta_dict),
+            dataset_key: get_name(meta_dict),
             channels_key: meta_dict.get(channels_key, []),
             method_key: 'project_info',
             format_key: 'json',
@@ -282,7 +297,7 @@ the bounds requested for a data query
         :class:`DataQuery`
         """
         # Parse all the group terms
-        meta_dict = self._get_group_dict(_keywords, _channel=True)
+        meta_dict = get_config(self.BFLY_CONFIG, _keywords, True)
 
         # Get keys for interface
         resolution_key = self.INPUT.RESOLUTION.XY.NAME
@@ -333,34 +348,8 @@ the bounds requested for a data query
             msg = msg.format(name, result)
             raise URLError([msg, 400])
 
-    def _match_list(self, name, result, whitelist):
-        """ Check if the query result is in a whitelist
-
-        Arguments
-        -----------
-        name: str
-            The name of the ``result`` property
-        result: anything
-            The value to check for in the ``whitelist``
-        whitelist: list
-            The list of all accepted ``result``
-
-        Returns
-        ---------
-        anything
-            If the ``result`` is in the ``whitelist``
-        """
-        # Check if the result is in the list
-        if result in whitelist:
-            return result
-
-        # Create the error message
-        msg = "The {0} {1} is not in {2}."
-        msg = msg.format(name, result, whitelist)
-        raise URLError([msg, 400])
-
     def _get_list(self, keywords, name, whitelist, value=''):
-        """ Call :meth:`_match_list` on the keywords
+        """ Call ``match_list`` on the keywords
 
         Arguments
         ----------
@@ -379,7 +368,7 @@ the bounds requested for a data query
             If the ``result`` is in the ``whitelist``
         """
         result = keywords.get(name, value)
-        return self._match_list(name, result, whitelist)
+        return match_list(name, result, whitelist)
 
     def _get_int(self, keywords, name, value=''):
         """ Call :meth:`_try_int` on the keywords
