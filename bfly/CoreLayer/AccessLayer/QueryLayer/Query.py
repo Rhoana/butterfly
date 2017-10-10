@@ -48,9 +48,13 @@ keys each match a `NAME` of a :class:`NamedStruct`in \
         """
         self.keywords.update(keywords)
 
-        # Update method and feature
-        self.set_key(self.INPUT, 'FEATURES')
-        self.set_key(self.INPUT, 'METHODS')
+        # Get method and feature
+        method = keywords.get(self.INPUT.METHODS.NAME,'')
+        feature = keywords.get(self.INPUT.FEATURES.NAME,'')
+        # Set method and feature
+        self.INPUT.METHODS.VALUE = method
+        self.INPUT.FEATURES.VALUE = feature
+ 
         # Update the linked list of queries
         self.set_key(self.OUTPUT.INFO, 'QUERY')
 
