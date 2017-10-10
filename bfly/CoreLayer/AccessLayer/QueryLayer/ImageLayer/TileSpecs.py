@@ -33,4 +33,5 @@ numpy 3x1 array of any given tile shape
             * :data:`OUTPUT.INFO`.``SIZE.NAME`` -- \
 numpy 3x1 array of full volume shape
         """
-        return {}
+        common = Datasource.preload_source(t_query)
+        return common

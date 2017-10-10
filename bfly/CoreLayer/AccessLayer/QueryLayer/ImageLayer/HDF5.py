@@ -146,9 +146,6 @@ this filname to not give a valid h5 volume.
         # Get the max block size in bytes for a single tile
         max_bytes = t_query.RUNTIME.CACHE.MAX_BLOCK.VALUE
 
-        # call superclass
-        Datasource.preload_source(t_query)
-
         # Check if path is valid
         keywords = HDF5.valid_path(t_query)
         if not keywords:
@@ -190,8 +187,9 @@ this filname to not give a valid h5 volume.
                 output.SIZE.NAME: np.uint32(shape),
                 output.TYPE.NAME: str(vol.dtype),
             })
-        # Return all canonical keywords
-        return keywords
+        # Combine results with parent method
+        common = Datasource.preload_source(t_query)
+        return dict(common, **keywords)
 
     @staticmethod
     def valid_path(t_query):

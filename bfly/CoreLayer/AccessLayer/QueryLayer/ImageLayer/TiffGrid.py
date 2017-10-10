@@ -79,9 +79,6 @@ a valid json file pointing to the tiff grid.
         filename = t_query.OUTPUT.INFO.PATH.VALUE
         ending = os.path.splitext(filename)[1]
 
-        # call superclass
-        Datasource.preload_source(t_query)
-
         # Return if the ending is not json
         if ending not in TiffGrid._meta_files:
             return {}
@@ -114,11 +111,15 @@ a valid json file pointing to the tiff grid.
             # The size and datatype of the full volume
             full_shape = tile_shape * index_size
 
-            return {
+            keywords = {
                 runtime.BLOCK.NAME: tile_shape[np.newaxis],
                 output.SIZE.NAME: np.uint32(full_shape),
                 output.TYPE.NAME: str(tile0.dtype),
             }
+
+            # Combine results with parent method
+            common = Datasource.preload_source(t_query)
+            return dict(common, **keywords)
 
     @staticmethod
     def imread(_path):

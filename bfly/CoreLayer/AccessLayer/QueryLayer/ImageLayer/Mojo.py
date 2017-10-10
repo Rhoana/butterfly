@@ -71,8 +71,8 @@ of the full tile resolution.
             return vol[np.newaxis]
         return vol
 
-    @classmethod
-    def preload_source(cls, t_query):
+    @staticmethod
+    def preload_source(t_query):
         """load info from example tile (image)
 
         Arguments
@@ -100,7 +100,7 @@ a valid mojo directory.
 
         # Get the name and ending of the target folder
         path_name = t_query.OUTPUT.INFO.PATH.VALUE
-        meta_file = os.path.join(path_name, cls._meta)
+        meta_file = os.path.join(path_name, Mojo._meta)
 
         # Return if no meta file for mojo
         if not os.path.exists(meta_file):
@@ -130,12 +130,14 @@ a valid mojo directory.
         # Specify block_size for all resolutions
         block_array = [block_size for res in range(lo_res)]
 
-        return {
+        # Combine results with parent method
+        common = Datasource.preload_source(t_query)
+        return dict(common, **{
             runtime.BLOCK.NAME: np.uint32(block_array),
             output.SIZE.NAME: np.uint32([full_z, full_y, full_x]),
             output.TYPE.NAME: dtype,
             k_format: file_ext,
-        }
+        })
 
     @staticmethod
     def imread(_path):
