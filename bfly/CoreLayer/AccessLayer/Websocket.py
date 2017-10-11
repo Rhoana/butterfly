@@ -43,7 +43,8 @@ class Websocket(tornado.websocket.WebSocketHandler):
         self.query.update_keys(config)
         # Get message from the core
         content = self.core.get_info(self.query)
-        self.send(content)
+        # Send welcome only via this websocket
+        self.write_message(content)
 
         # Add to list
         if self not in websockets:
