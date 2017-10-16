@@ -220,10 +220,10 @@ static NAME that should always be used externally.
                 VALUE = np.uint32([[1, 512, 512]])
             ),
             MERGE = NamedStruct('merge',
-                VALUE = [],
+                VALUE = False,
             ),
             ERROR = NamedStruct('error',
-                VALUE = {},
+                VALUE = '',
             ),
         )
         # ALL THE CACHE RUNTIME TERMS

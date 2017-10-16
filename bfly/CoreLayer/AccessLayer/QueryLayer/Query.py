@@ -81,6 +81,19 @@ and the ``key`` has no default in the struct
         setattr(field, 'VALUE', val)
 
     @property
+    def is_websocket(self):
+        """ Checks whether websocket method
+
+        Returns
+        --------
+        bool
+        """
+        methods = self.INPUT.METHODS
+        scope = methods.VALUE.split(':')[0]
+        # Whether the method starts with websocket
+        return (scope == methods.WEBSOCKET.NAME)
+
+    @property
     def is_data(self):
         """ Checks whether the method requests images
 
