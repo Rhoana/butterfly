@@ -8,6 +8,7 @@ websockets = []
 class Websocket(tornado.websocket.WebSocketHandler):
 
     INPUT = RequestHandler.INPUT
+    RUNTIME = RequestHandler.RUNTIME
     OUTPUT = RequestHandler.OUTPUT
 
     OPEN_API = [
@@ -20,13 +21,15 @@ class Websocket(tornado.websocket.WebSocketHandler):
         self.BFLY_CONFIG = _config
 
         # Get keys for interface
+        error_key = self.RUNTIME.IMAGE.ERROR.NAME
         format_key = self.INPUT.INFO.FORMAT.NAME
         method_key = self.INPUT.METHODS.NAME
 
         # Initializae empty query
         self.query = InfoQuery(**{
-            method_key: 'websocket:info',
+            method_key: 'websocket:restore',
             format_key: 'json',
+            error_key: '',
         }) 
 
     def check_origin(self, origin):
@@ -51,17 +54,25 @@ class Websocket(tornado.websocket.WebSocketHandler):
             websockets.append(self)
 
     def on_close(self):
-
         # Remove from list
         if self in websockets:
             websockets.remove(self)
 
     def on_message(self, message):
-        pass
-        # Handle message in the core
-        # reply = self.core.get_websocket(self.query, message)
-        # if reply:
-        #   self.send(reply)
+        # Get keys for interface
+        method_key = self.INPUT.METHODS.NAME
+        error_key = self.RUNTIME.IMAGE.ERROR.NAME
+        # Get current method
+        action_val = message.get('action', '')
+        method_val = 'websocket:{}'.format(action_val),
+        # Set the action from the message
+        self.query.update_keys({
+            method_key: method_val,
+            error_key: '',
+        })
+        # Get reply from the core
+        reply = self.core.get_edits(self.query, message)
+        self.send(reply)
 
     def send(self, message):
         # Send to all in list

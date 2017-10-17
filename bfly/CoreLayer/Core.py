@@ -60,6 +60,36 @@ from ``db`` argument
         """
         return i_query.dump
 
+    def get_edits(self, i_query, msg={}):
+        """ dumps websocket updates to ``i_query`` as a string
+
+        Calls :meth:`update_query` with more information\
+from the cache or from the properties of a tile.
+
+        Arguments
+        ----------
+        i_query: :class:`QueryLayer.InfoQuery`
+            A request for information
+
+        Returns
+        --------
+        str
+            Wesocket info for :class:`QueryLayer.InfoQuery`
+        """
+        keywords = self.update_query(i_query)
+        # Update current query with preloaded terms
+        i_query.update_source(keywords)
+        # Execute weboscket command if needed
+        changed = i_query.websocket_edit(msg)
+        # Add to cache and query
+        if len(changed):
+            keywords.update(changed)
+            i_query.update_source(keywords)
+            self._cache.set(i_query.key, keywords)
+
+        # Return the i_query info
+        return i_query.dump
+
     def get_info(self, i_query):
         """ dumps answer to ``i_query`` as a string
 
