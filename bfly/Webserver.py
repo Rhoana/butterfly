@@ -107,7 +107,7 @@ Only set after :meth:`start` starts :data:`_webapp`.
  Start server on port {0}.
 _______________________________
         """
-        log.info(msg.format(_port))
+        log.critical(msg.format(_port))
         # Return the webserver
         return self._server
 
@@ -135,6 +135,6 @@ Also sets the class attribute :data:`_port`
  Stop server on port {0}.
 *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
         """
-        log.info(msg.format(self._port))
+        log.critical(msg.format(self._port))
 
 

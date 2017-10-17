@@ -27,7 +27,7 @@ new :class:`bfly.Webserver`.
     #: path to log and the log priority level
     _log_info = {
         'filename': UtilityLayer.LOG_PATH,
-        'level': log.INFO
+        'level': getattr(log, UtilityLayer.LOG_LEVEL, log.INFO)
     }
     #: class of :mod:`DatabaseLayer`
     _db_type = UtilityLayer.DB_TYPE

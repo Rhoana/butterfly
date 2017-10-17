@@ -43,8 +43,10 @@ DB_UPDATE = is_yes(BFLY_CONFIG.get('db-update', True))
 DB_PATH = BFLY_CONFIG.get('db-path', 'bfly.db')
 DB_TYPE = BFLY_CONFIG.get('db-type', 'Nodb')
 DB_PORT = BFLY_CONFIG.get('db-port', 27017)
-# Path to the log file
+
+# Path and level of the log file
 LOG_PATH = BFLY_CONFIG.get('log-path', 'bfly.log')
+LOG_LEVEL = BFLY_CONFIG.get('log-level', 'INFO')
 
 # Maximum size of the cache in MiB: 1 GiB by default
 _max_cache = BFLY_CONFIG.get('max-cache-size', 1024)
