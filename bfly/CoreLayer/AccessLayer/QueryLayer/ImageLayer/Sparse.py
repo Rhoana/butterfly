@@ -61,8 +61,9 @@ def sparse_1d(data, rows):
         Vector of all 64-bit unsigned ints
     """
     T_SHAPE = (sys.maxsize, 1)
+    T_SHAPE = (2**30, 1)
     sparse = (data, rows, [0, len(rows)])
-    out_vec = csc_matrix(sparse, T_SHAPE, dtype=np.uint64)
+    out_vec = csc_matrix(sparse, T_SHAPE, dtype=np.int64)
     out_vec.sort_indices()
     return out_vec
 
@@ -83,7 +84,7 @@ def load(path):
     if not os.path.exists(npz_path):
         merges = sparse_1d([],[])
         return (merges,)
-    with load(npz_path) as d:
+    with np.load(npz_path) as d:
         merges = sparse_1d(d['merge'], d['rows'])
         return (merges,)
 
@@ -118,7 +119,15 @@ def update(t_now, t_new):
     t_new: csc_matrix
         The matrix to read 
     """
-    t_now[t_new.indices] = t_new[t_new.indices]
+    print str(t_now)
+    print """
+    +
+    """
+    print str(t_new)
+    # Write each new value to current key
+    for k,v in zip(t_new.indices, t_new.data):
+        print k,v
+        t_now[k, 0] = v
     t_now.sort_indices()
 
 def safe_makedirs(path):
@@ -173,7 +182,7 @@ def from_sparse(mt_now):
     for k in mt_now.indices:
         # Add to the merge list or an empty list
         k_list = merge_dict.get(k, [])
-        k_list.append(str(mt_now[v]))
+        k_list.append(str(mt_now[k,0]))
         # Add new list to dictionary
         merge_dict[k] = k_list
 

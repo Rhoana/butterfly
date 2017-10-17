@@ -1,3 +1,6 @@
+import yaml
+import json
+import logging as log
 import tornado.websocket
 from QueryLayer import InfoQuery
 from RequestHandler import RequestHandler
@@ -58,23 +61,32 @@ class Websocket(tornado.websocket.WebSocketHandler):
         if self in websockets:
             websockets.remove(self)
 
-    def on_message(self, message):
+    def on_message(self, json_msg):
+        # Interpret the message
+        message = json.loads(json_msg)
         # Get keys for interface
         method_key = self.INPUT.METHODS.NAME
         error_key = self.RUNTIME.IMAGE.ERROR.NAME
         # Get current method
         action_val = message.get('action', '')
-        method_val = 'websocket:{}'.format(action_val),
+        method_val = 'websocket:{}'.format(action_val)
         # Set the action from the message
         self.query.update_keys({
             method_key: method_val,
             error_key: '',
         })
+        # Log request
+        log_msg = {'Incoming Message': message}
+        log.warning(yaml.safe_dump(log_msg))
         # Get reply from the core
         reply = self.core.get_edits(self.query, message)
         self.send(reply)
 
     def send(self, message):
+        # Log response
+        log_msg = """Outgoing Broadcast:
+    {}""".format(message)
+        log.warning(log_msg)
         # Send to all in list
         for ws in websockets:
             ws.write_message(message)

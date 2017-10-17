@@ -104,7 +104,6 @@ class InfoQuery(Query):
         fmt_val = self.INPUT.INFO.FORMAT.VALUE
         return self.INPUT.INFO.FORMAT.LIST.index(fmt_val)
 
-    @property
     def websocket_edit(self, msg={}):
         """ Change internal state based on websocket message
 
@@ -118,6 +117,7 @@ class InfoQuery(Query):
         dict
             The values changed in the internal state
         """
+        methods = self.INPUT.METHODS
         action = methods.VALUE.split(':')[1]
         # take named keywords
         merge_field = self.RUNTIME.IMAGE.MERGE
