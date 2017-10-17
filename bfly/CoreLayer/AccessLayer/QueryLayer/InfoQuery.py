@@ -1,4 +1,5 @@
 from Query import Query
+from ImageLayer import Sparse
 import numpy as np
 import json, yaml
 
@@ -103,17 +104,72 @@ class InfoQuery(Query):
         fmt_val = self.INPUT.INFO.FORMAT.VALUE
         return self.INPUT.INFO.FORMAT.LIST.index(fmt_val)
 
+    @property
+    def websocket_edit(self, msg={}):
+        """ Change internal state based on websocket message
+
+        Arguments
+        -------------
+        msg: dict
+            The commands controlling the message
+
+        Returns
+        --------
+        dict
+            The values changed in the internal state
+        """
+        action = methods.VALUE.split(':')[1]
+        # take named keywords
+        merge_field = self.RUNTIME.IMAGE.MERGE
+        error_field = self.RUNTIME.IMAGE.ERROR
+        # Save merges in message
+        if action in ['save']:
+            # Get the new merges
+            sv_new = msg.get('merge',[])
+            mt_new = Sparse.to_sparse(sv_new)
+            # Update the current merges
+            mt_now = merge_field.VALUE
+            Sparse.update(mt_now, mt_new)
+            # Write and return current merges
+            path = self.OUTPUT.INFO.PATH.VALUE
+            error_msg = Sparse.save(path, mt_now)
+            # Update Error message
+            return {
+                merge_field.NAME: mt_now,
+                error_field.NAME: error_msg,
+            }
+        # Unchanged
+        return {}
+
     def websocket_result(self, action):
+        """ Results to a websocket query
+        
+        Arguments
+        ----------
+        action: str
+            The type of result to send to client
+
+        Returns
+        --------
+        dict
+            The result to send to client
+        """
+        # take named keywords
+        merge_field = self.RUNTIME.IMAGE.MERGE
+        error_field = self.RUNTIME.IMAGE.ERROR
         # Standard results
         result = {
             'action': action,
+            'error': error_field.VALUE,
         }
-        if action == 'info':
-            # take named keywords
-            merge_field = self.RUNTIME.IMAGE.MERGE
+        # Restore and save return the same
+        if action in ['save', 'restore']:
+            # Format the merge table as output
+            mt_now = merge_field.VALUE
             return dict({
-                merge_field.NAME: merge_field.VALUE,
+                'merge': Sparse.from_sparse(mt_now),
             }, **result)
+
         return result
 
     @property
@@ -156,9 +212,9 @@ class InfoQuery(Query):
                 info_out.CHANNEL.NAME: info_out.CHANNEL.VALUE,
             }
         # Handle websocket events
-        scope = methods.VALUE.split(':')
-        if scope[0] == methods.WEBSOCKET.NAME:
-            return self.websocket_result(*scope[1:])
+        if self.is_websocket:
+            ws_actions = methods.VALUE.split(':')[1:]
+            return self.websocket_result(*ws_actions)
         # Return list of groups
         return info_out.NAMES.VALUE
 

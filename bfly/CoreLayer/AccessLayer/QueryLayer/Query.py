@@ -215,7 +215,7 @@ otherwise.
         ##############
         # Optional keywords for editing
         merge_field = runtime.MERGE
-        merge_field.value = keywords.get(merge_field.NAME)
+        merge_field.VALUE = keywords.get(merge_field.NAME)
 
         ##############
         # Optional keywords by source

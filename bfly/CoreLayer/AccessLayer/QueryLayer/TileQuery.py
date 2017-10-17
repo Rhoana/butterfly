@@ -1,6 +1,7 @@
 from ImageLayer import HDF5
 from ImageLayer import Mojo
 from ImageLayer import TiffGrid
+from ImageLayer import Sparse
 from urllib2 import URLError
 from Query import Query
 import numpy as np
@@ -249,7 +250,13 @@ that can load a ``TileQuery``.
         keywords[cache_meta.NAME] = dict_size
         # calculate the size
         for key in keywords.keys():
-            n_bytes = sys.getsizeof(keywords[key])
+            v = keywords[key]
+            # Estimate memory usage for sparse matrix
+            if type(v) in Sparse.TYPES:
+                n_bytes = Sparse.count_bytes(v)
+            # Works for numpy arrays, strings, numbers
+            else:   
+                n_bytes = sys.getsizeof(v)
             keywords[cache_meta.NAME] += n_bytes
         # Return keywords for cache and dataQuery
         return keywords
