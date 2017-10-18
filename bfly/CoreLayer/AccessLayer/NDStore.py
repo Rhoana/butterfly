@@ -67,7 +67,7 @@ def get_config(_config, _keywords, _channel=False):
     group_keys = list(RequestHandler.INPUT.METHODS.GROUP_LIST)
 
     # Get all the input token groups
-    tokens = _keywords.get('token','').split(',')
+    tokens = _keywords.get('token','').split('::')
     tokens.append(_keywords.get('channel',''))
 
     # Ignore channel information
