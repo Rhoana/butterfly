@@ -44,6 +44,9 @@ DB_PATH = BFLY_CONFIG.get('db-path', 'bfly.db')
 DB_TYPE = BFLY_CONFIG.get('db-type', 'Nodb')
 DB_PORT = BFLY_CONFIG.get('db-port', 27017)
 
+# Path to root edit directory
+EDIT_PATH = BFLY_CONFIG.get('edit-path', '')
+
 # Path and level of the log file
 LOG_PATH = BFLY_CONFIG.get('log-path', 'bfly.log')
 LOG_LEVEL = BFLY_CONFIG.get('log-level', 'INFO')

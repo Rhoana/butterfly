@@ -14,6 +14,7 @@ from Settings import ALLOWED_PATHS
 from Settings import DEV_MODE
 from Settings import LOG_PATH
 from Settings import LOG_LEVEL
+from Settings import EDIT_PATH
 from Settings import DB_PATH
 from Settings import DB_TYPE
 from Settings import PORT

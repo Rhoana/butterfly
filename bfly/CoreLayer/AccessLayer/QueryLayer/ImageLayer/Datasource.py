@@ -43,8 +43,10 @@ class Datasource(object):
         RUNTIME = t_query.RUNTIME
         k_merge = RUNTIME.IMAGE.MERGE.NAME
         k_error = RUNTIME.IMAGE.ERROR.NAME
+        # Create the edit path
+        edit_path = t_query.edit_path
         # Return merges and error message
         return {
-            k_merge : Sparse.load(t_query.path)[0],
+            k_merge : Sparse.load(edit_path)[0],
             k_error : '',
         }
