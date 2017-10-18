@@ -72,6 +72,7 @@ Only set after :meth:`start` starts :data:`_webapp`.
             (r'/(images/.*)', StaticHandler, stat_in),
             (r'/(style/.*)', StaticHandler, stat_in),
             (r'/(index/.*)', StaticHandler, stat_in),
+            (r'/(ng/.*)', StaticHandler, stat_in),
             (r'/(viz/.*)', StaticHandler, stat_in),
             (r'/(x3d/.*)', StaticHandler, stat_in),
         ], **app_set)

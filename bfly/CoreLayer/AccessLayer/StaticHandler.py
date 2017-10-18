@@ -76,11 +76,15 @@ class StaticHandler(web.RequestHandler):
             the actual path to a file on the server
         """
         if not path:
-            path = 'index.html'
+            path = ''
+        INDEX = 'index.html'
+        # Turn directory to index
+        if '.' not in os.path.basename(path):
+            path = os.path.join(path, INDEX)
         # Get the actual path on server
         path = posixpath.normpath(path)
         filepath = os.path.join("static", path)
-
+        print filepath
         # Deny access to any path outside static directory
         if os.path.isabs(path) or path.startswith(".."):
             return self.send_error(403)
