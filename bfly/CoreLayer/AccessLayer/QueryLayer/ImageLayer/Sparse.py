@@ -119,14 +119,8 @@ def update(t_now, t_new):
     t_new: csc_matrix
         The matrix to read 
     """
-    print str(t_now)
-    print """
-    +
-    """
-    print str(t_new)
     # Write each new value to current key
     for k,v in zip(t_new.indices, t_new.data):
-        print k,v
         t_now[k, 0] = v
     t_now.sort_indices()
 
@@ -179,12 +173,12 @@ def from_sparse(mt_now):
     """
     merge_dict = {}
     # All entries in sparse array
-    for k in mt_now.indices:
+    for k,v in zip(mt_now.indices, mt_now.data):
         # Add to the merge list or an empty list
-        k_list = merge_dict.get(k, [])
-        k_list.append(str(mt_now[k,0]))
+        v_list = merge_dict.get(v, [])
+        v_list.append(str(k))
         # Add new list to dictionary
-        merge_dict[k] = k_list
+        merge_dict[v] = v_list
 
     # Return all lists of values
     return merge_dict.values()
