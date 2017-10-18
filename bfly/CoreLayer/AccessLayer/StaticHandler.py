@@ -84,7 +84,6 @@ class StaticHandler(web.RequestHandler):
         # Get the actual path on server
         path = posixpath.normpath(path)
         filepath = os.path.join("static", path)
-        print filepath
         # Deny access to any path outside static directory
         if os.path.isabs(path) or path.startswith(".."):
             return self.send_error(403)
