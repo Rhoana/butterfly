@@ -1,10 +1,12 @@
 from mimetypes import types_map
 from UtilityLayer import INPUT
-from UtilityLayer import RUNTIME
 from UtilityLayer import OUTPUT
+from UtilityLayer import RUNTIME
+from UtilityLayer import EDIT_PATH
 from urllib2 import URLError
 import logging as log
 import numpy as np
+import os
 
 class Query():
     """ Describe content of :mod:`AccessLayer` requests
@@ -79,6 +81,40 @@ and the ``key`` has no default in the struct
         val = self.keywords.get(field.NAME, default)
         # Set keyword value to field
         setattr(field, 'VALUE', val)
+
+    @property
+    def path(self):
+        """ return the path to the whole volume
+
+        Returns
+        -------
+        str
+            the path value from ``OUTPUT.INFO``
+        """
+        return self.OUTPUT.INFO.PATH.VALUE
+
+    @property
+    def key(self):
+        """ return the key for the database
+
+        Returns
+        -------
+        str
+            the path value from ``OUTPUT.INFO``
+        """
+        return self.path
+
+    @property
+    def edit_path(self):
+        """ return the path to edit the volume
+
+        Returns
+        -------
+        str
+            the path under the EDIT_PATH root
+        """
+        rel_path = self.path.lstrip(os.sep)
+        return os.path.join(EDIT_PATH, rel_path)
 
     @property
     def is_websocket(self):

@@ -105,17 +105,6 @@ joined with the tile_values from \
         return self.my_source.load_tile(self)
 
     @property
-    def path(self):
-        """ return the path to the whole volume
-
-        Returns
-        -------
-        str
-            the path value from ``OUTPUT.INFO``
-        """
-        return self.OUTPUT.INFO.PATH.VALUE
-
-    @property
     def my_source(self):
         """ return the source that loads this tile
 

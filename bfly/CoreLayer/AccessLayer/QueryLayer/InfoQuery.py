@@ -80,18 +80,6 @@ class InfoQuery(Query):
         """
         return self.OUTPUT.INFO.CHANNELS.VALUE
 
-
-    @property
-    def key(self):
-        """ return the key for the database
-
-        Returns
-        -------
-        str
-            the path value from ``OUTPUT.INFO``
-        """
-        return self.OUTPUT.INFO.PATH.VALUE
-
     @property
     def get_format(self):
         """ get the index of the output format
@@ -131,8 +119,8 @@ class InfoQuery(Query):
             mt_now = merge_field.VALUE
             Sparse.update(mt_now, mt_new)
             # Write and return current merges
-            path = self.OUTPUT.INFO.PATH.VALUE
-            error_msg = Sparse.save(path, mt_now)
+            e_path = self.edit_path
+            error_msg = Sparse.save(e_path, mt_now)
             # Update Error message
             return {
                 merge_field.NAME: mt_now,
