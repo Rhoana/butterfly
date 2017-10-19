@@ -121,7 +121,10 @@ def update(t_now, t_new):
     """
     # Write each new value to current key
     for k,v in zip(t_new.indices, t_new.data):
-        t_now[k, 0] = v
+        # All merged to k now merge to v
+        t_now[t_now == k] = v
+        # Merge k to v
+        t_now[k] = v
     t_now.sort_indices()
 
 def safe_makedirs(path):
