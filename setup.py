@@ -5,6 +5,7 @@ from setuptools import setup
 VERSION = 2.0
 INSTALL_REQ = [
     'h5py>=2.6.0',
+    'scipy>=0.17.0'
     'numpy>=1.12.0',
     'tornado>=4.4.2',
     'futures>=3.0.5',
