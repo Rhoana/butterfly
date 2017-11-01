@@ -513,10 +513,12 @@ has the path to data in the requested group from \
         # Parse all the group terms
         meta_dict = self._get_group_dict('')
         path_key = self.OUTPUT.INFO.PATH.NAME
+        offset_key = self.INPUT.IMAGE.OFFSET.NAME
 
         # Begin building needed keywords
         terms = {
-            path_key: meta_dict[path_key],
+            path_key: meta_dict.get(path_key, ''),
+            offset_key: meta_dict.get(offset_key, [0,0,0]),
             self.INPUT.METHODS.NAME: _method
         }
 

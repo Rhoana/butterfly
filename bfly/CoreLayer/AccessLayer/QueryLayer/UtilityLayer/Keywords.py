@@ -152,6 +152,9 @@ data or mask requests.
                 COLOR = NamedStruct('colormap'),
                 RGB = NamedStruct('rgb'),
                 VALUE = 'grayscale'
+            ),
+            OFFSET = NamedStruct('offset',
+                VALUE = [0,0,0]
             )
         )
 

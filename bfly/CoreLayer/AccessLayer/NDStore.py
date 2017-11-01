@@ -299,16 +299,19 @@ the bounds requested for a data query
         # Parse all the group terms
         meta_dict = get_config(self.BFLY_CONFIG, _keywords, True)
 
-        # Get keys for interface
+        # Get keys for API interfaces
         resolution_key = self.INPUT.RESOLUTION.XY.NAME
         format_key = self.INPUT.IMAGE.FORMAT.NAME
         view_key = self.INPUT.IMAGE.VIEW.NAME
-        path_key = self.OUTPUT.INFO.PATH.NAME
         method_key = self.INPUT.METHODS.NAME
+        # Get keys from file interfaces
+        offset_key = self.INPUT.IMAGE.OFFSET.NAME
+        path_key = self.OUTPUT.INFO.PATH.NAME
 
         # Begin building needed keywords
         terms = {
-            path_key: meta_dict[path_key],
+            offset_key: meta_dict.get(offset_key, [0,0,0]),
+            path_key: meta_dict.get(path_key, ''),
             resolution_key: resolution,
             format_key: img_fmt,
             view_key: 'grayscale',
