@@ -196,7 +196,7 @@ static NAME that should always be used externally.
             SOURCE = NamedStruct('source-type',
                 LIST = [
                     'hdf5',
-                    'tiff',
+                    'boss',
                     'mojo',
                 ],
                 HDF5 = NamedStruct('hdf5',
@@ -212,7 +212,7 @@ static NAME that should always be used externally.
                         H5_LIST = ['h5','hdf5'],
                     )
                 ),
-                BOSS = NamedStruct('tiff',
+                BOSS = NamedStruct('boss',
                     PATHS = NamedStruct('tiff-paths',
                         VALUE = {}
                     ),
