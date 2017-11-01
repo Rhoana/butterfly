@@ -75,7 +75,7 @@ class DataQuery(Query):
         return getattr(np,dtype, np.uint8)
 
     @property
-    def source_off():
+    def source_off(self):
         """ Get the data offset at full resolution
 
         Returns
@@ -86,7 +86,7 @@ class DataQuery(Query):
         return np.int64(self.INPUT.IMAGE.OFFSET.VALUE)
 
     @property
-    def target_off():
+    def target_off(self):
         """ Get the data offset at target resolution
 
         Returns
