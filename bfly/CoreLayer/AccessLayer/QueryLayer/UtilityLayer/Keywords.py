@@ -209,7 +209,10 @@ static NAME that should always be used externally.
                         H5_LIST = ['h5','hdf5'],
                     )
                 ),
-                TIFF = NamedStruct('tiff',
+                BOSS = NamedStruct('tiff',
+                    PATHS = NamedStruct('tiff-paths',
+                        VALUE = {}
+                    ),
                     ALL = 'tiles',
                     PATH = 'location',
                     ZYX = ['z','row','column'],

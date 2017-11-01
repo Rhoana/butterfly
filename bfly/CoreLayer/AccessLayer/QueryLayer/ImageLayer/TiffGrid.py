@@ -43,22 +43,20 @@ volume from :meth:`TileQuery.all_scales`, \
         """
         # call superclass
         Datasource.load_tile(t_query)
+        # Get needed field from t_query
+        boss_field = t_query.RUNTIME.IMAGE.SOURCE.BOSS
+        # Get parameters from t_query
+        path_dict = boss_field.PATHS.VALUE
         i_z, i_y, i_x = t_query.index_zyx
-        # TEMP: ignore boss.json : assume naming conventions
-        # Assume root dir and z dir naming
-        root_dir = os.path.dirname(t_query.path)
-        z_dir = os.path.join(root_dir, "{0:05d}".format(i_z))
-        if not os.path.exists(z_dir):
-            return []
+        # Attempt to get path from dictionary
+        path = path_dict.get(i_z,{}).get(i_y,{}).get(i_x,'')
 
-        # Assume name of each tiff file
-        file_name = "seg_r{1}_c{0}.tif".format(i_y, i_x)
-        file_path = os.path.join(z_dir, file_name)
-        if not os.path.exists(file_path):
+        # Sanity check returns empty tile
+        if not len(path) or not os.path.exists(path):
             return []
 
         # Read the image from the file
-        return TiffGrid.imread(file_path)[np.newaxis]
+        return TiffGrid.imread(path)[np.newaxis]
 
     @staticmethod
     def preload_source(t_query):
@@ -88,7 +86,7 @@ a valid json file pointing to the tiff grid.
         # Keyword names
         output = t_query.OUTPUT.INFO
         runtime = t_query.RUNTIME.IMAGE
-        tiff_field = runtime.SOURCE.TIFF
+        boss_field = runtime.SOURCE.BOSS
 
         # Get the name and ending of the target file
         filename = t_query.OUTPUT.INFO.PATH.VALUE
@@ -109,27 +107,56 @@ a valid json file pointing to the tiff grid.
         # Get information from json file
         with open(filename, 'r') as jd:
             # Get all the filenames
-            all = reader(jd).get(tiff_field.ALL, [])
+            boss = reader(jd).get(boss_field.ALL, [])
             # Get all the paths
-            def get_path(d):
-                return d.get(tiff_field.PATH, '')
-            all_path = map(get_path, all)
-            # Get all the offsets
-            def get_offset(d):
-                return map(d.get, tiff_field.ZYX)
-            # Get the offsets and the max offset
-            all_off = np.uint32(map(get_offset, all))
-            index_size = np.amax(all_off, 0) + 1
-            # Get the tile size from first tile
-            tile0 = TiffGrid.imread(all_path[0])
-            tile_shape = np.uint32((1,) + tile0.shape)
-            # The size and datatype of the full volume
+            path_dict = {}
+            # Get the max offset
+            max_zyx = np.uint32([0,0,0])
+
+            # Read all paths in dictionary
+            for d in boss: 
+                path = d.get(boss_field.PATH, '')
+                # Update the maximum value
+                z,y,x = map(d.get, boss_field.ZYX)
+                max_zyx = np.maximum(max_zyx, [z,y,x])
+                # Add section to the dictionary
+                if z not in path_dict:
+                    path_dict[z] = {
+                        y: {
+                            x: path
+                        }
+                    }
+                    continue
+                # Add column to dictionary
+                if y not in path_dict[z]:
+                    path_dict[z][y] = {
+                        x: path
+                    }
+                    continue
+                # Add row to dictionary
+                path_dict[z][y][x] = path
+            # Return if no paths
+            if not np.any(max_zyx):
+                return {}
+            # Index of edge of volume
+            index_size = max_zyx + 1
+
+            # Get arbitrary path from dictionary
+            any_v = lambda d: d[next(iter(d))]
+            any_path = any_v(any_v(any_v(path_dict)))
+            # Get the tile size from a tile
+            any_tile = TiffGrid.imread(any_path)
+            tile_shape = np.uint32((1,) + any_tile.shape)
+
+            # The size of the full volume
             full_shape = tile_shape * index_size
 
+            # All keys to follow API
             keywords = {
                 runtime.BLOCK.NAME: tile_shape[np.newaxis],
                 output.SIZE.NAME: np.uint32(full_shape),
-                output.TYPE.NAME: str(tile0.dtype),
+                output.TYPE.NAME: str(any_tile.dtype),
+                boss_field.PATHS.NAME: path_dict,
             }
 
             # Combine results with parent method

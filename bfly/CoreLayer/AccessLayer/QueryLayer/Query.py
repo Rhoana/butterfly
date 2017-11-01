@@ -264,6 +264,10 @@ otherwise.
         mojo_format = runtime.SOURCE.MOJO.FORMAT
         mojo_format.VALUE = keywords.get(mojo_format.NAME)
 
+        # Boss
+        boss_tiles = runtime.SOURCE.BOSS.PATHS
+        boss_tiles.VALUE = keywords.get(boss_tiles.NAME)
+
     def check_list(self, whitelist, value, term):
         """ Checks that a value is in a given list
 
