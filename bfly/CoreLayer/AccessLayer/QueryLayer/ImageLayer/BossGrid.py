@@ -46,8 +46,10 @@ volume from :meth:`TileQuery.all_scales`, \
         # Get needed field from t_query
         boss_field = t_query.RUNTIME.IMAGE.SOURCE.BOSS
         # Get parameters from t_query
+        tile_start = boss_field.INFO.START.VALUE
         path_dict = boss_field.PATHS.VALUE
-        i_z, i_y, i_x = t_query.index_zyx
+        i_z, i_y, i_x = t_query.index_zyx + tile_start
+
         # Attempt to get path from dictionary
         z_path = path_dict.get(i_z,{})
         if type(z_path) is dict: 
@@ -96,6 +98,7 @@ a valid json file pointing to the tiff grid.
         info_field = boss_field.INFO
         block_field = info_field.BLOCK
         full_field = info_field.EXTENT
+        start_field = info_field.START
 
         # Get the name and ending of the target file
         filename = t_query.OUTPUT.INFO.PATH.VALUE
@@ -126,6 +129,16 @@ a valid json file pointing to the tiff grid.
             path_dict = {}
             any_path = None
 
+            # Origin of first tile
+            start_info = info.get(start_field.NAME, {})
+            start_list = map(start_info.get, start_field.ZYX)
+            # Set default first tile origin
+            if any([s is None for s in start_list]):
+                start_list = start_field.VALUE
+            # Extract offset of first tile
+            tile_start = np.uint64(start_list)
+            any_y, any_x = tile_start[1:]
+            
             # Shape of one tile
             block_info = info.get(block_field.NAME, {})
             block_list = map(block_info.get, block_field.ZYX)
@@ -153,10 +166,6 @@ a valid json file pointing to the tiff grid.
                 return {}
             # Finally, get the full shape from extent
             full_shape = np.diff(full_bounds).T[0]
-
-            # Get the middle index as any index
-            index_bounds = full_bounds.T // [block_shape]
-            any_z, any_y, any_x = np.sum(index_bounds, 0) // 2
 
             # All paths in dictionary
             for d in boss: 
@@ -206,6 +215,7 @@ a valid json file pointing to the tiff grid.
 
             # All keys to follow API
             keywords = {
+                start_field.NAME: tile_start,
                 boss_field.PATHS.NAME: path_dict,
                 runtime.BLOCK.NAME: block_shapes,
                 output.SIZE.NAME: full_shape,

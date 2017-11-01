@@ -226,6 +226,10 @@ static NAME that should always be used externally.
                         EXTENT = NamedStruct('extent', 
                             ZYX = ['z','y','x'],
                         ),
+                        START = NamedStruct('tile_origin',
+                            VALUE = np.uint64([0,0,0]),
+                            ZYX = ['z','row','column'],
+                        ),
                     ),
                 ),
                 VALUE = 'tiff'

@@ -268,6 +268,9 @@ otherwise.
         boss_tiles = runtime.SOURCE.BOSS.PATHS
         boss_tiles.VALUE = keywords.get(boss_tiles.NAME)
 
+        boss_start = runtime.SOURCE.BOSS.INFO.START
+        boss_start.VALUE = keywords.get(boss_start.NAME)
+
     def check_list(self, whitelist, value, term):
         """ Checks that a value is in a given list
 
