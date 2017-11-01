@@ -49,7 +49,13 @@ volume from :meth:`TileQuery.all_scales`, \
         path_dict = boss_field.PATHS.VALUE
         i_z, i_y, i_x = t_query.index_zyx
         # Attempt to get path from dictionary
-        path = path_dict.get(i_z,{}).get(i_y,{}).get(i_x,'')
+        z_path = path_dict.get(i_z,{})
+        if type(z_path) is dict: 
+            # Get path from dictionary
+            path = z_path.get(i_y,{}).get(i_x,'')
+        else:
+            # Get path from string
+            path = z_path.format(column=i_y, row=i_x)
 
         # Sanity check returns empty tile
         if not len(path) or not os.path.exists(path):
@@ -87,6 +93,9 @@ a valid json file pointing to the tiff grid.
         output = t_query.OUTPUT.INFO
         runtime = t_query.RUNTIME.IMAGE
         boss_field = runtime.SOURCE.BOSS
+        info_field = boss_field.INFO
+        block_field = info_field.BLOCK
+        full_field = info_field.EXTENT
 
         # Get the name and ending of the target file
         filename = t_query.OUTPUT.INFO.PATH.VALUE
@@ -107,18 +116,24 @@ a valid json file pointing to the tiff grid.
         # Get information from json file
         with open(filename, 'r') as jd:
             # Get all the filenames
-            boss = reader(jd).get(boss_field.ALL, [])
-            # Get all the paths
+            all_info = readed(jd)
+            boss = all_info.get(boss_field.ALL, [])
+            info = all_info.get(info_field.NAME, {})
+            # Return if no metadata
+            if not len(info):
+                return {}
+            # For all the paths
             path_dict = {}
-            # Get the max offset
-            max_zyx = np.uint32([0,0,0])
 
             # Read all paths in dictionary
             for d in boss: 
                 path = d.get(boss_field.PATH, '')
                 # Update the maximum value
                 z,y,x = map(d.get, boss_field.ZYX)
-                max_zyx = np.maximum(max_zyx, [z,y,x])
+                # Allow for simple section formats
+                if not all([y,x]):
+                    path_dict[z] = path
+                    continue
                 # Add section to the dictionary
                 if z not in path_dict:
                     path_dict[z] = {
@@ -136,25 +151,41 @@ a valid json file pointing to the tiff grid.
                 # Add row to dictionary
                 path_dict[z][y][x] = path
             # Return if no paths
-            if not np.any(max_zyx):
+            if not len(path_dict):
                 return {}
-            # Index of edge of volume
-            index_size = max_zyx + 1
 
-            # Get arbitrary path from dictionary
-            any_v = lambda d: d[next(iter(d))]
-            any_path = any_v(any_v(any_v(path_dict)))
-            # Get the tile size from a tile
-            any_tile = BossGrid.imread(any_path)
-            tile_shape = np.uint32((1,) + any_tile.shape)
+            # Shape of one tile
+            block_info = info.get(block_field.NAME, {})
+            block_list = map(block_info.get, block_field.ZYX)
+            # Return if no block shape
+            if not all(block_list):
+                return {}
 
-            # The size of the full volume
-            full_shape = tile_shape * index_size
+            # Shape of full volume
+            full_info = info.get(full_field.NAME)
+            full_extent = map(full_info.get, full_field.ZYX)
+            # Return if no full extent shape
+            if not all(full_extent):
+                return {}
+
+            # Block shape as a numpy array
+            block_shape = np.uint64(block_list)
+            if block_shape.shape != (3,):
+                return {}
+            # Finally, list all the mip levels
+            block_shapes = block_shape[np.newaxis]
+
+            # Full shape as a numpy array
+            full_bounds = np.uint64(full_extent)
+            if full_bounds.shape != (3,2):
+                return {}
+            # Finally, get the full shape from extent
+            full_shape = np.diff(full_bounds)
 
             # All keys to follow API
             keywords = {
-                runtime.BLOCK.NAME: tile_shape[np.newaxis],
-                output.SIZE.NAME: np.uint32(full_shape),
+                runtime.BLOCK.NAME: block_shape[np.newaxis],
+                output.SIZE.NAME: full_shape,
                 output.TYPE.NAME: str(any_tile.dtype),
                 boss_field.PATHS.NAME: path_dict,
             }
