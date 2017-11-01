@@ -45,7 +45,7 @@ class DataQuery(Query):
         for key in ['DEPTH','HEIGHT','WIDTH']:
             self.set_key(self.INPUT.POSITION, key, 1)
 
-        for key in ['VIEW','FORMAT']:
+        for key in ['VIEW','FORMAT','OFFSET']:
             self.set_key(self.INPUT.IMAGE, key)
 
         self.set_key(self.OUTPUT.INFO, 'PATH')
@@ -73,6 +73,28 @@ class DataQuery(Query):
         """
         dtype = self.OUTPUT.INFO.TYPE.VALUE
         return getattr(np,dtype, np.uint8)
+
+    @property
+    def source_off():
+        """ Get the data offset at full resolution
+
+        Returns
+        --------
+        numpy.ndarray
+            [z_off, y_off, x_off]
+        """
+        return np.int64(self.INPUT.IMAGE.OFFSET.VALUE)
+
+    @property
+    def target_off():
+        """ Get the data offset at target resolution
+
+        Returns
+        --------
+        numpy.ndarray
+            [z_off, y_off, x_off]
+        """
+        return np.int64(self.source_off // self.scales)
 
     @property
     def scales(self):
@@ -146,7 +168,8 @@ the voxel scales from :meth:`scales`.
             The 3x1 block of Z, Y, and X in `INPUT.POSITION`
         """
         zyx = map(self.INPUT.POSITION.get,'ZYX')
-        return np.uint32([c.VALUE for c in zyx])
+        origin = [c.VALUE for c in zyx] + self.target_off
+        return np.uint32(np.maximum(origin, [0,0,0]))
 
     @property
     def source_origin(self):
