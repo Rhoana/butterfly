@@ -42,8 +42,9 @@ volume from :meth:`TileQuery.all_scales`, \
         """
         # call superclass
         Datasource.load_tile(t_query)
+        # TEMP: ignore boss.json : assume naming conventions
 
-        return None
+        return []
 
     @staticmethod
     def preload_source(t_query):

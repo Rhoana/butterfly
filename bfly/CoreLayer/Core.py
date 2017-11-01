@@ -269,6 +269,8 @@ to pass to :meth:`Query.update_dataset`.
             # Make a query for the given tile
             t_query = self.make_tile_query(d_query, t_index)
             tile = self.load_tile(t_query)
+            if not len(tile):
+                continue
             # Fill the tile into the full cutout
             to_cut = [t_query.target_origin, tile.shape]
             [Z0,Y0,X0],[Z1,Y1,X1] = d_query.some_in_all(*to_cut)
@@ -328,6 +330,8 @@ to pass to :meth:`Query.update_dataset`.
             return cache_tile[K0:K1,J0:J1,I0:I1]
         # Load from disk
         tile = t_query.tile
+        if not len(tile):
+            return []
 
         self._cache.set(t_query.key, tile)
 
