@@ -38,13 +38,27 @@ volume from :meth:`TileQuery.all_scales`, \
 
         Returns
         --------
-        None
+        numpy.ndarray
+            1/H/W image volume
         """
         # call superclass
         Datasource.load_tile(t_query)
+        i_z, i_y, i_x = t_query.index_zyx
         # TEMP: ignore boss.json : assume naming conventions
+        # Assume root dir and z dir naming
+        root_dir = os.path.dirname(t_query.path)
+        z_dir = os.path.join(root_dir, "{0:05d}".format(i_z))
+        if not os.path.exists(z_dir):
+            return []
 
-        return []
+        # Assume name of each tiff file
+        file_name = "seg_r{1}_c{0}.tif".format(i_y, i_x)
+        file_path = os.path.join(z_dir, file_name)
+        if not os.path.exists(file_path):
+            return []
+
+        # Read the image from the file
+        return TiffGrid.imread(file_path)[np.newaxis]
 
     @staticmethod
     def preload_source(t_query):
