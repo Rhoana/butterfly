@@ -5,7 +5,7 @@ import json
 import cv2
 import os
 
-class TiffGrid(Datasource):
+class BossGrid(Datasource):
     """ Loads images from hdf5 files
 
     Attributes
@@ -56,7 +56,7 @@ volume from :meth:`TileQuery.all_scales`, \
             return []
 
         # Read the image from the file
-        return TiffGrid.imread(path)[np.newaxis]
+        return BossGrid.imread(path)[np.newaxis]
 
     @staticmethod
     def preload_source(t_query):
@@ -93,7 +93,7 @@ a valid json file pointing to the tiff grid.
         ending = os.path.splitext(filename)[1]
 
         # Return if the ending is not json
-        if ending not in TiffGrid._meta_files:
+        if ending not in BossGrid._meta_files:
             return {}
 
         # Return if the path does not exist
@@ -101,8 +101,8 @@ a valid json file pointing to the tiff grid.
             return {}
 
         # Get function to read the metainfo file
-        order = TiffGrid._meta_files.index(ending)
-        reader = TiffGrid._read[order]
+        order = BossGrid._meta_files.index(ending)
+        reader = BossGrid._read[order]
 
         # Get information from json file
         with open(filename, 'r') as jd:
@@ -145,7 +145,7 @@ a valid json file pointing to the tiff grid.
             any_v = lambda d: d[next(iter(d))]
             any_path = any_v(any_v(any_v(path_dict)))
             # Get the tile size from a tile
-            any_tile = TiffGrid.imread(any_path)
+            any_tile = BossGrid.imread(any_path)
             tile_shape = np.uint32((1,) + any_tile.shape)
 
             # The size of the full volume

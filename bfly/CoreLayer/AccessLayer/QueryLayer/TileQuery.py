@@ -1,6 +1,6 @@
 from ImageLayer import HDF5
 from ImageLayer import Mojo
-from ImageLayer import TiffGrid
+from ImageLayer import BossGrid
 from ImageLayer import Sparse
 from urllib2 import URLError
 from Query import Query
@@ -26,7 +26,7 @@ class TileQuery(Query):
         from :class:`RUNTIME` ``.IMAGE.SOURCE.LIST``
     SOURCES: dict
         * source_list[0]: :class:`HDF5`
-        * source_list[1]: :class:`TiffGrid`
+        * source_list[1]: :class:`BossGrid`
     """
     def __init__(self, *args, **keywords):
 
@@ -37,7 +37,7 @@ class TileQuery(Query):
 
         self.SOURCES = {
             self.source_list[0]: HDF5,
-            self.source_list[1]: TiffGrid,
+            self.source_list[1]: BossGrid,
             self.source_list[2]: Mojo,
         }
 
