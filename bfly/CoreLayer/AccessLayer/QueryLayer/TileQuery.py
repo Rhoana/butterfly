@@ -71,6 +71,9 @@ class TileQuery(Query):
         self_format = self.RUNTIME.IMAGE.SOURCE.MOJO.FORMAT
         self_format.VALUE = query_format.VALUE
 
+        # Only applies to Boss datasource
+        self_source.BOSS = query_source.BOSS
+
         # Get the XY resolution for Mojo
         query_xy = query.INPUT.RESOLUTION.XY
         self_xy = self.INPUT.RESOLUTION.XY
@@ -237,15 +240,26 @@ that can load a ``TileQuery``.
         # Get the size of this dictionary for the cache
         dict_size = np.uint32(sys.getsizeof({}))
         keywords[cache_meta.NAME] = dict_size
-        # calculate the size
-        for key in keywords.keys():
-            v = keywords[key]
+        # Size calculation function
+        def get_bytes(v):
             # Estimate memory usage for sparse matrix
             if type(v) in Sparse.TYPES:
-                n_bytes = Sparse.count_bytes(v)
+                return Sparse.count_bytes(v)
+            # Works for dictionaries of similarly size elements
+            if type(v) is dict:
+                # number of items X size of item
+                any_k = next(iter(v), None)
+                any_v = v.get(any_k, None)
+                key_size = sys.getsizeof(any_k)
+                val_size = len(v)*get_bytes(any_v)
+                return key_size + val_size + dict_size
             # Works for numpy arrays, strings, numbers
-            else:   
-                n_bytes = sys.getsizeof(v)
+            return sys.getsizeof(v)
+
+        # calculate the size of everything
+        for key in keywords.keys():
+            v = keywords[key]
+            n_bytes = get_bytes(v)
             keywords[cache_meta.NAME] += n_bytes
         # Return keywords for cache and dataQuery
         return keywords
