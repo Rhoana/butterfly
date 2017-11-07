@@ -1,12 +1,11 @@
-from scipy.sparse import csc_matrix
+from scipy.sparse import lil_matrix
 import numpy as np
 import scipy
 import sys
 import os
 
 TYPES = [
-    scipy.sparse.csc.csc_matrix,
-    scipy.sparse.csr.csr_matrix
+    scipy.sparse.lil.lil_matrix,
 ]
 NPZ_EXT = ".edit.npz"
 
@@ -31,14 +30,14 @@ def count_bytes(v):
     
     Arguments
     ----------
-    v: csc_matrix|csr_matrix
+    v: lil_matrix
 
     Returns
     ---------
     int
         Number of bytes in v
     """
-    d_bytes = v.data.nbytes + v.indices.nbytes + v.indices.nbytes 
+    d_bytes = v.nnz * (v.data.nbytes + v.rows.nbytes)
     p_bytes = sys.getsizeof(v)
     return d_bytes + p_bytes
 
@@ -57,14 +56,13 @@ def sparse_1d(data, rows):
 
     Returns
     --------
-    csc_matrix
+    lil_matrix
         Vector of all 64-bit unsigned ints
     """
-    T_SHAPE = (sys.maxsize, 1)
-    T_SHAPE = (2**30, 1)
-    sparse = (data, rows, [0, len(rows)])
-    out_vec = csc_matrix(sparse, T_SHAPE, dtype=np.int64)
-    out_vec.sort_indices()
+    T_SHAPE = (1, sys.maxsize)
+    out_vec = lil_matrix(T_SHAPE, dtype=np.int64)
+    for r,d in zip(rows, data):
+        out_vec[0, r] = d
     return out_vec
 
 def load(path):
@@ -77,7 +75,7 @@ def load(path):
 
     Returns
     ---------
-    csc_matrix
+    lil_matrix
         The current merges
     """
     npz_path = name_npz(path)
@@ -98,11 +96,11 @@ def to_sparse(sv_new):
 
     Returns
     --------
-    csc_matrix
+    lil_matrix
         The new merges
     """
-    data = [int(m[0]) for m in sv_new for _ in m]
-    rows = [int(i) for m in sv_new for i in m]
+    data = [int(m[0]) + 1 for m in sv_new for _ in m]
+    rows = [int(i) + 1 for m in sv_new for i in m]
     # Make new sparse merge table
     return sparse_1d(data, rows)
 
@@ -114,21 +112,23 @@ def update(t_now, t_new):
 
     Arguments
     ----------
-    t_now: csc_matrix
+    t_now: lil_matrix
         The matrix to write
-    t_new: csc_matrix
+    t_new: lil_matrix
         The matrix to read 
     """
+    all_roots = t_now.data[0]
     # Write each new value to current key
-    for k,v in zip(t_new.indices, t_new.data):
+    for k,v in zip(t_new.rows[0], t_new.data[0]):
         # Get current value for v
-        if (v in t_now.indices):
-            v = t_now[v,0]
+        if (v in t_now.rows[0]):
+            v = t_now[0,v]
         # All merged to k now merge to v
-        t_now.data[t_now.data == k] = v
+        for i in range(t_now.nnz):
+            if all_roots[i] == k:
+                all_roots[i] = v
         # Merge k to v
-        t_now[k] = v
-    t_now.sort_indices()
+        t_now[0,k] = v
 
 def safe_makedirs(path):
     """ Make a directory if doesn't exist
@@ -149,13 +149,13 @@ def save(path, mt_now):
     Arguments
     ----------
     path: str
-    mt_now: csc_matrix
+    mt_now: lil_matrix
         Contains all current merges
     """
     npz_path = name_npz(path)
     keywords = {
-        'merge': mt_now.data,
-        'rows': mt_now.indices,
+        'merge': mt_now.data[0],
+        'rows': mt_now.rows[0],
     }
     try: 
         path_error = safe_makedirs(path)
@@ -169,7 +169,7 @@ def from_sparse(mt_now):
 
     Arguments
     ----------
-    mt_now: csc_matrix
+    mt_now: lil_matrix
         All merges in 1D sparse array
 
     Returns
@@ -179,12 +179,12 @@ def from_sparse(mt_now):
     """
     merge_dict = {}
     # All entries in sparse array
-    for k,v in zip(mt_now.indices, mt_now.data):
+    for k,v in zip(mt_now.rows[0], mt_now.data[0]):
         # Add to the merge list or an empty list
-        v_list = merge_dict.get(v, [])
-        v_list.append(str(k))
+        v_list = merge_dict.get(v - 1, [])
+        v_list.append(str(k - 1))
         # Add new list to dictionary
-        merge_dict[v] = v_list
+        merge_dict[v - 1] = v_list
 
     # Return all lists of values
     return merge_dict.values()
