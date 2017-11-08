@@ -1,3 +1,4 @@
+import logging as log
 from scipy.sparse import lil_matrix
 import numpy as np
 import scipy
@@ -7,10 +8,11 @@ import os
 TYPES = [
     scipy.sparse.lil.lil_matrix,
 ]
-NPZ_EXT = ".edit.npz"
+MERGE_EXT = ".merge.npy"
+MERGE_DAT = 2
 
-def name_npz(path):
-    """ Concat NPZ_EXT to a filenmae
+def get_merge_file(path):
+    """ Concat MERGE_EXT to a filenmae
     
     Arguments
     ----------
@@ -23,7 +25,7 @@ def name_npz(path):
        The filename for all edits  
 
     """
-    return path.rstrip(os.sep)+NPZ_EXT
+    return path.rstrip(os.sep)+MERGE_EXT
     
 def count_bytes(v):
     """ Count bytes in sparse matrix
@@ -44,26 +46,26 @@ def count_bytes(v):
 #######
 # Input and Generation
 #######
-def sparse_1d(data, rows):
-    """ Make a 1D sparse vector of max length
+def sparse_merge(id_gen):
+    """ Make a sparse merge matrix of max length
 
     Arguments
     ----------
-    data : np.ndarray
-        values for each row given
-    rows : np.ndarray
-        all rows with a given value
+    id_gen : generator
+        yields [key, root, region] per merge
 
     Returns
     --------
     lil_matrix
         Vector of all 64-bit unsigned ints
     """
-    T_SHAPE = (1, sys.maxsize)
-    out_vec = lil_matrix(T_SHAPE, dtype=np.int64)
-    for r,d in zip(rows, data):
-        out_vec[0, r] = d
-    return out_vec
+    T_SHAPE = (MERGE_DAT, sys.maxsize)
+    t_merge = lil_matrix(T_SHAPE, dtype=np.int64)
+    # Add each id item to matrix
+    for key, root, region in id_gen:
+        t_merge[0, key] = root
+        t_merge[1, key] = region
+    return t_merge
 
 def load(path):
     """ Read all sparse matrices in edits file
@@ -78,13 +80,13 @@ def load(path):
     lil_matrix
         The current merges
     """
-    npz_path = name_npz(path)
-    if not os.path.exists(npz_path):
-        merges = sparse_1d([],[])
+    merge_path = get_merge_file(path)
+    if not os.path.exists(merge_path):
+        merges = sparse_merge(iter(()))
         return (merges,)
-    with np.load(npz_path) as d:
-        merges = sparse_1d(d['merge'], d['rows'])
-        return (merges,)
+    saved_merges = np.load(merge_path, mmap_mode='r')
+    merges = sparse_merge(iter(saved_merges))
+    return (merges,)
 
 def to_sparse(sv_new):
     """ Make a sparse merge table from disjoint sets
@@ -99,10 +101,14 @@ def to_sparse(sv_new):
     lil_matrix
         The new merges
     """
-    data = [int(m[0]) + 1 for m in sv_new for _ in m]
-    rows = [int(i) + 1 for m in sv_new for i in m]
+    def read_id(root, merge):
+        key, region = (merge+':0').split(':')[:MERGE_DAT]
+        return np.uint64([key, root, region]) + 1
+
+    # Key ID, Root ID, and region
+    id_gen = (read_id(m[0], i) for m in sv_new for i in m)
     # Make new sparse merge table
-    return sparse_1d(data, rows)
+    return sparse_merge(id_gen)
 
 #######
 # Update and output
@@ -118,17 +124,22 @@ def update(t_now, t_new):
         The matrix to read 
     """
     all_roots = t_now.data[0]
-    # Write each new value to current key
-    for k,v in zip(t_new.rows[0], t_new.data[0]):
-        # Get current value for v
-        if (v in t_now.rows[0]):
-            v = t_now[0,v]
-        # All merged to k now merge to v
-        for i in range(t_now.nnz):
-            if all_roots[i] == k:
-                all_roots[i] = v
-        # Merge k to v
-        t_now[0,k] = v
+    all_regions = t_now.data[1]
+
+    # Merg each key into root and region
+    for key, root, region in zip(t_new.rows[0], *t_new.data):
+        # Get current root and region
+        if (root in t_now.rows[0]):
+            root = t_now[0, root]
+            region = t_now[1, root]
+        # All key now merge to root and region
+        for i in range(t_now.nnz / MERGE_DAT):
+            if all_roots[i] == key:
+                all_roots[i] = root
+                all_regions[i] = region
+        # Merge k to root and region
+        t_now[0, key] = root
+        t_now[1, key] = region
 
 def safe_makedirs(path):
     """ Make a directory if doesn't exist
@@ -152,14 +163,16 @@ def save(path, mt_now):
     mt_now: lil_matrix
         Contains all current merges
     """
-    npz_path = name_npz(path)
-    keywords = {
-        'merge': mt_now.data[0],
-        'rows': mt_now.rows[0],
-    }
+    merge_path = get_merge_file(path)
+    all_merges = np.uint64([
+        ## Only use rows with merge roots
+        mt_now.rows[0],
+        mt_now.data[0],
+        mt_now.data[1],
+    ]).T
     try: 
         path_error = safe_makedirs(path)
-        np.savez(npz_path, **keywords)
+        np.save(merge_path, all_merges)
     except OSError as e:
         return str(e)
     return ''
@@ -178,13 +191,19 @@ def from_sparse(mt_now):
         List of all merged lists of ids
     """
     merge_dict = {}
+
+    def write_id(key, region):
+        if region > 1:
+            return "{}:{}".format(key - 1, region - 1)
+        return str(key - 1)
+
     # All entries in sparse array
-    for k,v in zip(mt_now.rows[0], mt_now.data[0]):
+    for key, root, region in zip(mt_now.rows[0], *mt_now.data):
         # Add to the merge list or an empty list
-        v_list = merge_dict.get(v - 1, [])
-        v_list.append(str(k - 1))
+        v_list = merge_dict.get(root - 1, [])
+        v_list.append(write_id(key, region))
         # Add new list to dictionary
-        merge_dict[v - 1] = v_list
+        merge_dict[root - 1] = v_list
 
     # Return all lists of values
     return merge_dict.values()
