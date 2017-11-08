@@ -238,7 +238,10 @@ static NAME that should always be used externally.
                 VALUE = np.uint32([[1, 512, 512]])
             ),
             MERGE = NamedStruct('merge',
-                VALUE = False,
+                VALUE = None,
+            ),
+            SPLIT = NamedStruct('split',
+                VALUE = None,
             ),
             ERROR = NamedStruct('error',
                 VALUE = '',

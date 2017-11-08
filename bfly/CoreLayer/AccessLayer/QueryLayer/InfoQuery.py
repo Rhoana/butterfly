@@ -109,22 +109,31 @@ class InfoQuery(Query):
         action = methods.VALUE.split(':')[1]
         # take named keywords
         merge_field = self.RUNTIME.IMAGE.MERGE
+        split_field = self.RUNTIME.IMAGE.SPLIT
         error_field = self.RUNTIME.IMAGE.ERROR
         # Save merges in message
         if action in ['save']:
             # Get the new merges
-            sv_new = msg.get('merge',[])
-            mt_new = Sparse.to_sparse(sv_new)
+            merge_new = msg.get('merge', [])
+            mt_new = Sparse.to_sparse_mt(merge_new)
+            # Get the new splits
+            split_new = msg.get('split', [])
+            st_new = Sparse.to_sparse_st(split_new)
             # Update the current merges
             mt_now = merge_field.VALUE
-            Sparse.update(mt_now, mt_new)
-            # Write and return current merges
+            Sparse.update_mt(mt_now, mt_new)
+            # Update the current splits
+            st_now = split_field.VALUE
+            Sparse.update_st(st_now, st_new)
+            # Write and return current merges and splits
             e_path = self.edit_path
-            error_msg = Sparse.save(e_path, mt_now)
+            error0 = Sparse.save_mt(e_path, mt_now)
+            error1 = Sparse.save_st(e_path, st_now)
             # Update Error message
             return {
                 merge_field.NAME: mt_now,
-                error_field.NAME: error_msg,
+                split_field.NAME: st_now,
+                error_field.NAME: error0 + error1,
             }
         # Unchanged
         return {}
@@ -144,6 +153,7 @@ class InfoQuery(Query):
         """
         # take named keywords
         merge_field = self.RUNTIME.IMAGE.MERGE
+        split_field = self.RUNTIME.IMAGE.SPLIT
         error_field = self.RUNTIME.IMAGE.ERROR
         # Standard results
         result = {
@@ -152,10 +162,12 @@ class InfoQuery(Query):
         }
         # Restore and save return the same
         if action in ['save', 'restore']:
-            # Format the merge table as output
+            # Format the merge and split tables as output
             mt_now = merge_field.VALUE
+            st_now = split_field.VALUE
             return dict({
-                'merge': Sparse.from_sparse(mt_now),
+                'merge': Sparse.from_sparse_mt(mt_now),
+                'split': Sparse.from_sparse_st(st_now),
             }, **result)
 
         return result

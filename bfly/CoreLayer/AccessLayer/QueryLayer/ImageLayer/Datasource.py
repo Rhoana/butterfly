@@ -35,18 +35,22 @@ class Datasource(object):
             * :class:`OUTPUT` ``.INFO.SIZE.NAME``
                 (numpy.ndarray) -- 3x1 for full volume shape
             * :class:`OUTPUT` ``.IMAGE.MERGE.NAME``
-                ([list]) -- All sets of merged ids
+                (lil_matrix) -- A matrix of merged ids
+            * :class:`OUTPUT` ``.IMAGE.SPLIT.NAME``
+                (lil_matrix) -- A matrix of plit regions
             * :class:`OUTPUT` ``.IMAGE.ERROR.NAME``
                 dict -- All error messages
         """
         # take named keywords
         RUNTIME = t_query.RUNTIME
         k_merge = RUNTIME.IMAGE.MERGE.NAME
+        k_split = RUNTIME.IMAGE.SPLIT.NAME
         k_error = RUNTIME.IMAGE.ERROR.NAME
         # Create the edit path
         edit_path = t_query.edit_path
         # Return merges and error message
         return {
-            k_merge : Sparse.load(edit_path)[0],
+            k_merge : Sparse.load_mt(edit_path),
+            k_split : Sparse.load_st(edit_path),
             k_error : '',
         }
