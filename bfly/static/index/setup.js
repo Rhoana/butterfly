@@ -8,7 +8,7 @@
 window.DOJO.Setup = function(api){
   this.parse = api.parse;
   this.write = new window.DOJO.Write(this);
-  var allData = this.start("");
+  var allData = this.start([]);
   allData.then(function(all){
 //    log(all)
   });
@@ -38,7 +38,10 @@ window.DOJO.Setup.prototype = {
       if (bid.status === 200) {
         var json = JSON.parse(bid.response);
         var target = where.split("?").pop();
-        return this({out:json,old:target});
+        var old = target.split('&').filter(function(x){
+            return (x !== '');
+        });
+        return this({out:json, old:old});
       }
       //console.log("error loading");
     };
@@ -53,12 +56,11 @@ window.DOJO.Setup.prototype = {
     return (str + "s").replace(/datas$/,"data");
   },
   hash: function(hash){
-    var now = hash.old+"&";
-    now = now.replace(/^&/,"");
+    var now = hash.old.slice();
     if(hash.kind && hash.name){
-      now += hash.kind+"="+hash.name;
+      now.push(hash.kind+"="+hash.name);
     }
-    return now;
+    return now.join('&');
   },
   build: function(hash,sources){
     hash.kind = this.ask[hash.depth];
@@ -86,7 +88,8 @@ window.DOJO.Setup.prototype = {
       });
       return Promise.all(promises);
     }
-    var sources = [target,this.parse(result.old),result.out];
+    old_terms = this.parse(result.old.join('&'))
+    var sources = [target,old_terms,result.out];
     return build(sources);
   },
   find: function(hash,depth){
