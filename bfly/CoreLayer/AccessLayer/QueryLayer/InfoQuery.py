@@ -303,7 +303,8 @@ class InfoQuery(Query):
         # Get voxel, block, and full sizes
         xyz_blocklist = np.fliplr(block_list)
         xyz_voxelres = np.uint64([30, 4, 4][::-1] * xyz_scales)
-        xyz_fullsize =  np.uint64(k_fullsize[::-1] // xyz_scales)
+        xyz_fullsize =  np.uint64(k_fullsize[::-1] / xyz_scales)
+        xyz_fullsize = np.clip(xyz_fullsize, 1, None)
 
         # Make a dictionary for all levels
         def level_dict(values):
