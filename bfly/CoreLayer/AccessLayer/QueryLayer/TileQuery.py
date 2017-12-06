@@ -1,3 +1,4 @@
+import logging as log
 from ImageLayer import HDF5
 from ImageLayer import Mojo
 from ImageLayer import BossGrid
