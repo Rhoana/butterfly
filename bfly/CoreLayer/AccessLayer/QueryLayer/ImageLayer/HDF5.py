@@ -177,7 +177,7 @@ this filname to not give a valid h5 volume.
             ####
             # Get max blocksizes for different resolutions
             ####
-            lo_res = 10
+            lo_res = 1
             # Get all block sizes by halving the max block size
             all_blocks = [shape/(2**res) for res in range(lo_res)]
             block_array = np.clip(np.ceil(all_blocks), 1, max_block)

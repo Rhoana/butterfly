@@ -77,6 +77,7 @@ window.DOJO.Write.prototype = {
   ng_path: function(old_path, next){
     var new_spec = {
       layers: {},
+      layout: 'xy',
     };
     if (old_path) {
       var old_hash = old_path.split('ng/#!').pop();
