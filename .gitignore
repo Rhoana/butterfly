@@ -1,6 +1,7 @@
 # vim 
 *.swo
 *.swp
+*.nfs*
 
 # Temporary tests
 scripts/database_trials/database/*

@@ -1,5 +1,6 @@
 # Get all the classes
 from Datasource import Datasource
+from ImageStack import ImageStack
 from BossGrid import BossGrid
 from Mojo import Mojo
 from HDF5 import HDF5
@@ -7,7 +8,7 @@ from HDF5 import HDF5
 import Sparse
 
 # Get all the derived classes
-__all__ = ['BossGrid', 'HDF5', 'Mojo']
+__all__ = ['BossGrid', 'HDF5', 'Mojo', 'ImageStack']
 # Get the base class
 __all__ += ['Datasource']
 # Get the tools

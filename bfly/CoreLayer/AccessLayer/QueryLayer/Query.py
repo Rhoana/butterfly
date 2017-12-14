@@ -207,7 +207,9 @@ otherwise.
 
             Keyword arguments if editable
             * :class:`RUNTIME` ``.IMAGE.MERGE.NAME``
-                (set[]) -- The list of merged sets
+                lil_matrix -- The matrix of merged ids
+            * :class:`RUNTIME` ``.IMAGE.MERGE.NAME``
+                lil_matrix -- The matrix of split regions
         """
         # take named keywords
         output = self.OUTPUT.INFO
@@ -251,7 +253,9 @@ otherwise.
         ##############
         # Optional keywords for editing
         merge_field = runtime.MERGE
+        split_field = runtime.SPLIT
         merge_field.VALUE = keywords.get(merge_field.NAME)
+        split_field.VALUE = keywords.get(split_field.NAME)
 
         ##############
         # Optional keywords by source
