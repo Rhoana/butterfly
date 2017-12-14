@@ -1,6 +1,7 @@
 import logging as log
 from ImageLayer import HDF5
 from ImageLayer import Mojo
+from ImageLayer import ImageStack
 from ImageLayer import BossGrid
 from ImageLayer import Sparse
 from urllib2 import URLError
@@ -40,6 +41,7 @@ class TileQuery(Query):
             self.source_list[0]: HDF5,
             self.source_list[1]: BossGrid,
             self.source_list[2]: Mojo,
+            self.source_list[3]: ImageStack,
         }
 
         self.RUNTIME.TILE.ZYX.VALUE = zyx_index

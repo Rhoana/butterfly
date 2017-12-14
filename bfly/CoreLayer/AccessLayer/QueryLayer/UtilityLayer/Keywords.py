@@ -198,6 +198,7 @@ static NAME that should always be used externally.
                     'hdf5',
                     'boss',
                     'mojo',
+                    'stack',
                 ],
                 HDF5 = NamedStruct('hdf5',
                     OFF = NamedStruct('z-offset'),
