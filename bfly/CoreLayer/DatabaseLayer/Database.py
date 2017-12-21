@@ -274,9 +274,9 @@ where N is the number of neurons for the ``path``.
                     else:
                         # Add new synapseless neuron
                         new_neurons.append(new_soma)
-
-                # Add new neurons to full neurons list
-                neurons = np.r_[neurons, new_neurons]
+                # Add any new neurons
+                if len(new_neurons):
+                    neurons = np.r_[neurons, new_neurons]
 
         # Add neurons to database
         self.add_neurons(path, neurons)
