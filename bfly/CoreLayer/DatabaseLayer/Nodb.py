@@ -225,8 +225,8 @@ of entries to add and ``K`` is the number of keys per entry
         table_path = Database.is_synapse(self, table, path, id_key)
         # Get one value by key
         synapse = self.get_by_key(table, path, id_key)
-        # Return boolean by length
-        return not not len(synapse)
+        # Return boolean by nonzero
+        return any(synapse)
 
     def is_neuron(self, table, path, id_key):
         """
@@ -246,7 +246,7 @@ of entries to add and ``K`` is the number of keys per entry
         k_z, k_y, k_x = self.RUNTIME.DB.TABLE.ALL.POINT_LIST
         # Return a dictionary from a single result
         synapse = self.get_by_key(table, path, id_key)
-        if not len(synapse):
+        if not any(synapse):
             return {}
         return {
             k_z: synapse[-3],

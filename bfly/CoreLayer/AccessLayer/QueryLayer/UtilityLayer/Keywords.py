@@ -264,7 +264,8 @@ static NAME that should always be used externally.
                     VALUE = CONFIG_FILENAME,
                     GROUP_LIST = _group_list,
                     PATH = NamedStruct('path'),
-                    DPATH = NamedStruct('dpath')
+                    DPATH = NamedStruct('dpath'),
+                    FIRST = NamedStruct('first-synapse')
                 )
             ),
             JOIN = NamedStruct('{}://{}')

@@ -78,12 +78,16 @@ class Database():
         k_list = k_files.CONFIG.GROUP_LIST
         k_dpath = k_files.CONFIG.DPATH.NAME
         k_path = k_files.CONFIG.PATH.NAME
+        k_first = k_files.CONFIG.FIRST.NAME
         # Get the key to the channels
         k_channel = k_list[-1]
 
         # Set custom names of files
         for nf in map(k_files.get, k_files.DB_LIST):
             nf.VALUE = source.get(nf.NAME, nf.DEFAULT)
+
+        # Get synapse ID of first index
+        syn_start = int(source.get(k_first, 0))
 
         # list of channels for the dataset path
         c_list = source.get(k_channel, [])
@@ -105,7 +109,7 @@ class Database():
                 # Add all tables for the dataset path
                 self.add_tables(c_dpath)
                 # Load all synapses and neurons
-                synapses = self.load_synapses(c_dpath)
+                synapses = self.load_synapses(c_dpath, syn_start)
                 self.load_neurons(c_dpath, synapses)
                 # Mark the dataset path as fully loaded
                 done_paths.append(c_dpath)
@@ -160,13 +164,15 @@ added successfully.
         k_join = self.RUNTIME.DB.JOIN.NAME
         return k_join.format(table, path)
 
-    def load_synapses(self, path):
+    def load_synapses(self, path, syn_start):
         """ Load all the synapse information from files
 
         Arguments
         ----------
         path: str
             The dataset path to metadata files
+        syn_start: int
+            The id of synapse at index 0
 
         Returns
         --------
@@ -193,10 +199,12 @@ where N is the number of synapses for the ``path``.
         except (IOError, ValueError):
             return []
 
-        # Transpose the list of all synapses
+        # Get neuron IDs and synapse centers
         links = map(all_dict.get, k_nodes_in)
         center = map(point_dict.get, k_points_in)
-        synapses = np.uint32(links + center).T
+        # Add zeros before to offset first synapse
+        syn_lists = [[0]*syn_start + l for l in links + center]
+        synapses = np.uint32(syn_lists).T
 
         # Add synapses to database
         self.add_synapses(path, synapses)
