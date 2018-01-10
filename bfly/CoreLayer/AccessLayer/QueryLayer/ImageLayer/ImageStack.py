@@ -17,7 +17,7 @@ class ImageStack(Datasource):
             With file path and image position
         """
         # read all tifs in tifs folder
-        search = os.path.join(t_query.path, '*.tif')
+        search = os.path.join(t_query.path, '*')
         stack = sorted(glob.glob(search))
 
         # Read tif at current z 
@@ -45,7 +45,7 @@ numpy 3x1 array of any given tile shape
 numpy 3x1 array of full volume shape
         """
         # read all tifs in tifs folder
-        search = os.path.join(t_query.path, '*.tif')
+        search = os.path.join(t_query.path, '*')
         depth = len(list(glob.glob(search)))
         # Should count files on filesystem
         N_FILES = np.uint32([depth, 1, 1])
