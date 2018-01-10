@@ -19,6 +19,15 @@ class HDF5(Datasource):
     _meta_files = ['.json']
 
     @staticmethod
+    def dtype(n):
+        only_pos = dict(zip(
+            map(np.dtype, ('int64', 'int32', 'int16', 'int8')),
+            map(np.dtype, ('uint64', 'uint32', 'uint16', 'uint8'))
+        ))
+        d = n.dtype
+        return only_pos.get(d,d)
+
+    @staticmethod
     def load_tile(t_query):
         """load a single tile (image)
 
@@ -185,7 +194,7 @@ this filname to not give a valid h5 volume.
             keywords.update({
                 runtime.BLOCK.NAME: np.uint32(block_array),
                 output.SIZE.NAME: np.uint32(shape),
-                output.TYPE.NAME: str(vol.dtype),
+                output.TYPE.NAME: str(HDF5.dtype(vol)),
             })
         # Combine results with parent method
         common = Datasource.preload_source(t_query)
