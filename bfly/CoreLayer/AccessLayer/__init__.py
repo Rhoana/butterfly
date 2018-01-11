@@ -5,6 +5,7 @@ import QueryLayer
 from API import API
 from NDStore import NDStore
 from Websocket import Websocket
+from Precomputed import Precomputed
 from StaticHandler import StaticHandler
 from RequestHandler import RequestHandler
 

@@ -65,10 +65,12 @@ Only set after :meth:`start` starts :data:`_webapp`.
             (r'/api/(.*)', AccessLayer.API, app_in),
             (r'/nd/(.*)', AccessLayer.NDStore, app_in),
             (r'/ws/(.*)', AccessLayer.Websocket, app_in),
+            (r'/pre/(.*)', AccessLayer.Precomputed, app_in),
             # A file requested from root of static,
             # Or a file requested from a static folder
             (r'/([^/]*\..*)?', StaticHandler, stat_in),
             (r'/(shaders/.*)', StaticHandler, stat_in),
+            (r'/(meshes/.*)', StaticHandler, stat_in),
             (r'/(images/.*)', StaticHandler, stat_in),
             (r'/(style/.*)', StaticHandler, stat_in),
             (r'/(index/.*)', StaticHandler, stat_in),
