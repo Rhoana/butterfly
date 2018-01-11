@@ -3,6 +3,8 @@ from ImageLayer import Sparse
 import numpy as np
 import json, yaml
 
+VOXEL_XYZ = np.uint32([4,4,30])
+
 class NumpyEncoder(json.JSONEncoder):
     """ Encode numpy datatypes in json
     """
@@ -226,7 +228,7 @@ class InfoQuery(Query):
                 return {
                     'key': str(r),
                     'size': full_size,
-                    'resolution': [2**r, 2**r, 1],
+                    'resolution': [2**r, 2**r, 1]*VOXEL_XYZ,
                     'voxel_offset': [0,0,0],
                     'chunk_sizes': [list(b)],
                     'encoding': 'raw',
@@ -341,7 +343,7 @@ class InfoQuery(Query):
 
         # Get voxel, block, and full sizes
         xyz_blocklist = np.fliplr(block_list)
-        xyz_voxelres = np.uint64([30, 4, 4][::-1] * xyz_scales)
+        xyz_voxelres = np.uint64(VOXEL_XYZ * xyz_scales)
         xyz_fullsize =  np.uint64(k_fullsize[::-1] / xyz_scales)
         xyz_fullsize = np.clip(xyz_fullsize, 1, None)
 

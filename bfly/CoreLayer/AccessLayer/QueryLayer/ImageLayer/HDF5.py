@@ -154,6 +154,7 @@ this filname to not give a valid h5 volume.
         k_h5 = runtime.SOURCE.HDF5.NAME
         # Get the max block size in bytes for a single tile
         max_bytes = t_query.RUNTIME.CACHE.MAX_BLOCK.VALUE
+        max_bytes = int(max_bytes/64)
 
         # Check if path is valid
         keywords = HDF5.valid_path(t_query)
@@ -182,7 +183,7 @@ this filname to not give a valid h5 volume.
             side_scalar = np.ceil(np.sqrt(square_overage))
             # Set the actual blocksize to be under the cache limit
             plane_shape = np.ceil(shape[1:] / side_scalar)
-            max_block = np.r_[[1], plane_shape]
+            max_block = np.r_[[64], plane_shape]
             ####
             # Get max blocksizes for different resolutions
             ####
