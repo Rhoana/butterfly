@@ -403,6 +403,12 @@ to pass to :meth:`Query.update_dataset`.
         # Use colormap / RGB style encoding of ID data
         vol = self.view_volume(img_view, volume)
 
+        if img_format.VALUE in ['raw']:
+            output = StringIO.StringIO()
+            output.write(vol.tobytes())
+            vol_string = output.getvalue()
+            return vol_string
+
         if img_format.VALUE in ['npz']:
             output = StringIO.StringIO()
             np.save(output, vol[np.newaxis])

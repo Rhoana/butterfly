@@ -50,6 +50,7 @@ Only set after :meth:`start` starts :data:`_webapp`.
         app_in = {
             '_config': config,
             '_core': self._core,
+            '_root': __name__,
             '_db': self._db,
         }
         # Arguments for static requests

@@ -3,6 +3,7 @@ from QueryLayer import InfoQuery
 from QueryLayer import DataQuery
 from urllib2 import URLError
 import numpy as np
+import os
 
 def get_name(g):
     """ get the name of a group
@@ -116,6 +117,7 @@ class Precomputed(RequestHandler):
     DATA_API = [
         'token',
         'channel',
+        'resolution',
         'xmin-xmax',
         'ymin-ymax',
         'zmin-zmax',
@@ -135,9 +137,6 @@ class Precomputed(RequestHandler):
         :class:`QueryLayer.Query`
             contains standard details for each request
         """
-        print request
-        return None
-
         super(Precomputed, self).parse(request)
         # Store the request
         args = request.split('/')
@@ -145,9 +144,19 @@ class Precomputed(RequestHandler):
         # Interpret first arguments
         keywords = dict(zip(self.INFO_API, args)) 
 
+        # Get the meshes
+        if keywords['action'] == 'mesh':
+            mesh_args = args[:2] + args[3:]
+            mesh_args = ['static','mesh'] + mesh_args
+            return str('/'.join(mesh_args))
+
         # Handle the info API
         if keywords['action'] == 'info':
             return self.get_info(keywords)
+
+        # Also split bounds by underscore
+        bounds = args.pop()
+        args += bounds.split('_')
 
         # Handle volume API
         keywords = dict(zip(self.DATA_API, args))
@@ -165,16 +174,19 @@ class Precomputed(RequestHandler):
             made with info from ``get_config``
         """
         # Parse all the group terms
-        chan_dict = get_config(self.BFLY_CONFIG, _keywords)
+        chan_dict = get_config(self.BFLY_CONFIG, _keywords, True)
 
         # Get keys for interface
         chan_key = self.OUTPUT.INFO.CHANNEL.NAME
         format_key = self.INPUT.INFO.FORMAT.NAME
+        k_pre_info = self.INPUT.METHODS.PRE.NAME
+        path_key = self.OUTPUT.INFO.PATH.NAME
         method_key = self.INPUT.METHODS.NAME
 
         return InfoQuery(**{
-            chan_key: get_name(meta_dict),
-            method_key: 'precompute_info',
+            chan_key: get_name(chan_dict),
+            path_key: chan_dict[path_key],
+            method_key: k_pre_info,
             format_key: 'json',
         })
 
@@ -199,6 +211,7 @@ class Precomputed(RequestHandler):
         xmin, xmax = self._get_ints(_keywords, 'xmin-xmax', '0-512') 
         ymin, ymax = self._get_ints(_keywords, 'ymin-ymax', '0-512') 
         zmin, zmax = self._get_ints(_keywords, 'zmin-zmax', '0-1') 
+        resolution = self._get_int(_keywords, 'resolution', '0')
 
         # Get format
         img_fmt = 'raw'
@@ -288,6 +301,26 @@ the bounds requested for a data query
             msg = "The {0} {1} is not an integer."
             msg = msg.format(name, result)
             raise URLError([msg, 400])
+
+    def _get_int(self, keywords, name, value=''):
+        """ Call :meth:`_try_int` on the keywords
+
+        Arguments
+        ----------
+        keywords: dict
+            All URL parameters
+        name: str
+            the name of the property
+        value: anything
+            the default property value
+
+        Returns
+        ---------
+        int
+            If the ``result`` can be converted to an integer
+        """
+        result = keywords.get(name, value)
+        return self._try_int(name, result)
 
     def _get_ints(self, keywords, name, value=''):
         """ Call :meth:`_try_ints` on the keywords

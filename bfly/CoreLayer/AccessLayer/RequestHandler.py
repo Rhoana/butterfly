@@ -1,7 +1,10 @@
+import os
 import logging as log
 from tornado import web, gen
 from urllib2 import URLError
+from mimetypes import types_map
 from QueryLayer import UtilityLayer
+from pkg_resources import resource_string
 from concurrent.futures import ThreadPoolExecutor
 
 class RequestHandler(web.RequestHandler):
@@ -28,11 +31,12 @@ class RequestHandler(web.RequestHandler):
     :h:`Methods`
 
     """
+    _basic_mime = 'text/plain'
     INPUT = UtilityLayer.INPUT()
     OUTPUT = UtilityLayer.OUTPUT()
     RUNTIME = UtilityLayer.RUNTIME()
 
-    def initialize(self, _core, _db, _config):
+    def initialize(self, _core, _db, _config, _root=''):
         """ Bind Core, database, and configuration
 
         Arguments
@@ -48,6 +52,7 @@ class RequestHandler(web.RequestHandler):
         self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header('Access-Control-Allow-Methods', 'GET')
         self._core = _core
+        self._root = _root
         self._db = _db
         # Set the config dict
         self.BFLY_CONFIG = _config
@@ -84,7 +89,10 @@ asynchronously to :meth:`handle`.
         """
         try:
             query = self.parse(*args)
-            yield self._ex.submit(self.handle, query)
+            if isinstance(query, str):
+                yield self._ex.submit(self.handle_static, query)
+            else:
+                yield self._ex.submit(self.handle, query)
         except URLError, u_error:
             # Get error information
             msg, status = u_error.args[0]
@@ -93,6 +101,23 @@ asynchronously to :meth:`handle`.
             # Log and write the error message
             log.warning(msg)
             self.write(msg)
+
+    def handle_static(self, filepath):
+        """ Serves a path in the `./bfly/static` directory
+
+        Arguments
+        ----------
+        path: str
+            the actual path to a file on the server
+        """
+        extension = os.path.splitext(filepath)[1]
+        # Get the mimetype from the requested extension
+        mime_type = types_map.get(extension, self._basic_mime)
+        self.set_header("Content-Type", mime_type)
+
+        data = resource_string(self._root, filepath)
+        self.write(data)
+
 
     def handle(self, _query):
         """ Sends response of :data:`_core` to ``_query``

@@ -59,6 +59,7 @@ data or mask requests.
             INFO_LIST = ['channel_metadata', 'entity_feature'],
             WEBSOCKET = NamedStruct('websocket'),
             META = NamedStruct('channel_metadata'),
+            PRE = NamedStruct('precompute_info'),
             FEAT = NamedStruct('entity_feature'),
             IMAGE_LIST = ['data', 'mask'],
             GROUP_LIST = _group_list

@@ -202,6 +202,45 @@ class InfoQuery(Query):
         # Return a list of all group naems
         if methods.VALUE in methods.GROUP_LIST:
             return info_out.NAMES.VALUE
+        # Return fake "precomputed" file
+        if methods.VALUE == methods.PRE.NAME:
+            # Check if image or segmentation
+            dtype = info_out.TYPE.VALUE
+            is_id = dtype in info_out.TYPE.ID_LIST
+            # Get the blocksizes
+            block_zyx = self.RUNTIME.IMAGE.BLOCK.VALUE
+            block_xyz = np.fliplr(block_zyx)
+            # All block info
+            resolutions = range(len(block_xyz))
+            block_enum = zip(resolutions, block_xyz)
+            # Constant info
+            full_size = [
+                info_out.SIZE.VALUE['x'],
+                info_out.SIZE.VALUE['y'],
+                info_out.SIZE.VALUE['z'],
+            ]
+            
+            # Format all scales
+            def get_scale(rb):
+                r,b = rb
+                return {
+                    'key': str(r),
+                    'size': full_size,
+                    'resolution': [2**r, 2**r, 1],
+                    'voxel_offset': [0,0,0],
+                    'chunk_sizes': [list(b)],
+                    'encoding': 'raw',
+                }
+
+            all_info = {
+                'num_channels': 1,
+                'data_type': dtype,
+                'scales': list(map(get_scale, block_enum)),
+                'type': ['image', 'segmentation'][is_id],
+                'mesh': 'mesh',
+            }
+
+            return all_info
         # Return dictionary created here
         if methods.VALUE == methods.META.NAME:
             return {
