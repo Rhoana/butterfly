@@ -82,10 +82,6 @@ class Database():
         # Get the key to the channels
         k_channel = k_list[-1]
 
-        # Set custom names of files
-        for nf in map(k_files.get, k_files.DB_LIST):
-            nf.VALUE = source.get(nf.NAME, nf.DEFAULT)
-
         # Get synapse ID of first index
         syn_start = int(source.get(k_first, 0))
 
@@ -98,6 +94,16 @@ class Database():
 
         # Add all channel paths to database
         for c_dict in c_list:
+
+            # Set custom names of files
+            for nf in map(k_files.get, k_files.DB_LIST):
+                d_file = source.get(nf.NAME, nf.DEFAULT)
+                c_file = c_dict.get(nf.NAME, d_file)
+                nf.VALUE = c_file
+                if c_file != d_file:
+                    import logging
+                    logging.info(c_file, d_file)
+
             # Get paths to map to data
             c_path = c_dict.get(k_path, '')
             c_dpath = c_dict.get(k_dpath, d_path)
