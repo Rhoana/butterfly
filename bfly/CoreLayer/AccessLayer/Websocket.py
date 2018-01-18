@@ -18,7 +18,7 @@ class Websocket(tornado.websocket.WebSocketHandler):
         'token',
         'channel',
     ]
-    def initialize(self, _core, _db, _config):
+    def initialize(self, _core, _db, _config, _root=''):
 
         self.core = _core;
         self.BFLY_CONFIG = _config
