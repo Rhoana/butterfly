@@ -65,7 +65,8 @@ window.DOJO.Write.prototype = {
       return x.split('=').pop();
     });
     var token = old_values.slice(0, -1).join('::');
-    var path = 'ndstore://'+host+'/'+token+'/'+channel;
+//  var path = 'ndstore://'+host+'/'+token+'/'+channel;
+    var path = 'precomputed://'+host+'/pre/'+token+'/'+channel;
     return {
       key: channel,
       value: {
