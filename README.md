@@ -7,9 +7,6 @@
 
 [![V2][V2.IMAGE.CODACY]][V2.LINK.CODACY] 
 
-### Master:
-[![V1][V1.IMAGE.CI]][V1.LINK.CI]
-
 [IMAGE.RTD]: http://readthedocs.org/projects/butterfly/badge/?version=latest
 [LINK.RTD]: http://butterfly.readthedocs.io/en/latest/?badge=latest
 
