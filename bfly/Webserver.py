@@ -70,6 +70,7 @@ Only set after :meth:`start` starts :data:`_webapp`.
             # A file requested from root of static,
             # Or a file requested from a static folder
             (r'/([^/]*\..*)?', StaticHandler, stat_in),
+            (r'/(scatter/.*)', StaticHandler, stat_in),
             (r'/(shaders/.*)', StaticHandler, stat_in),
             (r'/(meshes/.*)', StaticHandler, stat_in),
             (r'/(images/.*)', StaticHandler, stat_in),

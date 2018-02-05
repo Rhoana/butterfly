@@ -2,9 +2,9 @@
 <html>
 <head>
     <title>D3 : 3D Scatter Plot Using X3DOM</title>
-    <script type="text/javascript" src="http://d3js.org/d3.v4.0.0-alpha.28.min.js"></script>
-    <script type="text/javascript" src="http://x3dom.org/download/1.7.2/x3dom-full.js"></script>
-    <link rel="stylesheet" type="text/css" href="http://x3dom.org/download/1.7/x3dom.css" />
+    <script type="text/javascript" src="d3.v4.0.0-alpha.28.min.js"></script>
+    <script type="text/javascript" src="x3dom-full.js"></script>
+    <link rel="stylesheet" type="text/css" href="x3dom.css" />
     <script src="d3-x3dom-axis.js"></script>
 </head>
 
@@ -72,15 +72,28 @@
             .call(zAxis)
             ;//.select('.domain');
 
-        var n = 40;
-        var points = d3.range(n).map(function(d) {
+/*
+var n = 40;
+var points = d3.range(n).map(function(d) {
             var p = {};
             p.x = Math.random();
             p.z = Math.random();
             p.y = Math.random();
             return p;
         });
-	
+*/
+        var makeScene =  function(points) {
+        };
+
+        get_points = function(scene) {
+            out_points = []
+            d3.json("nrn.json", function(points) {
+                console.log(points)
+                out_points = points
+            });
+            return out_points
+        }
+
         scene.selectAll('.point')
             .data(points)
             .enter()
@@ -93,8 +106,8 @@
             .call(makeSolid, 'orange')
             .append('sphere')
             .attr('radius', 0.8);
-        
-    	scene.append('transform')
+
+    	  scene.append('transform')
             .attr('class', 'label')
             .attr('scale', '1 1 1')
             .append('billboard')
