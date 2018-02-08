@@ -40,6 +40,10 @@ QueryLayer classes
 ************************* 
 .. autoclass:: DataQuery
     :members:
+
+.. autoclass:: InfoQuery
+    :members:
+    
 .. autoclass:: TileQuery
     :members:
 
