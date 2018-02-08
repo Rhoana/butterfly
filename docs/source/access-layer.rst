@@ -36,7 +36,15 @@ You can import ``AccessLayer`` from :mod:`bfly` and :mod:`CoreLayer`.
 
 AccessLayer classes
 ************************* 
+.. autoclass:: Websocket
+    :members:
+.. autoclass:: NDStore
+    :members:
 .. autoclass:: API
+    :members:
+.. autoclass:: Precomputed
+    :members:
+.. autoclass:: StaticHandler
     :members:
 
 Request Handler base class
