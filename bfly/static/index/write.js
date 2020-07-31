@@ -114,31 +114,31 @@ window.DOJO.Write.prototype = {
       group[1].innerText = [w,h,d].join(", ");
     }
     else {
-			var dtype = source["data-type"];
-			var channel = Number(!dtype.match(/float|uint8/)) + source.channel;
-			var old = source.old.replace(/&channel=([^&]+)/,"&channel="+channel);
-			var [w,h,d] = [Math.max(size.x,512),Math.max(size.y,512),size.z];
-			var path = "viz.html?depth="+d+"&width="+w+"&height="+h;
-			// Fix the maxLevel if not mojo data source
-			if (source['source-type'] != 'mojo'){
-				path += '&maxLevel=1';
-			}
-			// Get the path for this channel
-			var this_path = path + "&" + old;
-			var this_channel = "," + channel;
-			// Set the current group href
-			var current = cousin.children[0];
-			current.setAttribute("href", this_path);
-			// Set the containing group href
-			var group = uncle.children[0];
-			// add to the group's path
-			var first_path = Number(!!group.href);
-			var new_path = [this_path, this_channel][first_path];
-			// Add full path or current channel to the containing group
-			group.setAttribute("href", group.href + new_path);
-			// Fill in the details for the channel
-			cousin.children[1].innerText = dtype;
-			uncle.children[1].innerText = [w,h,d].join(", ");
+      var dtype = source["data-type"];
+      var channel = Number(!dtype.match(/float|uint8/)) + source.channel;
+      var old = source.old.replace(/&channel=([^&]+)/,"&channel="+channel);
+      var [w,h,d] = [Math.max(size.x,512),Math.max(size.y,512),size.z];
+      var path = "viz.html?depth="+d+"&width="+w+"&height="+h;
+      // Fix the maxLevel if not mojo data source
+      if (source['source-type'] != 'mojo'){
+        path += '&maxLevel=1';
+      }
+      // Get the path for this channel
+      var this_path = path + "&" + old;
+      var this_channel = "," + channel;
+      // Set the current group href
+      var current = cousin.children[0];
+      current.setAttribute("href", this_path);
+      // Set the containing group href
+      var group = uncle.children[0];
+      // add to the group's path
+      var first_path = Number(!!group.href);
+      var new_path = [this_path, this_channel][first_path];
+      // Add full path or current channel to the containing group
+      group.setAttribute("href", group.href + new_path);
+      // Fill in the details for the channel
+      cousin.children[1].innerText = dtype;
+      uncle.children[1].innerText = [w,h,d].join(", ");
     }
 
     // Close all containing checkboxes
